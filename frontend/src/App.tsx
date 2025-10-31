@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./Components/layout/Layout";
 import Dashboard from "./pages/Dashboard";
+import Setting from './pages/Setting'
 
 const App: React.FC = () => {
   return (
@@ -20,15 +21,16 @@ const App: React.FC = () => {
           }
         />
 
-        {/* Add other routes wrapped with Layout */}
-        <Route
-          path="*"
+         <Route
+          path="/settings"
           element={
             <Layout>
-              <h1 className="text-center mt-10 text-xl">Page Not Found</h1>
+              <Setting />
             </Layout>
           }
         />
+
+       
       </Routes>
     </Router>
   );

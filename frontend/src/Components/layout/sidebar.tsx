@@ -1,9 +1,25 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import {
   Home,
-  HelpCircle,
+  MessageSquare,
+  Image as Media,
+  Users,
+  Music,
+  BarChart3,
+  User,
+  BadgeDollarSign,
   Settings,
+  HelpCircle,
+  Bell,
+  FolderCog,
+  ShieldCheck,
+  CheckSquare,
+  Wallet,
+  FileText,
+  Layers,
+  Ticket,
+  Menu,
 } from "lucide-react";
 import clsx from "clsx";
 
@@ -12,11 +28,26 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
+  const location = useLocation(); // ✅ safer than window.location
+
   const menuItems = [
     { to: "/dashboard", label: "Dashboard", icon: <Home className="w-5 h-5" /> },
-    
+    { to: "/messages", label: "Messages", icon: <MessageSquare className="w-5 h-5" /> },
+    { to: "/media", label: "Media", icon: <Media className="w-5 h-5" /> },
+    { to: "/users", label: "Users", icon: <Users className="w-5 h-5" /> },
+    { to: "/releases", label: "Releases", icon: <Music className="w-5 h-5" /> },
+    { to: "/statistics", label: "Statistics", icon: <BarChart3 className="w-5 h-5" /> },
+    { to: "/artists", label: "Artists", icon: <User className="w-5 h-5" /> },
+    { to: "/labels", label: "Labels", icon: <BadgeDollarSign className="w-5 h-5" /> },
+    { to: "/oac-requests", label: "OAC Requests", icon: <ShieldCheck className="w-5 h-5" /> },
+    { to: "/claim-requests", label: "Claim Release Requests", icon: <CheckSquare className="w-5 h-5" /> },
+    { to: "/notifications", label: "Notifications", icon: <Bell className="w-5 h-5" /> },
+    { to: "/support-tickets", label: "Support Tickets", icon: <Ticket className="w-5 h-5" /> },
+    { to: "/withdrawal-requests", label: "Withdrawal Request", icon: <Wallet className="w-5 h-5" /> },
+    { to: "/subscriptions", label: "Subscriptions", icon: <Layers className="w-5 h-5" /> },
+    { to: "/subscription-settings", label: "Subscription Settings", icon: <FolderCog className="w-5 h-5" /> },
+    { to: "/plans", label: "Plans", icon: <FileText className="w-5 h-5" /> },
     { to: "/settings", label: "Settings", icon: <Settings className="w-5 h-5" /> },
-    { to: "/help", label: "Help", icon: <HelpCircle className="w-5 h-5" /> },
   ];
 
   return (
@@ -33,7 +64,6 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
         ) : (
           <NavLink to="/" className="flex items-center space-x-2">
             <img src="/logo.png" alt="Lakshya IAS Logo" className="w-12 h-12" />
-            
           </NavLink>
         )}
       </div>
@@ -50,41 +80,39 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
           {menuItems.map((item, index) => (
             <li key={index}>
               <NavLink
-  to={item.to}
-  className={({ isActive }) =>
-    clsx(
-      "flex items-center gap-3 px-4 py-3 text-sm rounded-md transition-colors group relative",
-      isActive
-        ? "bg-green-600 text-white font-semibold"
-        : "text-gray-800 hover:bg-gray-100"
-    )
-  }
->
-  {/* Icon — now turns white when active */}
-  <span
-    className={clsx(
-      "transition-colors",
-      "group-hover:text-green-600",
-      "text-green-600",
-      {
-        "text-white": window.location.pathname === item.to, // make icon white on active
-      }
-    )}
-  >
-    {item.icon}
-  </span>
+                to={item.to}
+                className={({ isActive }) =>
+                  clsx(
+                    "flex items-center gap-3 px-4 py-3 text-sm rounded-md transition-colors group relative",
+                    isActive
+                      ? "bg-green-600 text-white font-semibold"
+                      : "text-gray-800 hover:bg-gray-100"
+                  )
+                }
+              >
+                {/* Icon */}
+                <span
+                  className={clsx(
+                    "transition-colors",
+                    "group-hover:text-green-600",
+                    location.pathname === item.to
+                      ? "text-white"
+                      : "text-green-600"
+                  )}
+                >
+                  {item.icon}
+                </span>
 
-  {/* Label */}
-  {!collapsed && <span>{item.label}</span>}
+                {/* Label */}
+                {!collapsed && <span>{item.label}</span>}
 
-  {/* Tooltip when collapsed */}
-  {collapsed && (
-    <span className="absolute left-20 bg-gray-800 text-white text-xs px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-      {item.label}
-    </span>
-  )}
-</NavLink>
-
+                {/* Tooltip */}
+                {collapsed && (
+                  <span className="absolute left-20 bg-gray-800 text-white text-xs px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                    {item.label}
+                  </span>
+                )}
+              </NavLink>
             </li>
           ))}
         </ul>
@@ -94,3 +122,4 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
 };
 
 export default Sidebar;
+
