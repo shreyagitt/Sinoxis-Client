@@ -32,21 +32,14 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
 
   const menuItems = [
     { to: "/dashboard", label: "Dashboard", icon: <Home className="w-5 h-5" /> },
-    { to: "/messages", label: "Messages", icon: <MessageSquare className="w-5 h-5" /> },
-    { to: "/media", label: "Media", icon: <Media className="w-5 h-5" /> },
-    { to: "/users", label: "Users", icon: <Users className="w-5 h-5" /> },
     { to: "/releases", label: "Releases", icon: <Music className="w-5 h-5" /> },
-    { to: "/statistics", label: "Statistics", icon: <BarChart3 className="w-5 h-5" /> },
+    { to: "/revenue", label: "Revenue", icon: <BarChart3 className="w-5 h-5" /> },
     { to: "/artists", label: "Artists", icon: <User className="w-5 h-5" /> },
     { to: "/labels", label: "Labels", icon: <BadgeDollarSign className="w-5 h-5" /> },
-    { to: "/oac-requests", label: "OAC Requests", icon: <ShieldCheck className="w-5 h-5" /> },
-    { to: "/claim-requests", label: "Claim Release Requests", icon: <CheckSquare className="w-5 h-5" /> },
+    { to: "/services", label: "Service", icon: <ShieldCheck className="w-5 h-5" /> },
     { to: "/notifications", label: "Notifications", icon: <Bell className="w-5 h-5" /> },
-    { to: "/support-tickets", label: "Support Tickets", icon: <Ticket className="w-5 h-5" /> },
-    { to: "/withdrawal-requests", label: "Withdrawal Request", icon: <Wallet className="w-5 h-5" /> },
-    { to: "/subscriptions", label: "Subscriptions", icon: <Layers className="w-5 h-5" /> },
-    { to: "/subscription-settings", label: "Subscription Settings", icon: <FolderCog className="w-5 h-5" /> },
-    { to: "/plans", label: "Plans", icon: <FileText className="w-5 h-5" /> },
+    { to: "/banksettings", label: "Bank Settings", icon: <FolderCog className="w-5 h-5" /> },
+    { to: "/form", label: "Apply Form Management", icon: <FileText className="w-5 h-5" /> },
     { to: "/settings", label: "Settings", icon: <Settings className="w-5 h-5" /> },
   ];
 

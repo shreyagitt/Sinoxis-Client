@@ -1,7 +1,7 @@
 import React from "react";
 import Chart from "react-apexcharts";
 import Row2 from '../Components/Dashboard/row2';
-import Row3 from '../Components/Dashboard/row3';
+
 
 const Dashboard = () => {
   // === Chart Config ===
