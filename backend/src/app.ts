@@ -33,6 +33,8 @@ mongoose.connect(process.env.MONGO_URL!)
 // =======================
 app.use(routes);
 
+app.get("/", (req, res) => res.send("☁️ Cloudinary Media API Running"));
+
 // =======================
 // 🔹 Health Check
 // =======================

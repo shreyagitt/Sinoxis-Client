@@ -27,7 +27,8 @@ export const API_ENDPOINTS = {
  AUTH: '/api/v1/auth',
  USERS: '/api/v1/users',
   TENANTS: '/api/v1/tenants',
-  HEALTH: '/api/v1/health'
+  HEALTH: '/api/v1/health',
+  MEDIA:'/api/v1/media'
 } as const;
 
 export const CLIENT_API_ENDPOINTS = {

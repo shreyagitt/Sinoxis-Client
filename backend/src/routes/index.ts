@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import authRoutes from './auth';
+import mediaRoutes from './mediaRoutes'
 import { API_ENDPOINTS } from '../config/constants';
 
 const router = Router();
@@ -15,5 +16,6 @@ router.get('/health', (req, res) => {
 });
 
 router.use(API_ENDPOINTS.AUTH, authRoutes);
+router.use(API_ENDPOINTS.MEDIA, mediaRoutes);
 
 export default router;
