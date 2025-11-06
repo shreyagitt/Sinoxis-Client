@@ -12,7 +12,7 @@ if (!MONGO_URL) {
 export const connectDB = async (): Promise<void> => {
   try {
     const conn = await mongoose.connect(MONGO_URL);
-    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+    console.log(`✅ MongoDB Connected`);
 
     // Handle connection errors
     mongoose.connection.on('error', (err) => {
