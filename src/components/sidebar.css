@@ -1,0 +1,119 @@
+.sidebar {
+  width: 250px;
+  height: 100vh;
+  background-color: #ffffff;
+  border-right: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+  font-family: "Poppins", sans-serif;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 20;
+  transition: width 0.3s ease;
+}
+
+/* Collapsed state */
+.sidebar.collapsed {
+  width: 80px;
+}
+
+/* ✅ Logo section aligned & centered */
+.logo-section {
+  height: 71px; /* Same as topbar */
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Center the logo horizontally */
+  border-bottom: 1px solid #f0f0f0;
+  padding: 0 20px;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+/* ✅ Logo sizing and smooth resizing */
+.logo {
+  height: 85px;
+  width: auto;
+  transition: all 0.3s ease;
+  object-fit: contain;
+}
+
+/* ✅ When sidebar collapses, logo stays centered but smaller */
+.sidebar.collapsed .logo {
+  height: 40px;
+}
+
+/* Logo text beside logo */
+.logo-text {
+  font-weight: 700;
+  color: #d90429;
+  font-size: 17px;
+  margin-left: 10px;
+  white-space: nowrap;
+  transition: opacity 0.3s ease, margin 0.3s ease;
+}
+
+/* Hide text smoothly on collapse */
+.sidebar.collapsed .logo-text {
+  opacity: 0;
+  margin: 0;
+}
+
+
+
+/* Menu list */
+.menu {
+  list-style: none;
+  padding: 20px 0;
+  margin: 0;
+  flex-grow: 1;
+}
+
+/* Menu items */
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 22px;
+  color: #333;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-left: 3px solid transparent;
+}
+
+.menu-item .icon {
+  margin-right: 14px;
+  font-size: 18px;
+  color: #000000b1;
+  transition: color 0.3s;
+}
+
+/* Adjust items when collapsed */
+.sidebar.collapsed .menu-item {
+  justify-content: center;
+  padding: 14px 0;
+}
+
+.sidebar.collapsed .menu-item .icon {
+  margin: 0;
+}
+
+/* Hover & active states */
+.menu-item:hover {
+  background-color: #ffeaea;
+  color: #d90429;
+}
+
+.menu-item.active {
+  background-color: #d90429;
+  color: white;
+  border-left: 3px solid #d90429;
+}
+
+.menu-item.active .icon {
+  color: white;
+}
+
+.menu-item span{
+    color: #000000b4;
+}

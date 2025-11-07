@@ -2,11 +2,16 @@ import { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import AOS from "aos";
 import "aos/dist/aos.css";
-import "./App.css";
-import Login from './components/Login'
 
-// Import your pages/components
-  // adjust path as needed
+// Pages
+import Home from "./pages/Home";
+import LoginPage from "./components/Login";
+import BankDetails from "./components/BankDetails";
+
+// Layout
+import Layout from "./components/Layout"; // adjust path as needed
+import ChangePassword from "./components/ChangePass";
+import Service from './components/Service'
 
 function App() {
   useEffect(() => {
@@ -18,10 +23,20 @@ function App() {
 
   return (
     <Routes>
-      {/* Landing Page */}
-      <Route path="/" element={<Login />} />
+      
+
+      
+      <Route
+        path="/"
+        element={
+          <Layout>
+            <Service />
+          </Layout>
+        }
+      />
     </Routes>
   );
 }
 
 export default App;
+

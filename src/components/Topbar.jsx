@@ -1,136 +1,87 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
+import "./topbar.css";
+import { FaBell, FaSearch, FaBars } from "react-icons/fa";
+import { ChevronDown, User, Settings, LogOut, UserCircle } from "lucide-react";
+import { Link } from "react-router-dom";
 
-const Topbar = () => {
-  const headerStyle = {
-    marginBottom: "-70.4px",
-    position: "sticky",
-    top: 0,
-    zIndex: 1000,
-    backgroundColor: "#fff",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-  };
+const Topbar = ({ isCollapsed, toggleSidebar }) => {
+  const [open, setOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
-  const containerStyle = {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: "10px 20px",
-  };
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-  const logoStyle = {
-    height: "40px",
-    marginRight: "10px",
-  };
-
-  const searchContainerStyle = {
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-    flex: 1,
-    maxWidth: "400px",
-    marginLeft: "20px",
-  };
-
-  const searchInputStyle = {
-    flex: 1,
-    border: "1px solid #ccc",
-    borderRadius: "5px",
-    padding: "8px 12px",
-  };
-
-  const iconButtonStyle = {
-    background: "none",
-    border: "none",
-    cursor: "pointer",
-    fontSize: "18px",
-  };
-
-  const profileSectionStyle = {
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-  };
-
-  const profileImageStyle = {
-    width: "35px",
-    height: "35px",
-    borderRadius: "50%",
-    objectFit: "cover",
-  };
-
-  const userTextStyle = {
-    display: "flex",
-    flexDirection: "column",
-    lineHeight: "1.1",
+  const handleLogout = () => {
+    alert("Logged out!"); // replace with your logic
+    setOpen(false);
   };
 
   return (
-    <div className="app-header header sticky" style={headerStyle}>
-      <div className="container-fluid main-container" style={containerStyle}>
-        {/* Sidebar Toggle */}
-        <a
-          href="#"
-          style={{ color: "#333", textDecoration: "none" }}
-          aria-label="Hide Sidebar"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <rect x="3" y="3" width="7" height="7" />
-            <rect x="14" y="3" width="7" height="7" />
-            <rect x="14" y="14" width="7" height="7" />
-            <rect x="3" y="14" width="7" height="7" />
-          </svg>
-        </a>
+    <div className={`topbar ${isCollapsed ? "collapsed" : ""}`}>
+      <div className="left-section">
+        <button className="toggle-btn" onClick={toggleSidebar}>
+          <FaBars />
+        </button>
 
-        {/* Logo */}
-        <a href="/">
-          <img
-            src="../assets/images/brand/logo.webp"
-            alt="logo"
-            style={logoStyle}
-          />
-        </a>
-
-        {/* Search Bar */}
-        <div className="main-header-center" style={searchContainerStyle}>
-          <input
-            type="text"
-            placeholder="Search for results..."
-            style={searchInputStyle}
-          />
-          <button style={iconButtonStyle}>
-            <i className="fe fe-search"></i>
-          </button>
+        <div className="search-box">
+          <FaSearch className="search-icon" />
+          <input type="text" placeholder="Search for results..." />
         </div>
+      </div>
 
-        {/* Right Section */}
-        <div className="d-flex" style={profileSectionStyle}>
-          {/* Notification Icon */}
-          <a href="#" style={{ fontSize: "20px", color: "#555" }}>
-            <i className="fe fe-bell"></i>
-          </a>
+      <div className="topbar-right">
+        <FaBell className="bell-icon" />
 
-          {/* Profile Dropdown */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <img
-              src="../assets/images/profiles/5.jpg"
-              alt="profile"
-              style={profileImageStyle}
-            />
-            <div style={userTextStyle}>
-              <p style={{ margin: 0, fontWeight: "600" }}>Alex Mora</p>
-              <p style={{ margin: 0, fontSize: "12px", color: "#777" }}>Admin</p>
+        <div className="user-dropdown" ref={dropdownRef}>
+          <button
+            className="user-info"
+            onClick={() => setOpen((prev) => !prev)}
+          >
+            <UserCircle className="user-icon" />
+            <div className="user-text">
+              <span className="user-name">Alex Mora</span>
+              <span className="user-role">Admin</span>
             </div>
-          </div>
+            <ChevronDown
+              className={`chevron ${open ? "rotate" : ""}`}
+              size={16}
+            />
+          </button>
+
+          {open && (
+            <div className="dropdown-menu animate-fadeIn">
+              <Link
+                to="/profile"
+                className="dropdown-item"
+                onClick={() => setOpen(false)}
+              >
+                <User size={16} className="dropdown-icon" /> Profile
+              </Link>
+
+              <Link
+                to="/settings"
+                className="dropdown-item"
+                onClick={() => setOpen(false)}
+              >
+                <Settings size={16} className="dropdown-icon" /> Settings
+              </Link>
+
+              <button
+                className="dropdown-item logout"
+                onClick={handleLogout}
+              >
+                <LogOut size={16} className="dropdown-icon" /> Logout
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
