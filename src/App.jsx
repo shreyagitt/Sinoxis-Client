@@ -27,6 +27,7 @@ import MetadataUpdateForm from "./components/MetadataUpdateForm";
 import Register from "./components/Register";
 import CopyrightClaim from "./components/CopyrightClaim";
 import OfficialArtistChannel from "./components/OfficialArtistChannel";
+import ReleaseForm from "./components/ReleaseForm";
 
 
 
@@ -66,6 +67,25 @@ function App() {
           </Layout>
         }
       />
+
+       <Route
+        path="/releases/create"
+        element={
+          <Layout>
+            < ReleaseForm/>
+          </Layout>
+        }
+      />
+
+             <Route
+        path="/releases/edit/:id"
+        element={
+          <Layout>
+            < ReleaseForm/>
+          </Layout>
+        }
+      />
+
 
       <Route
         path="/artists/list"

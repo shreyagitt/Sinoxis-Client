@@ -46,15 +46,7 @@ const STATUS_STYLES = {
 };
 
 
-/* ----------------- YUP SCHEMA (Medium Validation) -----------------
-  - Full Name: required, min 3
-  - Label Name: required, min 3
-  - Email: optional, must be valid if present
-  - Phone: required, 10 digits Indian (no prefix)
-  - YouTube: optional, must be URL if present
-  - Language: required
-  - Images: optional
--------------------------------------------------------------------*/
+
 const LabelSchema = Yup.object().shape({
   fullName: Yup.string().min(3, "At least 3 characters").required("Full name is required"),
   labelName: Yup.string().min(3, "At least 3 characters").required("Label name is required"),
@@ -255,7 +247,7 @@ export default function Labels() {
   };
 
   return (
-    <div className="min-h-screen bg-[#05071a] text-white p-8">
+    <div className="min-h-screen bg-[#020726] text-white p-8">
       {/* hidden reference screenshots for environment transform */}
       <img src={refScreenshot1} alt="ref1" className="hidden" />
       <img src={refScreenshot2} alt="ref2" className="hidden" />
@@ -272,7 +264,7 @@ export default function Labels() {
       </div>
 
       {/* Main Card */}
-      <div className="bg-[#0f1b36] rounded-2xl p-8 border border-white/10">
+      <div className="bg-[#0a1039] rounded-2xl p-8 border border-white/10">
         <div className="flex justify-between mb-6">
           <h2 className="text-xl font-medium">Manage Labels</h2>
           <button

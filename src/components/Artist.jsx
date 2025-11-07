@@ -130,7 +130,7 @@ export default function Artists() {
       </div>
 
       {/* CARD HEADER: Manage Artists + Add Artist (side-by-side) */}
-      <div className="bg-[#0f1b36] rounded-2xl p-6 border border-white/10 shadow-sm mb-6">
+      <div className="bg-[#0a1039] rounded-2xl p-6 border border-white/10 shadow-sm mb-6">
 
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-lg font-medium">Manage Artists</h2>
