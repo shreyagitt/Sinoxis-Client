@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
-
+import Footer from "./Footer"; // ✅ Import existing Footer
 
 const Layout = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
@@ -11,27 +11,37 @@ const Layout = ({ children }) => {
   };
 
   return (
-    <div className="layout-container">
+    <div className="layout-container min-h-screen flex flex-col bg-gray-50">
       {/* Sidebar */}
       <Sidebar collapsed={collapsed} />
 
       {/* Topbar */}
       <Topbar toggleSidebar={toggleSidebar} isCollapsed={collapsed} />
 
-      {/* Main content area */}
+      {/* Main Content */}
       <main
-        className="main-content"
+        className="flex-1 transition-all duration-300 p-6"
         style={{
           marginLeft: collapsed ? "80px" : "240px",
           marginTop: "70px",
-          transition: "all 0.3s ease",
         }}
       >
         {children}
       </main>
+
+      {/* Footer */}
+      <div
+        style={{
+          marginLeft: collapsed ? "80px" : "240px",
+          transition: "all 0.3s ease",
+        }}
+      >
+        <Footer />
+      </div>
     </div>
   );
 };
 
 export default Layout;
+
 

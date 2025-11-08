@@ -8,4 +8,5 @@ export default defineConfig({
   plugins: [react(),
     tailwindcss(),
   ],
+  include: ["react-apexcharts", "apexcharts"],
 })

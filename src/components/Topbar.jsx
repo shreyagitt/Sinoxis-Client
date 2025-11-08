@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./topbar.css";
-import { FaBell, FaSearch, FaBars } from "react-icons/fa";
-import { ChevronDown, User, Settings, LogOut, UserCircle } from "lucide-react";
+import { FaBell,FaBars } from "react-icons/fa";
+import { ChevronDown, User, Settings, LogOut, UserCircle, Home } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Topbar = ({ isCollapsed, toggleSidebar }) => {
@@ -27,22 +27,33 @@ const Topbar = ({ isCollapsed, toggleSidebar }) => {
   return (
     <div className={`topbar ${isCollapsed ? "collapsed" : ""}`}>
       <div className="left-section">
-        <button className="toggle-btn" onClick={toggleSidebar}>
-          <FaBars />
-        </button>
+        {/* Sidebar toggle button */}
+        
+<button className="toggle-btn" onClick={toggleSidebar}>
+  <FaBars size={20} />
+</button>
 
         <div className="search-box">
-          <FaSearch className="search-icon" />
           <input type="text" placeholder="Search for results..." />
         </div>
       </div>
 
-      <div className="topbar-right">
+      <div className="topbar-right flex items-center gap-4">
+        {/* Home icon */}
+        <Link
+          to="/"
+          className="home-icon flex items-center text-red-700 hover:text-[#d90429] transition"
+        >
+          <Home size={18} />
+        </Link>
+
+        {/* Notification bell */}
         <FaBell className="bell-icon" />
 
+        {/* User dropdown */}
         <div className="user-dropdown" ref={dropdownRef}>
           <button
-            className="user-info"
+            className="user-info flex items-center gap-2"
             onClick={() => setOpen((prev) => !prev)}
           >
             <UserCircle className="user-icon" />

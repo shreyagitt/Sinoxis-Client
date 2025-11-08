@@ -69,7 +69,7 @@ const ApplyForm = () => {
                     className={`w-full p-2 border rounded-lg focus:outline-none focus:ring-2 ${
                       errors.fullName && touched.fullName
                         ? "border-red-500 ring-red-300"
-                        : "border-gray-300 ring-purple-500"
+                        : "border-gray-300 ring-red-500"
                     }`}
                   />
                   <ErrorMessage
@@ -89,7 +89,7 @@ const ApplyForm = () => {
                     className={`w-full p-2 border rounded-lg focus:outline-none focus:ring-2 ${
                       errors.email && touched.email
                         ? "border-red-500 ring-red-300"
-                        : "border-gray-300 ring-purple-500"
+                        : "border-gray-300 ring-red-500"
                     }`}
                   />
                   <ErrorMessage
@@ -109,7 +109,7 @@ const ApplyForm = () => {
                     className={`w-full p-2 border rounded-lg focus:outline-none focus:ring-2 ${
                       errors.phone && touched.phone
                         ? "border-red-500 ring-red-300"
-                        : "border-gray-300 ring-purple-500"
+                        : "border-gray-300 ring-red-500"
                     }`}
                   />
                   <ErrorMessage
@@ -128,7 +128,7 @@ const ApplyForm = () => {
                     className={`w-full p-2 border rounded-lg focus:outline-none focus:ring-2 ${
                       errors.role && touched.role
                         ? "border-red-500 ring-red-300"
-                        : "border-gray-300 ring-purple-500"
+                        : "border-gray-300 ring-red-500"
                     }`}
                   >
                     <option value="" disabled>
@@ -156,7 +156,7 @@ const ApplyForm = () => {
                     className={`w-full p-2 border rounded-lg focus:outline-none focus:ring-2 ${
                       errors.genre && touched.genre
                         ? "border-red-500 ring-red-300"
-                        : "border-gray-300 ring-purple-500"
+                        : "border-gray-300 ring-red-500"
                     }`}
                   />
                   <ErrorMessage
@@ -176,7 +176,7 @@ const ApplyForm = () => {
                     className={`w-full p-2 border rounded-lg focus:outline-none focus:ring-2 ${
                       errors.musicLink && touched.musicLink
                         ? "border-red-500 ring-red-300"
-                        : "border-gray-300 ring-purple-500"
+                        : "border-gray-300 ring-red-500"
                     }`}
                   />
                   <ErrorMessage
@@ -198,7 +198,7 @@ const ApplyForm = () => {
                   className={`w-full p-2 border rounded-lg focus:outline-none focus:ring-2 ${
                     errors.bio && touched.bio
                       ? "border-red-500 ring-red-300"
-                      : "border-gray-300 ring-purple-500"
+                      : "border-gray-300 ring-red-500"
                   }`}
                 />
                 <ErrorMessage
@@ -209,25 +209,26 @@ const ApplyForm = () => {
               </div>
 
               {/* Agreement Checkbox */}
-              <div className="flex items-center gap-2">
-                <Field
-                  type="checkbox"
-                  name="agree"
-                  className={`w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-2 ${
-                    errors.agree && touched.agree
-                      ? "ring-red-300 border-red-500"
-                      : "ring-purple-500 border-gray-300"
-                  }`}
-                />
-                <label className="text-gray-700 text-sm">
-                  I confirm that the above information is accurate.
-                </label>
-              </div>
-              <ErrorMessage
-                name="agree"
-                component="div"
-                className="text-red-500 text-sm mt-1"
-              />
+<div className="flex items-center gap-2">
+  <Field
+    type="checkbox"
+    name="agree"
+    className={`w-4 h-4 rounded focus:ring-2 accent-red-600 ${
+      errors.agree && touched.agree
+        ? "ring-red-300 border-red-500"
+        : "ring-red-500 border-gray-300"
+    }`}
+  />
+  <label className="text-gray-700 text-sm">
+    I confirm that the above information is accurate.
+  </label>
+</div>
+<ErrorMessage
+  name="agree"
+  component="div"
+  className="text-red-500 text-sm mt-1"
+/>
+
 
               {/* Submit Button */}
               <button
