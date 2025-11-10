@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import { Eye, Pencil } from "lucide-react";
+import AddArtist from './AddArtist' // <-- adjust path if needed
+import ViewArtistModal from "./ViewArtistModal";
+import EditArtistModal from "./EditArtistModal";
+
 
 const Artist = () => {
-  // Sample artist data
   const [artists, setArtists] = useState([
     { id: 1, name: "Ava Stone", genre: "Pop / R&B", followers: "12K", status: "Active" },
     { id: 2, name: "Liam Grey", genre: "Indie / Rock", followers: "8K", status: "Inactive" },
@@ -14,20 +17,24 @@ const Artist = () => {
   const [filter, setFilter] = useState("All");
   const [search, setSearch] = useState("");
 
-  // Filter + Search logic
+  // ✅ Modal State
+  const [showAddArtist, setShowAddArtist] = useState(false);
+  const [selectedArtist, setSelectedArtist] = useState(null);
+const [isViewOpen, setIsViewOpen] = useState(false);
+const [isEditOpen, setIsEditOpen] = useState(false);
+
+
   const filteredArtists = artists.filter((artist) => {
-    const matchesFilter =
-      filter === "All" ? true : artist.status === filter;
-    const matchesSearch = artist.name
-      .toLowerCase()
-      .includes(search.toLowerCase());
+    const matchesFilter = filter === "All" ? true : artist.status === filter;
+    const matchesSearch = artist.name.toLowerCase().includes(search.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
   return (
-    <div className="p-6 pl-10 min-h-screen bg-gray-50 ">
+    <div className="p-6 pl-10 min-h-screen bg-gray-50">
+
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 ">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
         <h1 className="text-2xl font-semibold text-gray-800">Artists</h1>
         <ol className="flex space-x-2 text-sm text-gray-500 mt-2 sm:mt-0">
           <li>Home</li>
@@ -36,7 +43,7 @@ const Artist = () => {
         </ol>
       </div>
 
-      {/* Search + Create */}
+      {/* Search + Add Button */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-4">
         <input
           type="text"
@@ -45,7 +52,10 @@ const Artist = () => {
           onChange={(e) => setSearch(e.target.value)}
           className="flex-grow border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
         />
-        <button className="bg-red-600 hover:bg-red-700 text-white rounded-full px-6 py-2 w-full sm:w-auto">
+        <button
+          onClick={() => setShowAddArtist(true)}
+          className="bg-red-600 hover:bg-red-700 text-white rounded-full px-6 py-2 w-full sm:w-auto"
+        >
           Add Artist
         </button>
       </div>
@@ -94,65 +104,73 @@ const Artist = () => {
                 }`}
               ></span>
             </div>
-            <h5 className="font-bold text-lg text-gray-800 mb-1">
-              {artist.name}
-            </h5>
+
+            <h5 className="font-bold text-lg text-gray-800 mb-1">{artist.name}</h5>
             <p className="text-sm text-gray-500 mb-1">{artist.genre}</p>
-            <p 
-            style={{
-      borderColor: "#007F6E",
-      color: "#007F6E",
-    }}
-            className="text-xs text-gray-400 mb-3">
+            <p className="text-xs mb-3" style={{ borderColor: "#007F6E", color: "#007F6E" }}>
               {artist.followers} Followers
             </p>
 
-<div className="flex items-center justify-center gap-2">
-  {/* View Button */}
-  <button
-    className="border px-3 py-1.5 rounded-md text-sm flex items-center gap-1 transition-colors duration-200 
-               border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
-  >
-    <Eye size={16} className="text-current" />
-    View
-  </button>
+            <div className="flex items-center justify-center gap-2">
+              <button  className="border px-3 py-1.5 rounded-md text-sm flex items-center gap-1 border-red-600 text-red-600 hover:bg-red-600 hover:text-white transition" 
+              onClick={() => { setSelectedArtist(artist); setIsViewOpen(true); }}>
+                <Eye size={16} />
+                View
+              </button>
 
-  {/* Edit Button */}
-  <button
-    className="border px-3 py-1.5 rounded-md text-sm flex items-center gap-1 transition-colors duration-200"
-    style={{
-      borderColor: "#007F6E",
-      color: "#007F6E",
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.backgroundColor = "#007F6E";
-      e.currentTarget.style.color = "#fff";
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.backgroundColor = "transparent";
-      e.currentTarget.style.color = "#007F6E";
-    }}
-  >
-    <Pencil size={16} style={{ color: "currentColor" }} />
-    Edit
-  </button>
-</div>
+              <button
+                className="border px-3 py-1.5 rounded-md text-sm flex items-center gap-1 transition"
+                style={{ borderColor: "#007F6E", color: "#007F6E" }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#007F6E";
+                  e.currentTarget.style.color = "#fff";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                  e.currentTarget.style.color = "#007F6E";
+                }}
+                onClick={() => { setSelectedArtist(artist); setIsEditOpen(true); }}
 
-
-
-
+              >
+                <Pencil size={16} />
+                Edit
+              </button>
+            </div>
           </div>
         ))}
       </div>
 
-      {/* No Results Message */}
+      {/* Empty State */}
       {filteredArtists.length === 0 && (
-        <div className="text-center text-gray-500 mt-8">
-          No artists found.
-        </div>
+        <div className="text-center text-gray-500 mt-8">No artists found.</div>
       )}
+
+      {/* ✅ Add Artist Modal */}
+      <AddArtist
+        open={showAddArtist}
+        onClose={() => setShowAddArtist(false)}
+        onSubmit={(artist) => {
+          setArtists([...artists, { id: artists.length + 1, ...artist }]);
+          setShowAddArtist(false);
+        }}
+      />
+      <ViewArtistModal
+  open={isViewOpen}
+  onClose={() => setIsViewOpen(false)}
+  artist={selectedArtist}
+  onEdit={() => setIsEditOpen(true)}
+/>
+
+<EditArtistModal
+  open={isEditOpen}
+  onClose={() => setIsEditOpen(false)}
+  artist={selectedArtist}
+  onSave={(updated) => setArtists(artists.map(a => a.id === updated.id ? updated : a))}
+/>
+
     </div>
   );
 };
 
 export default Artist;
+

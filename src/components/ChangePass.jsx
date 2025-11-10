@@ -26,8 +26,9 @@ const ChangePassword = () => {
       </div>
 
       {/* Form Container */}
-      <div className="flex justify-center items-center py-6">
-        <div className="bg-white rounded-xl shadow-2xl p-12 w-full max-w-5xl">
+    <div className="flex justify-start py-8 px-4 ml-10">
+  <div className="bg-white rounded-xl shadow-2xl p-10 w-full max-w-5xl border border-gray-200">
+
           <Formik
             initialValues={{
               currentPassword: "",

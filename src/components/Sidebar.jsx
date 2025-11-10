@@ -40,8 +40,28 @@ const Sidebar = ({ collapsed }) => {
         { label: "List Of Labels", path: "/artists/labels" },
       ],
     },
-    { path: "/revenue", label: "Revenue Reports", icon: <FaDollarSign /> },
-    { path: "/services", label: "Services", icon: <FaChartBar /> },
+    {
+      path: "/revenue",
+      label: "Revenue Reports",
+      icon: <FaDollarSign />,
+      subItems: [
+        { label: "Revenue Reports List", path: "/revenue/reports" },
+        { label: "Total Revenue", path: "/revenue/total" },
+        { label: "Request Payment", path: "/revenue/request" },
+      ],
+    },
+    {
+      path: "/services",
+      label: "Services",
+      icon: <FaChartBar />,
+      subItems: [
+        { label: "YouTube OAC Request", path: "/services/youtube-oac" },
+        { label: "Youtube Claim Release", path: "/services/claim" },
+        { label: "Social Media Links", path: "/services/facebook-insta-profile" },
+        { label: "Facebook Claim Release", path: "/services/facebook-claim" },
+        { label: "Metadata Update Request", path: "/services/metadata-update" },
+      ],
+    },
     {
       path: "/settings",
       label: "Settings",
@@ -59,18 +79,18 @@ const Sidebar = ({ collapsed }) => {
         collapsed ? "w-20" : "w-64"
       }`}
     >
-      {/* ===== Logo Section ===== */}
+      {/* Logo */}
       <div className="h-[70px] flex items-center justify-center border-b border-gray-200 px-4">
         <img
           src="/image/logo.webp"
-          alt="Sinoxis Logo"
+          alt="Logo"
           className={`object-contain transition-all duration-300 ${
             collapsed ? "h-[70px] w-[70px]" : "h-[100px] w-[100px]"
           }`}
         />
       </div>
 
-      {/* ===== Menu Section ===== */}
+      {/* Menu */}
       <ul className="flex-1 mt-4 space-y-1 overflow-y-auto scrollbar-hide">
         {menuItems.map((item) => {
           const isActive =
@@ -81,17 +101,14 @@ const Sidebar = ({ collapsed }) => {
           return (
             <li key={item.path}>
               {item.subItems ? (
-                // Item with subItems: toggle submenu
                 <div
                   onClick={() => handleToggle(item.path)}
-                  className={`flex items-center cursor-pointer rounded-md font-base transition-all duration-300 text-[16px]
-                  ${
-                    collapsed ? "justify-center py-3" : "px-5 py-3 gap-3"
-                  }
+                  className={`flex items-center cursor-pointer rounded-md transition text-[16px]
+                  ${collapsed ? "justify-center py-3" : "px-5 py-3 gap-3"}
                   ${
                     isActive
-                      ? "bg-[#d90429] text-white"
-                      : "text-gray-700 hover:bg-[#d90429] hover:text-white"
+                      ? "bg-red-500 text-white"
+                      : "text-gray-700 hover:bg-red-500 hover:text-white"
                   }`}
                 >
                   <span className="text-[20px]">{item.icon}</span>
@@ -107,17 +124,14 @@ const Sidebar = ({ collapsed }) => {
                   )}
                 </div>
               ) : (
-                // Item without subItems: normal link
                 <Link
                   to={item.path}
-                  className={`flex items-center rounded-md font-base transition-all duration-300 text-[16px]
-                  ${
-                    collapsed ? "justify-center py-3" : "px-5 py-3 gap-3"
-                  }
+                  className={`flex items-center rounded-md transition text-[16px]
+                  ${collapsed ? "justify-center py-3" : "px-5 py-3 gap-3"}
                   ${
                     isActive
-                      ? "bg-[#d90429] text-white"
-                      : "text-gray-700 hover:bg-[#d90429] hover:text-white"
+                      ? "bg-red-500 text-white"
+                      : "text-gray-700 hover:bg-red-500 hover:text-white"
                   }`}
                 >
                   <span className="text-[20px]">{item.icon}</span>
@@ -125,7 +139,7 @@ const Sidebar = ({ collapsed }) => {
                 </Link>
               )}
 
-              {/* ===== Submenu ===== */}
+              {/* Submenu */}
               {!collapsed && item.subItems && isOpen && (
                 <ul className="ml-10 mt-1 space-y-1">
                   {item.subItems.map((sub) => {
@@ -134,11 +148,11 @@ const Sidebar = ({ collapsed }) => {
                       <li key={sub.path}>
                         <Link
                           to={sub.path}
-                          className={`flex items-center gap-2 px-3 py-2 rounded-md text-[15px] transition-all duration-200
+                          className={`flex items-center gap-2 px-3 py-2 rounded-md text-[15px]
                             ${
                               isSubActive
-                                ? "bg-[#d90429] text-white font-semibold"
-                                : "text-gray-700 hover:bg-[#d90429] hover:text-white"
+                                ? "bg-red-500 text-white font-semibold"
+                                : "text-gray-700 hover:bg-red-500 hover:text-white"
                             }`}
                         >
                           <span
@@ -158,11 +172,11 @@ const Sidebar = ({ collapsed }) => {
         })}
       </ul>
 
-      {/* ===== Bottom Fade ===== */}
-      <div className="h-6 bg-gradient-to-t from-white via-white to-transparent" />
+      <div className="h-6 bg-gradient-to-t from-white to-transparent" />
     </div>
   );
 };
 
 export default Sidebar;
+
 

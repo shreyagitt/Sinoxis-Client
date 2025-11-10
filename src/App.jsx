@@ -10,12 +10,20 @@ import Dashboard from "./components/Dashboard";
 import MyReleases from "./components/MyRelease";
 import Artist from "./components/Artist";
 import Labels from "./components/Labels";
-import Service from './components/Service';
-import Revenue from './components/Revenue';
+
 import ChangePass from './components/ChangePass';
 import BankDetails from './components/BankDetails';
 import Login from './components/Login';
 import ApplyForm from './components/ApplyForm';
+
+import RevenueReport from "./components/RevenueReport";
+import TotalRevenueAnalytics from "./components/TotalRevenueAnalytics";
+import RevenuePayment from './components/RequestPayment'
+import YouTubeOACRequestForm from "./components/YouTubeOACRequestForm";
+import YouTubeClaimRelease from "./components/YouTubeClaimRelease";
+import SocialIsrcSubmitForm from "./components/SocialIsrcSubmitForm";
+import FacebookVideoLinkSubmitForm from "./components/FacebookVideoLinkSubmitForm";
+import MetadataUpdateForm from "./components/MetadataUpdateForm";
 
 
 
@@ -74,23 +82,77 @@ function App() {
         }
       />
 
+<Route
+        path="/revenue/reports"
+        element={
+          <Layout>
+            < RevenueReport/>
+          </Layout>
+        }
+      />
       <Route
-  path="/revenue"
-  element={
-    <Layout>
-      <Revenue />
-    </Layout>
-  }
-/>
+        path="/revenue/total"
+        element={
+          <Layout>
+            < TotalRevenueAnalytics/>
+          </Layout>
+        }
+      />
 
-   <Route
-  path="/services"
-  element={
-    <Layout>
-      <Service />
-    </Layout>
-  }
-/>
+      <Route
+        path="/revenue/request"
+        element={
+          <Layout>
+            < RevenuePayment/>
+          </Layout>
+        }
+      />
+       
+       <Route
+        path="/services/youtube-oac"
+        element={
+          <Layout>
+            < YouTubeOACRequestForm/>
+          </Layout>
+        }
+      />
+      <Route
+        path="/services/claim"
+        element={
+          <Layout>
+            < YouTubeClaimRelease/>
+          </Layout>
+        }
+      />
+      <Route
+        path="/services/facebook-insta-profile"
+        element={
+          <Layout>
+            < SocialIsrcSubmitForm/>
+          </Layout>
+        }
+      />
+
+       <Route
+        path="/services/facebook-claim"
+        element={
+          <Layout>
+            < FacebookVideoLinkSubmitForm />
+          </Layout>
+        }
+      />
+
+<Route
+        path="/services/metadata-update"
+        element={
+          <Layout>
+            < MetadataUpdateForm />
+          </Layout>
+        }
+      />
+      
+
+ 
 
  <Route
   path="/settings/password"

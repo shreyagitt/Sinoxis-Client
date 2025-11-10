@@ -36,7 +36,8 @@ const BankDetails = () => {
         </div>
 
         {/* Form Card */}
-        <div className="bg-white shadow-lg shadow-gray-200/40 rounded-2xl p-8 border border-gray-100">
+        <div className="bg-white rounded-xl shadow-2xl p-10 w-full max-w-5xl border border-gray-200">
+
           <h5 className="text-xl font-semibold mb-2 text-gray-500">Bank Details</h5>
           <p className="text-gray-500 mb-8">
             Provide your bank details accurately. All information is securely encrypted.

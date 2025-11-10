@@ -1,5 +1,9 @@
 import React, { useState } from "react";
 import { Eye, Pencil } from "lucide-react";
+import ViewArtistModal from "./ViewArtistModal";
+import EditArtistModal from "./EditArtistModal";
+import AddArtist from "./AddArtist";
+
 
 const Labels = () => {
   // Sample artist data
@@ -13,6 +17,10 @@ const Labels = () => {
 
   const [filter, setFilter] = useState("All");
   const [search, setSearch] = useState("");
+  const [selectedArtist, setSelectedArtist] = useState(null);
+const [isViewOpen, setIsViewOpen] = useState(false);
+const [isEditOpen, setIsEditOpen] = useState(false);
+const [showAddArtist, setShowAddArtist] = useState(false);
 
   // Filter + Search logic
   const filteredArtists = artists.filter((artist) => {
@@ -45,7 +53,9 @@ const Labels = () => {
           onChange={(e) => setSearch(e.target.value)}
           className="flex-grow border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
         />
-        <button className="bg-red-600 hover:bg-red-700 text-white rounded-full px-6 py-2 w-full sm:w-auto">
+        <button 
+        onClick={() => setShowAddArtist(true)}
+        className="bg-red-600 hover:bg-red-700 text-white rounded-full px-6 py-2 w-full sm:w-auto">
           Add Artist
         </button>
       </div>
@@ -110,12 +120,16 @@ const Labels = () => {
 <div className="flex items-center justify-center gap-2">
   {/* View Button */}
   <button
-    className="border px-3 py-1.5 rounded-md text-sm flex items-center gap-1 transition-colors duration-200 
-               border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
-  >
-    <Eye size={16} className="text-current" />
-    View
-  </button>
+  onClick={() => {
+    setSelectedArtist(artist);
+    setIsViewOpen(true);
+  }}
+  className="border px-3 py-1.5 rounded-md text-sm flex items-center gap-1 border-red-600 text-red-600 hover:bg-red-600 hover:text-white transition"
+>
+  <Eye size={16} />
+  View
+</button>
+
 
   {/* Edit Button */}
   <button
@@ -124,6 +138,11 @@ const Labels = () => {
       borderColor: "#007F6E",
       color: "#007F6E",
     }}
+
+      onClick={() => {
+    setSelectedArtist(artist);
+    setIsEditOpen(true);
+  }}
     onMouseEnter={(e) => {
       e.currentTarget.style.backgroundColor = "#007F6E";
       e.currentTarget.style.color = "#fff";
@@ -151,6 +170,30 @@ const Labels = () => {
           No artists found.
         </div>
       )}
+
+            {/* ✅ Add Artist Modal */}
+      <AddArtist
+        open={showAddArtist}
+        onClose={() => setShowAddArtist(false)}
+        onSubmit={(artist) => {
+          setArtists([...artists, { id: artists.length + 1, ...artist }]);
+          setShowAddArtist(false);
+        }}
+      />
+      <ViewArtistModal
+  open={isViewOpen}
+  onClose={() => setIsViewOpen(false)}
+  artist={selectedArtist}
+  onEdit={() => setIsEditOpen(true)}
+/>
+
+<EditArtistModal
+  open={isEditOpen}
+  onClose={() => setIsEditOpen(false)}
+  artist={selectedArtist}
+  onSave={(updated) => setArtists(artists.map(a => a.id === updated.id ? updated : a))}
+/>
+
     </div>
   );
 };

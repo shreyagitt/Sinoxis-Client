@@ -1,4 +1,4 @@
-import React from "react";
+import React ,{ useState } from "react";
 import Chart from "react-apexcharts";
 import {
   FaUsers,
@@ -9,6 +9,8 @@ import {
   FaTrash,
   FaUser,
 } from "react-icons/fa";
+import CreateReleaseModal from "./CreateReleaseModal";
+import { useNavigate } from "react-router-dom";
 
 // === Data for Songs Table ===
 const songs = [
@@ -21,6 +23,8 @@ const songs = [
 
 // === Dashboard Component ===
 const Dashboard = () => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
   const revenueOptions = {
     chart: { type: "line", toolbar: { show: false }, height: 300, zoom: { enabled: false } },
     stroke: { curve: "stepline", width: 2, colors: ["#d90429", "#ff8f00"] },
@@ -56,16 +60,51 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="bg-gray-100 p-8 min-h-screen font-[Poppins]">
+    <div className="bg-white p-8 min-h-screen font-[Poppins]">
       {/* === Header === */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
         <h1 className="text-2xl font-semibold text-gray-800">Dashboard Overview</h1>
         <ol className="flex space-x-2 text-sm text-gray-500 mt-2 sm:mt-0">
           <li>Home</li>
           <li>/</li>
-          <li className="text-red-700 font-medium">Dashboard</li>
+          <li className="text-red-500 font-medium">Dashboard</li>
         </ol>
       </div>
+        
+<div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+
+  {/* Search Input */}
+  <div className="flex-grow">
+    <input
+      type="text"
+      placeholder="Type & Enter to search"
+      className="w-full border border-gray-300 rounded-full px-4 py-2 focus:ring-2 focus:ring-red-500 focus:outline-none"
+    />
+  </div>
+
+  {/* Create Release Button */}
+  <button
+    onClick={() => setIsModalOpen(true)}
+    className="bg-red-600 hover:bg-red-700 text-white rounded-full px-6 py-2 transition"
+  >
+    Create
+  </button>
+
+  {/* Go To My Releases */}
+  <button
+    onClick={() => navigate('/releases/myRelease')} // <-- if using react-router
+    className="bg-red-600 hover:bg-red-700 text-white rounded-full px-6 py-2 transition"
+  >
+    My Release
+  </button>
+
+</div>
+
+ <CreateReleaseModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={(data) => console.log("✅ Release Submitted:", data)}
+      />
 
       {/* === Stats + Chart === */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
@@ -98,7 +137,7 @@ const Dashboard = () => {
             </thead>
             <tbody>
               <tr>
-                <td className="text-red-700 p-2 font-medium">On Time Delivery</td>
+                <td className="text-red-500 p-2 font-medium">On Time Delivery</td>
                 <td className="p-2">
                   <div className="flex items-center">
                     <div className="w-4/5 h-2 bg-red-500 rounded-full"></div>
@@ -184,7 +223,7 @@ const Dashboard = () => {
             <td className="py-4 px-6 text-gray-600">{song.genre}</td>
 
             {/* Streams */}
-            <td className="py-4 px-6 font-medium text-red-700">
+            <td className="py-4 px-6 font-medium text-red-500">
               {song.streams}
             </td>
 
@@ -203,7 +242,7 @@ const Dashboard = () => {
                 <button className="px-3 py-1 rounded-md bg-green-100 text-green-600 font-medium hover:bg-green-600 hover:text-white transition">
                   <FaEdit />
                 </button>
-                <button className="px-3 py-1 rounded-md bg-red-100 text-red-600 font-medium hover:bg-red-600 hover:text-white transition">
+                <button className="px-3 py-1 rounded-md bg-red-100 text-red-500 font-medium hover:bg-red-500 hover:text-white transition">
                   <FaTrash />
                 </button>
               </div>

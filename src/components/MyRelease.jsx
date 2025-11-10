@@ -1,7 +1,11 @@
 import React, { useState } from "react";
+import CreateReleaseModal from "./CreateReleaseModal";
+import ReleaseDetailsModal from "./ReleaseDetailsModal";
 
 const MyReleases = () => {
-  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [selectedRelease, setSelectedRelease] = useState(null);
 
   const releases = [
     { id: 1, title: "DEMO TUNE", subtitle: "Demo Song", status: "Pending" },
@@ -43,10 +47,24 @@ const MyReleases = () => {
           placeholder="Type & Enter to search"
           className="flex-grow w-full sm:w-auto rounded-full border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
         />
-        <button className="bg-red-600 hover:bg-red-700 text-white rounded-full px-6 py-2">
+        <button 
+         onClick={() => setIsModalOpen(true)}
+        className="bg-red-600 hover:bg-red-700 text-white rounded-full px-6 py-2">
           Create
         </button>
       </div>
+
+      <CreateReleaseModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={(data) => console.log("✅ Release Submitted:", data)}
+      />
+
+       <ReleaseDetailsModal
+        open={viewModalOpen}
+        onClose={() => setViewModalOpen(false)}
+        release={selectedRelease}
+      />
 
       {/* Release Count */}
       <div className="flex justify-between items-center mb-4">
@@ -94,7 +112,9 @@ const MyReleases = () => {
                 <span className="bg-yellow-200 text-yellow-800 px-2 py-1 text-xs font-semibold rounded-md">
                   {release.status}
                 </span>
-                <button className="border border-red-600 text-red-600 hover:bg-red-50 rounded-md px-3 py-1 text-sm">
+                <button 
+                onClick={() => { setSelectedRelease(release); setViewModalOpen(true); }}
+                className="border border-red-600 text-red-600 hover:bg-red-50 rounded-md px-3 py-1 text-sm">
                   View Details
                 </button>
               </div>
