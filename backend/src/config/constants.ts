@@ -28,11 +28,14 @@ export const API_ENDPOINTS = {
  USERS: '/api/v1/users',
   TENANTS: '/api/v1/tenants',
   HEALTH: '/api/v1/health',
-  MEDIA:'/api/v1/media'
+  MEDIA:'/api/v1/media',
+  ARTIST:'/api/v1/artist',
+  RELEASE:'/api/v1/release'
 } as const;
 
 export const CLIENT_API_ENDPOINTS = {
-  
+  ARTIST:'/artist',
+  RELEASE:'/release'
 } as const;
 
 export const HTTP_STATUS = {

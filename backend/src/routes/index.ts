@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import authRoutes from './auth';
-import mediaRoutes from './mediaRoutes'
+import artistRoutes from './artistRoutes';
+import releaseRoutes from './releaseRoutes'
+import clientRouter from './client';   // ✅ Add this import
 import { API_ENDPOINTS } from '../config/constants';
 
 const router = Router();
@@ -16,6 +18,10 @@ router.get('/health', (req, res) => {
 });
 
 router.use(API_ENDPOINTS.AUTH, authRoutes);
-router.use(API_ENDPOINTS.MEDIA, mediaRoutes);
+router.use(API_ENDPOINTS.ARTIST, artistRoutes);
+router.use(API_ENDPOINTS.RELEASE, releaseRoutes);
+
+// ✅ Client-side routes
+router.use('/client', clientRouter);
 
 export default router;
