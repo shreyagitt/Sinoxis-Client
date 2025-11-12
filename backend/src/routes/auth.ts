@@ -1,5 +1,9 @@
 import { Router, Request, Response, NextFunction } from "express";
-import { AuthController, loginValidation, registerValidation } from "../controllers/authController";
+import { AuthController,
+   loginValidation, 
+   registerValidation ,
+  changePasswordValidation, } 
+  from "../controllers/authController";
 import { authenticate } from "../middlewares/auth";
 
 const router = Router();
@@ -40,6 +44,13 @@ router.get("/profile", authenticate, (req: Request, res: Response, next: NextFun
 
 router.post("/logout", authenticate, (req: Request, res: Response, next: NextFunction) =>
   AuthController.logout(req, res, next)
+);
+
+router.post(
+  "/change-password",
+  authenticate,
+  changePasswordValidation,
+  (req: Request, res: Response, next: NextFunction) => AuthController.changePassword(req, res, next)
 );
 
 export default router;

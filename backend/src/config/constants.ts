@@ -30,12 +30,33 @@ export const API_ENDPOINTS = {
   HEALTH: '/api/v1/health',
   MEDIA:'/api/v1/media',
   ARTIST:'/api/v1/artist',
-  RELEASE:'/api/v1/release'
+  RELEASE:'/api/v1/release',
+  BANK:'/api/v1/bank',
+  APPLY:'/api/v1/apply',
+  FACEBOOKVIDEO:'/api/v1/facebook-video',
+  METADATA:'/api/v1/metadata',
+  SOCIALISRC:'/api/v1/social',
+  YOUTUBECLAIM:'/api/v1/youtube-claim',
+  YOUTUBEOAC:'/api/v1/youtube-oac',
+  REVENUE:'/api/v1/revenue-analytics',
+  REVENUEREPORTS:'/api/v1/revenue-report',
+  PAYMENT:'/api/v1/payment'
+
 } as const;
 
 export const CLIENT_API_ENDPOINTS = {
   ARTIST:'/artist',
-  RELEASE:'/release'
+  RELEASE:'/release',
+  BANK:'/bank',
+  APPLY:'/apply',
+  FACEBOOKVIDEO:'/facebook-video',
+  METADATA:'/metadata',
+  SOCIALISRC:'/social',
+  YOUTUBECLAIM:'/youtube-claim',
+  YOUTUBEOAC:'/youtube-oac',
+  REVENUE:'/revenue-analytics',
+  REVENUEREPORTS:'/revenue-report',
+  PAYMENT:'/payment'
 } as const;
 
 export const HTTP_STATUS = {

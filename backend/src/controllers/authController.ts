@@ -86,6 +86,66 @@ export class AuthController {
   });
 
   /**
+ * 🔐 Change Password
+ */
+static changePassword = asyncHandler(async (req: Request, res: Response) => {
+  const user = (req as any).user; // from middleware
+const userId = user?.userId; // ✅ use userId instead of _id
+  const { currentPassword, newPassword, confirmPassword } = req.body;
+
+ if (!userId) {
+  return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+    success: false,
+    error: "Unauthorized access",
+  });
+}
+
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    return res.status(HTTP_STATUS.BAD_REQUEST).json({
+      success: false,
+      error: "All fields are required",
+    });
+  }
+
+  if (newPassword !== confirmPassword) {
+    return res.status(HTTP_STATUS.BAD_REQUEST).json({
+      success: false,
+      error: "Passwords do not match",
+    });
+  }
+
+
+const existingUser = await (await import("../models/User")).User
+  .findById(userId)
+  .select("+password");
+    if (!existingUser) {
+    return res.status(HTTP_STATUS.NOT_FOUND).json({
+      success: false,
+      error: "User not found",
+    });
+  }
+
+  const bcrypt = (await import("bcryptjs")).default;
+  const isMatch = await bcrypt.compare(currentPassword, existingUser.password);
+  if (!isMatch) {
+    return res.status(HTTP_STATUS.BAD_REQUEST).json({
+      success: false,
+      error: "Incorrect current password",
+    });
+  }
+
+  const hashedPassword = await bcrypt.hash(newPassword, 12);
+  existingUser.password = hashedPassword;
+  await existingUser.save();
+
+  res.status(HTTP_STATUS.OK).json({
+    success: true,
+    message: "Password changed successfully",
+  });
+});
+
+
+  /**
    * 🚪 Logout
    */
   static logout = asyncHandler(async (_req: Request, res: Response) => {
@@ -115,3 +175,18 @@ export const registerValidation = [
   body("firstName").trim().isLength({ min: 2, max: 50 }),
   body("lastName").trim().isLength({ min: 2, max: 50 }),
 ];
+
+export const changePasswordValidation = [
+  body("currentPassword")
+    .isString()
+    .isLength({ min: 8 })
+    .withMessage("Current password must be at least 8 characters"),
+  body("newPassword")
+    .isLength({ min: 8 })
+    .matches(/[0-9!@#$%^&*]/)
+    .withMessage("New password must include a number or special character"),
+  body("confirmPassword")
+    .custom((value, { req }) => value === req.body.newPassword)
+    .withMessage("Passwords do not match"),
+];
+
