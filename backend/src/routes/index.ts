@@ -11,7 +11,7 @@ import youTubeClaimRoutes from './youTubeClaimRoutes';
 import youTubeOACRoutes from './youTubeOACRoutes';
 import revenueRoutes from './revenueRoutes';
 import revenueReportRoutes from './revenueReportRoutes';
-import paymentRoutes from './PaymentRoutes'
+import paymentRoutes from './paymentRoutes'
 import clientRouter from './client';   // ✅ Add this import
 import { API_ENDPOINTS } from '../config/constants';
 
