@@ -13,6 +13,51 @@ export const AdminApplicationController = {
     });
   }),
 
+  // -----------------------------------------------------------
+  // 📌 2. CREATE NEW APPLICATION
+  // -----------------------------------------------------------
+  async create(req: Request, res: Response) {
+    try {
+      const {
+        fullName,
+        email,
+        phone,
+        role,
+        genre,
+        musicLink,
+        bio,
+        agree
+      } = req.body;
+
+      // Basic validation
+      if (!fullName || !email || !phone) {
+        return res.status(400).json({
+          status: false,
+          message: "Full name, email, and phone are required.",
+        });
+      }
+
+      const newApplication = await Application.create({
+        fullName,
+        email,
+        phone,
+        role,
+        genre,
+        musicLink,
+        bio,
+        agree,
+      });
+
+      return res.json({
+        status: true,
+        message: "Application created successfully",
+        data: newApplication,
+      });
+    } catch (error: any) {
+      return res.status(500).json({ status: false, message: error.message });
+    }
+  },
+
   // PATCH /api/v1/applications/:id/status
   updateStatus: asyncHandler(async (req: Request, res: Response) => {
     const { status } = req.body;

@@ -11,10 +11,24 @@ const app = express();
 // =======================
 // 🔹 Middleware Setup
 // =======================
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
-  credentials: process.env.CORS_CREDENTIALS === 'true'
-}));
+const allowedOrigins = (process.env.CORS_ORIGIN || "").split(",");
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true); // allow Postman
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("CORS Not Allowed"));
+      }
+    },
+    credentials: true,
+  })
+);
+
+
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));

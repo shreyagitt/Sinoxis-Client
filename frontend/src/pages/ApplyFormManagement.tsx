@@ -1,321 +1,323 @@
 import React, { useState, useEffect } from "react";
 import {
-  Edit,
-  Trash2,
   Eye,
+  Edit,
   Search,
   CheckCircle,
   XCircle,
+  Trash2,
   Plus,
 } from "lucide-react";
 import Swal from "sweetalert2";
+import axios from "axios";
+import { useAppSelector } from "../store/hook";
 
-interface Applicant {
-  id: number;
-  name: string;
-  artistName: string;
+interface Application {
+  _id: string;
+  fullName: string;
   email: string;
   phone: string;
-  instagram: string;
-  youtube: string;
-  releasedBefore: boolean;
-  links?: string;
-  hearAboutUs: string;
-  status: "Pending" | "Approved" | "Rejected";
+  role: string;
+  genre: string;
+  musicLink: string;
+  bio: string;
+  agree: boolean;
+  status: "Pending" | "Reviewed" | "Accepted" | "Rejected";
 }
 
 const ApplyFormManagement: React.FC = () => {
-  const [applicants, setApplicants] = useState<Applicant[]>([]);
+  const [applications, setApplications] = useState<Application[]>([]);
   const [search, setSearch] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [editingApplicant, setEditingApplicant] = useState<Applicant | null>(
-    null
-  );
+  const [page, setPage] = useState(1);
   const itemsPerPage = 5;
 
-  useEffect(() => {
-    // Demo mock data
-    const mockData: Applicant[] = [
-      {
-        id: 1,
-        name: "John Doe",
-        artistName: "JD Beats",
-        email: "john@example.com",
-        phone: "9876543210",
-        instagram: "@jdbeats",
-        youtube: "youtube.com/jdbeats",
-        releasedBefore: true,
-        links: "spotify.com/jdbeats",
-        hearAboutUs: "YouTube",
-        status: "Pending",
-      },
-      {
-        id: 2,
-        name: "Emma Watson",
-        artistName: "EWat",
-        email: "emma@example.com",
-        phone: "9988776655",
-        instagram: "@ewatmusic",
-        youtube: "youtube.com/ewatmusic",
-        releasedBefore: false,
-        hearAboutUs: "Friend",
-        status: "Approved",
-      },
-    ];
-    setApplicants(mockData);
-  }, []);
+  const { token } = useAppSelector((state) => state.auth);
+  const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
-  // 🔍 Search filter
-  const filtered = applicants.filter(
-    (app) =>
-      app.name.toLowerCase().includes(search.toLowerCase()) ||
-      app.artistName.toLowerCase().includes(search.toLowerCase()) ||
-      app.email.toLowerCase().includes(search.toLowerCase())
+  // =======================================================
+  // ⬇️ FETCH APPLICATIONS
+  // =======================================================
+  useEffect(() => {
+    axios
+      .get(`${baseUrl}/apply`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        if (res.data.status && Array.isArray(res.data.data)) {
+          setApplications(res.data.data);
+        }
+      });
+  }, [token]);
+
+  // =======================================================
+  // 🔎 SEARCH FILTER
+  // =======================================================
+  const filtered = applications.filter((a) =>
+    a.fullName.toLowerCase().includes(search.toLowerCase())
   );
 
-  // 🔢 Pagination
-  const indexOfLast = currentPage * itemsPerPage;
-  const indexOfFirst = indexOfLast - itemsPerPage;
-  const currentItems = filtered.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const visible = filtered.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
-  // ✅ Approve
-  const handleApprove = (id: number) => {
-    Swal.fire({
-      title: "Approve this application?",
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonColor: "#16a34a",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, Approve",
-    }).then((res) => {
-      if (res.isConfirmed) {
-        setApplicants((prev) =>
-          prev.map((a) => (a.id === id ? { ...a, status: "Approved" } : a))
-        );
-        Swal.fire("Approved!", "Application approved successfully.", "success");
-      }
-    });
+  // =======================================================
+  // 🔄 UPDATE STATUS
+  // =======================================================
+  const updateStatus = async (id: string, status: Application["status"]) => {
+    await axios.patch(
+      `${baseUrl}/apply/${id}/status`,
+      { status },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    setApplications((prev) =>
+      prev.map((a) => (a._id === id ? { ...a, status } : a))
+    );
+
+    Swal.fire("Updated!", `Status changed to ${status}`, "success");
   };
 
-  // ❌ Reject
-  const handleReject = (id: number) => {
+  // =======================================================
+  // ❌ DELETE APPLICATION
+  // =======================================================
+  const handleDelete = async (id: string) => {
     Swal.fire({
-      title: "Reject this application?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#aaa",
-      confirmButtonText: "Yes, Reject",
-    }).then((res) => {
-      if (res.isConfirmed) {
-        setApplicants((prev) =>
-          prev.map((a) => (a.id === id ? { ...a, status: "Rejected" } : a))
-        );
-        Swal.fire("Rejected!", "Application rejected successfully.", "info");
-      }
-    });
-  };
-
-  // 🗑 Delete
-  const handleDelete = (id: number) => {
-    Swal.fire({
-      title: "Delete application?",
-      text: "This cannot be undone!",
+      title: "Delete this application?",
+      text: "This action cannot be undone.",
       icon: "error",
       showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonText: "Cancel",
       confirmButtonText: "Delete",
-    }).then((res) => {
+      confirmButtonColor: "#d33",
+    }).then(async (res) => {
       if (res.isConfirmed) {
-        setApplicants((prev) => prev.filter((a) => a.id !== id));
+        await axios.delete(`${baseUrl}/apply/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        setApplications((prev) => prev.filter((a) => a._id !== id));
+
         Swal.fire("Deleted!", "Application removed.", "success");
       }
     });
   };
 
-  // 👁️ View Details
-  const handleView = (app: Applicant) => {
+  // =======================================================
+  // 👁 VIEW DETAILS
+  // =======================================================
+  const handleView = (app: Application) => {
     Swal.fire({
-      title: `<strong>${app.name} (${app.artistName})</strong>`,
+      title: `<strong>${app.fullName}</strong>`,
       html: `
         <p><b>Email:</b> ${app.email}</p>
         <p><b>Phone:</b> ${app.phone}</p>
-        <p><b>Instagram:</b> ${app.instagram}</p>
-        <p><b>YouTube:</b> ${app.youtube}</p>
-        <p><b>Released Before:</b> ${app.releasedBefore ? "Yes" : "No"}</p>
-        ${app.links ? `<p><b>Links:</b> ${app.links}</p>` : ""}
-        <p><b>Heard About Us:</b> ${app.hearAboutUs}</p>
+        <p><b>Role:</b> ${app.role}</p>
+        <p><b>Genre:</b> ${app.genre}</p>
+        <p><b>Music Link:</b> <a href="${app.musicLink}" target="_blank">${app.musicLink}</a></p>
+        <p><b>Bio:</b> ${app.bio}</p>
+        <p><b>Agree:</b> ${app.agree ? "Yes" : "No"}</p>
         <p><b>Status:</b> ${app.status}</p>
       `,
       confirmButtonColor: "#16a34a",
     });
   };
 
-  // ✏️ Edit Applicant
-  const handleEdit = (app: Applicant) => {
-    setEditingApplicant(app);
-  };
-
-  const handleEditSave = () => {
-    if (editingApplicant) {
-      setApplicants((prev) =>
-        prev.map((a) => (a.id === editingApplicant.id ? editingApplicant : a))
-      );
-      Swal.fire("Updated!", "Applicant details updated successfully.", "success");
-      setEditingApplicant(null);
-    }
-  };
-
-  // ➕ Create New Applicant
+  // =======================================================
+  // ➕ ADD NEW APPLICANT
+  // =======================================================
   const handleCreate = () => {
+  Swal.fire({
+    title: "Add New Applicant",
+    html: `
+      <input id="swal-fullName" class="swal2-input" placeholder="Full Name" />
+      <input id="swal-email" class="swal2-input" placeholder="Email" />
+      <input id="swal-phone" class="swal2-input" placeholder="Phone" />
+      <input id="swal-role" class="swal2-input" placeholder="Role" />
+      <input id="swal-genre" class="swal2-input" placeholder="Genre" />
+      <input id="swal-musicLink" class="swal2-input" placeholder="Music Link" />
+    `,
+    showCancelButton: true,
+    confirmButtonText: "Create",
+
+    preConfirm: () => {
+      const fullName = (document.getElementById("swal-fullName") as HTMLInputElement).value;
+      const email = (document.getElementById("swal-email") as HTMLInputElement).value;
+      const phone = (document.getElementById("swal-phone") as HTMLInputElement).value;
+      const role = (document.getElementById("swal-role") as HTMLInputElement).value;
+      const genre = (document.getElementById("swal-genre") as HTMLInputElement).value;
+      const musicLink = (document.getElementById("swal-musicLink") as HTMLInputElement).value;
+
+      if (!fullName || !email || !phone || !role || !genre || !musicLink) {
+        Swal.showValidationMessage("All fields are required!");
+        return;
+      }
+
+      return { fullName, email, phone, role, genre, musicLink };
+    },
+  }).then(async (res) => {
+    if (res.isConfirmed) {
+      const payload = {
+        ...res.value,
+        bio: "New applicant",
+        agree: true,
+        status: "Pending",
+      };
+
+      const response = await axios.post(
+        `${baseUrl}/apply`,
+        payload,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setApplications((prev) => [...prev, response.data.data]);
+
+      Swal.fire("Added!", "Applicant created successfully", "success");
+    }
+  });
+};
+
+
+  // =======================================================
+  // ✏️ EDIT APPLICANT
+  // =======================================================
+  const handleEdit = (app: Application) => {
     Swal.fire({
-      title: "Add New Applicant",
+      title: "Edit Applicant",
       html: `
-        <input id="name" class="swal2-input" placeholder="Name" />
-        <input id="artistName" class="swal2-input" placeholder="Artist Name" />
-        <input id="email" class="swal2-input" placeholder="Email" />
-        <input id="phone" class="swal2-input" placeholder="Phone" />
+        <input id="fullName" class="swal2-input" value="${app.fullName}" />
+        <input id="email" class="swal2-input" value="${app.email}" />
+        <input id="phone" class="swal2-input" value="${app.phone}" />
+        <input id="role" class="swal2-input" value="${app.role}" />
+        <input id="genre" class="swal2-input" value="${app.genre}" />
       `,
       showCancelButton: true,
-      confirmButtonText: "Create",
-      preConfirm: () => {
-        const name = (
-          document.getElementById("name") as HTMLInputElement
-        )?.value;
-        const artistName = (
-          document.getElementById("artistName") as HTMLInputElement
-        )?.value;
-        const email = (
-          document.getElementById("email") as HTMLInputElement
-        )?.value;
-        const phone = (
-          document.getElementById("phone") as HTMLInputElement
-        )?.value;
+      confirmButtonText: "Save",
+      preConfirm: () => ({
+        fullName: (document.getElementById("fullName") as any).value,
+        email: (document.getElementById("email") as any).value,
+        phone: (document.getElementById("phone") as any).value,
+        role: (document.getElementById("role") as any).value,
+        genre: (document.getElementById("genre") as any).value,
+      }),
+    }).then(async (res) => {
+      if (res.isConfirmed) {
+        await axios.patch(
+          `${baseUrl}/apply/${app._id}`,
+          res.value,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
 
-        if (!name || !artistName || !email || !phone) {
-          Swal.showValidationMessage("Please fill all fields!");
-          return;
-        }
+        setApplications((prev) =>
+          prev.map((a) =>
+            a._id === app._id ? { ...a, ...res.value } : a
+          )
+        );
 
-        return { name, artistName, email, phone };
-      },
-    }).then((result) => {
-      if (result.isConfirmed && result.value) {
-        const newApp: Applicant = {
-          id: applicants.length + 1,
-          name: result.value.name,
-          artistName: result.value.artistName,
-          email: result.value.email,
-          phone: result.value.phone,
-          instagram: "",
-          youtube: "",
-          releasedBefore: false,
-          hearAboutUs: "Other",
-          status: "Pending",
-        };
-        setApplicants((prev) => [...prev, newApp]);
-        Swal.fire("Added!", "New applicant created successfully.", "success");
+        Swal.fire("Updated!", "Applicant updated successfully.", "success");
       }
     });
   };
 
+  // =======================================================
+  // UI
+  // =======================================================
   return (
     <div className="p-6 bg-white min-h-screen">
-      <h2 className="text-2xl font-semibold text-gray-800 mb-8 flex items-center gap-2">
-        Apply Form Management
-      </h2>
+      {/* Title */}
+      <h2 className="text-2xl font-semibold mb-6">Apply Form Management</h2>
 
-      {/* Top Actions */}
-      <div className="flex justify-between items-center mb-4">
+      {/* Search + Add */}
+      <div className="flex justify-between items-center mb-5">
         <div className="relative w-80">
-          <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+          <Search size={18} className="absolute left-3 top-2.5 text-gray-400" />
           <input
             type="text"
-            placeholder="Search by name, artist, or email"
-            value={search}
+            placeholder="Search by name..."
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10 pr-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-green-400 outline-none"
+            className="pl-10 pr-4 py-2 w-full rounded-xl border shadow-sm focus:ring-2 focus:ring-green-400 outline-none"
           />
         </div>
+
         <button
           onClick={handleCreate}
-          className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+          className="flex items-center gap-2 bg-green-600 text-white px-5 py-2 rounded-xl shadow hover:bg-green-700"
         >
           <Plus size={18} /> Add Applicant
         </button>
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto shadow-md rounded-xl border border-gray-100">
-        <table className="w-full text-sm text-left text-gray-700">
-          <thead className="bg-green-600 text-white">
+      <div className="overflow-x-auto rounded-xl border shadow-md">
+        <table className="w-full text-sm text-gray-700">
+          <thead className="bg-green-600 text-white rounded-t-xl">
             <tr>
-              <th className="py-3 px-4">Name</th>
-              <th className="py-3 px-4">Artist Name</th>
-              <th className="py-3 px-4">Email</th>
-              <th className="py-3 px-4">Phone</th>
-              <th className="py-3 px-4">Status</th>
+              <th className="py-3 px-4 text-left">Name</th>
+              <th className="py-3 px-4 text-left">Role</th>
+              <th className="py-3 px-4 text-left">Email</th>
+              <th className="py-3 px-4 text-left">Phone</th>
+              <th className="py-3 px-4 text-left">Status</th>
               <th className="py-3 px-4 text-center">Actions</th>
             </tr>
           </thead>
+
           <tbody>
-            {currentItems.map((app) => (
-              <tr key={app.id} className="border-t hover:bg-green-50">
-                <td className="py-3 px-4">{app.name}</td>
-                <td className="py-3 px-4">{app.artistName}</td>
+            {visible.map((app, index) => (
+              <tr
+                key={app._id}
+                className={`border-t ${
+                  index % 2 === 0 ? "bg-white" : "bg-green-50"
+                }`}
+              >
+                <td className="py-3 px-4">{app.fullName}</td>
+                <td className="py-3 px-4">{app.role}</td>
                 <td className="py-3 px-4">{app.email}</td>
                 <td className="py-3 px-4">{app.phone}</td>
+
                 <td className="py-3 px-4">
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      app.status === "Approved"
+                      app.status === "Accepted"
                         ? "bg-green-200 text-green-800"
                         : app.status === "Rejected"
                         ? "bg-red-200 text-red-800"
+                        : app.status === "Reviewed"
+                        ? "bg-blue-200 text-blue-800"
                         : "bg-yellow-200 text-yellow-800"
                     }`}
                   >
                     {app.status}
                   </span>
                 </td>
-                <td className="py-3 px-4 flex justify-center gap-3">
-                  <button
+
+                {/* Actions */}
+                <td className="py-3 px-4 flex gap-3 justify-center">
+                  <Eye
+                    size={18}
+                    className="text-blue-600 cursor-pointer hover:scale-110"
                     onClick={() => handleView(app)}
-                    className="text-blue-600 hover:text-blue-800"
-                    title="View"
-                  >
-                    <Eye size={18} />
-                  </button>
-                  <button
+                  />
+
+                  <Edit
+                    size={18}
+                    className="text-green-600 cursor-pointer hover:scale-110"
                     onClick={() => handleEdit(app)}
-                    className="text-green-600 hover:text-green-800"
-                    title="Edit"
-                  >
-                    <Edit size={18} />
-                  </button>
-                  <button
-                    onClick={() => handleApprove(app.id)}
-                    className="text-green-500 hover:text-green-700"
-                    title="Approve"
-                  >
-                    <CheckCircle size={18} />
-                  </button>
-                  <button
-                    onClick={() => handleReject(app.id)}
-                    className="text-yellow-600 hover:text-yellow-800"
-                    title="Reject"
-                  >
-                    <XCircle size={18} />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(app.id)}
-                    className="text-red-600 hover:text-red-800"
-                    title="Delete"
-                  >
-                    <Trash2 size={18} />
-                  </button>
+                  />
+
+                  <CheckCircle
+                    size={18}
+                    className="text-green-500 cursor-pointer hover:scale-110"
+                    onClick={() => updateStatus(app._id, "Accepted")}
+                  />
+
+                  <XCircle
+                    size={18}
+                    className="text-yellow-600 cursor-pointer hover:scale-110"
+                    onClick={() => updateStatus(app._id, "Rejected")}
+                  />
+
+                  <Trash2
+                    size={18}
+                    className="text-red-600 cursor-pointer hover:scale-110"
+                    onClick={() => handleDelete(app._id)}
+                  />
                 </td>
               </tr>
             ))}
@@ -325,99 +327,31 @@ const ApplyFormManagement: React.FC = () => {
 
       {/* Pagination */}
       <div className="flex justify-between items-center mt-4">
-        <p className="text-sm text-gray-600">
-          Showing {indexOfFirst + 1} to {Math.min(indexOfLast, filtered.length)}{" "}
-          of {filtered.length} entries
+        <p>
+          Showing {(page - 1) * itemsPerPage + 1}–
+          {Math.min(page * itemsPerPage, filtered.length)} of {filtered.length}
         </p>
+
         <div className="flex gap-2">
           <button
-            className="px-3 py-1 border rounded-lg text-sm hover:bg-green-100 disabled:opacity-50"
-            onClick={() => setCurrentPage((p) => p - 1)}
-            disabled={currentPage === 1}
+            disabled={page === 1}
+            onClick={() => setPage(page - 1)}
+            className="px-4 py-1 rounded-lg border shadow-sm bg-white disabled:opacity-50"
           >
             Previous
           </button>
+
           <button
-            className="px-3 py-1 border rounded-lg text-sm hover:bg-green-100 disabled:opacity-50"
-            onClick={() => setCurrentPage((p) => p + 1)}
-            disabled={currentPage === totalPages}
+            disabled={page === totalPages}
+            onClick={() => setPage(page + 1)}
+            className="px-4 py-1 rounded-lg border shadow-sm bg-white disabled:opacity-50"
           >
             Next
           </button>
         </div>
       </div>
-
-      {/* Edit Modal */}
-      {editingApplicant && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white rounded-xl shadow-lg p-6 w-[400px]">
-            <h3 className="text-lg font-bold text-green-700 mb-4">Edit Applicant</h3>
-            <div className="flex flex-col gap-2">
-              <input
-                className="border rounded-lg p-2"
-                value={editingApplicant.name}
-                onChange={(e) =>
-                  setEditingApplicant({
-                    ...editingApplicant,
-                    name: e.target.value,
-                  })
-                }
-                placeholder="Name"
-              />
-              <input
-                className="border rounded-lg p-2"
-                value={editingApplicant.artistName}
-                onChange={(e) =>
-                  setEditingApplicant({
-                    ...editingApplicant,
-                    artistName: e.target.value,
-                  })
-                }
-                placeholder="Artist Name"
-              />
-              <input
-                className="border rounded-lg p-2"
-                value={editingApplicant.email}
-                onChange={(e) =>
-                  setEditingApplicant({
-                    ...editingApplicant,
-                    email: e.target.value,
-                  })
-                }
-                placeholder="Email"
-              />
-              <input
-                className="border rounded-lg p-2"
-                value={editingApplicant.phone}
-                onChange={(e) =>
-                  setEditingApplicant({
-                    ...editingApplicant,
-                    phone: e.target.value,
-                  })
-                }
-                placeholder="Phone"
-              />
-            </div>
-            <div className="flex justify-end gap-3 mt-4">
-              <button
-                onClick={() => setEditingApplicant(null)}
-                className="px-3 py-1 border rounded-lg hover:bg-gray-100"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleEditSave}
-                className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700"
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
 
 export default ApplyFormManagement;
-

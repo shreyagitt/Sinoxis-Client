@@ -1,8 +1,8 @@
-// src/store/index.ts
-import { configureStore } from '@reduxjs/toolkit';
-import { setupListeners } from '@reduxjs/toolkit/query';
-import authReducer from '@/features/auth/authSlice';
-import { authApi } from '@/features/auth/authApi';
+import { configureStore } from "@reduxjs/toolkit";
+import { setupListeners } from "@reduxjs/toolkit/query";
+
+import authReducer from "../features/auth/authSlice";
+import { authApi } from "../features/auth/authApi";
 // add other feature APIs here and their slices if needed
 
 export const store = configureStore({
