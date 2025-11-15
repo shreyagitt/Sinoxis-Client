@@ -32,20 +32,26 @@ app.use(
 );
 
 // ---------------- CORS ----------------
+const allowedOrigins = (process.env.CORS_ORIGIN || "").split(",");
+
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || /^http:\/\/localhost:\d+$/, // from .env or allow all localhost
-    credentials: process.env.CORS_CREDENTIALS === 'true',
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("CORS Not Allowed: " + origin));
+      }
+    },
+    credentials: process.env.CORS_CREDENTIALS === "true",
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: [
-      'Content-Type',
-      'Authorization',
-      'Cache-Control',
-      'X-Requested-With',
-    ],
   })
 );
-app.options('*', cors());
+
+app.options("*", cors());
+
 
 // ---------------- STATIC FILES ----------------
 app.use('/images', express.static(path.join(__dirname, '../uploads')));
