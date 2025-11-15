@@ -8,7 +8,7 @@ export interface LoginResponse { token: string; refreshToken?: string; user: any
 export const authApi = createApi({
   reducerPath: 'authApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api',
+    baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1',
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).auth.token;
       if (token) headers.set('Authorization', `Bearer ${token}`);
@@ -19,7 +19,7 @@ export const authApi = createApi({
   endpoints: (builder) => ({
     login: builder.mutation<LoginResponse, LoginRequest>({
       query: (credentials) => ({
-        url: '/v1/auth/login',
+        url: '/auth/login',
         method: 'POST',
         body: credentials,
       }),
@@ -27,22 +27,22 @@ export const authApi = createApi({
     }),
     register: builder.mutation<any, any>({
       query: (data) => ({
-        url: '/v1/auth/register',
+        url: '/auth/register',
         method: 'POST',
         body: data,
       }),
     }),
     getProfile: builder.query<any, void>({
-      query: () => ({ url: '/v1/auth/profile' }),
+      query: () => ({ url: '/auth/profile' }),
       providesTags: ['Auth'],
     }),
     changePassword: builder.mutation<any, { currentPassword: string; newPassword: string }>(
       {
-        query: (body) => ({ url: '/v1/auth/change-password', method: 'POST', body }),
+        query: (body) => ({ url: '/auth/change-password', method: 'POST', body }),
       }
     ),
     logout: builder.mutation<void, void>({
-      query: () => ({ url: '/v1/auth/logout', method: 'POST' }),
+      query: () => ({ url: '/auth/logout', method: 'POST' }),
     }),
   }),
 });

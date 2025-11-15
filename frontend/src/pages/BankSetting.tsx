@@ -8,6 +8,7 @@ import {
   ShieldOff,
 } from "lucide-react";
 import { useAppSelector } from "../store/hook";
+import toast from "react-hot-toast";
 
 interface BankRecord {
   _id: string;
@@ -30,27 +31,36 @@ const AdminSettingsPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   // ================================
-  // FETCH ALL BANK DETAILS
+  // FETCH ALL BANK DETAILS (FIXED ENDPOINT)
   // ================================
   useEffect(() => {
+    if (!token) return;
+
     axios
       .get(`${baseUrl}/bank`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
-        if (res.data.success) setRecords(res.data.data);
+        if (res.data.success && Array.isArray(res.data.data)) {
+          setRecords(res.data.data);
+        }
       })
-      .catch((err) => console.error("Error fetching bank details:", err));
-  }, []);
+      .catch((err) => {
+        console.error("Error fetching bank details:", err);
+        toast.error("Failed to fetch bank details");
+      });
+  }, [token]);
 
   // ================================
   // VERIFY BANK RECORD
   // ================================
   const verifyAccount = async (id: string) => {
+    if (!token) return toast.error("Unauthorized: No token found");
+
     try {
       await axios.put(
         `${baseUrl}/bank/${id}/verify`,
-        {},
+        { verified: true },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -58,9 +68,10 @@ const AdminSettingsPage: React.FC = () => {
         prev.map((r) => (r._id === id ? { ...r, verified: true } : r))
       );
 
-      alert("Bank account verified successfully!");
+      toast.success("Bank account verified successfully!");
     } catch (err) {
       console.error(err);
+      toast.error("Failed to verify bank account");
     }
   };
 
@@ -68,6 +79,7 @@ const AdminSettingsPage: React.FC = () => {
   // DELETE BANK RECORD
   // ================================
   const deleteRecord = async (id: string) => {
+    if (!token) return toast.error("Unauthorized: No token");
     if (!confirm("Are you sure you want to delete this bank record?")) return;
 
     try {
@@ -77,14 +89,15 @@ const AdminSettingsPage: React.FC = () => {
 
       setRecords((prev) => prev.filter((r) => r._id !== id));
 
-      alert("Bank details deleted successfully");
+      toast.success("Bank record deleted successfully");
     } catch (err) {
       console.error(err);
+      toast.error("Failed to delete bank record");
     }
   };
 
   // ================================
-  // SEARCH
+  // SEARCH FILTER
   // ================================
   const filtered = records.filter(
     (r) =>
@@ -95,7 +108,6 @@ const AdminSettingsPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-white px-6 py-8">
       <div className="max-w-7xl mx-auto">
-
         {/* Title */}
         <h1 className="text-2xl font-semibold mb-6">Bank Details Management</h1>
 
@@ -134,7 +146,7 @@ const AdminSettingsPage: React.FC = () => {
               {filtered.map((record) => (
                 <tr
                   key={record._id}
-                  className="border-b hover:bg-green-100"
+                  className="border-b hover:bg-green-100 transition"
                 >
                   <td className="py-3 px-4">{record.accountName}</td>
                   <td className="py-3 px-4">{record.email}</td>
@@ -202,3 +214,4 @@ const AdminSettingsPage: React.FC = () => {
 };
 
 export default AdminSettingsPage;
+

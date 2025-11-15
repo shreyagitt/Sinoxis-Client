@@ -1,123 +1,153 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+
+import { useDispatch } from "react-redux";
+import { Toaster } from "react-hot-toast";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+import { setToken } from "./features/auth/authSlice";
+import ProtectedRoute from "./Components/Auth/ProtectedRoute";
 import Layout from "./Components/layout/Layout";
+
+// Pages
+import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import Setting from './pages/Setting';
 import Artist from "./pages/Artist";
-import Label from './pages/Label';
+import Label from "./pages/Label";
 import ReleasesPage from "./pages/Release";
-import Notification from './pages/Notification';
-import Revenue from './pages/Revenue';
-import Service from './pages/Service';
-import BankSetting from './pages/BankSetting';
-import ApplyForm from './pages/ApplyFormManagement';
+import Notification from "./pages/Notification";
+import BankSetting from "./pages/BankSetting";
 import ApplyFormManagement from "./pages/ApplyFormManagement";
+import Setting from "./pages/Setting";
 
-const App: React.FC = () => {
+import "./index.css";
+
+const AppRoutes: React.FC = () => {
+  const dispatch = useDispatch();
+
+  // Restore token when page refreshes
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) dispatch(setToken(token));
+  }, [dispatch]);
+
   return (
-    <Router>
-      <Routes>
-        {/* Default route */}
-        <Route path="/" element={<Navigate to="/dashboard" />} />
+    <>
+      {/* FULL ToastContainer (your requested config) */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
 
-        {/* Pages inside layout */}
-        <Route
-          path="/dashboard"
-          element={
-            <Layout>
-              <Dashboard />
-            </Layout>
-          }
-        />
+      <Router>
+        <div className="App">
+          {/* Hot Toaster (inside .App just like old project) */}
+          <Toaster position="top-right" />
 
-         <Route
-          path="/artists"
-          element={
-            <Layout>
-              <Artist />
-            </Layout>
-          }
-        />
+          <Routes>
+            {/* PUBLIC ROUTES */}
+            <Route
+              path="/login"
+              element={
+                <Layout hideChrome>
+                  <Login />
+                </Layout>
+              }
+            />
 
-         <Route
-          path="/labels"
-          element={
-            <Layout>
-              <Label />
-            </Layout>
-          }
-        />
+            {/* Redirect root → login */}
+            <Route path="/" element={<Navigate to="/login" replace />} />
 
-         <Route
-          path="/releases"
-          element={
-            <Layout>
-              <ReleasesPage />
-            </Layout>
-          }
-        />
+            {/* PROTECTED ROUTES */}
 
-        
-         <Route
-          path="/notifications"
-          element={
-            <Layout>
-              <Notification />
-            </Layout>
-          }
-        />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Layout><Dashboard /></Layout>
+                </ProtectedRoute>
+              }
+            />
 
-        <Route
-          path="/revenue"
-          element={
-            <Layout>
-              <Revenue />
-            </Layout>
-          }
-        />
+            <Route
+              path="/artists"
+              element={
+                <ProtectedRoute>
+                  <Layout><Artist /></Layout>
+                </ProtectedRoute>
+              }
+            />
 
-         <Route
-          path="/services"
-          element={
-            <Layout>
-              <Service />
-            </Layout>
-          }
-        />
+            <Route
+              path="/labels"
+              element={
+                <ProtectedRoute>
+                  <Layout><Label /></Layout>
+                </ProtectedRoute>
+              }
+            />
 
- <Route
-          path="/banksettings"
-          element={
-            <Layout>
-              <BankSetting />
-            </Layout>
-          }
-        />
+            <Route
+              path="/releases"
+              element={
+                <ProtectedRoute>
+                  <Layout><ReleasesPage /></Layout>
+                </ProtectedRoute>
+              }
+            />
 
-         <Route
-          path="/Form"
-          element={
-            <Layout>
-              <ApplyFormManagement />
-            </Layout>
-          }
-        />
+            <Route
+              path="/notifications"
+              element={
+                <ProtectedRoute>
+                  <Layout><Notification /></Layout>
+                </ProtectedRoute>
+              }
+            />
 
-         <Route
-          path="/settings"
-          element={
-            <Layout>
-              <Setting />
-            </Layout>
-          }
-        />
+            <Route
+              path="/banksettings"
+              element={
+                <ProtectedRoute>
+                  <Layout><BankSetting /></Layout>
+                </ProtectedRoute>
+              }
+            />
 
-       
-      </Routes>
-    </Router>
+            <Route
+              path="/form"
+              element={
+                <ProtectedRoute>
+                  <Layout><ApplyFormManagement /></Layout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <Layout><Setting /></Layout>
+                </ProtectedRoute>
+              }
+            />
+
+            {/* fallback */}
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          </Routes>
+        </div>
+      </Router>
+    </>
   );
 };
 
-export default App;
-
+export default AppRoutes;
 

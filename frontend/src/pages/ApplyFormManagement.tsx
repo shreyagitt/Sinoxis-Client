@@ -35,73 +35,99 @@ const ApplyFormManagement: React.FC = () => {
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
   // =======================================================
-  // ⬇️ FETCH APPLICATIONS
+  // FETCH APPLICATIONS (WITH TOKEN CHECK)
   // =======================================================
   useEffect(() => {
-    axios
-      .get(`${baseUrl}/apply`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => {
-        if (res.data.status && Array.isArray(res.data.data)) {
+    if (!token) {
+      console.warn("❗ No token found. Skipping API call...");
+      return;
+    }
+
+    const fetchApplications = async () => {
+      try {
+        console.log("🔗 Calling API:", `${baseUrl}/apply`);
+        const res = await axios.get(`${baseUrl}/apply`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        console.log("Response:", res.data);
+
+        if (Array.isArray(res.data.data)) {
           setApplications(res.data.data);
+        } else {
+          console.warn("⚠ Unexpected API response:", res.data);
         }
-      });
+      } catch (error: any) {
+        console.error("❌ Error fetching applications:", error.response?.data || error);
+      }
+    };
+
+    fetchApplications();
   }, [token]);
 
   // =======================================================
-  // 🔎 SEARCH FILTER
+  // SEARCH FILTER
   // =======================================================
   const filtered = applications.filter((a) =>
-    a.fullName.toLowerCase().includes(search.toLowerCase())
+    a.fullName?.toLowerCase().includes(search.toLowerCase())
   );
 
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
   const visible = filtered.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
   // =======================================================
-  // 🔄 UPDATE STATUS
+  // UPDATE STATUS
   // =======================================================
   const updateStatus = async (id: string, status: Application["status"]) => {
-    await axios.patch(
-      `${baseUrl}/apply/${id}/status`,
-      { status },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+    try {
+      await axios.patch(
+        `${baseUrl}/apply/${id}/status`,
+        { status },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-    setApplications((prev) =>
-      prev.map((a) => (a._id === id ? { ...a, status } : a))
-    );
+      setApplications((prev) =>
+        prev.map((a) => (a._id === id ? { ...a, status } : a))
+      );
 
-    Swal.fire("Updated!", `Status changed to ${status}`, "success");
+      Swal.fire("Updated!", `Status changed to ${status}`, "success");
+    } catch (error) {
+      console.error(error);
+      Swal.fire("Error", "Failed to update status", "error");
+    }
   };
 
   // =======================================================
-  // ❌ DELETE APPLICATION
+  // DELETE APPLICATION
   // =======================================================
   const handleDelete = async (id: string) => {
     Swal.fire({
       title: "Delete this application?",
       text: "This action cannot be undone.",
-      icon: "error",
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Delete",
       confirmButtonColor: "#d33",
+      confirmButtonText: "Delete",
     }).then(async (res) => {
       if (res.isConfirmed) {
-        await axios.delete(`${baseUrl}/apply/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        try {
+          await axios.delete(`${baseUrl}/apply/${id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
 
-        setApplications((prev) => prev.filter((a) => a._id !== id));
+          setApplications((prev) => prev.filter((a) => a._id !== id));
 
-        Swal.fire("Deleted!", "Application removed.", "success");
+          Swal.fire("Deleted!", "Application removed.", "success");
+        } catch (error) {
+          console.error(error);
+          Swal.fire("Error", "Failed to delete", "error");
+        }
       }
     });
   };
 
   // =======================================================
-  // 👁 VIEW DETAILS
+  // VIEW DETAILS
   // =======================================================
   const handleView = (app: Application) => {
     Swal.fire({
@@ -121,62 +147,65 @@ const ApplyFormManagement: React.FC = () => {
   };
 
   // =======================================================
-  // ➕ ADD NEW APPLICANT
+  // ADD APPLICANT
   // =======================================================
   const handleCreate = () => {
-  Swal.fire({
-    title: "Add New Applicant",
-    html: `
-      <input id="swal-fullName" class="swal2-input" placeholder="Full Name" />
-      <input id="swal-email" class="swal2-input" placeholder="Email" />
-      <input id="swal-phone" class="swal2-input" placeholder="Phone" />
-      <input id="swal-role" class="swal2-input" placeholder="Role" />
-      <input id="swal-genre" class="swal2-input" placeholder="Genre" />
-      <input id="swal-musicLink" class="swal2-input" placeholder="Music Link" />
-    `,
-    showCancelButton: true,
-    confirmButtonText: "Create",
+    Swal.fire({
+      title: "Add New Applicant",
+      html: `
+        <input id="swal-fullName" class="swal2-input" placeholder="Full Name" />
+        <input id="swal-email" class="swal2-input" placeholder="Email" />
+        <input id="swal-phone" class="swal2-input" placeholder="Phone" />
+        <input id="swal-role" class="swal2-input" placeholder="Role" />
+        <input id="swal-genre" class="swal2-input" placeholder="Genre" />
+        <input id="swal-musicLink" class="swal2-input" placeholder="Music Link" />
+      `,
+      showCancelButton: true,
+      confirmButtonText: "Create",
+      preConfirm: () => {
+        const fullName = (document.getElementById("swal-fullName") as HTMLInputElement).value;
+        const email = (document.getElementById("swal-email") as HTMLInputElement).value;
+        const phone = (document.getElementById("swal-phone") as HTMLInputElement).value;
+        const role = (document.getElementById("swal-role") as HTMLInputElement).value;
+        const genre = (document.getElementById("swal-genre") as HTMLInputElement).value;
+        const musicLink = (document.getElementById("swal-musicLink") as HTMLInputElement).value;
 
-    preConfirm: () => {
-      const fullName = (document.getElementById("swal-fullName") as HTMLInputElement).value;
-      const email = (document.getElementById("swal-email") as HTMLInputElement).value;
-      const phone = (document.getElementById("swal-phone") as HTMLInputElement).value;
-      const role = (document.getElementById("swal-role") as HTMLInputElement).value;
-      const genre = (document.getElementById("swal-genre") as HTMLInputElement).value;
-      const musicLink = (document.getElementById("swal-musicLink") as HTMLInputElement).value;
+        if (!fullName || !email || !phone || !role || !genre || !musicLink) {
+          Swal.showValidationMessage("All fields are required!");
+          return;
+        }
 
-      if (!fullName || !email || !phone || !role || !genre || !musicLink) {
-        Swal.showValidationMessage("All fields are required!");
-        return;
+        return { fullName, email, phone, role, genre, musicLink };
+      },
+    }).then(async (res) => {
+      if (res.isConfirmed) {
+        try {
+          const payload = {
+            ...res.value,
+            bio: "New applicant",
+            agree: true,
+            status: "Pending",
+          };
+
+          const response = await axios.post(
+            `${baseUrl}/apply`,
+            payload,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+
+          setApplications((prev) => [...prev, response.data.data]);
+
+          Swal.fire("Added!", "Applicant created successfully", "success");
+        } catch (error) {
+          console.error(error);
+          Swal.fire("Error", "Failed to add applicant", "error");
+        }
       }
-
-      return { fullName, email, phone, role, genre, musicLink };
-    },
-  }).then(async (res) => {
-    if (res.isConfirmed) {
-      const payload = {
-        ...res.value,
-        bio: "New applicant",
-        agree: true,
-        status: "Pending",
-      };
-
-      const response = await axios.post(
-        `${baseUrl}/apply`,
-        payload,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      setApplications((prev) => [...prev, response.data.data]);
-
-      Swal.fire("Added!", "Applicant created successfully", "success");
-    }
-  });
-};
-
+    });
+  };
 
   // =======================================================
-  // ✏️ EDIT APPLICANT
+  // EDIT APPLICANT
   // =======================================================
   const handleEdit = (app: Application) => {
     Swal.fire({
@@ -199,19 +228,24 @@ const ApplyFormManagement: React.FC = () => {
       }),
     }).then(async (res) => {
       if (res.isConfirmed) {
-        await axios.patch(
-          `${baseUrl}/apply/${app._id}`,
-          res.value,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        try {
+          await axios.patch(
+            `${baseUrl}/apply/${app._id}`,
+            res.value,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
 
-        setApplications((prev) =>
-          prev.map((a) =>
-            a._id === app._id ? { ...a, ...res.value } : a
-          )
-        );
+          setApplications((prev) =>
+            prev.map((a) =>
+              a._id === app._id ? { ...a, ...res.value } : a
+            )
+          );
 
-        Swal.fire("Updated!", "Applicant updated successfully.", "success");
+          Swal.fire("Updated!", "Applicant updated successfully.", "success");
+        } catch (error) {
+          console.error(error);
+          Swal.fire("Error", "Failed to update applicant", "error");
+        }
       }
     });
   };
@@ -221,7 +255,6 @@ const ApplyFormManagement: React.FC = () => {
   // =======================================================
   return (
     <div className="p-6 bg-white min-h-screen">
-      {/* Title */}
       <h2 className="text-2xl font-semibold mb-6">Apply Form Management</h2>
 
       {/* Search + Add */}
@@ -287,7 +320,6 @@ const ApplyFormManagement: React.FC = () => {
                   </span>
                 </td>
 
-                {/* Actions */}
                 <td className="py-3 px-4 flex gap-3 justify-center">
                   <Eye
                     size={18}
