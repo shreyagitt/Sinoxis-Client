@@ -1,81 +1,106 @@
-// src/components/Release/ReleaseForm.tsx
 import React, { useState, useEffect } from "react";
 import { Release } from "../../pages/Release";
+import { X, Upload } from "lucide-react";
 
-type Props = {
+interface Props {
   initial: Release | null;
   onCancel: () => void;
-  onCreate: (payload: Omit<Release, "id">) => void;
-  onUpdate: (payload: Release) => void;
-};
+  onCreate: (fd: FormData) => void;
+  onUpdate: (id: string, fd: FormData) => void;
+}
 
 const ReleaseForm: React.FC<Props> = ({ initial, onCancel, onCreate, onUpdate }) => {
-  const [form, setForm] = useState<Omit<Release, "id">>({
-    title: "",
-    artist: "",
-    label: "",
-    releaseDate: "",
-    status: "Pending",
-  });
+  const [title, setTitle] = useState("");
+  const [subtitle, setSubtitle] = useState("");
+  const [remarks, setRemarks] = useState("");
+
+  const [cover, setCover] = useState<File | null>(null);
+  const [audio, setAudio] = useState<File | null>(null);
 
   useEffect(() => {
     if (initial) {
-      setForm({
-        title: initial.title,
-        artist: initial.artist,
-        label: initial.label,
-        releaseDate: initial.releaseDate || "",
-        status: initial.status,
-      });
+      setTitle(initial.title);
+      setSubtitle(initial.subtitle || "");
+      setRemarks(initial.remarks || "");
     } else {
-      setForm({
-        title: "",
-        artist: "",
-        label: "",
-        releaseDate: "",
-        status: "Pending",
-      });
+      setTitle("");
+      setSubtitle("");
+      setRemarks("");
     }
   }, [initial]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.title.trim() || !form.artist.trim()) {
-      alert("Title and Artist are required");
-      return;
-    }
-    if (initial) {
-      onUpdate({ id: initial.id, ...form });
-    } else {
-      onCreate({ ...form });
-    }
+
+    const fd = new FormData();
+    fd.append("title", title);
+    fd.append("subtitle", subtitle);
+    fd.append("remarks", remarks);
+
+    if (cover) fd.append("coverImage", cover);
+    if (audio) fd.append("audioFile", audio);
+
+    if (initial) onUpdate(initial._id, fd);
+    else onCreate(fd);
   };
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-lg w-full max-w-lg p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">{initial ? "Edit Release" : "Create New Release"}</h3>
-          <button type="button" onClick={onCancel} className="text-gray-500">✕</button>
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-6 rounded-xl shadow-lg w-full max-w-lg"
+      >
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold">
+            {initial ? "Edit Release" : "Create New Release"}
+          </h2>
+          <button onClick={onCancel}>
+            <X size={20} />
+          </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <input value={form.title} onChange={(e) => setForm((s) => ({ ...s, title: e.target.value }))} placeholder="Title" className="border rounded px-3 py-2" />
-          <input value={form.artist} onChange={(e) => setForm((s) => ({ ...s, artist: e.target.value }))} placeholder="Artist" className="border rounded px-3 py-2" />
-          <input value={form.label} onChange={(e) => setForm((s) => ({ ...s, label: e.target.value }))} placeholder="Label" className="border rounded px-3 py-2" />
-          <input type="date" value={form.releaseDate} onChange={(e) => setForm((s) => ({ ...s, releaseDate: e.target.value }))} className="border rounded px-3 py-2" />
-          <select value={form.status} onChange={(e) => setForm((s) => ({ ...s, status: e.target.value as Release["status"] }))} className="border rounded px-3 py-2 md:col-span-2">
-            <option>Pending</option>
-            <option>Approved</option>
-            <option>Rejected</option>
-            <option>Unfinished</option>
-            <option>Action Required</option>
-          </select>
+        <div className="space-y-4">
+          <input
+            required
+            placeholder="Title"
+            className="border rounded px-3 py-2 w-full"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+
+          <input
+            placeholder="Subtitle"
+            className="border rounded px-3 py-2 w-full"
+            value={subtitle}
+            onChange={(e) => setSubtitle(e.target.value)}
+          />
+
+          <textarea
+            placeholder="Remarks"
+            className="border rounded px-3 py-2 w-full h-24"
+            value={remarks}
+            onChange={(e) => setRemarks(e.target.value)}
+          />
+
+          <label className="flex items-center gap-2 cursor-pointer">
+            <Upload size={18} />
+            Upload Cover Image
+            <input hidden type="file" onChange={(e) => setCover(e.target.files?.[0] || null)} />
+          </label>
+
+          <label className="flex items-center gap-2 cursor-pointer">
+            <Upload size={18} />
+            Upload Audio File
+            <input hidden type="file" onChange={(e) => setAudio(e.target.files?.[0] || null)} />
+          </label>
         </div>
 
         <div className="flex justify-end gap-3 mt-6">
-          <button type="button" onClick={onCancel} className="px-4 py-2 border rounded">Cancel</button>
-          <button type="submit" className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+          <button type="button" onClick={onCancel} className="px-4 py-2 border rounded">
+            Cancel
+          </button>
+
+          <button type="submit" className="px-4 py-2 bg-green-600 text-white rounded">
             {initial ? "Update" : "Create"}
           </button>
         </div>

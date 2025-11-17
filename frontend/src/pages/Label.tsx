@@ -1,248 +1,349 @@
-import React, { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, Search } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Edit, Trash2, Search, ImagePlus } from "lucide-react";
+import { useAppSelector } from "../store/hook";
+import toast from "react-hot-toast";
 
 interface Label {
-  id: number;
+  _id: string;
   name: string;
-  country: string;
-  founded: string;
-  status: "active" | "inactive";
+  genre: string;
+  followers: string;
+  status: "Active" | "Inactive";
+  labelImage?: string;
 }
 
-const LabelsPage: React.FC = () => {
-  const [labels, setLabels] = useState<Label[]>([]);
-  const [search, setSearch] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editLabel, setEditLabel] = useState<Label | null>(null);
+const LabelPage: React.FC = () => {
+  const { token } = useAppSelector((s) => s.auth);
+  const baseUrl = import.meta.env.VITE_API_BASE_URL;
+
+  const [records, setRecords] = useState<Label[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editing, setEditing] = useState<Label | null>(null);
 
   const [formData, setFormData] = useState({
     name: "",
-    country: "",
-    founded: "",
-    status: "active",
+    genre: "",
+    followers: "",
+    status: "Active",
+    labelImage: null as File | null,
   });
 
+  // ================================
+  // FETCH LABELS
+  // ================================
   useEffect(() => {
-    fetchLabels();
-  }, []);
+    if (!token) return;
 
-  const fetchLabels = async () => {
+    axios
+      .get(`${baseUrl}/labels`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        if (res.data.success) {
+          setRecords(res.data.data);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching labels:", err);
+        toast.error("Failed to fetch labels");
+      });
+  }, [token]);
+
+  // ================================
+  // CREATE / UPDATE LABEL
+  // ================================
+  const saveLabel = async () => {
+    if (!token) return toast.error("Unauthorized");
+
+    const fd = new FormData();
+    fd.append("name", formData.name);
+    fd.append("genre", formData.genre);
+    fd.append("followers", formData.followers);
+    fd.append("status", formData.status);
+    if (formData.labelImage) fd.append("labelImage", formData.labelImage);
+
     try {
-      const response = await axios.get("/api/labels");
-      setLabels(Array.isArray(response.data) ? response.data : response.data.data || []);
-
-    } catch (error) {
-      console.error("Error fetching labels:", error);
-    }
-  };
-
-  const handleAddLabel = async () => {
-    try {
-      if (editLabel) {
-        await axios.put(`/api/labels/${editLabel.id}`, formData);
+      if (editing) {
+        await axios.put(`${baseUrl}/labels/${editing._id}`, fd, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        toast.success("Label updated successfully");
       } else {
-        await axios.post("/api/labels", formData);
+        await axios.post(`${baseUrl}/labels`, fd, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        toast.success("Label created successfully");
       }
-      fetchLabels();
+
+      // refresh
+      const res = await axios.get(`${baseUrl}/labels`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setRecords(res.data.data);
+
       closeModal();
-    } catch (error) {
-      console.error("Error saving label:", error);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to save label");
     }
   };
 
-  const handleDeleteLabel = async (id: number) => {
-    if (window.confirm("Are you sure you want to delete this label?")) {
-      try {
-        await axios.delete(`/api/labels/${id}`);
-        fetchLabels();
-      } catch (error) {
-        console.error("Error deleting label:", error);
-      }
+  // ================================
+  // DELETE LABEL
+  // ================================
+  const deleteLabel = async (id: string) => {
+    if (!window.confirm("Delete this label?")) return;
+
+    try {
+      await axios.delete(`${baseUrl}/labels/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setRecords((prev) => prev.filter((r) => r._id !== id));
+      toast.success("Label deleted");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to delete label");
     }
   };
 
+  // ================================
+  // OPEN MODAL
+  // ================================
   const openModal = (label?: Label) => {
     if (label) {
-      setEditLabel(label);
+      setEditing(label);
       setFormData({
         name: label.name,
-        country: label.country,
-        founded: label.founded,
+        genre: label.genre,
+        followers: label.followers,
         status: label.status,
+        labelImage: null,
       });
     } else {
-      setEditLabel(null);
-      setFormData({ name: "", country: "", founded: "", status: "active" });
+      setEditing(null);
+      setFormData({
+        name: "",
+        genre: "",
+        followers: "",
+        status: "Active",
+        labelImage: null,
+      });
     }
-    setIsModalOpen(true);
+
+    setModalOpen(true);
   };
 
   const closeModal = () => {
-    setIsModalOpen(false);
-    setEditLabel(null);
+    setModalOpen(false);
+    setEditing(null);
   };
 
-  const filteredLabels = labels.filter((label) =>
-    label.name.toLowerCase().includes(search.toLowerCase())
+  // ================================
+  // SEARCH
+  // ================================
+  const filtered = records.filter(
+    (r) =>
+      r.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      r.genre.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold text-gray-800">Manage Labels</h1>
-        <button
-          onClick={() => openModal()}
-          className="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
-        >
-          <Plus className="w-4 h-4 mr-2" /> Add Label
-        </button>
-      </div>
+    <div className="min-h-screen bg-white px-6 py-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Title */}
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-semibold">Label Management</h1>
+          <button
+            onClick={() => openModal()}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+          >
+            + Add Label
+          </button>
+        </div>
 
-      {/* Search Bar */}
-      <div className="mb-4 flex items-center bg-white shadow-sm rounded-xl p-3">
-        <Search className="w-5 h-5 text-gray-500 mr-2" />
-        <input
-          type="text"
-          placeholder="Search labels..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full outline-none bg-transparent text-gray-700"
-        />
-      </div>
+        {/* Search */}
+        <div className="flex items-center border border-green-400 rounded-lg p-2 w-72 mb-6">
+          <Search className="text-green-600 mr-2" size={18} />
+          <input
+            type="text"
+            placeholder="Search by name or genre..."
+            className="bg-transparent w-full outline-none"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
 
-      {/* Labels Table */}
-      <div className="bg-white shadow-sm rounded-2xl overflow-hidden">
-        <table className="min-w-full text-sm text-gray-700">
-          <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
-            <tr>
-              <th className="py-3 px-4 text-left">Label Name</th>
-              <th className="py-3 px-4 text-left">Country</th>
-              <th className="py-3 px-4 text-left">Founded</th>
-              <th className="py-3 px-4 text-left">Status</th>
-              <th className="py-3 px-4 text-center">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredLabels.length > 0 ? (
-              filteredLabels.map((label) => (
-                <tr
-                  key={label.id}
-                  className="border-b hover:bg-gray-50 transition"
-                >
+        {/* Table */}
+        <div className="overflow-x-auto rounded-xl shadow">
+          <table className="min-w-full text-sm text-gray-800">
+            <thead className="bg-green-600 text-white">
+              <tr>
+                <th className="py-3 px-4 text-left">Image</th>
+                <th className="py-3 px-4 text-left">Name</th>
+                <th className="py-3 px-4 text-left">Genre</th>
+                <th className="py-3 px-4 text-left">Followers</th>
+                <th className="py-3 px-4 text-left">Status</th>
+                <th className="py-3 px-4 text-center">Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {filtered.map((label) => (
+                <tr key={label._id} className="border-b hover:bg-green-100">
+                  <td className="py-3 px-4">
+                    <img
+                      src={label.labelImage || "https://via.placeholder.com/50"}
+                      className="w-12 h-12 rounded object-cover"
+                    />
+                  </td>
+
                   <td className="py-3 px-4">{label.name}</td>
-                  <td className="py-3 px-4">{label.country}</td>
-                  <td className="py-3 px-4">{label.founded}</td>
+                  <td className="py-3 px-4">{label.genre}</td>
+                  <td className="py-3 px-4">{label.followers}</td>
+
                   <td className="py-3 px-4">
                     <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        label.status === "active"
-                          ? "bg-green-100 text-green-600"
-                          : "bg-red-100 text-red-600"
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        label.status === "Active"
+                          ? "bg-green-200 text-green-800"
+                          : "bg-red-200 text-red-800"
                       }`}
                     >
                       {label.status}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-center space-x-3">
+
+                  <td className="py-3 px-4 flex justify-center gap-3">
                     <button
                       onClick={() => openModal(label)}
-                      className="text-indigo-600 hover:text-indigo-800"
+                      className="text-blue-600 hover:text-blue-800"
                     >
-                      <Edit className="w-4 h-4 inline" />
+                      <Edit size={18} />
                     </button>
+
                     <button
-                      onClick={() => handleDeleteLabel(label.id)}
+                      onClick={() => deleteLabel(label._id)}
                       className="text-red-600 hover:text-red-800"
                     >
-                      <Trash2 className="w-4 h-4 inline" />
+                      <Trash2 size={18} />
                     </button>
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan={5}
-                  className="py-6 text-center text-gray-500 font-medium"
+              ))}
+
+              {filtered.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={6}
+                    className="text-center py-4 text-gray-500 italic"
+                  >
+                    No labels found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* MODAL */}
+        {modalOpen && (
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-6 shadow-xl w-full max-w-md">
+              <h2 className="text-xl font-semibold mb-4">
+                {editing ? "Edit Label" : "Add New Label"}
+              </h2>
+
+              <div className="space-y-4">
+                <input
+                  type="text"
+                  placeholder="Label Name"
+                  className="w-full border rounded-md px-3 py-2"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                />
+
+                <input
+                  type="text"
+                  placeholder="Genre (Pop, Hip-Hop...)"
+                  className="w-full border rounded-md px-3 py-2"
+                  value={formData.genre}
+                  onChange={(e) =>
+                    setFormData({ ...formData, genre: e.target.value })
+                  }
+                />
+
+                <input
+                  type="text"
+                  placeholder="Followers (ex: 12K)"
+                  className="w-full border rounded-md px-3 py-2"
+                  value={formData.followers}
+                  onChange={(e) =>
+                    setFormData({ ...formData, followers: e.target.value })
+                  }
+                />
+
+                <select
+                  className="w-full border rounded-md px-3 py-2"
+                  value={formData.status}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      status: e.target.value as "Active" | "Inactive",
+                    })
+                  }
                 >
-                  No labels found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+                  <option>Active</option>
+                  <option>Inactive</option>
+                </select>
 
-      {/* Modal for Add/Edit Label */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl shadow-lg w-full max-w-md p-6">
-            <h2 className="text-lg font-semibold mb-4">
-              {editLabel ? "Edit Label" : "Add New Label"}
-            </h2>
-            <div className="space-y-4">
-              <input
-                type="text"
-                placeholder="Label Name"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                className="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-400"
-              />
-              <input
-                type="text"
-                placeholder="Country"
-                value={formData.country}
-                onChange={(e) =>
-                  setFormData({ ...formData, country: e.target.value })
-                }
-                className="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-400"
-              />
-              <input
-                type="text"
-                placeholder="Founded (Year)"
-                value={formData.founded}
-                onChange={(e) =>
-                  setFormData({ ...formData, founded: e.target.value })
-                }
-                className="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-400"
-              />
-              <select
-                value={formData.status}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    status: e.target.value as "active" | "inactive",
-                  })
-                }
-                className="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-400"
-              >
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
-            </div>
+                <div>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <ImagePlus size={18} /> Upload Label Image
+                  </label>
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        labelImage: e.target.files?.[0] || null,
+                      })
+                    }
+                  />
+                </div>
+              </div>
 
-            <div className="flex justify-end mt-6 space-x-3">
-              <button
-                onClick={closeModal}
-                className="px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleAddLabel}
-                className="px-4 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700"
-              >
-                {editLabel ? "Update" : "Add"}
-              </button>
+              <div className="flex justify-end gap-3 mt-6">
+                <button
+                  className="px-4 py-2 bg-gray-200 rounded-lg"
+                  onClick={closeModal}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg"
+                  onClick={saveLabel}
+                >
+                  {editing ? "Update" : "Add"}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+
+      </div>
     </div>
   );
 };
 
-export default LabelsPage;
+export default LabelPage;
+
+

@@ -40,7 +40,8 @@ export const API_ENDPOINTS = {
   YOUTUBEOAC:'/api/v1/youtube-oac',
   REVENUE:'/api/v1/revenue-analytics',
   REVENUEREPORTS:'/api/v1/revenue-report',
-  PAYMENT:'/api/v1/payment'
+  PAYMENT:'/api/v1/payment',
+  LABEL:'/api/v1/labels'
 
 } as const;
 
@@ -56,7 +57,8 @@ export const CLIENT_API_ENDPOINTS = {
   YOUTUBEOAC:'/youtube-oac',
   REVENUE:'/revenue-analytics',
   REVENUEREPORTS:'/revenue-report',
-  PAYMENT:'/payment'
+  PAYMENT:'/payment',
+  LABEL:'/labels'
 } as const;
 
 export const HTTP_STATUS = {

@@ -11,7 +11,8 @@ import youTubeClaimRoutes from './youTubeClaimRoutes';
 import youTubeOACRoutes from './youTubeOACRoutes';
 import revenueRoutes from './revenueRoutes';
 import revenueReportRoutes from './revenueReportRoutes';
-import paymentRoutes from './paymentRoutes'
+import paymentRoutes from './paymentRoutes';
+import labelRoutes from './labelRoutes'
 import clientRouter from './client';   // ✅ Add this import
 import { API_ENDPOINTS } from '../config/constants';
 
@@ -40,6 +41,7 @@ router.use(API_ENDPOINTS.YOUTUBEOAC, youTubeOACRoutes);
 router.use(API_ENDPOINTS.REVENUE, revenueRoutes);
 router.use(API_ENDPOINTS.REVENUEREPORTS, revenueReportRoutes);
 router.use(API_ENDPOINTS.PAYMENT, paymentRoutes);
+router.use(API_ENDPOINTS.LABEL, labelRoutes);
 
 
 // ✅ Client-side routes

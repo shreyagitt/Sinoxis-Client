@@ -12,7 +12,8 @@ import YouTubeClaimRoutes from './YouTubeClaimRoutes';
 import YouTubeOACRoutes from './YouTubeOACRoutes';
 import RevenueRoutes from './RevenueRoutes';
 import RevenueReportRoutes from './RevenueReportRoutes';
-import paymentRoutes from './PaymentRoutes'
+import paymentRoutes from './PaymentRoutes';
+import LabelRoutes from './LabelRoutes';
 
 
 
@@ -33,6 +34,7 @@ clientRouter.use(CLIENT_API_ENDPOINTS.YOUTUBEOAC, YouTubeOACRoutes);
 clientRouter.use(CLIENT_API_ENDPOINTS.REVENUE, RevenueRoutes);
 clientRouter.use(CLIENT_API_ENDPOINTS.REVENUEREPORTS, RevenueReportRoutes);
 clientRouter.use(CLIENT_API_ENDPOINTS.PAYMENT, paymentRoutes);
+clientRouter.use(CLIENT_API_ENDPOINTS.LABEL, LabelRoutes);
 
 
 export default clientRouter;
