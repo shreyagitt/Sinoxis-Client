@@ -20,8 +20,16 @@ import Notification from "./pages/Notification";
 import BankSetting from "./pages/BankSetting";
 import ApplyFormManagement from "./pages/ApplyFormManagement";
 import Setting from "./pages/Setting";
+import RequestPayment from './pages/RequestPayment';
+import RevenueReport from './pages/RevenueReport';
+import TotalRevenue from './pages/TotalRevenue';
 
 import "./index.css";
+import AdminYouTubeOACRequests from "./pages/YouTubeOACRequests";
+import AdminYouTubeClaims from "./pages/YouTubeClaim";
+import AdminSocialISRC from "./pages/SocialISRC";
+import Metadata from './pages/Metadata';
+import FacebookClaim from './pages/FacebookVideo'
 
 const AppRoutes: React.FC = () => {
   const dispatch = useDispatch();
@@ -103,6 +111,79 @@ const AppRoutes: React.FC = () => {
                 </ProtectedRoute>
               }
             />
+
+            <Route
+              path="/revenue/request"
+              element={
+                <ProtectedRoute>
+                  <Layout><RequestPayment /></Layout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/revenue/reports"
+              element={
+                <ProtectedRoute>
+                  <Layout><RevenueReport /></Layout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/revenue/total"
+              element={
+                <ProtectedRoute>
+                  <Layout><TotalRevenue /></Layout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/services/youtube-oac"
+              element={
+                <ProtectedRoute>
+                  <Layout><AdminYouTubeOACRequests/></Layout>
+                </ProtectedRoute>
+              }
+            />
+
+ <Route
+              path="/services/claim"
+              element={
+                <ProtectedRoute>
+                  <Layout><AdminYouTubeClaims/></Layout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/services/facebook-insta-profile"
+              element={
+                <ProtectedRoute>
+                  <Layout><AdminSocialISRC/></Layout>
+                </ProtectedRoute>
+              }
+            />
+            
+
+ <Route
+              path="/services/metadata-update"
+              element={
+                <ProtectedRoute>
+                  <Layout><Metadata/></Layout>
+                </ProtectedRoute>
+              }
+            />
+ <Route
+              path="/services/facebook-claim"
+              element={
+                <ProtectedRoute>
+                  <Layout><FacebookClaim/></Layout>
+                </ProtectedRoute>
+              }
+            />
+
 
             <Route
               path="/notifications"

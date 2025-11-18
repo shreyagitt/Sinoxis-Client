@@ -1,25 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   Home,
-  MessageSquare,
-  Image as Media,
-  Users,
   Music,
   BarChart3,
   User,
   BadgeDollarSign,
   Settings,
-  HelpCircle,
   Bell,
   FolderCog,
   ShieldCheck,
-  CheckSquare,
-  Wallet,
   FileText,
-  Layers,
-  Ticket,
-  Menu,
 } from "lucide-react";
 import clsx from "clsx";
 
@@ -28,15 +19,41 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
-  const location = useLocation(); // ✅ safer than window.location
+  const location = useLocation();
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
+
+  const toggleMenu = (label: string) => {
+    setOpenMenu(openMenu === label ? null : label);
+  };
 
   const menuItems = [
     { to: "/dashboard", label: "Dashboard", icon: <Home className="w-5 h-5" /> },
     { to: "/releases", label: "Releases", icon: <Music className="w-5 h-5" /> },
-    { to: "/revenue", label: "Revenue", icon: <BarChart3 className="w-5 h-5" /> },
+    {
+      to: "/revenue",
+      label: "Revenue Reports",
+      icon: <BarChart3 className="w-5 h-5" />,
+      subItems: [
+        { label: "Revenue Reports List", to: "/revenue/reports" },
+        { label: "Total Revenue", to: "/revenue/total" },
+        { label: "Request Payment", to: "/revenue/request" },
+      ],
+    },
     { to: "/artists", label: "Artists", icon: <User className="w-5 h-5" /> },
     { to: "/labels", label: "Labels", icon: <BadgeDollarSign className="w-5 h-5" /> },
-    { to: "/services", label: "Service", icon: <ShieldCheck className="w-5 h-5" /> },
+    {
+      to: "/services",
+      label: "Services",
+      icon: <ShieldCheck className="w-5 h-5" />,
+      subItems: [
+        { label: "YouTube OAC Request", to: "/services/youtube-oac" },
+        { label: "Youtube Claim Release", to: "/services/claim" },
+        { label: "Social Media Links", to: "/services/facebook-insta-profile" },
+        { label: "Facebook Claim Release", to: "/services/facebook-claim" },
+        { label: "Metadata Update Request", to: "/services/metadata-update" },
+      ],
+    },
+
     { to: "/notifications", label: "Notifications", icon: <Bell className="w-5 h-5" /> },
     { to: "/banksettings", label: "Bank Settings", icon: <FolderCog className="w-5 h-5" /> },
     { to: "/form", label: "Apply Form Management", icon: <FileText className="w-5 h-5" /> },
@@ -50,18 +67,16 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
         collapsed ? "w-[5rem]" : "w-[16rem]"
       )}
     >
-      {/* Logo Section */}
+      {/* Logo */}
       <div className="flex items-center justify-center h-16 border-b">
-  {collapsed ? (
-    <img src="/logo.png" alt="Logo" className="w-10 h-10" />
-  ) : (
-    <NavLink to="/" className="flex items-center gap-3">
-      <img src="/image/logo.webp" alt="Sinoxis Logo" className="w-12 h-12" />
-      
-    </NavLink>
-  )}
-</div>
-
+        {collapsed ? (
+          <img src="/image/logo.webp" alt="Sinoxis Logo" className="w-10 h-10" />
+        ) : (
+          <NavLink to="/" className="flex items-center gap-3">
+            <img src="/image/logo.webp" alt="Sinoxis Logo" className="w-12 h-12" />
+          </NavLink>
+        )}
+      </div>
 
       {/* Menu */}
       <nav className="mt-6 px-2 pb-8">
@@ -72,44 +87,91 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
         )}
 
         <ul className="space-y-1 relative">
-          {menuItems.map((item, index) => (
-            <li key={index}>
-              <NavLink
-                to={item.to}
-                className={({ isActive }) =>
-                  clsx(
-                    "flex items-center gap-3 px-4 py-3 text-sm rounded-md transition-colors group relative",
-                    isActive
+          {menuItems.map((item, index) => {
+            const isActiveMain = location.pathname.startsWith(item.to);
+
+            const hasSub = item.subItems && item.subItems.length > 0;
+            const isOpen = openMenu === item.label || isActiveMain;
+
+            return (
+              <li key={index}>
+                {/* Main item */}
+                <div
+                  onClick={() => hasSub && !collapsed && toggleMenu(item.label)}
+                  className={clsx(
+                    "flex items-center justify-between px-4 py-3 text-sm rounded-md cursor-pointer transition-colors group relative",
+                    isActiveMain
                       ? "bg-green-600 text-white font-semibold"
                       : "text-gray-800 hover:bg-gray-100"
-                  )
-                }
-              >
-                {/* Icon */}
-                <span
-                  className={clsx(
-                    "transition-colors",
-                    "group-hover:text-green-600",
-                    location.pathname === item.to
-                      ? "text-white"
-                      : "text-green-600"
                   )}
                 >
-                  {item.icon}
-                </span>
+                  <NavLink
+                    to={item.to}
+                    className="flex items-center gap-3 flex-grow"
+                  >
+                    {/* Icon */}
+                    <span
+                      className={clsx(
+                        "transition-colors",
+                        "group-hover:text-green-600",
+                        isActiveMain ? "text-white" : "text-green-600"
+                      )}
+                    >
+                      {item.icon}
+                    </span>
 
-                {/* Label */}
-                {!collapsed && <span>{item.label}</span>}
+                    {/* Label */}
+                    {!collapsed && <span>{item.label}</span>}
+                  </NavLink>
 
-                {/* Tooltip */}
-                {collapsed && (
-                  <span className="absolute left-20 bg-gray-800 text-white text-xs px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                    {item.label}
-                  </span>
+                  {/* Arrow for submenus */}
+                  {hasSub && !collapsed && (
+                    <span
+                      className={clsx(
+                        "transition-colors",
+                        "group-hover:text-green-600",
+                        isActiveMain ? "text-white" : "text-green-600"
+                      )}
+                    >
+                      {isOpen ? "▲" : "▼"}
+                    </span>
+                  )}
+
+                  {/* Tooltip (when collapsed) */}
+                  {collapsed && (
+                    <span className="absolute left-20 bg-gray-800 text-white text-xs px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                      {item.label}
+                    </span>
+                  )}
+                </div>
+
+                {/* Submenu */}
+                {hasSub && isOpen && !collapsed && (
+                  <ul className="ml-10 mt-1 space-y-1 border-l border-gray-200 pl-3">
+                    {item.subItems!.map((sub, idx) => {
+                      const isActiveSub = location.pathname === sub.to;
+
+                      return (
+                        <li key={idx}>
+                          <NavLink
+                            to={sub.to}
+                            className={clsx(
+                              "block text-sm px-2 py-2 rounded-md",
+                              isActiveSub
+                                ? "text-green-600 font-semibold"
+                                : "text-gray-600 hover:text-green-600"
+                            )}
+                          >
+                            {sub.label}
+                          </NavLink>
+                        </li>
+                      );
+                    })}
+                  </ul>
                 )}
-              </NavLink>
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ul>
       </nav>
     </aside>
@@ -117,4 +179,3 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
 };
 
 export default Sidebar;
-
