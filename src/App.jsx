@@ -24,6 +24,7 @@ import YouTubeClaimRelease from "./components/YouTubeClaimRelease";
 import SocialIsrcSubmitForm from "./components/SocialIsrcSubmitForm";
 import FacebookVideoLinkSubmitForm from "./components/FacebookVideoLinkSubmitForm";
 import MetadataUpdateForm from "./components/MetadataUpdateForm";
+import Register from "./components/Register";
 
 
 
@@ -40,9 +41,9 @@ function App() {
       <Route
         path="/"
         element={
-          <Layout>
+        
             <Home />
-          </Layout>
+          
         }
       />
 
@@ -186,6 +187,12 @@ function App() {
   }
 />
 
+<Route
+  path="/register"
+  element={
+    <Register />
+  }
+/>
       
 
       

@@ -1,18 +1,20 @@
 import React, { useState, useRef, useEffect } from "react";
 import { FaBell, FaBars } from "react-icons/fa";
 import { ChevronDown, UserCircle, Settings, LogOut, Home } from "lucide-react";
-import { Link } from "react-router-dom";
-import './topbar.css'
-import Notifications from "./Notifications"; // 👈 Import component
+import { Link, useNavigate } from "react-router-dom";
+import "./topbar.css";
+import Notifications from "./Notifications";
 
 const Topbar = ({ isCollapsed, toggleSidebar }) => {
+  const navigate = useNavigate();
+
   const [open, setOpen] = useState(false); // user dropdown
   const [showNotifications, setShowNotifications] = useState(false); // notification popup
 
   const dropdownRef = useRef(null);
   const notifRef = useRef(null);
 
-  // ✅ Notification Data State
+  // Dummy Notification State
   const [notificationsList, setNotificationsList] = useState([
     {
       title: "Desktop notification turned on",
@@ -36,17 +38,17 @@ const Topbar = ({ isCollapsed, toggleSidebar }) => {
     },
   ]);
 
-  // ✅ Remove Notification
+  // Remove one notification
   const removeNotification = (index) => {
     setNotificationsList((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // ✅ Mark All as Read
+  // Mark all notifications as read
   const markAllAsRead = () => {
     setNotificationsList([]);
   };
 
-  // ✅ Close dropdowns on outside click
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setOpen(false);
@@ -55,6 +57,12 @@ const Topbar = ({ isCollapsed, toggleSidebar }) => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // ⭐ REAL LOGOUT FUNCTION
+  const handleLogout = () => {
+    localStorage.removeItem("token"); // remove JWT
+    navigate("/login"); // redirect to login
+  };
 
   return (
     <div className={`topbar ${isCollapsed ? "collapsed" : ""}`}>
@@ -71,15 +79,15 @@ const Topbar = ({ isCollapsed, toggleSidebar }) => {
 
       <div className="topbar-right flex items-center gap-6">
 
-        {/* Home */}
+        {/* Home Icon */}
         <Link to="/" className="text-red-700 hover:text-red-800 transition">
           <Home size={18} />
         </Link>
 
-        {/* 🔔 Notification Bell + Badge + Dropdown */}
+        {/* Notifications */}
         <div className="relative" ref={notifRef}>
           <button onClick={() => setShowNotifications(!showNotifications)} className="relative">
-            <FaBell className="cursor-pointer text-red-600  transition" size={20} />
+            <FaBell className="cursor-pointer text-red-600 transition" size={20} />
 
             {notificationsList.length > 0 && (
               <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
@@ -100,10 +108,10 @@ const Topbar = ({ isCollapsed, toggleSidebar }) => {
         {/* User Menu */}
         <div className="user-dropdown" ref={dropdownRef}>
           <button className="user-info flex items-center gap-2" onClick={() => setOpen((prev) => !prev)}>
-            <UserCircle className="user-icon " />
+            <UserCircle className="user-icon" />
             <div className="user-text">
-              <span className="user-name">Alex Mora</span>
-              <span className="user-role">Admin</span>
+              <span className="user-name">John Doe</span>
+              <span className="user-role">User</span>
             </div>
             <ChevronDown className={`chevron ${open ? "rotate" : ""}`} size={16} />
           </button>
@@ -118,7 +126,8 @@ const Topbar = ({ isCollapsed, toggleSidebar }) => {
                 <Settings size={16} className="dropdown-icon" /> Settings
               </Link>
 
-              <button className="dropdown-item logout" onClick={() => alert("Logged out!")}>
+              {/* LOGOUT BUTTON */}
+              <button className="dropdown-item logout" onClick={handleLogout}>
                 <LogOut size={16} className="dropdown-icon" /> Logout
               </button>
             </div>
@@ -131,4 +140,5 @@ const Topbar = ({ isCollapsed, toggleSidebar }) => {
 };
 
 export default Topbar;
+
 

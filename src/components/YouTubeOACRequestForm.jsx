@@ -10,6 +10,34 @@ const validationSchema = Yup.object({
 });
 
 const YouTubeOACRequestForm = () => {
+  const baseUrl = import.meta.env.VITE_API_BASE_URL; // 🔥 API BASE URL
+
+  const handleSubmit = async (values, { resetForm }) => {
+    try {
+      const res = await fetch(`${baseUrl}/client/youtube-oac`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        alert(data.error || "❌ Failed to submit!");
+        return;
+      }
+
+      alert("✅ Request Submitted Successfully!");
+      resetForm();
+
+    } catch (error) {
+      console.error(error);
+      alert("❌ Server error! Please try again.");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       
@@ -25,7 +53,7 @@ const YouTubeOACRequestForm = () => {
 
       {/* Form Container */}
       <div className="flex justify-start py-8 px-4 ml-10">
-  <div className="bg-white rounded-xl shadow-2xl p-10 w-full max-w-5xl border border-gray-200">
+        <div className="bg-white rounded-xl shadow-2xl p-10 w-full max-w-5xl border border-gray-200">
 
 
           <Formik
@@ -36,11 +64,7 @@ const YouTubeOACRequestForm = () => {
               officialVideoUrl: "",
             }}
             validationSchema={validationSchema}
-            onSubmit={(values, { resetForm }) => {
-              console.log("Form Submitted:", values);
-              alert("✅ Request Submitted Successfully!");
-              resetForm();
-            }}
+            onSubmit={handleSubmit}
           >
             <Form className="space-y-6">
 
@@ -97,7 +121,7 @@ const YouTubeOACRequestForm = () => {
 export default YouTubeOACRequestForm;
 
 
-// ✅ Reusable Form Field Component
+// Reusable Field Group Component
 const FieldGroup = ({ label, name, placeholder }) => (
   <div>
     <label className="block text-sm font-semibold text-gray-800 mb-1">{label}</label>

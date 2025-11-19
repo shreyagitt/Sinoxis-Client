@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 
@@ -14,198 +14,167 @@ const BankDetailsSchema = Yup.object().shape({
 });
 
 const BankDetails = () => {
-  const handleSubmit = (values, { resetForm }) => {
-    console.log("Bank Details submitted:", values);
-    alert("Bank Details Submitted!\n" + JSON.stringify(values, null, 2));
-    resetForm();
+  const baseUrl = import.meta.env.VITE_API_BASE_URL;
+
+  const [initialValues, setInitialValues] = useState({
+    accountName: "",
+    accountNumber: "",
+    bankName: "",
+    ifscCode: "",
+    bankBranch: "",
+    panNumber: "",
+    confirm: false,
+  });
+
+  const [loading, setLoading] = useState(true);
+
+  // 🔥 GET BANK DETAILS
+  const fetchBankDetails = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(`${baseUrl}/client/bank/me`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      if (data.success && data.data) {
+        setInitialValues({
+          ...data.data,
+          confirm: false,
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching bank details:", error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    fetchBankDetails();
+  }, []);
+
+  // 🔥 SUBMIT (UPSERT) BANK DETAILS
+  const handleSubmit = async (values) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(`${baseUrl}/client/bank`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(values),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        alert("Bank details saved successfully!");
+        fetchBankDetails();
+      } else {
+        alert(data.error || "Failed to save bank details");
+      }
+    } catch (error) {
+      console.error("Error submitting:", error);
+      alert("An error occurred while saving bank details.");
+    }
+  };
+
+  if (loading)
+    return <div className="p-10 text-center text-xl">Loading Bank Details...</div>;
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] flex justify-center p-5">
-      <div className="w-full max-w-6xl ">
+      <div className="w-full max-w-6xl">
+
         {/* Page Header */}
-        <div className="mb-6 flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-semibold text-gray-800">Bank Details</h1>
-          </div>
-          <ol className="flex text-gray-800 text-sm space-x-2">
-            <li>Home</li>
-            <li>/</li>
-            <li className="text-red-600 font-medium">Bank Details</li>
-          </ol>
+        <div className="mb-6">
+          <h1 className="text-3xl font-semibold text-gray-800">Bank Details</h1>
         </div>
 
         {/* Form Card */}
-        <div className="bg-white rounded-xl shadow-2xl p-10 w-full max-w-5xl border border-gray-200">
+        <div className="bg-white rounded-xl shadow-2xl p-10 border">
 
           <h5 className="text-xl font-semibold mb-2 text-gray-500">Bank Details</h5>
-          <p className="text-gray-500 mb-8">
-            Provide your bank details accurately. All information is securely encrypted.
-          </p>
 
           <Formik
-            initialValues={{
-              accountName: "",
-              accountNumber: "",
-              bankName: "",
-              ifscCode: "",
-              bankBranch: "",
-              panNumber: "",
-              confirm: false,
-            }}
+            enableReinitialize
+            initialValues={initialValues}
             validationSchema={BankDetailsSchema}
             onSubmit={handleSubmit}
           >
-            {({ errors, touched }) => (
+            {() => (
               <Form className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
                 {/* Account Holder Name */}
                 <div>
-                  <label className="block mb-2 font-medium text-gray-700">
-                    Account Holder Name
-                  </label>
-                  <Field
-                    type="text"
-                    name="accountName"
-                    placeholder="Enter account holder name"
-                    className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 ${
-                      errors.accountName && touched.accountName
-                        ? "border-red-500 ring-red-300"
-                        : "border-gray-300 focus:ring-red-500"
-                    }`}
-                  />
-                  <ErrorMessage
-                    name="accountName"
-                    component="div"
-                    className="text-red-600 text-sm mt-1"
-                  />
+                  <label className="block mb-2 font-medium">Account Holder Name</label>
+                  <Field name="accountName" type="text" className="w-full p-3 border rounded-lg" />
+                  <ErrorMessage name="accountName" component="div" className="text-red-600 text-sm" />
                 </div>
 
                 {/* Account Number */}
                 <div>
-                  <label className="block mb-2 font-medium text-gray-700">
-                    Account Number
-                  </label>
-                  <Field
-                    type="text"
-                    name="accountNumber"
-                    placeholder="Enter account number"
-                    className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 ${
-                      errors.accountNumber && touched.accountNumber
-                        ? "border-red-500 ring-red-300"
-                        : "border-gray-300 focus:ring-red-500"
-                    }`}
-                  />
-                  <ErrorMessage
-                    name="accountNumber"
-                    component="div"
-                    className="text-red-600 text-sm mt-1"
-                  />
+                  <label className="block mb-2 font-medium">Account Number</label>
+                  <Field name="accountNumber" type="text" className="w-full p-3 border rounded-lg" />
+                  <ErrorMessage name="accountNumber" component="div" className="text-red-600 text-sm" />
                 </div>
 
                 {/* Bank Name */}
                 <div>
-                  <label className="block mb-2 font-medium text-gray-700">
-                    Bank Name
-                  </label>
-                  <Field
-                    type="text"
-                    name="bankName"
-                    placeholder="Enter bank name"
-                    className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 ${
-                      errors.bankName && touched.bankName
-                        ? "border-red-500 ring-red-300"
-                        : "border-gray-300 focus:ring-red-500"
-                    }`}
-                  />
-                  <ErrorMessage
-                    name="bankName"
-                    component="div"
-                    className="text-red-600 text-sm mt-1"
-                  />
+                  <label className="block mb-2 font-medium">Bank Name</label>
+                  <Field name="bankName" type="text" className="w-full p-3 border rounded-lg" />
+                  <ErrorMessage name="bankName" component="div" className="text-red-600 text-sm" />
                 </div>
 
                 {/* IFSC Code */}
                 <div>
-                  <label className="block mb-2 font-medium text-gray-700">
-                    IFSC Code
-                  </label>
-                  <Field
-                    type="text"
-                    name="ifscCode"
-                    placeholder="Enter IFSC code"
-                    className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 ${
-                      errors.ifscCode && touched.ifscCode
-                        ? "border-red-500 ring-red-300"
-                        : "border-gray-300 focus:ring-red-500"
-                    }`}
-                  />
-                  <small className="text-gray-400 text-sm block mt-1">
-                    Example: SBIN0001234
-                  </small>
-                  <ErrorMessage
-                    name="ifscCode"
-                    component="div"
-                    className="text-red-600 text-sm mt-1"
-                  />
+                  <label className="block mb-2 font-medium">IFSC Code</label>
+                  <Field name="ifscCode" type="text" className="w-full p-3 border rounded-lg" />
+                  <ErrorMessage name="ifscCode" component="div" className="text-red-600 text-sm" />
                 </div>
 
-                {/* Bank Branch (Optional) */}
+                {/* Bank Branch */}
                 <div>
-                  <label className="block mb-2 font-medium text-gray-700">
-                    Bank Branch (Optional)
-                  </label>
-                  <Field
-                    type="text"
-                    name="bankBranch"
-                    placeholder="Enter bank branch"
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-                  />
+                  <label className="block mb-2 font-medium">Bank Branch</label>
+                  <Field name="bankBranch" type="text" className="w-full p-3 border rounded-lg" />
                 </div>
 
-                {/* PAN Number (Optional) */}
+                {/* PAN Number */}
                 <div>
-                  <label className="block mb-2 font-medium text-gray-700">
-                    PAN Number (Optional)
-                  </label>
-                  <Field
-                    type="text"
-                    name="panNumber"
-                    placeholder="Enter PAN number"
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-                  />
+                  <label className="block mb-2 font-medium">PAN Number</label>
+                  <Field name="panNumber" type="text" className="w-full p-3 border rounded-lg" />
                 </div>
 
                 {/* Checkbox */}
-                <div className="col-span-1 md:col-span-2 mt-2">
+                <div className="col-span-2">
                   <div className="flex items-center gap-2">
-                    <Field
-                      type="checkbox"
-                      name="confirm"
-                      className="w-4 h-4 border-gray-300 rounded focus:ring-2 focus:ring-red-500 accent-red-600"
-                    />
+                    <Field type="checkbox" name="confirm" className="w-4 h-4 accent-red-600" />
                     <label className="text-gray-700 text-sm">
                       I confirm that the above bank details are correct.
                     </label>
                   </div>
-                  <ErrorMessage
-                    name="confirm"
-                    component="div"
-                    className="text-red-600 text-sm mt-1"
-                  />
+                  <ErrorMessage name="confirm" component="div" className="text-red-600 text-sm" />
                 </div>
 
                 {/* Submit Button */}
-                <div className="col-span-1 md:col-span-2">
-                  <button
-                    type="submit"
-                    className="bg-red-600 hover:bg-red-500 text-white font-semibold py-2 px-8 rounded-lg transition w-32"
-                  >
-                    Submit
+                <div className="col-span-2">
+                  <button type="submit" className="bg-red-600 text-white px-8 py-2 rounded-lg">
+                    Save Details
                   </button>
                 </div>
+
               </Form>
             )}
           </Formik>
+
         </div>
       </div>
     </div>
@@ -213,6 +182,3 @@ const BankDetails = () => {
 };
 
 export default BankDetails;
-
-
-

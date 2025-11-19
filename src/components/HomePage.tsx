@@ -5,7 +5,7 @@ const HomePage = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-screen flex justify-center items-center bg-gray-10 p-8">
+    <div className="min-h-screen flex justify-center items-center bg-gray-10 p-8">
       <div className="bg-white rounded-xl shadow-md max-w-md w-full text-center p-8">
         <img
           src="/image/logo.webp"
