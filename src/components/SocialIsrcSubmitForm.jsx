@@ -1,6 +1,8 @@
 import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 const SocialISRCschema = Yup.object({
   artistNameSocial: Yup.string().required("Artist name is required"),
@@ -16,10 +18,30 @@ const SocialISRCschema = Yup.object({
 });
 
 const SocialIsrcSubmitForm = () => {
+  const baseUrl = import.meta.env.VITE_API_BASE_URL;
+
+  const handleSubmit = async (values, { resetForm }) => {
+    try {
+      const res = await axios.post(`${baseUrl}/client/social`, values, {
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (res.data?.success) {
+        toast.success("Form Submitted Successfully!");
+        resetForm();
+      } else {
+        toast.error(res.data?.error || "Something went wrong");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Server error!");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
 
-      {/* Header / Breadcrumb */}
+      {/* Header */}
       <div className="bg-gray-100 py-3 px-10 flex justify-between items-center">
         <h1 className="text-base font-semibold text-gray-800">
           Social Profile Links & Music ISRC Submit Form
@@ -47,11 +69,7 @@ const SocialIsrcSubmitForm = () => {
               confirmSocial: false,
             }}
             validationSchema={SocialISRCschema}
-            onSubmit={(values, { resetForm }) => {
-              console.log(values);
-              alert("✅ Form Submitted Successfully!");
-              resetForm();
-            }}
+            onSubmit={handleSubmit}
           >
             <Form className="space-y-6">
 
@@ -93,7 +111,7 @@ const SocialIsrcSubmitForm = () => {
                 placeholder="https://www.youtube.com/watch?v=..."
               />
 
-              {/* Confirm Checkbox */}
+              {/* Confirm */}
               <div className="flex items-start gap-2">
                 <Field type="checkbox" name="confirmSocial" className="mt-1 accent-red-500" />
                 <span className="text-sm text-gray-700">I confirm that all information provided is accurate</span>
@@ -122,7 +140,7 @@ const SocialIsrcSubmitForm = () => {
 export default SocialIsrcSubmitForm;
 
 
-// Reusable Fields
+// Reusable Field Component
 const FieldGroup = ({ label, name, placeholder, helper }) => (
   <div>
     <label className="block text-sm font-semibold text-gray-800 mb-1">{label}</label>

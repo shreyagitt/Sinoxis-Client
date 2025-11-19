@@ -131,7 +131,8 @@ const YouTubeClaimRelease = () => {
                     type="file"
                     accept="image/*"
                     onChange={(e) => setFieldValue("screenshot", e.target.files[0])}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm cursor-pointer"
+                    className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm cursor-pointer 
+                        file:bg-gray-200 file:px-3 file:py-1 file:rounded-md file:border-0 hover:bg-gray-100"
                   />
                   <p className="text-xs text-gray-500 mt-1">
                     Upload screenshot of the claim (optional but recommended)

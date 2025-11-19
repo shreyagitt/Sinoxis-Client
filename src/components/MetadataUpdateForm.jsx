@@ -1,6 +1,9 @@
+// src/pages/MetadataUpdateForm.jsx
 import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 const MetadataSchema = Yup.object({
   artistName: Yup.string().required("Artist name is required"),
@@ -20,6 +23,34 @@ const MetadataSchema = Yup.object({
 });
 
 const MetadataUpdateForm = () => {
+  const baseUrl = import.meta.env.VITE_API_BASE_URL;
+
+  const handleSubmit = async (values, { resetForm }) => {
+    try {
+      const formData = new FormData();
+
+      Object.keys(values).forEach((key) => {
+        if (key === "artwork") {
+          if (values.artwork) formData.append("artwork", values.artwork);
+        } else {
+          formData.append(key, values[key]);
+        }
+      });
+
+      await axios.post(`${baseUrl}/metadata-update`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      toast.success("Metadata Updated Successfully!");
+
+      resetForm();
+      document.getElementById("artworkInput").value = ""; // Reset file input manually
+    } catch (error) {
+      console.error(error);
+      toast.error("Error submitting metadata");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
 
@@ -55,43 +86,47 @@ const MetadataUpdateForm = () => {
               confirm: false,
             }}
             validationSchema={MetadataSchema}
-            onSubmit={(values, { resetForm }) => {
-              console.log(values);
-              alert("✅ Metadata Updated Successfully!");
-              resetForm();
-            }}
+            onSubmit={handleSubmit}
           >
-            {({ setFieldValue }) => (
+            {({ setFieldValue, resetForm }) => (
               <Form className="space-y-6">
 
                 {/* Artist & Track */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FieldGroup 
-  label={<>Artist Name <span className="text-red-500">*</span></>} 
-  name="artistName" 
-  placeholder="Enter artist name" 
-/>
-                  <FieldGroup label={<>Track Title <span className="text-red-500">*</span></>} name="trackTitle" placeholder="Enter track title" />
+                    label={<>Artist Name <span className="text-red-500">*</span></>} 
+                    name="artistName" 
+                    placeholder="Enter artist name" 
+                  />
+                  
+                  <FieldGroup 
+                    label={<>Track Title <span className="text-red-500">*</span></>} 
+                    name="trackTitle" 
+                    placeholder="Enter track title" 
+                  />
                 </div>
 
                 {/* Album & Label */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FieldGroup label="Album / Release" name="album" placeholder="Album or release name" />
+
                   <FieldGroup 
-  label={<>Label Name <span className="text-red-500">*</span></>} 
-  name="LabelName" 
-  placeholder="Enter Label name" 
-/>
+                    label={<>Label Name <span className="text-red-500">*</span></>} 
+                    name="label" 
+                    placeholder="Enter Label name" 
+                  />
                 </div>
 
-                {/* ISRC + UPC + Release Date */}
+                {/* ISRC / UPC / Release Date */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <FieldGroup 
-  label={<>ISRC Code <span className="text-red-500">*</span></>} 
-  name="isrc" 
-  placeholder="Enter ISRC Code" 
-/>
+                    label={<>ISRC Code <span className="text-red-500">*</span></>} 
+                    name="isrc" 
+                    placeholder="Enter ISRC Code" 
+                  />
+
                   <FieldGroup label="UPC" name="upc" placeholder="Album/Release UPC" />
+
                   <FieldGroup label="Release Date" name="releaseDate" type="date" />
                 </div>
 
@@ -106,27 +141,36 @@ const MetadataUpdateForm = () => {
                 <FieldGroup label="Primary Language" name="language" placeholder="e.g., English" />
 
                 {/* Lyrics */}
-                <TextAreaGroup label="Lyrics (optional)" name="lyrics" rows={4} placeholder="Paste lyrics" />
+                <TextAreaGroup 
+                  label="Lyrics (optional)" 
+                  name="lyrics" 
+                  rows={4} 
+                  placeholder="Paste lyrics" 
+                />
 
-                {/* Contact + Artwork Upload */}
+                {/* contact + artwork */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FieldGroup label="Contact Email / Manager" name="contact" placeholder="contact@example.com" />
+                  <FieldGroup 
+                    label="Contact Email / Manager" 
+                    name="contact" 
+                    placeholder="contact@example.com" 
+                  />
 
                   <div>
                     <label className="block text-sm font-semibold mb-1">Upload Artwork (optional)</label>
                     <input
+                      id="artworkInput"
                       type="file"
                       accept="image/*"
                       onChange={(e) => setFieldValue("artwork", e.target.files[0])}
-                      className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm cursor-pointer file:cursor-pointer 
-                 file:bg-gray-200 file:rounded-md file:px-3 file:py-1 file:border-0
-                 hover:bg-gray-100 transition"
+                      className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm cursor-pointer 
+                        file:bg-gray-200 file:px-3 file:py-1 file:rounded-md file:border-0 hover:bg-gray-100"
                     />
                     <p className="text-xs text-gray-500 mt-1">PNG/JPG (recommended 3000×3000px)</p>
                   </div>
                 </div>
 
-                {/* Explicit Content */}
+                {/* Explicit */}
                 <div className="flex items-center gap-2">
                   <Field type="checkbox" name="explicit" className="accent-red-500" />
                   <span className="text-sm text-gray-700">Explicit Content</span>
@@ -135,15 +179,25 @@ const MetadataUpdateForm = () => {
                 {/* Confirm */}
                 <div className="flex items-center gap-2">
                   <Field type="checkbox" name="confirm" className="accent-red-500" />
-                  <span className="text-sm text-gray-700">I confirm that the metadata provided is correct</span>
+                  <span className="text-sm text-gray-700">
+                    I confirm that the metadata provided is correct
+                  </span>
                 </div>
                 <ErrorMessage name="confirm" component="p" className="text-red-600 text-xs" />
 
                 {/* Buttons */}
                 <div className="flex justify-end gap-3 pt-2">
-                  <button type="reset" className="border px-5 py-2 text-sm rounded-md text-gray-700 hover:bg-gray-50">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      resetForm();
+                      document.getElementById("artworkInput").value = "";
+                    }}
+                    className="border px-5 py-2 text-sm rounded-md text-gray-700 hover:bg-gray-50"
+                  >
                     Reset Form
                   </button>
+
                   <button type="submit" className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 text-sm rounded-md font-medium">
                     Update Metadata
                   </button>
@@ -161,8 +215,10 @@ const MetadataUpdateForm = () => {
 
 export default MetadataUpdateForm;
 
+/* ===================================================== */
+/* REUSABLE INPUT COMPONENTS */
+/* ===================================================== */
 
-// Reusable Inputs
 const FieldGroup = ({ label, name, placeholder, type = "text" }) => (
   <div>
     <label className="block text-sm font-semibold text-gray-800 mb-1">{label}</label>
