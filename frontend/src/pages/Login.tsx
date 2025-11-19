@@ -22,30 +22,30 @@ const Login = () => {
   const [login, { isLoading }] = useLoginMutation();
 
   const onSubmit = async (data: LoginForm) => {
-    try {
-      const response = await login({
-        email: data.email,
-        password: data.password,
-      }).unwrap();
+  try {
+    const response = await login({
+      email: data.email,
+      password: data.password,
+    }).unwrap();
 
-      console.log("LOGIN SUCCESS:", response);
+    console.log("LOGIN SUCCESS:", response);
 
-      const { user, token, refreshToken } = response;
+    const { user, token, refreshToken } = response.data; // FIXED HERE
 
-      dispatch(loginSuccess({ user, token, refreshToken: refreshToken || undefined }));
+    dispatch(loginSuccess({ user, token, refreshToken }));
 
+    localStorage.setItem("token", token);
+    if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
 
-      localStorage.setItem("token", token);
-      if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
+    toast.success("Login Successful!");
+    navigate("/dashboard");
 
-      toast.success("Login Successful!");
-      navigate("/dashboard");
+  } catch (error: any) {
+    console.error("LOGIN ERROR:", error);
+    toast.error(error?.data?.error || "Invalid email or password.");
+  }
+};
 
-    } catch (error: any) {
-      console.error("LOGIN ERROR:", error);
-      toast.error(error?.data?.error || "Invalid email or password.");
-    }
-  };
 
   return (
     <Layout hideChrome>

@@ -133,6 +133,7 @@ const AdminYouTubeOACRequests: React.FC = () => {
             <tr>
               <th className="p-4 text-left">Channel</th>
               <th className="p-4 text-left">Channel URL</th>
+              <th className="p-4 text-left">Topic URL</th>
               <th className="p-4 text-left">Official Video</th>
               <th className="p-4 text-center">Status</th>
               <th className="p-4 text-center">Actions</th>
@@ -145,6 +146,9 @@ const AdminYouTubeOACRequests: React.FC = () => {
                 <td className="p-4">{req.channelName}</td>
                 <td className="p-4 text-blue-600 underline">
                   <a href={req.channelUrl} target="_blank">Visit</a>
+                </td>
+                <td className="p-4 text-blue-600 underline">
+                  <a href={req.topicUrl} target="_blank">Visit</a>
                 </td>
                 <td className="p-4 text-red-600 underline">
                   <a href={req.officialVideoUrl} target="_blank">Video Link</a>

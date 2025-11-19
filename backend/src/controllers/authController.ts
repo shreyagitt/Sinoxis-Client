@@ -57,6 +57,7 @@ export class AuthController {
    */
   static refreshToken = asyncHandler(async (req: Request, res: Response) => {
     const { refreshToken } = req.body;
+
     if (!refreshToken) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
@@ -86,64 +87,64 @@ export class AuthController {
   });
 
   /**
- * 🔐 Change Password
- */
-static changePassword = asyncHandler(async (req: Request, res: Response) => {
-  const user = (req as any).user; // from middleware
-const userId = user?.userId; // ✅ use userId instead of _id
-  const { currentPassword, newPassword, confirmPassword } = req.body;
+   * 🔐 Change Password — FIXED VERSION
+   */
+  static changePassword = asyncHandler(async (req: Request, res: Response) => {
+    const user = (req as any).user;
+    const userId = user?.userId;
 
- if (!userId) {
-  return res.status(HTTP_STATUS.UNAUTHORIZED).json({
-    success: false,
-    error: "Unauthorized access",
-  });
-}
+    const { currentPassword, newPassword, confirmPassword } = req.body;
 
-  if (!currentPassword || !newPassword || !confirmPassword) {
-    return res.status(HTTP_STATUS.BAD_REQUEST).json({
-      success: false,
-      error: "All fields are required",
-    });
-  }
+    if (!userId) {
+      return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+        success: false,
+        error: "Unauthorized access",
+      });
+    }
 
-  if (newPassword !== confirmPassword) {
-    return res.status(HTTP_STATUS.BAD_REQUEST).json({
-      success: false,
-      error: "Passwords do not match",
-    });
-  }
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        error: "All fields are required",
+      });
+    }
 
+    if (newPassword !== confirmPassword) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        error: "Passwords do not match",
+      });
+    }
 
-const existingUser = await (await import("../models/User")).User
-  .findById(userId)
-  .select("+password");
+    const { User } = await import("../models/User");
+    const bcrypt = (await import("bcryptjs")).default;
+
+    const existingUser = await User.findById(userId).select("+password");
     if (!existingUser) {
-    return res.status(HTTP_STATUS.NOT_FOUND).json({
-      success: false,
-      error: "User not found",
+      return res.status(HTTP_STATUS.NOT_FOUND).json({
+        success: false,
+        error: "User not found",
+      });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, existingUser.password);
+    if (!isMatch) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        error: "Incorrect current password",
+      });
+    }
+
+    // ❗ DO NOT HASH HERE — User model pre('save') does it
+    existingUser.password = newPassword;
+
+    await existingUser.save();
+
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: "Password changed successfully",
     });
-  }
-
-  const bcrypt = (await import("bcryptjs")).default;
-  const isMatch = await bcrypt.compare(currentPassword, existingUser.password);
-  if (!isMatch) {
-    return res.status(HTTP_STATUS.BAD_REQUEST).json({
-      success: false,
-      error: "Incorrect current password",
-    });
-  }
-
-  const hashedPassword = await bcrypt.hash(newPassword, 12);
-  existingUser.password = hashedPassword;
-  await existingUser.save();
-
-  res.status(HTTP_STATUS.OK).json({
-    success: true,
-    message: "Password changed successfully",
   });
-});
-
 
   /**
    * 🚪 Logout
@@ -157,17 +158,17 @@ const existingUser = await (await import("../models/User")).User
 }
 
 /**
- * ✅ Validation Middleware
+ * Validation Middleware
  */
 export const loginValidation = [
-  body("email").isEmail().normalizeEmail().withMessage("Please provide a valid email"),
+  body("email").isEmail().withMessage("Please provide a valid email"),
   body("password")
     .isLength({ min: 8 })
     .withMessage("Password must be at least 8 characters long"),
 ];
 
 export const registerValidation = [
-  body("email").isEmail().normalizeEmail().withMessage("Please provide a valid email"),
+  body("email").isEmail().withMessage("Please provide a valid email"),
   body("password")
     .isLength({ min: 8 })
     .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
@@ -177,10 +178,7 @@ export const registerValidation = [
 ];
 
 export const changePasswordValidation = [
-  body("currentPassword")
-    .isString()
-    .isLength({ min: 8 })
-    .withMessage("Current password must be at least 8 characters"),
+  body("currentPassword").isLength({ min: 8 }),
   body("newPassword")
     .isLength({ min: 8 })
     .matches(/[0-9!@#$%^&*]/)

@@ -1,4 +1,5 @@
 // src/pages/AdminYouTubeClaims.tsx
+
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
@@ -14,7 +15,7 @@ import { useAppSelector } from "../store/hook";
 import toast from "react-hot-toast";
 
 /* -------------------------
-   Types (match your schema)
+   Types (match backend model)
 ------------------------- */
 export interface YouTubeClaim {
   _id: string;
@@ -23,7 +24,7 @@ export interface YouTubeClaim {
   youtubeLink: string;
   claimType: "copyright" | "content_id" | "manual" | "other";
   claimDetails?: string;
-  screenshot?: string; // URL
+  screenshot?: string;
   screenshotId?: string;
   additionalInfo?: string;
   confirm: boolean;
@@ -46,20 +47,21 @@ const AdminYouTubeClaims: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  /* ================
-     Fetch list
-     ================ */
+  /* =============================
+        Fetch Claims
+  ============================= */
   const fetchClaims = async () => {
     setLoading(true);
     try {
       const res = await axios.get(`${baseUrl}/youtube-claim`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
       const data = res.data?.data || [];
       setItems(Array.isArray(data) ? data : [data]);
     } catch (err) {
       console.error("fetchClaims:", err);
-      toast.error("Failed to load claims (showing empty list)");
+      toast.error("Failed to load claims");
       setItems([]);
     } finally {
       setLoading(false);
@@ -68,30 +70,49 @@ const AdminYouTubeClaims: React.FC = () => {
 
   useEffect(() => {
     if (token) fetchClaims();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
-  /* ================
-     Helpers
-     ================ */
+  /* =============================
+        Status Badge
+  ============================= */
   const statusBadge = (s: YouTubeClaim["status"]) => {
     switch (s) {
       case "Pending":
-        return <span className="px-3 py-1 text-xs rounded-full bg-yellow-50 text-yellow-700">Pending</span>;
+        return (
+          <span className="px-3 py-1 text-xs rounded-full bg-yellow-50 text-yellow-700">
+            Pending
+          </span>
+        );
+
       case "Reviewed":
-        return <span className="px-3 py-1 text-xs rounded-full bg-blue-50 text-blue-700">Reviewed</span>;
+        return (
+          <span className="px-3 py-1 text-xs rounded-full bg-blue-50 text-blue-700">
+            Reviewed
+          </span>
+        );
+
       case "Approved":
-        return <span className="px-3 py-1 text-xs rounded-full bg-emerald-50 text-emerald-700">Approved</span>;
+        return (
+          <span className="px-3 py-1 text-xs rounded-full bg-emerald-50 text-emerald-700">
+            Approved
+          </span>
+        );
+
       case "Rejected":
-        return <span className="px-3 py-1 text-xs rounded-full bg-red-50 text-red-700">Rejected</span>;
+        return (
+          <span className="px-3 py-1 text-xs rounded-full bg-red-50 text-red-700">
+            Rejected
+          </span>
+        );
+
       default:
-        return <span className="px-3 py-1 text-xs rounded-full bg-gray-50 text-gray-700">{s}</span>;
+        return s;
     }
   };
 
-  /* ================
-     Update status
-     ================ */
+  /* =============================
+        Update Status
+  ============================= */
   const updateStatus = async (id: string, status: YouTubeClaim["status"]) => {
     try {
       await axios.patch(
@@ -99,49 +120,49 @@ const AdminYouTubeClaims: React.FC = () => {
         { status },
         { headers: { Authorization: `Bearer ${token}` } }
       );
+
       toast.success("Status updated");
       fetchClaims();
       setShowModal(false);
     } catch (err) {
-      console.error("updateStatus:", err);
-      toast.error("Failed to update status");
+      toast.error("Update failed");
+      console.error(err);
     }
   };
 
-  /* ================
-     Delete
-     ================ */
+  /* =============================
+        Delete
+  ============================= */
   const deleteClaim = async (id: string) => {
     if (!confirm("Delete this claim?")) return;
+
     try {
       await axios.delete(`${baseUrl}/youtube-claim/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
       toast.success("Claim deleted");
       setItems((prev) => prev.filter((p) => p._id !== id));
+
       if (active && active._id === id) setShowModal(false);
-    } catch (err) {
-      console.error("deleteClaim:", err);
+    } catch {
       toast.error("Delete failed");
     }
   };
 
-  /* ================
-     Refresh (with indicator)
-     ================ */
+  /* =============================
+        Refresh
+  ============================= */
   const handleRefresh = async () => {
     setRefreshing(true);
-    try {
-      await fetchClaims();
-      toast.success("Refreshed");
-    } finally {
-      setRefreshing(false);
-    }
+    await fetchClaims();
+    setRefreshing(false);
+    toast.success("Refreshed");
   };
 
-  /* ================
-     Filtered
-     ================ */
+  /* =============================
+        Search Filter
+  ============================= */
   const filtered = items.filter(
     (it) =>
       it.artistName.toLowerCase().includes(search.toLowerCase()) ||
@@ -154,31 +175,33 @@ const AdminYouTubeClaims: React.FC = () => {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-800">YouTube Claim Releases</h1>
-          <p className="text-sm text-gray-500 mt-1">Manage claim submissions from clients</p>
+          <h1 className="text-2xl font-semibold text-gray-800">
+            YouTube Claim Releases
+          </h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Manage client YouTube claim submissions
+          </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleRefresh}
-            className="inline-flex items-center gap-2 px-4 py-2 border rounded-lg text-sm hover:bg-gray-50"
-            disabled={refreshing}
-          >
-            <RotateCw size={16} />
-            {refreshing ? "Refreshing..." : "Refresh"}
-          </button>
-        </div>
+        <button
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className="inline-flex items-center gap-2 px-4 py-2 border rounded-lg text-sm hover:bg-gray-50"
+        >
+          <RotateCw size={16} />
+          {refreshing ? "Refreshing..." : "Refresh"}
+        </button>
       </div>
 
-      {/* Search */}
+      {/* Search Bar */}
       <div className="flex items-center gap-3">
         <div className="flex items-center border bg-white rounded-md px-3 py-2 w-96">
           <Search size={18} className="text-gray-500" />
           <input
-            placeholder="Search by artist, track or YouTube link..."
-            className="ml-2 w-full text-sm outline-none bg-transparent"
+            placeholder="Search artist, track or link..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            className="ml-2 w-full text-sm outline-none bg-transparent"
           />
         </div>
       </div>
@@ -201,8 +224,12 @@ const AdminYouTubeClaims: React.FC = () => {
             {filtered.map((row) => (
               <tr key={row._id} className="hover:bg-gray-50">
                 <td className="p-4">
-                  <div className="font-medium text-gray-800">{row.artistName}</div>
-                  <div className="text-xs text-gray-500 mt-1">{row.trackTitle}</div>
+                  <div className="font-medium text-gray-800">
+                    {row.artistName}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    {row.trackTitle}
+                  </div>
                 </td>
 
                 <td className="p-4">
@@ -210,18 +237,20 @@ const AdminYouTubeClaims: React.FC = () => {
                     href={row.youtubeLink}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-blue-600 underline text-sm"
+                    className="text-blue-600 underline"
                   >
                     Open Video
                   </a>
                 </td>
 
-                <td className="p-4">{row.claimType}</td>
+                <td className="p-4 capitalize">{row.claimType}</td>
 
                 <td className="p-4 text-center">{statusBadge(row.status)}</td>
 
                 <td className="p-4 text-right text-xs text-gray-500">
-                  {row.createdAt ? new Date(row.createdAt).toLocaleString() : "-"}
+                  {row.createdAt
+                    ? new Date(row.createdAt).toLocaleString()
+                    : "-"}
                 </td>
 
                 <td className="p-4 text-center flex items-center justify-center gap-3">
@@ -249,7 +278,10 @@ const AdminYouTubeClaims: React.FC = () => {
 
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={6} className="py-8 text-center text-gray-500 italic">
+                <td
+                  colSpan={6}
+                  className="py-8 text-center text-gray-500 italic"
+                >
                   {loading ? "Loading..." : "No claims found."}
                 </td>
               </tr>
@@ -258,124 +290,179 @@ const AdminYouTubeClaims: React.FC = () => {
         </table>
       </div>
 
-      {/* Modal: Details & Status Update */}
+      {/* ===========================
+             MODAL (FULL DETAILS)
+      =========================== */}
       {showModal && active && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full overflow-auto">
-            <div className="p-5 border-b flex justify-between items-start gap-3">
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full">
+
+            {/* Header */}
+            <div className="p-5 border-b flex justify-between items-start">
               <div>
-                <h3 className="text-lg font-semibold text-gray-800">{active.artistName} — {active.trackTitle}</h3>
-                <p className="text-xs text-gray-500 mt-1">Submitted: {active.createdAt ? new Date(active.createdAt).toLocaleString() : "-"}</p>
+                <h3 className="text-lg font-semibold text-gray-800">
+                  {active.artistName} — {active.trackTitle}
+                </h3>
+
+                <p className="text-xs text-gray-500 mt-1">
+                  Submitted:{" "}
+                  {active.createdAt
+                    ? new Date(active.createdAt).toLocaleString()
+                    : "-"}
+                </p>
+
+                <p className="text-xs text-gray-500">
+                  Updated:{" "}
+                  {active.updatedAt
+                    ? new Date(active.updatedAt).toLocaleString()
+                    : "-"}
+                </p>
               </div>
 
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="px-3 py-1 rounded-md border text-sm hover:bg-gray-50"
-                >
-                  Close
-                </button>
-              </div>
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-3 py-1 rounded-md border text-sm hover:bg-gray-50"
+              >
+                Close
+              </button>
             </div>
 
+            {/* Body */}
             <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Left: Info */}
+
+              {/* LEFT SIDE */}
               <div className="md:col-span-2 space-y-4">
+
+                {/* YouTube Link */}
                 <div>
-                  <h4 className="text-sm font-semibold text-gray-700">YouTube Link</h4>
-                  <a href={active.youtubeLink} target="_blank" rel="noreferrer" className="text-red-600 underline text-sm">
+                  <h4 className="font-semibold text-sm">YouTube Link</h4>
+                  <a
+                    href={active.youtubeLink}
+                    target="_blank"
+                    className="text-blue-600 underline text-sm"
+                  >
                     Open Video
                   </a>
                 </div>
 
+                {/* Claim Type */}
                 <div>
-                  <h4 className="text-sm font-semibold text-gray-700">Claim Type</h4>
-                  <div className="text-sm text-gray-600">{active.claimType}</div>
+                  <h4 className="font-semibold text-sm">Claim Type</h4>
+                  <p className="text-sm capitalize">{active.claimType}</p>
                 </div>
 
+                {/* Claim Details */}
                 <div>
-                  <h4 className="text-sm font-semibold text-gray-700">Claim Details</h4>
-                  <div className="text-sm text-gray-600 whitespace-pre-line">
-                    {active.claimDetails || <span className="text-gray-400 italic">No details provided</span>}
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-semibold text-gray-700">Additional Info</h4>
-                  <div className="text-sm text-gray-600 whitespace-pre-line">
-                    {active.additionalInfo || <span className="text-gray-400 italic">No additional info</span>}
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-semibold text-gray-700">Confirmed by User</h4>
-                  <div className="text-sm">
-                    {active.confirm ? (
-                      <span className="px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs">Yes</span>
-                    ) : (
-                      <span className="px-2 py-1 rounded-full bg-red-50 text-red-700 text-xs">No</span>
+                  <h4 className="font-semibold text-sm">Claim Details</h4>
+                  <p className="text-sm whitespace-pre-line">
+                    {active.claimDetails || (
+                      <span className="text-gray-400 italic">
+                        No details provided
+                      </span>
                     )}
-                  </div>
+                  </p>
+                </div>
+
+                {/* Additional Info */}
+                <div>
+                  <h4 className="font-semibold text-sm">Additional Info</h4>
+                  <p className="text-sm whitespace-pre-line">
+                    {active.additionalInfo || (
+                      <span className="text-gray-400 italic">
+                        No additional info
+                      </span>
+                    )}
+                  </p>
+                </div>
+
+                {/* User Confirm */}
+                <div>
+                  <h4 className="font-semibold text-sm">User Confirmation</h4>
+                  {active.confirm ? (
+                    <span className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">
+                      Yes — User Confirmed
+                    </span>
+                  ) : (
+                    <span className="px-2 py-1 text-xs bg-red-100 text-red-700 rounded-full">
+                      No — Not Confirmed
+                    </span>
+                  )}
+                </div>
+
+                {/* Screenshot ID */}
+                <div>
+                  <h4 className="font-semibold text-sm">Screenshot ID</h4>
+                  <p className="text-xs bg-gray-50 p-2 rounded border">
+                    {active.screenshotId || "No screenshotId provided"}
+                  </p>
                 </div>
               </div>
 
-              {/* Right: Screenshot & Status buttons */}
+              {/* RIGHT SIDE */}
               <div className="space-y-4">
+
+                {/* Screenshot */}
                 <div>
-                  <h4 className="text-sm font-semibold text-gray-700 mb-2">Screenshot</h4>
+                  <h4 className="font-semibold text-sm mb-2">Screenshot</h4>
                   {active.screenshot ? (
-                    <a href={active.screenshot} target="_blank" rel="noreferrer" className="block">
-                      <img src={active.screenshot} alt="screenshot" className="w-full h-48 object-contain rounded border" />
+                    <a href={active.screenshot} target="_blank">
+                      <img
+                        src={active.screenshot}
+                        alt="Screenshot"
+                        className="w-full h-48 object-contain border rounded"
+                      />
                     </a>
                   ) : (
-                    <div className="w-full h-48 flex items-center justify-center border rounded text-sm text-gray-400">
+                    <div className="w-full h-48 flex items-center justify-center border rounded text-gray-400 text-sm">
                       No screenshot uploaded
                     </div>
                   )}
                 </div>
 
+                {/* Status Update Buttons */}
                 <div>
-                  <h4 className="text-sm font-semibold text-gray-700 mb-2">Update Status</h4>
+                  <h4 className="font-semibold text-sm mb-2">Update Status</h4>
+
                   <div className="space-y-2">
-                    {(["Pending", "Reviewed", "Approved", "Rejected"] as YouTubeClaim["status"][]).map((s) => (
-                      <button
-                        key={s}
-                        onClick={() => updateStatus(active._id, s)}
-                        className={`w-full text-left px-4 py-2 rounded-md border ${
-                          active.status === s ? "bg-green-50 border-green-400" : "hover:bg-gray-50"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            {s === "Pending" && <Clock size={16} className="text-yellow-600" />}
-                            {s === "Reviewed" && <RotateCw size={16} className="text-blue-600" />}
-                            {s === "Approved" && <CheckCircle size={16} className="text-emerald-600" />}
-                            {s === "Rejected" && <XCircle size={16} className="text-red-600" />}
-                            <span className="ml-1">{s}</span>
+                    {(["Pending", "Reviewed", "Approved", "Rejected"] as const).map(
+                      (s) => (
+                        <button
+                          key={s}
+                          onClick={() => updateStatus(active._id, s)}
+                          className={`w-full px-4 py-2 text-left border rounded-md ${
+                            active.status === s
+                              ? "bg-green-50 border-green-400"
+                              : "hover:bg-gray-50"
+                          }`}
+                        >
+                          <div className="flex justify-between">
+                            <span>{s}</span>
+                            <span className="text-xs text-gray-500">
+                              {active.status === s ? "Current" : "Set"}
+                            </span>
                           </div>
-                          <div className="text-xs text-gray-500">{active.status === s ? "Current" : "Set as " + s}</div>
-                        </div>
-                      </button>
-                    ))}
+                        </button>
+                      )
+                    )}
                   </div>
                 </div>
 
-                <div className="pt-2">
-                  <button
-                    onClick={() => deleteClaim(active._id)}
-                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700"
-                  >
-                    <Trash2 size={16} /> Delete Claim
-                  </button>
-                </div>
+                {/* Delete */}
+                <button
+                  onClick={() => deleteClaim(active._id)}
+                  className="w-full bg-red-600 text-white py-2 rounded-md flex items-center justify-center gap-2 hover:bg-red-700"
+                >
+                  <Trash2 size={16} /> Delete Claim
+                </button>
+
               </div>
             </div>
           </div>
         </div>
       )}
-
     </div>
   );
 };
 
 export default AdminYouTubeClaims;
+
