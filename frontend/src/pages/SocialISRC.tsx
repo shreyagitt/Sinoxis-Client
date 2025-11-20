@@ -156,7 +156,7 @@ const AdminSocialISRC: React.FC = () => {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-800">Social ISRC Submissions (Admin)</h1>
+          <h1 className="text-2xl font-semibold text-gray-800">Social ISRC Submissions</h1>
           <p className="text-sm text-gray-500 mt-1">Review and manage social profile & ISRC submissions</p>
         </div>
 

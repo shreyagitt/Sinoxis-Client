@@ -189,7 +189,7 @@ const AdminTotalRevenueAnalytics: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-800">Admin • Total Revenue Analytics</h1>
+          <h1 className="text-2xl font-semibold text-gray-800">Total Revenue Analytics</h1>
           {analytics.lastUpdated && (
             <p className="text-xs text-gray-500 mt-1">Last updated: {analytics.lastUpdated}</p>
           )}

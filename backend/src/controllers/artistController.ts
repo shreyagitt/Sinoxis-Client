@@ -5,50 +5,132 @@ import { asyncHandler } from "../middlewares/errorHandler";
 import { HTTP_STATUS } from "../config/constants";
 
 export const artistController = {
-  create: asyncHandler(async (req: Request, res: Response) => {
-    const file = (req as any).file;
 
-    const artist = await Artist.create({
-      ...req.body,
-      artistImage: file?.path || null,
-      artistImageId: file?.filename || null,
-    });
-
-    res.status(HTTP_STATUS.CREATED).json({
-      success: true,
-      data: artist,
-      message: "Artist created successfully",
-    });
-  }),
-
-  update: asyncHandler(async (req: Request, res: Response) => {
-    const artist = await Artist.findById(req.params.id);
-    if (!artist) return res.status(HTTP_STATUS.NOT_FOUND).json({ success: false, message: "Artist not found" });
-
-    const file = (req as any).file;
-    if (file) {
-      if (artist.artistImageId) {
-        await cloudinary.uploader.destroy(artist.artistImageId);
-      }
-      req.body.artistImage = file.path;
-      req.body.artistImageId = file.filename;
-    }
-
-    const updated = await Artist.findByIdAndUpdate(req.params.id, req.body, { new: true });
+  // ----------------------------------------------------
+  // 📌 GET ALL ARTISTS
+  // ----------------------------------------------------
+  list: asyncHandler(async (req: Request, res: Response) => {
+    const artists = await Artist.find().sort({ createdAt: -1 });
 
     res.status(HTTP_STATUS.OK).json({
       success: true,
-      data: updated,
-      message: "Artist updated successfully",
+      data: artists,
     });
   }),
 
+  // ----------------------------------------------------
+  // 📌 GET SINGLE ARTIST
+  // ----------------------------------------------------
+  getOne: asyncHandler(async (req: Request, res: Response) => {
+    const artist = await Artist.findById(req.params.id);
+
+    if (!artist) {
+      return res
+        .status(HTTP_STATUS.NOT_FOUND)
+        .json({ success: false, message: "Artist not found" });
+    }
+
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: artist,
+    });
+  }),
+
+  // ----------------------------------------------------
+  // 📌 CREATE ARTIST
+  // ----------------------------------------------------
+  create: asyncHandler(async (req: Request, res: Response) => {
+    const data: any = req.body;
+
+    if (req.file) {
+      data.artistImage = req.file.path;
+      data.artistImageId =
+        (req.file as any).filename || (req.file as any).public_id;
+    }
+
+    const artist = await Artist.create(data);
+
+    res.status(HTTP_STATUS.CREATED).json({
+      success: true,
+      message: "Artist created successfully",
+      data: artist,
+    });
+  }),
+
+  // ----------------------------------------------------
+  // 📌 UPDATE ARTIST
+  // ----------------------------------------------------
+  update: asyncHandler(async (req: Request, res: Response) => {
+    const artist = await Artist.findById(req.params.id);
+
+    if (!artist) {
+      return res
+        .status(HTTP_STATUS.NOT_FOUND)
+        .json({ success: false, message: "Artist not found" });
+    }
+
+    // If new image uploaded → delete old one from Cloudinary
+    if (req.file) {
+      if (artist.artistImageId) {
+        try {
+          await cloudinary.uploader.destroy(artist.artistImageId);
+        } catch (err) {
+          console.log("Cloudinary delete failed:", err);
+        }
+      }
+
+      artist.artistImage = req.file.path;
+      artist.artistImageId =
+        (req.file as any).filename || (req.file as any).public_id;
+    }
+
+    // Allowed updatable fields
+    const allowed = [
+      "name",
+      "genre",
+      "label",
+      "followers",
+      "bio",
+      "spotify",
+      "instagram",
+      "status",
+    ];
+
+    allowed.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        // @ts-ignore
+        artist[field] = req.body[field];
+      }
+    });
+
+    await artist.save();
+
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: "Artist updated successfully",
+      data: artist,
+    });
+  }),
+
+  // ----------------------------------------------------
+  // 📌 DELETE ARTIST
+  // ----------------------------------------------------
   delete: asyncHandler(async (req: Request, res: Response) => {
     const artist = await Artist.findById(req.params.id);
-    if (!artist) return res.status(HTTP_STATUS.NOT_FOUND).json({ success: false, message: "Artist not found" });
 
+    if (!artist) {
+      return res
+        .status(HTTP_STATUS.NOT_FOUND)
+        .json({ success: false, message: "Artist not found" });
+    }
+
+    // Delete image from Cloudinary
     if (artist.artistImageId) {
-      await cloudinary.uploader.destroy(artist.artistImageId);
+      try {
+        await cloudinary.uploader.destroy(artist.artistImageId);
+      } catch (err) {
+        console.log("Cloudinary delete failed:", err);
+      }
     }
 
     await artist.deleteOne();
@@ -59,3 +141,4 @@ export const artistController = {
     });
   }),
 };
+

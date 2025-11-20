@@ -269,6 +269,9 @@ export default AdminMetadata;
 /* ============================
    MODAL COMPONENT
 ============================ */
+/* ============================
+   MODAL COMPONENT (SCROLLABLE)
+============================ */
 const MetadataModal = ({
   item,
   onClose,
@@ -279,10 +282,13 @@ const MetadataModal = ({
   onStatus: (id: string, status: Metadata["status"]) => void;
 }) => (
   <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-    <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full">
-      
-      {/* Header */}
-      <div className="p-5 border-b flex justify-between items-center">
+
+    {/* Modal Box */}
+    <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full 
+                    max-h-[85vh] flex flex-col overflow-hidden">
+
+      {/* Header (Fixed) */}
+      <div className="p-5 border-b flex justify-between items-center bg-white">
         <div>
           <h3 className="text-lg font-semibold text-gray-800">
             {item.artistName} — {item.trackTitle}
@@ -300,8 +306,9 @@ const MetadataModal = ({
         </button>
       </div>
 
-      {/* Body */}
-      <div className="p-6 space-y-3 text-sm">
+      {/* Body (Scrollable) */}
+      <div className="flex-1 overflow-y-auto p-6 space-y-4">
+
         <Detail label="Album" value={item.album || "-"} />
         <Detail label="Label" value={item.label} />
         <Detail label="ISRC" value={item.isrc} />
@@ -313,16 +320,30 @@ const MetadataModal = ({
         <Detail label="Language" value={item.language || "-"} />
         <Detail label="Contact" value={item.contact || "-"} />
         <Detail label="Explicit" value={item.explicit ? "Yes" : "No"} />
-        
+
         <div>
           <h4 className="font-semibold text-gray-700">Lyrics</h4>
-          <p className="text-gray-600 mt-1 whitespace-pre-line">{item.lyrics || "No lyrics provided"}</p>
+          <p className="text-gray-600 mt-1 whitespace-pre-line">
+            {item.lyrics || "No lyrics provided"}
+          </p>
         </div>
+
+        {/* Artwork */}
+        {item.artwork && (
+          <div>
+            <h4 className="font-semibold text-gray-700 mb-2">Artwork</h4>
+            <img
+              src={item.artwork}
+              alt="Artwork"
+              className="rounded-lg w-48 border"
+            />
+          </div>
+        )}
+
       </div>
 
-      {/* Status Buttons */}
-      <div className="p-5 border-t space-y-2">
-
+      {/* Footer (Fixed) */}
+      <div className="p-5 border-t bg-white space-y-2">
         {["Pending", "Reviewed", "Approved", "Rejected"].map((s) => (
           <button
             key={s}
@@ -332,12 +353,12 @@ const MetadataModal = ({
             {s}
           </button>
         ))}
-
       </div>
 
     </div>
   </div>
 );
+
 
 const Detail = ({ label, value }) => (
   <div>

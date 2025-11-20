@@ -7,6 +7,7 @@ import {
   RefreshCcw,
   ImagePlus,
 } from "lucide-react";
+
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useAppSelector } from "../store/hook";
@@ -14,11 +15,13 @@ import { useAppSelector } from "../store/hook";
 type Artist = {
   _id: string;
   name: string;
-  city?: string;
-  email?: string;
-  phone?: string;
-  label?: string;
-  status: "Active" | "Blocked";
+  genre: string;
+  label: string;
+  followers: number;
+  bio?: string;
+  spotify?: string;
+  instagram?: string;
+  status: "Active" | "Inactive";
   artistImage?: string;
 };
 
@@ -28,8 +31,6 @@ export default function ArtistsPage() {
 
   const [artists, setArtists] = useState<Artist[]>([]);
   const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState(10);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -38,21 +39,22 @@ export default function ArtistsPage() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const [form, setForm] = useState({
-    id: "",
+    _id: "",
     name: "",
-    city: "",
-    email: "",
-    phone: "",
+    genre: "",
     label: "",
-    status: "Active" as "Active" | "Blocked",
+    followers: "0",
+    bio: "",
+    spotify: "",
+    instagram: "",
+    status: "Active" as "Active" | "Inactive",
   });
 
-  // ======================================================
+  // ------------------------------------------------------------------
   // FETCH ARTISTS
-  // ======================================================
+  // ------------------------------------------------------------------
   useEffect(() => {
-    if (!token) return;
-    fetchArtists();
+    if (token) fetchArtists();
   }, [token]);
 
   const fetchArtists = async () => {
@@ -63,40 +65,48 @@ export default function ArtistsPage() {
 
       if (res.data.success) setArtists(res.data.data);
     } catch (error) {
-      console.error(error);
       toast.error("Failed to load artists");
     }
   };
 
-  // ======================================================
-  // OPEN MODALS
-  // ======================================================
+  // ------------------------------------------------------------------
+  // OPEN ADD ARTIST
+  // ------------------------------------------------------------------
   const openAdd = () => {
     setEditing(false);
+
     setForm({
-      id: "",
+      _id: "",
       name: "",
-      city: "",
-      email: "",
-      phone: "",
+      genre: "",
       label: "",
+      followers: "0",
+      bio: "",
+      spotify: "",
+      instagram: "",
       status: "Active",
     });
 
-    setImageFile(null);
     setImagePreview(null);
+    setImageFile(null);
     setModalOpen(true);
   };
 
+  // ------------------------------------------------------------------
+  // OPEN EDIT ARTIST
+  // ------------------------------------------------------------------
   const openEdit = (artist: Artist) => {
     setEditing(true);
+
     setForm({
-      id: artist._id,
+      _id: artist._id,
       name: artist.name,
-      city: artist.city ?? "",
-      email: artist.email ?? "",
-      phone: artist.phone ?? "",
-      label: artist.label ?? "",
+      genre: artist.genre || "",
+      label: artist.label || "",
+      followers: String(artist.followers),
+      bio: artist.bio || "",
+      spotify: artist.spotify || "",
+      instagram: artist.instagram || "",
       status: artist.status,
     });
 
@@ -105,25 +115,22 @@ export default function ArtistsPage() {
     setModalOpen(true);
   };
 
-  // ======================================================
-  // SAVE / UPDATE ARTIST
-  // ======================================================
+  // ------------------------------------------------------------------
+  // SAVE ARTIST (CREATE/UPDATE)
+  // ------------------------------------------------------------------
   const saveArtist = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const fd = new FormData();
-    fd.append("name", form.name);
-    fd.append("city", form.city);
-    fd.append("email", form.email);
-    fd.append("phone", form.phone);
-    fd.append("label", form.label);
-    fd.append("status", form.status);
+    Object.entries(form).forEach(([key, value]) => {
+      if (key !== "_id") fd.append(key, value);
+    });
 
     if (imageFile) fd.append("artistImage", imageFile);
 
     try {
       if (editing) {
-        await axios.put(`${baseUrl}/artist/${form.id}`, fd, {
+        await axios.put(`${baseUrl}/artist/${form._id}`, fd, {
           headers: { Authorization: `Bearer ${token}` },
         });
         toast.success("Artist updated");
@@ -137,14 +144,13 @@ export default function ArtistsPage() {
       fetchArtists();
       setModalOpen(false);
     } catch (error) {
-      console.error(error);
       toast.error("Failed to save artist");
     }
   };
 
-  // ======================================================
-  // DELETE ARTIST
-  // ======================================================
+  // ------------------------------------------------------------------
+  // DELETE
+  // ------------------------------------------------------------------
   const deleteArtist = async (id: string) => {
     if (!confirm("Delete this artist?")) return;
 
@@ -155,23 +161,24 @@ export default function ArtistsPage() {
 
       setArtists((prev) => prev.filter((a) => a._id !== id));
       toast.success("Artist deleted");
-    } catch (error) {
-      console.error(error);
-      toast.error("Unable to delete");
+    } catch (err) {
+      toast.error("Delete failed");
     }
   };
 
-  // ======================================================
-  // TOGGLE STATUS
-  // ======================================================
+  // ------------------------------------------------------------------
+  // STATUS TOGGLE
+  // ------------------------------------------------------------------
   const toggleStatus = async (artist: Artist) => {
-    const newStatus = artist.status === "Active" ? "Blocked" : "Active";
+    const newStatus = artist.status === "Active" ? "Inactive" : "Active";
 
     try {
       await axios.put(
         `${baseUrl}/artist/${artist._id}`,
         { status: newStatus },
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
 
       setArtists((prev) =>
@@ -181,44 +188,36 @@ export default function ArtistsPage() {
       );
 
       toast.success("Status updated");
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to change status");
+    } catch {
+      toast.error("Failed to update status");
     }
   };
 
-  // ======================================================
-  // IMAGE UPLOAD PREVIEW
-  // ======================================================
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // ------------------------------------------------------------------
+  // IMAGE PREVIEW
+  // ------------------------------------------------------------------
+  const handleImageUpload = (e: any) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setImageFile(file);
-
-    const reader = new FileReader();
-    reader.onload = () => setImagePreview(reader.result as string);
-    reader.readAsDataURL(file);
+    setImagePreview(URL.createObjectURL(file));
   };
 
-  // ======================================================
-  // PAGINATION + SEARCH
-  // ======================================================
+  // ------------------------------------------------------------------
+  // SEARCH FILTER
+  // ------------------------------------------------------------------
   const filtered = artists.filter((a) =>
     a.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  const totalPages = Math.ceil(filtered.length / perPage);
-
-  const shown = filtered.slice((page - 1) * perPage, page * perPage);
-
-  // ======================================================
+  // ------------------------------------------------------------------
   // UI
-  // ======================================================
-
+  // ------------------------------------------------------------------
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
+
         {/* HEADER */}
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-semibold">Artists</h1>
@@ -234,84 +233,63 @@ export default function ArtistsPage() {
         {/* MAIN CARD */}
         <div className="bg-white rounded-lg shadow p-6">
 
-          {/* TOP FILTER BAR */}
-          <div className="flex flex-col md:flex-row justify-between gap-4 mb-4">
-            
-            {/* SHOW ENTRIES */}
-            <div className="flex items-center gap-2">
-              <label className="text-sm text-gray-600">Show</label>
-              <select
-                value={perPage}
-                onChange={(e) => {
-                  setPerPage(Number(e.target.value));
-                  setPage(1);
-                }}
-                className="border rounded px-2 py-1 text-sm"
-              >
-                {[5, 10, 25, 50].map((n) => (
-                  <option key={n}>{n}</option>
-                ))}
-              </select>
-              <span className="text-sm text-gray-600">entries</span>
-            </div>
-
-            {/* SEARCH */}
-            <div className="flex items-center gap-2">
-              <Search size={16} className="text-gray-400" />
-              <input
-                placeholder="Search artist..."
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setPage(1);
-                }}
-                className="border rounded px-3 py-2 text-sm w-64"
-              />
-            </div>
+          {/* SEARCH BAR */}
+          <div className="flex items-center gap-2 mb-4">
+            <Search size={16} className="text-gray-400" />
+            <input
+              placeholder="Search artist..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="border rounded px-3 py-2 text-sm w-64"
+            />
           </div>
 
           {/* TABLE */}
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="text-gray-500 border-b">
+              <thead className="text-gray-600 border-b bg-gray-50">
                 <tr>
-                  <th className="py-3">Image</th>
-                  <th className="py-3">Name</th>
-                  <th className="py-3">City</th>
-                  <th className="py-3">Label</th>
-                  <th className="py-3">Phone</th>
-                  <th className="py-3">Email</th>
-                  <th className="py-3">Status</th>
-                  <th className="py-3">Action</th>
+                  <th className="py-4 px-3 text-left">Image</th>
+                  <th className="py-4 px-3 text-left">Name</th>
+                  <th className="py-4 px-3 text-left">Genre</th>
+                  <th className="py-4 px-3 text-left">Label</th>
+                  <th className="py-4 px-3 text-left">Followers</th>
+                  <th className="py-4 px-3 text-left">Status</th>
+                  <th className="py-4 px-3 text-left">Actions</th>
                 </tr>
               </thead>
 
               <tbody>
-                {shown.length === 0 ? (
+                {filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="text-center py-6 text-gray-400">
+                    <td colSpan={7} className="text-center py-8 text-gray-400">
                       No artists found.
                     </td>
                   </tr>
                 ) : (
-                  shown.map((artist) => (
-                    <tr key={artist._id} className="border-b">
-                      <td className="py-3">
+                  filtered.map((artist) => (
+                    <tr
+                      key={artist._id}
+                      className="border-b hover:bg-gray-50 transition"
+                    >
+                      <td className="py-4 px-3 align-middle">
                         <img
-                          src={
-                            artist.artistImage ||
-                            "https://via.placeholder.com/50"
-                          }
+                          src={artist.artistImage || "https://via.placeholder.com/50"}
                           className="w-12 h-12 rounded object-cover"
                         />
                       </td>
-                      <td className="py-3">{artist.name}</td>
-                      <td className="py-3">{artist.city || "—"}</td>
-                      <td className="py-3">{artist.label || "—"}</td>
-                      <td className="py-3">{artist.phone || "—"}</td>
-                      <td className="py-3">{artist.email || "—"}</td>
 
-                      <td className="py-3">
+                      <td className="py-4 px-3 align-middle font-medium text-gray-800">
+                        {artist.name}
+                      </td>
+
+                      <td className="py-4 px-3 align-middle">{artist.genre || "—"}</td>
+
+                      <td className="py-4 px-3 align-middle">{artist.label || "—"}</td>
+
+                      <td className="py-4 px-3 align-middle">{artist.followers}</td>
+
+                      <td className="py-4 px-3 align-middle">
                         <span
                           className={`px-3 py-1 text-xs rounded-full ${
                             artist.status === "Active"
@@ -323,27 +301,31 @@ export default function ArtistsPage() {
                         </span>
                       </td>
 
-                      <td className="py-3 flex gap-2">
-                        <button
-                          onClick={() => openEdit(artist)}
-                          className="p-2 bg-emerald-50 rounded hover:bg-emerald-100"
-                        >
-                          <Edit size={16} />
-                        </button>
+                      <td className="py-4 px-3 align-middle">
+                        <div className="flex items-center gap-2">
 
-                        <button
-                          onClick={() => toggleStatus(artist)}
-                          className="p-2 bg-gray-50 rounded hover:bg-gray-100"
-                        >
-                          <RefreshCcw size={16} />
-                        </button>
+                          <button
+                            onClick={() => openEdit(artist)}
+                            className="p-2 bg-emerald-50 rounded hover:bg-emerald-100"
+                          >
+                            <Edit size={16} />
+                          </button>
 
-                        <button
-                          onClick={() => deleteArtist(artist._id)}
-                          className="p-2 bg-red-50 rounded hover:bg-red-100"
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                          <button
+                            onClick={() => toggleStatus(artist)}
+                            className="p-2 bg-gray-50 rounded hover:bg-gray-100"
+                          >
+                            <RefreshCcw size={16} />
+                          </button>
+
+                          <button
+                            onClick={() => deleteArtist(artist._id)}
+                            className="p-2 bg-red-50 rounded hover:bg-red-100"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -352,41 +334,10 @@ export default function ArtistsPage() {
             </table>
           </div>
 
-          {/* FOOTER: ENTRY COUNT + PAGINATION */}
-          <div className="flex items-center justify-between mt-6">
-
-            {/* ENTRY INFO */}
-            <div className="text-sm text-gray-600">
-              Showing {(page - 1) * perPage + 1} to{" "}
-              {Math.min(page * perPage, filtered.length)} of{" "}
-              {filtered.length} entries
-            </div>
-
-            {/* PAGINATION BUTTONS */}
-            <div className="flex gap-2">
-              <button
-                disabled={page === 1}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                className="px-3 py-1 border rounded disabled:opacity-50"
-              >
-                Prev
-              </button>
-
-              <div className="px-3 py-1 border rounded bg-white">{page}</div>
-
-              <button
-                disabled={page === totalPages}
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                className="px-3 py-1 border rounded disabled:opacity-50"
-              >
-                Next
-              </button>
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* MODAL FORM */}
+      {/* Modal */}
       {modalOpen && (
         <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
           <form
@@ -398,6 +349,7 @@ export default function ArtistsPage() {
             </h2>
 
             <div className="space-y-3">
+
               <input
                 required
                 placeholder="Artist Name"
@@ -407,31 +359,46 @@ export default function ArtistsPage() {
               />
 
               <input
-                placeholder="City"
+                placeholder="Genre"
                 className="border rounded px-3 py-2 w-full"
-                value={form.city}
-                onChange={(e) => setForm({ ...form, city: e.target.value })}
+                value={form.genre}
+                onChange={(e) => setForm({ ...form, genre: e.target.value })}
               />
 
               <input
-                placeholder="Email"
-                className="border rounded px-3 py-2 w-full"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-              />
-
-              <input
-                placeholder="Phone"
-                className="border rounded px-3 py-2 w-full"
-                value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              />
-
-              <input
-                placeholder="Label Name"
+                placeholder="Label"
                 className="border rounded px-3 py-2 w-full"
                 value={form.label}
                 onChange={(e) => setForm({ ...form, label: e.target.value })}
+              />
+
+              <input
+                type="number"
+                placeholder="Followers"
+                className="border rounded px-3 py-2 w-full"
+                value={form.followers}
+                onChange={(e) => setForm({ ...form, followers: e.target.value })}
+              />
+
+              <textarea
+                placeholder="Bio"
+                className="border rounded px-3 py-2 w-full"
+                value={form.bio}
+                onChange={(e) => setForm({ ...form, bio: e.target.value })}
+              />
+
+              <input
+                placeholder="Spotify URL"
+                className="border rounded px-3 py-2 w-full"
+                value={form.spotify}
+                onChange={(e) => setForm({ ...form, spotify: e.target.value })}
+              />
+
+              <input
+                placeholder="Instagram URL"
+                className="border rounded px-3 py-2 w-full"
+                value={form.instagram}
+                onChange={(e) => setForm({ ...form, instagram: e.target.value })}
               />
 
               <select
@@ -440,20 +407,20 @@ export default function ArtistsPage() {
                 onChange={(e) =>
                   setForm({
                     ...form,
-                    status: e.target.value as "Active" | "Blocked",
+                    status: e.target.value as "Active" | "Inactive",
                   })
                 }
               >
                 <option value="Active">Active</option>
-                <option value="Blocked">Blocked</option>
+                <option value="Inactive">Inactive</option>
               </select>
 
-              {/* IMAGE UPLOAD */}
               <div>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <ImagePlus size={18} />
                   Upload Artist Image
                 </label>
+
                 <input
                   type="file"
                   accept="image/*"
@@ -468,6 +435,7 @@ export default function ArtistsPage() {
                   className="w-20 h-20 rounded object-cover mt-2"
                 />
               )}
+
             </div>
 
             <div className="flex justify-end gap-3 mt-6">
@@ -486,9 +454,12 @@ export default function ArtistsPage() {
                 Save Artist
               </button>
             </div>
+
           </form>
         </div>
       )}
+
     </div>
   );
 }
+

@@ -1,4 +1,5 @@
 // src/pages/AdminFacebookVideo.tsx
+// src/pages/AdminFacebookVideo.tsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
@@ -143,7 +144,7 @@ const AdminFacebookVideo: React.FC = () => {
             Facebook Video Claims
           </h1>
           <p className="text-sm text-gray-500">
-            Admin Panel • Review copyright/monetization claims
+            Review copyright/monetization claims
           </p>
         </div>
 
@@ -191,17 +192,13 @@ const AdminFacebookVideo: React.FC = () => {
                 <td className="p-4">{row.isrcCodeFb}</td>
 
                 <td className="p-4 text-center">
-                  <span
-                    className={`px-3 py-1 text-xs rounded-full ${badge(row.status)}`}
-                  >
+                  <span className={`px-3 py-1 text-xs rounded-full ${badge(row.status)}`}>
                     {row.status}
                   </span>
                 </td>
 
                 <td className="p-4 text-right text-xs text-gray-500">
-                  {row.createdAt
-                    ? new Date(row.createdAt).toLocaleString()
-                    : "-"}
+                  {row.createdAt ? new Date(row.createdAt).toLocaleString() : "-"}
                 </td>
 
                 <td className="p-4 flex items-center justify-center gap-3">
@@ -253,7 +250,7 @@ const AdminFacebookVideo: React.FC = () => {
 export default AdminFacebookVideo;
 
 /* ======================================
-          MODAL COMPONENT
+          MODAL COMPONENT (UPDATED)
 ====================================== */
 const FacebookVideoModal = ({
   item,
@@ -262,13 +259,10 @@ const FacebookVideoModal = ({
 }: {
   item: FacebookVideo;
   onClose: () => void;
-  onStatus: (
-    id: string,
-    status: FacebookVideo["status"]
-  ) => void;
+  onStatus: (id: string, status: FacebookVideo["status"]) => void;
 }) => (
   <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-    <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full">
+    <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full flex flex-col max-h-[90vh]">
 
       {/* Header */}
       <div className="p-5 border-b flex justify-between items-center">
@@ -277,10 +271,7 @@ const FacebookVideoModal = ({
             {item.artistNameFb} — ISRC: {item.isrcCodeFb}
           </h3>
           <p className="text-xs text-gray-500 mt-1">
-            Submitted:{" "}
-            {item.createdAt
-              ? new Date(item.createdAt).toLocaleString()
-              : "-"}
+            Submitted: {item.createdAt ? new Date(item.createdAt).toLocaleString() : "-"}
           </p>
         </div>
 
@@ -292,8 +283,8 @@ const FacebookVideoModal = ({
         </button>
       </div>
 
-      {/* Body */}
-      <div className="p-6 space-y-3 text-sm">
+      {/* Scrollable Body */}
+      <div className="flex-1 overflow-y-auto p-6 space-y-4">
         <Detail label="Artist" value={item.artistNameFb} />
         <Detail label="Label" value={item.labelNameFb || "-"} />
         <Detail label="Facebook Video URL" value={item.facebookVideoUrl} />
@@ -303,25 +294,21 @@ const FacebookVideoModal = ({
 
         {/* Screenshot */}
         {item.screenshotFb && (
-          <div>
+          <div className="space-y-2">
             <h4 className="font-semibold text-gray-700">Screenshot</h4>
             <img
               src={item.screenshotFb}
               alt="Claim Screenshot"
-              className="rounded-lg w-64 border mt-2"
+              className="rounded-lg w-full md:w-64 border"
             />
           </div>
         )}
 
-        <Detail
-          label="Confirm"
-          value={item.confirmFb ? "Yes" : "No"}
-        />
+        <Detail label="Confirm" value={item.confirmFb ? "Yes" : "No"} />
       </div>
 
-      {/* Status Update */}
-      <div className="p-5 border-t space-y-2">
-
+      {/* Status Update Footer (Fixed) */}
+      <div className="p-5 border-t space-y-2 bg-white">
         {["Pending", "Reviewed", "Resolved", "Rejected"].map((s) => (
           <button
             key={s}
@@ -331,7 +318,6 @@ const FacebookVideoModal = ({
             {s}
           </button>
         ))}
-
       </div>
 
     </div>
