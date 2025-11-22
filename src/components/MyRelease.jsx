@@ -1,129 +1,174 @@
-import React, { useState } from "react";
-import CreateReleaseModal from "./CreateReleaseModal";
-import ReleaseDetailsModal from "./ReleaseDetailsModal";
+import React from "react";
+import { Edit3, Eye } from "lucide-react";
 
-const MyReleases = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [viewModalOpen, setViewModalOpen] = useState(false);
-  const [selectedRelease, setSelectedRelease] = useState(null);
-
-  const releases = [
-    { id: 1, title: "DEMO TUNE", subtitle: "Demo Song", status: "Pending" },
-    { id: 2, title: "DEMO TUNE", subtitle: "Demo Song", status: "Pending" },
-    { id: 3, title: "DEMO TUNE", subtitle: "Demo Song", status: "Pending" },
-    { id: 4, title: "DEMO TUNE", subtitle: "Demo Song", status: "Action Required" },
-    { id: 5, title: "DEMO TUNE", subtitle: "Demo Song", status: "Pending" },
-    { id: 6, title: "DEMO TUNE", subtitle: "Demo Song", status: "Pending" },
-    { id: 7, title: "DEMO TUNE", subtitle: "Demo Song", status: "Pending" },
-    { id: 8, title: "DEMO TUNE", subtitle: "Demo Song", status: "Pending" },
-  ];
-
-  // 🧠 Filter state
-  const [filter, setFilter] = useState("All");
-
-  // 🔍 Filter logic
-  const filteredReleases =
-    filter === "All"
-      ? releases
-      : releases.filter((r) => r.status === filter);
-
-
+export default function Releases() {
   return (
-    <div className="p-6 pl-10 min-h-screen bg-gray-50 ">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 ">
-        <h1 className="text-2xl font-semibold text-gray-800">My Releases</h1>
-        <ol className="flex space-x-2 text-sm text-gray-500 mt-2 sm:mt-0">
-          <li>Home</li>
-          <li>/</li>
-          <li className="text-red-700 font-medium">My Releases</li>
-        </ol>
-      </div>
+    <div className="min-h-screen bg-[#020726] text-white px-6 py-8">
 
-      {/* Search + Create */}
-      <div className="flex flex-wrap gap-2 items-center justify-between mb-6">
-        <input
-          type="text"
-          placeholder="Type & Enter to search"
-          className="flex-grow w-full sm:w-auto rounded-full border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
-        />
-        <button 
-         onClick={() => setIsModalOpen(true)}
-        className="bg-red-600 hover:bg-red-700 text-white rounded-full px-6 py-2">
-          Create
-        </button>
-      </div>
+      {/* PAGE HEADER */}
+      <div className="flex justify-between items-start mb-8">
+        <h1 className="text-3xl font-semibold">My Releases</h1>
 
-      <CreateReleaseModal
-        open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={(data) => console.log("✅ Release Submitted:", data)}
-      />
-
-       <ReleaseDetailsModal
-        open={viewModalOpen}
-        onClose={() => setViewModalOpen(false)}
-        release={selectedRelease}
-      />
-
-      {/* Release Count */}
-      <div className="flex justify-between items-center mb-4">
-        <h6 className="font-semibold text-gray-700">Release Count</h6>
-        <div className="flex items-center gap-1 text-gray-600">
-           <span>{filteredReleases.length}</span>/<span>{releases.length}</span>
+        <div className="text-sm">
+          <span className="text-gray-300">Home / </span>
+          <span className="text-[#29B6F6]">My Releases</span>
         </div>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="flex flex-wrap gap-2 mb-6">
-        {["All", "Approved", "Pending", "Action Required"].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setFilter(tab)}
-            className={`px-4 py-2 rounded-md border ${
-              filter === tab
-                ? "bg-red-600 text-white border-red-600"
-                : "border-red-600 text-red-600 hover:bg-red-50"
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
+      {/* RELEASE COUNT */}
+      <div className="bg-[#0a1039] p-6 rounded-xl border border-white/10">
+        <div className="flex flex-wrap justify-between items-center mb-4">
+          <h6 className="font-semibold text-base">Release Count</h6>
+
+          <div className="flex items-center gap-1">
+            <span>1</span>
+            <span>/</span>
+            <span>10</span>
+          </div>
+        </div>
+
+        {/* FILTER TABS */}
+        <div className="flex flex-wrap gap-2 mb-6">
+          {[
+            "All",
+            "Approved",
+            "Pending",
+            "Action Required",
+            "Unfinished",
+            "Rejected",
+          ].map((tab) => (
+            <button
+              key={tab}
+              className="px-4 py-2 rounded-md border border-[#0A84FF] text-[#0A84FF] hover:bg-[#0A84FF]/10"
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {filteredReleases.map((release) => (
-          <div
-            key={release.id}
-            className="bg-white shadow-md rounded-xl overflow-hidden hover:shadow-lg transition-shadow"
-          >
-            <img
-              src="https://www.mixcloud.com/blog/wp-content/uploads/2023/11/Collage-1-2.png"
-              alt="Release Cover"
-              className="w-full h-40 object-cover"
+      {/* MANAGE RELEASES CARD */}
+      <div className="bg-[#0f1b36] rounded-2xl p-6 border border-white/10 shadow mt-6">
+
+        {/* Top Bar */}
+        <div className="flex flex-wrap justify-between items-center mb-6">
+          <h2 className="text-lg font-semibold">Manage Releases</h2>
+
+          <div className="flex items-center gap-3">
+            <input
+              type="text"
+              placeholder="Type & Enter to search"
+              className="px-4 py-2 rounded-full bg-[#0a1039] border border-white/20 text-white placeholder-gray-400 focus:outline-none"
             />
-            <div className="p-4">
-              <small className="text-gray-500">{release.subtitle}</small>
-              <h5 className="font-bold text-lg mb-2 text-gray-800">
-                {release.title}
-              </h5>
-              <div className="flex justify-between items-center">
-                <span className="bg-yellow-200 text-yellow-800 px-2 py-1 text-xs font-semibold rounded-md">
-                  {release.status}
-                </span>
-                <button 
-                onClick={() => { setSelectedRelease(release); setViewModalOpen(true); }}
-                className="border border-red-600 text-red-600 hover:bg-red-50 rounded-md px-3 py-1 text-sm">
-                  View Details
-                </button>
-              </div>
-            </div>
+
+            <button
+              className="px-5 py-2 rounded-full text-white font-semibold"
+              style={{ background: "linear-gradient(90deg,#00AEEF,#007BFF)" }}
+            >
+              Create Release
+            </button>
           </div>
-        ))}
+        </div>
+
+        {/* TABLE */}
+        <div className="overflow-x-auto">
+          <table className="min-w-[1000px] w-full text-left">
+            <thead>
+              <tr className="text-gray-300 border-b border-white/10">
+                <th className="py-3 px-4">Cover Art</th>
+                <th className="py-3 px-4">Title</th>
+                <th className="py-3 px-4">Artist</th>
+                <th className="py-3 px-4">Label</th>
+                <th className="py-3 px-4">ISRC</th>
+                <th className="py-3 px-4">UPC</th>
+                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4 text-center">Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {[
+                {
+                  title: "Demo Song Title",
+                  artist: "Demo Artist",
+                  label: "Demo Label",
+                  isrc: "INSI32500000",
+                  upc: "744662977286",
+                  status: "Rejected",
+                  color: "bg-red-500/20 text-red-400",
+                },
+                {
+                  title: "Demo Song Title",
+                  artist: "Demo Artist",
+                  label: "Demo Label",
+                  isrc: "INSI32500000",
+                  upc: "744662977286",
+                  status: "Inactive",
+                  color: "bg-blue-500/20 text-blue-400",
+                },
+                {
+                  title: "Demo Song Title",
+                  artist: "Demo Artist",
+                  label: "Demo Label",
+                  isrc: "INSI32500000",
+                  upc: "744662977286",
+                  status: "Pending",
+                  color: "bg-yellow-500/20 text-yellow-400",
+                },
+                {
+                  title: "Demo Song Title",
+                  artist: "Demo Artist",
+                  label: "Demo Label",
+                  isrc: "INSI32500000",
+                  upc: "744662977286",
+                  status: "Approved",
+                  color: "bg-green-500/20 text-green-400",
+                },
+              ].map((r, i) => (
+                <tr
+                  key={i}
+                  className="border-b border-white/10 hover:bg-white/5 transition"
+                >
+                  <td className="px-4 py-3">
+                    <img
+                      src="https://www.mixcloud.com/blog/wp-content/uploads/2023/11/Collage-1-2.png"
+                      className="w-14 h-14 rounded object-cover"
+                    />
+                  </td>
+
+                  <td className="px-4 py-3">{r.title}</td>
+                  <td className="px-4 py-3">{r.artist}</td>
+                  <td className="px-4 py-3">{r.label}</td>
+                  <td className="px-4 py-3">{r.isrc}</td>
+                  <td className="px-4 py-3">{r.upc}</td>
+
+                  <td className="px-4 py-3">
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-medium ${r.color}`}
+                    >
+                      {r.status}
+                    </span>
+                  </td>
+
+                  <td className="px-4 py-3 text-center">
+                    <div className="flex justify-center gap-3">
+                      <button className="w-10 h-10 flex items-center justify-center border border-amber-400 rounded-full hover:bg-amber-400 group">
+                        <Edit3 size={18} className="text-amber-300 group-hover:text-white" />
+                      </button>
+
+                      <button className="w-10 h-10 flex items-center justify-center border border-sky-500 rounded-full hover:bg-sky-500 group">
+                        <Eye size={18} className="text-sky-400 group-hover:text-white" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+
+          </table>
+        </div>
       </div>
+
     </div>
   );
-};
-
-export default MyReleases;
+}

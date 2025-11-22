@@ -77,7 +77,7 @@ function App() {
       />
 
       <Route
-        path="/artists/labels"
+        path="/lables/list"
         element={
           <Layout>
             < Labels/>
