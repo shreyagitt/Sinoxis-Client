@@ -39,21 +39,24 @@ const SocialIsrcSubmitForm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-[#020726] flex flex-col pb-20">
 
       {/* Header */}
-      <div className="bg-gray-100 py-3 px-10 flex justify-between items-center">
-        <h1 className="text-base font-semibold text-gray-800">
+      <div className="py-4 px-10 flex justify-between items-center">
+        <h1 className="text-xl font-semibold text-white">
           Social Profile Links & Music ISRC Submit Form
         </h1>
-        <p className="text-sm text-gray-500">
-          Home / <span className="text-red-600">Social Profile Links & Music ISRC Submit Form</span>
+        <p className="text-sm text-white">
+          Home{" "}
+          <span className="text-[#29B6F6]">
+            / Social Profile Links & Music ISRC Submit Form
+          </span>
         </p>
       </div>
 
       {/* Form Container */}
-      <div className="flex justify-start py-8 px-4 ml-12">
-        <div className="bg-white rounded-xl shadow-2xl p-10 w-full max-w-4xl border border-gray-200">
+      <div className="flex justify-start px-10">
+        <div className="bg-[#0a1039] rounded-xl shadow-2xl p-10 w-full max-w-4xl border border-white/10">
 
           <Formik
             initialValues={{
@@ -75,20 +78,44 @@ const SocialIsrcSubmitForm = () => {
 
               {/* Artist + Label */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FieldGroup label="Artist Name *" name="artistNameSocial" placeholder="Enter artist name" />
-                <FieldGroup label="Label Name" name="labelName" placeholder="Enter label name (if applicable)" />
+                <FieldGroup
+                  label="Artist Name *"
+                  name="artistNameSocial"
+                  placeholder="Enter artist name"
+                />
+                <FieldGroup
+                  label="Label Name"
+                  name="labelName"
+                  placeholder="Enter label name (if applicable)"
+                />
               </div>
 
               {/* Facebook / Instagram */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FieldGroup label="Facebook Profile URL" name="facebookLink" placeholder="https://facebook.com/..." />
-                <FieldGroup label="Instagram Profile URL" name="instagramLink" placeholder="https://instagram.com/..." />
+                <FieldGroup
+                  label="Facebook Profile URL"
+                  name="facebookLink"
+                  placeholder="https://facebook.com/..."
+                />
+                <FieldGroup
+                  label="Instagram Profile URL"
+                  name="instagramLink"
+                  placeholder="https://instagram.com/..."
+                />
               </div>
 
               {/* Spotify / Apple */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FieldGroup label="Spotify Artist URL" name="spotifyLink" placeholder="https://open.spotify.com/artist/..." />
-                <FieldGroup label="Apple Music Artist URL" name="appleMusicLink" placeholder="https://music.apple.com/..." />
+                <FieldGroup
+                  label="Spotify Artist URL"
+                  name="spotifyLink"
+                  placeholder="https://open.spotify.com/artist/..."
+                />
+                <FieldGroup
+                  label="Apple Music Artist URL"
+                  name="appleMusicLink"
+                  placeholder="https://music.apple.com/..."
+                />
               </div>
 
               {/* ISRC */}
@@ -96,7 +123,6 @@ const SocialIsrcSubmitForm = () => {
                 label="Music ISRC Code *"
                 name="isrcCode"
                 placeholder="Enter ISRC code (e.g., USABC1234567)"
-                helper="Provide a valid ISRC for your track"
               />
 
               <FieldGroup
@@ -113,17 +139,35 @@ const SocialIsrcSubmitForm = () => {
 
               {/* Confirm */}
               <div className="flex items-start gap-2">
-                <Field type="checkbox" name="confirmSocial" className="mt-1 accent-red-500" />
-                <span className="text-sm text-gray-700">I confirm that all information provided is accurate</span>
+                <Field
+                  type="checkbox"
+                  name="confirmSocial"
+                  className="mt-1 accent-[#29B6F6]"
+                />
+                <span className="text-sm text-white">
+                  I confirm that all information provided is accurate
+                </span>
               </div>
-              <ErrorMessage name="confirmSocial" component="p" className="text-red-600 text-xs" />
+              <ErrorMessage
+                name="confirmSocial"
+                component="p"
+                className="text-red-400 text-xs"
+              />
 
               {/* Buttons */}
               <div className="flex justify-end gap-3 pt-2">
-                <button type="reset" className="border px-5 py-2 text-sm rounded-md text-gray-700 hover:bg-gray-50">
+                <button
+                  type="reset"
+                  className="border border-white/20 text-white px-5 py-2 rounded-md hover:bg-white/5"
+                >
                   Reset Form
                 </button>
-                <button type="submit" className="bg-red-600 hover:bg-red-700 text-white px-5 py-2 text-sm rounded-md font-medium">
+
+                <button
+                  type="submit"
+                  className="bg-gradient-to-r from-[#29B6F6] to-[#0288D1] 
+                  hover:opacity-90 text-white px-5 py-2 rounded-md font-medium"
+                >
                   Submit Details
                 </button>
               </div>
@@ -140,16 +184,17 @@ const SocialIsrcSubmitForm = () => {
 export default SocialIsrcSubmitForm;
 
 
-// Reusable Field Component
-const FieldGroup = ({ label, name, placeholder, helper }) => (
+// Reusable Field Component (THEMED)
+const FieldGroup = ({ label, name, placeholder }) => (
   <div>
-    <label className="block text-sm font-semibold text-gray-800 mb-1">{label}</label>
+    <label className="block text-sm font-semibold text-white mb-1">{label}</label>
     <Field
       name={name}
       placeholder={placeholder}
-      className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:border-red-500 focus:ring-1 focus:ring-red-500"
+      className="w-full bg-[#2c2f4a] text-white placeholder-[#9bb6d8]
+      border border-transparent rounded-md px-4 py-2 
+      focus:outline-none focus:ring-1 focus:ring-[#29B6F6]"
     />
-    {helper && <p className="text-xs text-gray-500 mt-1">{helper}</p>}
-    <ErrorMessage name={name} component="p" className="text-red-600 text-xs mt-1" />
+    <ErrorMessage name={name} component="p" className="text-red-400 text-xs mt-1" />
   </div>
 );

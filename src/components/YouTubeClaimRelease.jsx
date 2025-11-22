@@ -45,18 +45,23 @@ const YouTubeClaimRelease = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-[#020726] flex flex-col pb-20">
+
       {/* Header */}
-      <div className="bg-gray-100 py-3 px-10 flex justify-between items-center">
-        <h1 className="text-base font-semibold text-gray-800">YouTube Claim Release</h1>
-        <p className="text-sm text-gray-500">
-          Home / <span className="text-red-600">YouTube Claim Release</span>
+      <div className="py-4 px-10 flex justify-between items-center">
+        <h1 className="text-xl font-semibold text-white">
+          YouTube Claim Release
+        </h1>
+
+        <p className="text-sm text-white">
+          Home <span className="text-[#29B6F6]">/ YouTube Claim Release</span>
         </p>
       </div>
 
-      {/* Form */}
-      <div className="flex justify-start py-8 px-4 ml-10">
-        <div className="bg-white rounded-xl shadow-2xl p-10 w-full max-w-5xl border border-gray-200">
+      {/* Form Section */}
+      <div className="flex justify-start px-10">
+        <div className="bg-[#0a1039] rounded-xl shadow-2xl p-10 w-full max-w-5xl border border-white/10">
+
           <Formik
             initialValues={{
               artistName: "",
@@ -73,6 +78,7 @@ const YouTubeClaimRelease = () => {
           >
             {({ setFieldValue }) => (
               <Form className="space-y-6">
+
                 {/* Artist + Track */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FieldGroup
@@ -96,13 +102,14 @@ const YouTubeClaimRelease = () => {
 
                 {/* Claim Type */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-800 mb-1">
+                  <label className="block text-sm font-semibold text-white mb-1">
                     Claim Type *
                   </label>
                   <Field
                     as="select"
                     name="claimType"
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-red-500"
+                    className="w-full bg-[#2c2f4a] text-white placeholder-[#9bb6d8] 
+                    border border-transparent rounded-md px-4 py-2 focus:ring-1 focus:ring-[#29B6F6]"
                   >
                     <option value="">Select claim type</option>
                     <option value="copyright">Copyright Claim</option>
@@ -110,11 +117,7 @@ const YouTubeClaimRelease = () => {
                     <option value="manual">Manual Claim</option>
                     <option value="other">Other</option>
                   </Field>
-                  <ErrorMessage
-                    name="claimType"
-                    component="p"
-                    className="text-red-600 text-xs mt-1"
-                  />
+                  <ErrorMessage name="claimType" component="p" className="text-red-400 text-xs mt-1" />
                 </div>
 
                 {/* Claim Details */}
@@ -126,16 +129,19 @@ const YouTubeClaimRelease = () => {
 
                 {/* Screenshot Upload */}
                 <div>
-                  <label className="block text-sm font-semibold mb-1">Screenshot</label>
+                  <label className="block text-sm font-semibold text-white mb-2">
+                    Screenshot
+                  </label>
                   <input
                     type="file"
                     accept="image/*"
                     onChange={(e) => setFieldValue("screenshot", e.target.files[0])}
-                    className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm cursor-pointer 
-                        file:bg-gray-200 file:px-3 file:py-1 file:rounded-md file:border-0 hover:bg-gray-100"
+                    className="w-full bg-[#2c2f4a] border border-[#2c2f4a] rounded-md px-4 py-2
+                    file:bg-[#1f2238] file:text-white file:px-3 file:py-1 file:rounded-md 
+                    text-white cursor-pointer"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Upload screenshot of the claim (optional but recommended)
+                  <p className="text-xs text-[#9bb6d8] mt-1">
+                    Upload screenshot of the claim (optional)
                   </p>
                 </div>
 
@@ -149,28 +155,35 @@ const YouTubeClaimRelease = () => {
 
                 {/* Confirm */}
                 <div className="flex items-start gap-2">
-                  <Field type="checkbox" name="confirm" className="mt-1 accent-red-500" />
-                  <span className="text-sm text-gray-700">
+                  <Field type="checkbox" name="confirm" className="mt-1 accent-[#29B6F6]" />
+                  <span className="text-sm text-white">
                     I confirm all information provided is accurate
                   </span>
                 </div>
-                <ErrorMessage name="confirm" component="p" className="text-red-600 text-xs" />
+                <ErrorMessage name="confirm" component="p" className="text-red-400 text-xs" />
 
                 {/* Buttons */}
                 <div className="flex justify-end gap-3">
-                  <button className="border px-5 py-2 rounded-md text-gray-700">
+                  <button
+                    type="reset"
+                    className="border border-white/20 text-white px-5 py-2 rounded-md"
+                  >
                     Reset
                   </button>
+
                   <button
                     type="submit"
-                    className="bg-red-600 text-white px-5 py-2 rounded-md"
+                    className="bg-gradient-to-r from-[#29B6F6] to-[#0288D1] 
+                    hover:opacity-90 text-white px-5 py-2 rounded-md"
                   >
                     Submit Claim
                   </button>
                 </div>
+
               </Form>
             )}
           </Formik>
+
         </div>
       </div>
     </div>
@@ -179,31 +192,33 @@ const YouTubeClaimRelease = () => {
 
 export default YouTubeClaimRelease;
 
-/* -------------------------
-   Reusable Components
-------------------------- */
+/* Reusable Styled Components */
 const FieldGroup = ({ label, name, placeholder }) => (
   <div>
-    <label className="block text-sm font-semibold">{label}</label>
+    <label className="block text-sm font-semibold text-white mb-1">{label}</label>
     <Field
       name={name}
       placeholder={placeholder}
-      className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-red-500"
+      className="w-full bg-[#2c2f4a] text-white placeholder-[#9bb6d8] 
+      border border-transparent rounded-md px-4 py-2 focus:ring-1 focus:ring-[#29B6F6]"
     />
-    <ErrorMessage name={name} component="p" className="text-red-600 text-xs mt-1" />
+    <ErrorMessage name={name} component="p" className="text-red-400 text-xs mt-1" />
   </div>
 );
 
 const TextAreaGroup = ({ label, name, placeholder, rows = 4 }) => (
   <div>
-    <label className="block text-sm font-semibold">{label}</label>
+    <label className="block text-sm font-semibold text-white mb-1">{label}</label>
     <Field
       as="textarea"
       name={name}
       rows={rows}
       placeholder={placeholder}
-      className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-red-500"
+      className="w-full bg-[#2c2f4a] text-white placeholder-[#9bb6d8]
+      border border-transparent rounded-md px-4 py-2 focus:ring-1 focus:ring-[#29B6F6]"
     />
-    <ErrorMessage name={name} component="p" className="text-red-600 text-xs mt-1" />
+    <ErrorMessage name={name} component="p" className="text-red-400 text-xs mt-1" />
   </div>
 );
+
+

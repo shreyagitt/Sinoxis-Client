@@ -10,15 +10,13 @@ const validationSchema = Yup.object({
 });
 
 const YouTubeOACRequestForm = () => {
-  const baseUrl = import.meta.env.VITE_API_BASE_URL; // 🔥 API BASE URL
+  const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
   const handleSubmit = async (values, { resetForm }) => {
     try {
       const res = await fetch(`${baseUrl}/client/youtube-oac`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
       });
 
@@ -39,22 +37,22 @@ const YouTubeOACRequestForm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      
+    <div className="min-h-screen bg-[#020726] flex flex-col pb-20">
+
       {/* Breadcrumb Header */}
-      <div className="bg-gray-100 py-3 px-10 flex justify-between items-center">
-        <h2 className="text-base md:text-lg font-semibold text-gray-800">
+      <div className="py-4 px-10 flex justify-between items-center">
+        <h2 className="text-xl font-semibold text-white">
           YouTube OAC Request Form
         </h2>
-        <div className="text-sm text-gray-500">
-          Home <span className="text-red-600"> / YouTube OAC Request Form</span>
+
+        <div className="text-sm text-white">
+          Home <span className="text-[#29B6F6]"> / YouTube OAC Request Form</span>
         </div>
       </div>
 
       {/* Form Container */}
-      <div className="flex justify-start py-8 px-4 ml-10">
-        <div className="bg-white rounded-xl shadow-2xl p-10 w-full max-w-5xl border border-gray-200">
-
+      <div className="flex justify-start px-10">
+        <div className="bg-[#0a1039] rounded-xl shadow-2xl p-10 w-full max-w-5xl border border-white/10">
 
           <Formik
             initialValues={{
@@ -68,33 +66,29 @@ const YouTubeOACRequestForm = () => {
           >
             <Form className="space-y-6">
 
-              {/* Channel Name */}
               <FieldGroup
                 label="YouTube Channel Name"
                 name="channelName"
-                placeholder="Enter YouTube channel name"
+                placeholder="Enter youtube channel name"
               />
 
-              {/* Channel URL */}
               <FieldGroup
-                label="YouTube Channel URL"
+                label="YouTube Channel Url"
                 name="channelUrl"
                 placeholder="https://www.youtube.com/channel..."
               />
 
-              {/* Topic URL */}
               <FieldGroup
-                label="YouTube Topic Channel URL"
+                label="YouTube Topic Channel Url"
                 name="topicUrl"
-                placeholder="YouTube Topic Channel URL"
+                placeholder="YouTube Topic Channel Url"
               />
 
-              {/* Official Video URL */}
               <FieldGroup
                 label={
                   <>
                     URL of Official Video or Art Track we distributed{" "}
-                    <span className="text-red-600">*</span>
+                    <span className="text-red-400">*</span>
                   </>
                 }
                 name="officialVideoUrl"
@@ -104,7 +98,7 @@ const YouTubeOACRequestForm = () => {
               {/* Submit Button */}
               <button
                 type="submit"
-                className="bg-red-600 hover:bg-red-700 text-white font-semibold rounded-md px-6 py-2 text-base transition"
+                className="bg-gradient-to-r from-[#29B6F6] to-[#0288D1] hover:opacity-90 text-white font-semibold rounded-md px-6 py-2 text-base transition"
               >
                 Submit Request
               </button>
@@ -120,20 +114,19 @@ const YouTubeOACRequestForm = () => {
 
 export default YouTubeOACRequestForm;
 
-
-// Reusable Field Group Component
+/* Reusable Field Group Component */
 const FieldGroup = ({ label, name, placeholder }) => (
   <div>
-    <label className="block text-sm font-semibold text-gray-800 mb-1">{label}</label>
+    <label className="block text-sm font-semibold text-white mb-1">{label}</label>
     <Field
       name={name}
       placeholder={placeholder}
-      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-red-500 text-base"
+      className="w-full bg-[#2c2f4a] text-white placeholder-[#9bb6d8] border border-transparent rounded-md px-4 py-2 focus:outline-none focus:ring-1 focus:ring-[#29B6F6]"
     />
     <ErrorMessage
       name={name}
       component="div"
-      className="text-red-600 text-xs mt-1"
+      className="text-red-400 text-xs mt-1"
     />
   </div>
 );

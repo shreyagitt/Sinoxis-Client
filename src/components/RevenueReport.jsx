@@ -1,177 +1,275 @@
-import React from "react";
-import { DollarSign, Music, Download, Award, Eye, DownloadCloud } from "lucide-react";
+// src/pages/RevenueReports.jsx
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-const RevenueReport = () => {
+/**
+ * RevenueReports.jsx
+ */
+
+const TRANSACTIONS = [
+  { source: "YouTube", date: "01 Nov 2025", amount: "+598.44 ₹", period: "January 2025", type: "in" },
+  { source: "Facebook", date: "01 Nov 2025", amount: "+598.44 ₹", period: "January 2025", type: "in" },
+  { source: "Money Withdraw", date: "01 Nov 2025", amount: "+598.44 ₹", period: "January 2025", type: "withdraw", status: "Pending" },
+  { source: "Money Withdraw", date: "01 Nov 2025", amount: "+598.44 ₹", period: "January 2025", type: "withdraw", status: "Failed" },
+  { source: "Money Withdraw", date: "01 Nov 2025", amount: "+598.44 ₹", period: "January 2025", type: "withdraw", status: "Paid" },
+  { source: "Spotify", date: "01 Nov 2025", amount: "+598.44 ₹", period: "January 2025", type: "in" },
+];
+
+const StatusPill = ({ status }) => {
+  if (!status) return null;
+
+  const base =
+    "inline-block min-w-[80px] text-center px-3 py-1 rounded-full text-sm font-medium";
+
+  const colors = {
+    Pending: "bg-yellow-400 text-black",
+    Failed: "bg-red-600 text-white",
+    Paid: "bg-green-400 text-black",
+    Released: "bg-green-400 text-black",
+  };
+
   return (
-    <div className="p-8 bg-[#f7f9fc] min-h-screen space-y-8">
+    <span className={`${base} ${colors[status] || "bg-gray-400 text-black"}`}>
+      {status}
+    </span>
+  );
+};
 
-      {/* Page Header */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold text-gray-800">Revenue Reports</h1>
-        <p className="text-sm text-gray-500">Home / <span className="text-red-600">Revenue Reports</span></p>
+export default function RevenueReports() {
+  const navigate = useNavigate();
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [withdrawAmount, setWithdrawAmount] = useState("");
+
+  const MIN_WITHDRAW = 1000;
+  const balance = 819.11;
+  const withdrawable = 1050;
+
+  const withdrawAmtNum = parseFloat(withdrawAmount) || 0;
+  const canWithdraw =
+    withdrawAmtNum >= MIN_WITHDRAW && withdrawAmtNum <= withdrawable;
+
+  const openWithdraw = () => setShowWithdrawModal(true);
+  const closeWithdraw = () => {
+    setShowWithdrawModal(false);
+    setWithdrawAmount("");
+  };
+
+  const goToBankDetails = () => navigate("/settings/bank-details");
+
+  const submitWithdraw = (e) => {
+    e.preventDefault();
+    if (!canWithdraw) return;
+    alert(`Withdraw requested: ₹${withdrawAmtNum}`);
+    closeWithdraw();
+  };
+
+  const formatCurrencyBig = (v) => `₹ ${v.toFixed(2)}`;
+
+  return (
+    <div className="min-h-screen bg-[#020726] text-white px-6 md:px-12 py-8">
+      {/* Page header */}
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-3xl font-semibold">Revenue Reports</h1>
+        <div className="text-sm text-gray-300">
+          Home <span className="text-[#29B6F6]"> / Revenue Reports</span>
+        </div>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
-        {[
-          { title: "Total Revenue", amount: "$127,890", change: "+12.5%", icon: <DollarSign />, color: "text-emerald-500" },
-          { title: "Streaming Revenue", amount: "$89,452", change: "+8.3%", icon: <Music />, color: "text-red-500" },
-          { title: "Downloads Revenue", amount: "$23,765", change: "-2.1%", icon: <Download />, color: "text-blue-500" },
-          { title: "Royalties", amount: "$14,673", change: "+5.7%", icon: <Award />, color: "text-yellow-500" },
-        ].map((item, i) => (
-          <div key={i} className="bg-white rounded-xl shadow-md border border-gray-100 p-6 relative">
-            <div className={`absolute top-5 right-5 text-3xl opacity-80 ${item.color}`}>
-  {item.icon}
+      {/* Card */}
+      <div className="bg-[#0a1039] border border-white/10 rounded-xl p-8 md:p-10 shadow-lg">
+        {/* Balance */}
+        <div className="flex items-start justify-between mb-8">
+          <div>
+            <div className="text-sm text-gray-300 mb-3">Balance Available</div>
+
+            <div className="flex items-baseline gap-4">
+              <span className="text-3xl font-extrabold">₹</span>
+              <span className="text-3xl font-extrabold">{balance.toFixed(2)}</span>
+            </div>
+          </div>
+
+          <button
+            onClick={openWithdraw}
+            className="rounded-full border border-[#29B6F6] px-4 py-2 text-sm text-[#29B6F6] hover:bg-[#29B6F6]/10"
+          >
+            Withdraw
+          </button>
+        </div>
+
+        {/* Transactions header */}
+        <div className="text-lg font-bold mb-6">Transactions</div>
+
+        {/* Transactions list */}
+        <div className="space-y-6">
+          {TRANSACTIONS.map((t, idx) => (
+            <div
+              key={idx}
+              className="grid grid-cols-12 items-center gap-4"
+            >
+              {/* Source */}
+              <div className="col-span-5 flex items-center gap-4 text-gray-200">
+                {t.type === "in" ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24">
+                    <path
+                      d="M7 7L17 17M17 17V7M17 17H7"
+                      stroke="#15b65b"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24">
+                    <path
+                      d="M17 17L7 7M7 7V16M7 7H16"
+                      stroke="#9aa4c5"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                )}
+
+                <span className="text-base">{t.source}</span>
+
+                {t.status && <StatusPill status={t.status} />}
+              </div>
+
+              {/* Date */}
+              <div className="col-span-2 text-gray-300">{t.date}</div>
+
+              {/* Amount */}
+              <div className="col-span-3 text-right">
+                {/* ALL amounts green as you requested */}
+                <div className="text-green-400 font-semibold">{t.amount}</div>
+                <div className="text-xs text-gray-400 italic">{t.period}</div>
+              </div>
+
+              {/* Action */}
+<div className="col-span-2 flex justify-end">
+  <button className="p-2 hover:bg-white/10 rounded-md">
+
+    {/* Download Icon */}
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      {/* Arrow down */}
+      <path
+        d="M12 3v10"
+        stroke="#ffffff"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+
+      <path
+        d="M8 11l4 4 4-4"
+        stroke="#ffffff"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+
+      {/* Tray / Base line */}
+      <path
+        d="M5 17h14"
+        stroke="#ffffff"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+
+  </button>
 </div>
 
-            <p className="text-gray-600 text-sm">{item.title}</p>
-            <h2 className="text-3xl font-semibold text-gray-800 mt-1">{item.amount}</h2>
-            <p className={`mt-2 text-sm flex items-center gap-1 ${item.change.includes("+") ? "text-emerald-600" : "text-orange-500"}`}>
-              ● {item.change} <span className="text-gray-500">Last 30 days</span>
-            </p>
-          </div>
-        ))}
-      </div>
-
-      {/* Platform Performance */}
-      <div className="bg-white shadow-md border border-gray-100 rounded-xl overflow-hidden">
-        <div className="p-5 flex justify-between items-center">
-          <h3 className="text-lg font-semibold text-gray-800">Platform Performance</h3>
-          <select className="border rounded-lg px-3 py-1 text-sm text-gray-600">
-            <option>Last 7 Days</option>
-            <option selected>Last 30 Days</option>
-            <option>Last 90 Days</option>
-            <option>This Year</option>
-          </select>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-gray-700">
-            <thead className="bg-gray-50 text-gray-500">
-              <tr>
-                <th className="text-left p-4">Platform</th>
-                <th className="p-4 text-center">Streams</th>
-                <th className="p-4 text-center">Revenue</th>
-                <th className="p-4 text-center">Growth</th>
-                <th className="p-4 text-right">Market Share</th>
-              </tr>
-            </thead>
-
-            <tbody className="divide-y">
-              {[
-                { name: "Spotify", streams: "2.4M", revenue: "$45,230", growth: "+12.5%", share: 42, color: "bg-red-500" },
-                { name: "Apple Music", streams: "1.8M", revenue: "$38,765", growth: "+8.3%", share: 35, color: "bg-emerald-500" },
-                { name: "YouTube Music", streams: "1.2M", revenue: "$22,450", growth: "+15.2%", share: 23, color: "bg-blue-600" },
-                { name: "Amazon Music", streams: "856K", revenue: "$15,230", growth: "-2.1%", share: 16, color: "bg-yellow-500" },
-              ].map((row, i) => (
-                <tr key={i} className="hover:bg-gray-50">
-                  <td className="p-4 font-medium text-gray-800">{row.name}</td>
-                  <td className="p-4 text-center">{row.streams}</td>
-                  <td className="p-4 text-center">{row.revenue}</td>
-                  <td className={`p-4 text-center font-medium ${row.growth.includes("+") ? "text-emerald-600" : "text-orange-500"}`}>
-                    {row.growth}
-                  </td>
-                  <td className="p-4 text-right flex items-center gap-3 justify-end">
-                    <div className="w-32 bg-gray-200 rounded-full h-2">
-                      <div className={`${row.color} h-2 rounded-full`} style={{ width: row.share + "%" }}></div>
-                    </div>
-                    <span>{row.share}%</span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Revenue By Artist */}
-      <div className="bg-white shadow-md rounded-xl border border-gray-100 overflow-hidden">
-        <div className="p-5 flex justify-between items-center">
-          <h3 className="text-lg font-semibold text-gray-800">Revenue by Artist</h3>
-          <button className="bg-red-600 hover:bg-red-700 text-white px-4 py-1 text-sm rounded-md">Export Report</button>
-        </div>
-
-        <table className="w-full text-sm text-gray-700">
-          <thead className="bg-gray-50 text-gray-600">
-            <tr>
-              <th className="p-4 text-left">Artist</th>
-              <th className="p-4 text-left">Total Revenue</th>
-              <th className="p-4 text-center">Streaming</th>
-              <th className="p-4 text-center">Downloads</th>
-              <th className="p-4 text-center">Royalties</th>
-              <th className="p-4 text-center">Growth</th>
-              <th className="p-4 text-center">Actions</th>
-            </tr>
-          </thead>
-
-          <tbody className="divide-y">
-            {[
-              ["Luna Gray", "Pop Artist", "$45,230", "$38,450", "$4,120", "$2,660", "+15.2%", "bg-blue-600"],
-              ["Arion Keys", "R&B Artist", "$38,765", "$32,890", "$3,450", "$2,425", "+8.7%", "bg-green-600"],
-              ["DJ Nova", "EDM Producer", "$28,450", "$24,120", "$2,890", "$1,440", "-2.3%", "bg-yellow-500"],
-              ["Violet Sky", "Indie Artist", "$22,890", "$18,765", "$2,340", "$1,785", "+12.1%", "bg-red-500"],
-              ["Neo Wave", "Synthpop Band", "$18,345", "$15,230", "$1,890", "$1,225", "+5.8%", "bg-blue-400"],
-            ].map((row, i) => (
-              <tr key={i} className="hover:bg-gray-50">
-                <td className="p-4 flex items-center gap-3">
-                  <span className={`w-9 h-9 flex items-center justify-center text-white text-xs rounded-full ${row[7]}`}>
-                    {row[0].split(" ").map(word => word[0]).join("")}
-                  </span>
-                  <div>
-                    <p className="font-medium text-gray-800">{row[0]}</p>
-                    <p className="text-gray-500 text-xs">{row[1]}</p>
-                  </div>
-                </td>
-
-                <td className="p-4 font-medium text-red-600">{row[2]}</td>
-                <td className="p-4 text-center">{row[3]}</td>
-                <td className="p-4 text-center">{row[4]}</td>
-                <td className="p-4 text-center">{row[5]}</td>
-
-                <td className={`p-4 text-center`}>
-                  <span className={`px-3 py-1 text-xs rounded-full ${row[6].includes("+") ? "bg-emerald-100 text-emerald-600" : "bg-yellow-100 text-yellow-600"}`}>
-                    {row[6]}
-                  </span>
-                </td>
-
-                <td className="p-4 flex gap-4 justify-center text-gray-600">
-                  <Eye className="cursor-pointer hover:text-red-600" size={17} />
-                  <DownloadCloud className="cursor-pointer hover:text-blue-600" size={17} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Top Performing Tracks */}
-      <div className="bg-white shadow-md  rounded-xl p-6">
-        <h3 className="text-lg font-semibold text-gray-800 bg-gray-50 mb-4">Top Performing Tracks</h3>
-
-        <div className="space-y-4 ">
-          {[
-            ["Midnight Dreams", "Luna Gray", "$8,450", "#1", "bg-red-600"],
-            ["Echoes of You", "Arion Keys", "$7,230", "#2", "bg-green-600"],
-            ["Lost Frequency", "DJ Nova", "$6,890", "#3", "bg-blue-600"],
-            ["Golden Waves", "Violet Sky", "$5,670", "#4", "bg-yellow-500"],
-            ["City Lights", "Neo Wave", "$4,980", "#5", "bg-emerald-500"],
-          ].map((track, i) => (
-            <div key={i} className="flex justify-between items-center border-b pb-3">
-              <div>
-                <p className="font-medium text-gray-800">{track[0]}</p>
-                <p className="text-gray-500 text-xs">{track[1]} • {track[2]}</p>
-              </div>
-              <span className={`${track[4]} text-white text-xs px-3 py-1 rounded-md`}>
-                {track[3]}
-              </span>
             </div>
           ))}
         </div>
       </div>
 
+      {/* ================== WITHDRAW MODAL ================== */}
+      {showWithdrawModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
+          <div className="w-full max-w-2xl bg-[#0b1138] p-6 rounded-xl border border-white/10 shadow-xl">
+            <h2 className="text-xl font-semibold text-white mb-4">
+              Withdraw Money
+            </h2>
+
+            <hr className="border-white/10 mb-6" />
+
+            <form onSubmit={submitWithdraw}>
+              {/* Withdrawable */}
+              <div className="flex items-center justify-between mb-6">
+                <span className="text-lg text-white">Withdrawable Amount</span>
+                <span className="text-xl text-[#15d196] font-semibold">
+                  {formatCurrencyBig(withdrawable)}
+                </span>
+              </div>
+
+              {/* Enter Amount */}
+              <div className="flex items-center justify-between mb-4">
+                <label className="text-white text-lg">Enter Amount</label>
+
+                <div className="flex flex-col items-end">
+                  {/* Input + ₹ button */}
+                  <div className="relative flex items-center">
+                    <input
+                      type="number"
+                      value={withdrawAmount}
+                      onChange={(e) => setWithdrawAmount(e.target.value)}
+                      placeholder="Enter amount"
+                      className="px-4 py-2 pr-10 bg-[#1a204b] text-white border border-white/20 rounded-md w-40 text-center text-lg outline-none"
+                    />
+
+                    <button
+                      type="button"
+                      className="absolute right-2 text-[#29B6F6] bg-[#29B6F6]/20 px-2 py-1 rounded text-sm"
+                    >
+                      ₹
+                    </button>
+                  </div>
+
+                  {/* Minimum always shown */}
+                  <span className="text-xs text-gray-400 mt-1">
+                    Minimum withdrawal: ₹1000
+                  </span>
+                </div>
+              </div>
+
+              {/* Bank */}
+              <div className="flex items-center justify-between text-sm text-gray-300 mb-4">
+                <span>To Bank Name, 000000009227</span>
+
+                <button
+                  type="button"
+                  onClick={goToBankDetails}
+                  className="text-[#29B6F6]"
+                >
+                  Change Bank
+                </button>
+              </div>
+
+              {/* Validation */}
+              {withdrawAmtNum > withdrawable && (
+                <div className="bg-[#4a2b2b] border border-[#7a4a4a] text-[#f7d384] px-4 py-3 rounded-md text-sm mb-6">
+                  You cannot withdraw more than your withdrawable balance.
+                </div>
+              )}
+
+              <hr className="border-white/10 mb-6" />
+
+              {/* Button */}
+              <button
+                type="submit"
+                disabled={!canWithdraw}
+                className={`w-full py-3 rounded-md font-semibold text-white ${
+                  canWithdraw
+                    ? "bg-gradient-to-r from-[#29B6F6] to-[#0288D1]"
+                    : "bg-gray-700 opacity-60 cursor-not-allowed"
+                }`}
+              >
+                WITHDRAW MONEY
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
-};
-
-export default RevenueReport;
+}
 

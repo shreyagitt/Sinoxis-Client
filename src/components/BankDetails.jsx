@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 
-// Validation schema
 const BankDetailsSchema = Yup.object().shape({
   accountName: Yup.string().required("Account holder name is required"),
   accountNumber: Yup.string().required("Account number is required"),
@@ -28,25 +27,17 @@ const BankDetails = () => {
 
   const [loading, setLoading] = useState(true);
 
-  // 🔥 GET BANK DETAILS
   const fetchBankDetails = async () => {
     try {
       const token = localStorage.getItem("token");
-
       const res = await fetch(`${baseUrl}/client/bank/me`, {
         method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       const data = await res.json();
-
       if (data.success && data.data) {
-        setInitialValues({
-          ...data.data,
-          confirm: false,
-        });
+        setInitialValues({ ...data.data, confirm: false });
       }
     } catch (error) {
       console.error("Error fetching bank details:", error);
@@ -59,7 +50,6 @@ const BankDetails = () => {
     fetchBankDetails();
   }, []);
 
-  // 🔥 SUBMIT (UPSERT) BANK DETAILS
   const handleSubmit = async (values) => {
     try {
       const token = localStorage.getItem("token");
@@ -88,97 +78,128 @@ const BankDetails = () => {
   };
 
   if (loading)
-    return <div className="p-10 text-center text-xl">Loading Bank Details...</div>;
+    return <div className="p-10 text-center text-xl text-white">Loading…</div>;
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] flex justify-center p-5">
-      <div className="w-full max-w-6xl">
+    <div className="min-h-screen bg-[#020726] text-white p-8">
 
-        {/* Page Header */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-semibold text-gray-800">Bank Details</h1>
-        </div>
+      {/* TITLE + BREADCRUMB */}
+      <div className="flex justify-between mb-8 px-2">
+        <h1 className="text-3xl font-semibold">Bank Details</h1>
 
-        {/* Form Card */}
-        <div className="bg-white rounded-xl shadow-2xl p-10 border">
+        <p className="text-sm text-gray-300">
+          Home / <span className="text-[#29B6F6]">Bank Details</span>
+        </p>
+      </div>
 
-          <h5 className="text-xl font-semibold mb-2 text-gray-500">Bank Details</h5>
+      {/* MAIN FORM CONTAINER */}
+      <div className="bg-[#0a1039] rounded-xl shadow-2xl p-10 w-full max-w-5xl border border-white/10">
 
-          <Formik
-            enableReinitialize
-            initialValues={initialValues}
-            validationSchema={BankDetailsSchema}
-            onSubmit={handleSubmit}
-          >
-            {() => (
-              <Form className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <h2 className="text-xl font-semibold mb-1">Bank Details</h2>
+        <p className="text-gray-300 mb-6">
+          Provide your bank details accurately. All information is securely encrypted.
+        </p>
 
-                {/* Account Holder Name */}
-                <div>
-                  <label className="block mb-2 font-medium">Account Holder Name</label>
-                  <Field name="accountName" type="text" className="w-full p-3 border rounded-lg" />
-                  <ErrorMessage name="accountName" component="div" className="text-red-600 text-sm" />
-                </div>
+        <Formik
+          enableReinitialize
+          initialValues={initialValues}
+          validationSchema={BankDetailsSchema}
+          onSubmit={handleSubmit}
+        >
+          {() => (
+            <Form className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                {/* Account Number */}
-                <div>
-                  <label className="block mb-2 font-medium">Account Number</label>
-                  <Field name="accountNumber" type="text" className="w-full p-3 border rounded-lg" />
-                  <ErrorMessage name="accountNumber" component="div" className="text-red-600 text-sm" />
-                </div>
+              {/* Account Holder Name */}
+              <FieldBox
+                label="Account Holder Name"
+                name="accountName"
+                placeholder="Enter account holder name"
+              />
 
-                {/* Bank Name */}
-                <div>
-                  <label className="block mb-2 font-medium">Bank Name</label>
-                  <Field name="bankName" type="text" className="w-full p-3 border rounded-lg" />
-                  <ErrorMessage name="bankName" component="div" className="text-red-600 text-sm" />
-                </div>
+              {/* Account Number */}
+              <FieldBox
+                label="Account Number"
+                name="accountNumber"
+                placeholder="Enter account number"
+              />
 
-                {/* IFSC Code */}
-                <div>
-                  <label className="block mb-2 font-medium">IFSC Code</label>
-                  <Field name="ifscCode" type="text" className="w-full p-3 border rounded-lg" />
-                  <ErrorMessage name="ifscCode" component="div" className="text-red-600 text-sm" />
-                </div>
+              {/* Bank Name */}
+              <FieldBox
+                label="Bank Name"
+                name="bankName"
+                placeholder="Enter bank name"
+              />
 
-                {/* Bank Branch */}
-                <div>
-                  <label className="block mb-2 font-medium">Bank Branch</label>
-                  <Field name="bankBranch" type="text" className="w-full p-3 border rounded-lg" />
-                </div>
+              {/* IFSC Code */}
+              <FieldBox
+                label="IFSC Code"
+                name="ifscCode"
+                placeholder="Enter IFSC code"
+                helper="Example: SBIN0001234"
+              />
 
-                {/* PAN Number */}
-                <div>
-                  <label className="block mb-2 font-medium">PAN Number</label>
-                  <Field name="panNumber" type="text" className="w-full p-3 border rounded-lg" />
-                </div>
+              {/* Bank Branch */}
+              <FieldBox
+                label="Bank Branch (Optional)"
+                name="bankBranch"
+                placeholder="Enter bank branch"
+              />
 
-                {/* Checkbox */}
-                <div className="col-span-2">
-                  <div className="flex items-center gap-2">
-                    <Field type="checkbox" name="confirm" className="w-4 h-4 accent-red-600" />
-                    <label className="text-gray-700 text-sm">
-                      I confirm that the above bank details are correct.
-                    </label>
-                  </div>
-                  <ErrorMessage name="confirm" component="div" className="text-red-600 text-sm" />
-                </div>
+              {/* PAN Number */}
+              <FieldBox
+                label="PAN Number (Optional)"
+                name="panNumber"
+                placeholder="Enter PAN number"
+              />
 
-                {/* Submit Button */}
-                <div className="col-span-2">
-                  <button type="submit" className="bg-red-600 text-white px-8 py-2 rounded-lg">
-                    Save Details
-                  </button>
-                </div>
+              {/* CONFIRMATION CHECKBOX */}
+              <div className="col-span-2 flex items-start gap-2 mt-3">
+                <Field type="checkbox" name="confirm" className="mt-1 w-4 h-4 accent-[#29B6F6]" />
+                <label className="text-sm text-gray-300">
+                  I confirm that the above bank details are correct.
+                </label>
+              </div>
+              <ErrorMessage name="confirm" component="div" className="text-red-400 text-sm" />
 
-              </Form>
-            )}
-          </Formik>
+              {/* SUBMIT BUTTON */}
+              <div className="col-span-2 mt-4">
+                <button
+                  type="submit"
+                  className="px-6 py-2 text-white font-semibold rounded-md 
+                  bg-gradient-to-r from-[#29B6F6] to-[#0288D1] hover:opacity-90"
+                >
+                  Submit
+                </button>
+              </div>
 
-        </div>
+            </Form>
+          )}
+        </Formik>
+
       </div>
     </div>
   );
 };
 
 export default BankDetails;
+
+/* Reusable Input Component */
+const FieldBox = ({ label, name, placeholder, helper }) => (
+  <div>
+    <label className="block text-sm font-semibold mb-1 text-white">
+      {label}
+    </label>
+
+    <Field
+      name={name}
+      placeholder={placeholder}
+      className="w-full bg-[#2c2f4a] text-white placeholder-gray-400 
+      border border-transparent rounded-md px-4 py-2
+      focus:outline-none focus:ring-1 focus:ring-[#29B6F6]"
+    />
+
+    {helper && <p className="text-xs text-gray-400 mt-1">{helper}</p>}
+
+    <ErrorMessage name={name} component="p" className="text-red-400 text-xs mt-1" />
+  </div>
+);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   DollarSign,
   Music,
@@ -7,386 +7,464 @@ import {
   ArrowUpCircle,
   ArrowDownCircle,
   BarChart2,
-  Download as DownloadIcon,
   Search,
   Play,
   Youtube,
   Headphones,
 } from "lucide-react";
-import axios from "axios";
 
-const TotalRevenueAnalytics = () => {
-   const baseUrl = import.meta.env.VITE_API_BASE_URL;
+// =======================
+// STATIC DATA
+// =======================
+const overview = {
+  totalRevenue: 347892,
+  totalChange: "18.4%",
+  growthAmount: 54120,
+  streamingRevenue: 278314,
+  streamingChange: "22.1%",
+  streamingPercent: 80,
+  streamingGrowth: 50289,
+  downloadsRevenue: 42568,
+  downloadsChange: "3.2%",
+  royaltiesRevenue: 27010,
+  royaltiesChange: "8.7%",
+  yearToDate: 2100000,
+  currentMonth: 347000,
+  growthRate: "18.4%",
+  revenueSources: 84,
+  distribution: {
+    streaming: 68.4,
+    downloads: 12.2,
+    royalties: 7.8,
+  },
+  platforms: [
+    {
+      icon: "spotify",
+      name: "Spotify",
+      category: "Music Streaming",
+      streams: "84.2M",
+      revenue: 124568,
+      avgPerStream: 0.0048,
+      growth: 18.2,
+      marketShare: 44.8,
+    },
+    {
+      icon: "apple",
+      name: "Apple Music",
+      category: "Music Streaming",
+      streams: "62.5M",
+      revenue: 98745,
+      avgPerStream: 0.0072,
+      growth: 12.4,
+      marketShare: 35.5,
+    },
+    {
+      icon: "youtube",
+      name: "YouTube Music",
+      category: "Video Streaming",
+      streams: "128.7M",
+      revenue: 42389,
+      avgPerStream: 0.0012,
+      growth: 24.7,
+      marketShare: 15.2,
+    },
+    {
+      icon: "amazon",
+      name: "Amazon Music",
+      category: "Music Streaming",
+      streams: "18.3M",
+      revenue: 12612,
+      avgPerStream: 0.0051,
+      growth: -3.1,
+      marketShare: 4.5,
+    },
+  ],
+};
 
-  const [loading, setLoading] = useState(true);
-  const [overview, setOverview] = useState(null);
+// =======================
+// FIXED Card Component
+// Accepts className
+// =======================
+const SinoxisCard = ({ children, className = "" }) => (
+  <div className={`bg-[#0a1039] border border-white/10 rounded-xl p-6 text-white shadow-sm ${className}`}>
+    {children}
+  </div>
+);
 
-  // =================== API FETCH =====================
-  const fetchOverview = async () => {
-    try {
-      const res = await axios.get(
-        `${baseUrl}/client/revenue-analytics/overview`
-      );
-      setOverview(res.data?.data);
-    } catch (err) {
-      console.error(err);
-      alert("Failed to load revenue analytics");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchOverview();
-  }, []);
-
-  // =================== LOADING UI =====================
-  if (loading || !overview) {
-    return (
-      <div className="p-10 text-center text-gray-600 text-lg">
-        Loading Revenue Analytics...
-      </div>
-    );
-  }
+export default function TotalRevenueAnalytics() {
   return (
-    <div className="p-6 md:p-8 bg-[#f7f9fc] min-h-screen space-y-8">
+    <div className="min-h-screen w-full bg-[#020726] text-white p-6 md:p-10 space-y-10">
 
       {/* PAGE HEADER */}
-      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-        <h1 className="text-2xl font-semibold text-gray-800">Total Revenue Analytics</h1>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
+        <h1 className="text-2xl md:text-3xl font-semibold">Total Revenue Analytics</h1>
 
-        <ol className="flex items-center text-sm text-gray-500 gap-2">
-          <li><a className="hover:text-red-500" href="#">Home</a></li>
+        <ol className="flex gap-2 text-sm  mt-2 md:mt-0">
+          <li><span className="hover:underline cursor-pointer">Home</span></li>
           <li>/</li>
-          <li><a className="hover:text-red-500" href="#">Revenue Reports</a></li>
+          <li><span className="hover:underline cursor-pointer">Revenue Reports</span></li>
           <li>/</li>
-          <li className="text-red-500 font-medium">Total Revenue</li>
+          <li className="text-[#29B6F6] font-medium">Total Revenue</li>
         </ol>
       </div>
 
-      {/* TIME FILTERS + EXPORT */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
-        <div className="p-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          
+      {/* FILTERS */}
+      <SinoxisCard>
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+
           <div>
-            <h5 className="text-base font-semibold text-gray-800">Revenue Overview</h5>
-            <p className="text-sm text-gray-500">
-              Comprehensive revenue analysis across all platforms and artists
+            <h2 className="text-lg font-semibold">Revenue Overview</h2>
+            <p className="text-gray-400 text-sm">
+              Comprehensive revenue analysis across all platforms & artists
             </p>
           </div>
 
-          {/* FILTER BUTTONS */}
-<div className="flex items-center">
-  <div className="inline-flex rounded-full overflow-hidden border border-red-500">
-    
-    {/* Active */}
-    <button className="px-4 py-1.5 text-sm font-medium bg-red-500 text-white transition">
-      Last 30 Days
-    </button>
+          <div className="flex items-center gap-3">
+            <div className="flex bg-transparent border border-[#29B6F6] rounded-full overflow-hidden">
+  
+  {/* ACTIVE BUTTON */}
+  <button className="px-4 py-1.5 bg-gradient-to-r from-[#29B6F6] to-[#0288D1] text-white font-medium text-sm transition-all">
+    Last 30 Days
+  </button>
 
-    {/* Inactive */}
-    <button className="px-4 py-1.5 text-sm font-medium text-red-500 bg-white hover:bg-red-500 hover:text-white transition border-l border-red-500">
-      Last 90 Days
-    </button>
+  {/* ALL OTHER BUTTONS – HOVER = FULL BLUE + WHITE */}
+  <button className="px-4 py-1.5 text-[#29B6F6] hover:bg-[#29B6F6] hover:text-white font-medium text-sm transition-all">
+    Last 90 Days
+  </button>
 
-    <button className="px-4 py-1.5 text-sm font-medium text-red-500 bg-white hover:bg-red-500 hover:text-white transition border-l border-red-500">
-      This Year
-    </button>
+  <button className="px-4 py-1.5 text-[#29B6F6] hover:bg-[#29B6F6] hover:text-white font-medium text-sm transition-all">
+    This Year
+  </button>
 
-    <button className="px-4 py-1.5 text-sm font-medium text-red-500 bg-white hover:bg-red-500 hover:text-white transition border-l border-red-500">
-      All Time
-    </button>
+  <button className="px-4 py-1.5 text-[#29B6F6] hover:bg-[#29B6F6] hover:text-white font-medium text-sm transition-all">
+    All Time
+  </button>
 
-  </div>
 </div>
 
 
-          {/* EXPORT BUTTON */}
-          <button className="inline-flex items-center gap-2 rounded-lg bg-red-500 text-white text-sm px-3 py-1.5 hover:bg-red-400">
-            <DownloadIcon size={16} />
-            Export Report
-          </button>
+            <button className="px-4 py-2 bg-gradient-to-r from-[#29B6F6] to-[#0288D1] rounded-lg text-[#020726] font-medium flex items-center gap-2">
+              <Download size={16} />
+              Export Report
+            </button>
+          </div>
 
         </div>
-      </div>
+      </SinoxisCard>
 
-      {/* REVENUE METRICS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
-        {[
-          {
-            title: "Total Revenue",
-            value: `$${overview.totalRevenue}`,
-            change: overview.totalChange,
-            changeColor: "text-emerald-600",
-            icon: <DollarSign className="w-8 h-8 text-red-500/80" />,
-            badges: [
-              ["All Platforms", "bg-red-50 text-red-500"],
-              [`+$${overview.growthAmount}`, "bg-emerald-50 text-emerald-600"],
-            ],
-          },
-          {
-            title: "Streaming Revenue",
-            value: `$${overview.streamingRevenue}`,
-            change: overview.streamingChange,
-            changeColor: "text-emerald-600",
-            icon: <Music className="w-8 h-8 text-emerald-600/80" />,
-            badges: [
-              [`${overview.streamingPercent}% of Total`, "bg-emerald-50 text-emerald-600"],
-              [`+$${overview.streamingGrowth}`, "bg-red-50 text-red-500"],
-            ],
-          },
-          {
-            title: "Digital Downloads",
-            value: `$${overview.downloadsRevenue}`,
-            change: overview.downloadsChange,
-            changeColor:
-              overview.downloadsChange.includes("-")
-                ? "text-amber-600"
-                : "text-emerald-600",
-            icon: <Download className="w-8 h-8 text-blue-600/80" />,
-            badges: [["12.2% of Total", "bg-blue-50 text-blue-600"]],
-          },
-          {
-            title: "Royalties & Licensing",
-            value: `$${overview.royaltiesRevenue}`,
-            change: overview.royaltiesChange,
-            changeColor: "text-emerald-600",
-            icon: <Award className="w-8 h-8 text-amber-500/90" />,
-            badges: [["7.8% of Total", "bg-amber-50 text-amber-600"]],
-          },
-        ].map((card, i) => (
-          <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm text-gray-600">{card.title}</p>
-                <h2 className="text-3xl font-semibold text-gray-800 mt-1">{card.value}</h2>
-                <p className="text-xs text-gray-500 mt-1">
-                  <span
-                    className={`${card.changeColor} inline-flex items-center gap-1 font-medium`}
-                  >
-                    {card.change.includes("-") ? (
-                      <ArrowDownCircle size={14} />
-                    ) : (
-                      <ArrowUpCircle size={14} />
-                    )}
-                    {card.change}
-                  </span>{" "}
-                  vs previous period
-                </p>
-              </div>
-              {card.icon}
-            </div>
+      {/* TOP METRICS */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
 
-            <div className="mt-3 flex flex-wrap gap-2">
-              {card.badges.map(([label, style], i) => (
-                <span key={i} className={`px-2.5 py-1 text-xs rounded-full ${style}`}>
-                  {label}
+        {/* Total Revenue */}
+        <SinoxisCard>
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-gray-300 text-sm">Total Revenue</p>
+              <h2 className="text-3xl font-bold mt-1">${overview.totalRevenue.toLocaleString()}</h2>
+
+              <p className="text-xs mt-2 text-gray-400">
+                <span className="text-green-300 flex items-center gap-1 font-semibold">
+                  <ArrowUpCircle size={14} /> {overview.totalChange}
                 </span>
-              ))}
+                vs previous period
+              </p>
             </div>
+
+            <DollarSign className="text-[#29B6F6] w-8 h-8" />
           </div>
-        ))}
+
+          <div className="flex gap-2 mt-4 flex-wrap">
+            <span className="px-3 py-1 rounded-full bg-[#29B6F6]/20 text-[#29B6F6] text-xs">All Platforms</span>
+            <span className="px-3 py-1 rounded-full bg-green-400/20 text-green-300 text-xs">
+              +${overview.growthAmount.toLocaleString()}
+            </span>
+          </div>
+        </SinoxisCard>
+
+        {/* Streaming Revenue */}
+        <SinoxisCard>
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-gray-300 text-sm">Streaming Revenue</p>
+              <h2 className="text-3xl font-bold mt-1">${overview.streamingRevenue.toLocaleString()}</h2>
+
+              <p className="text-xs mt-2 text-gray-400">
+                <span className="text-green-300 flex items-center gap-1 font-semibold">
+                  <ArrowUpCircle size={14} /> {overview.streamingChange}
+                </span>
+                vs previous period
+              </p>
+            </div>
+
+            <Music className="text-[#29B6F6] w-8 h-8" />
+          </div>
+
+          <div className="flex gap-2 mt-4 flex-wrap">
+            <span className="px-3 py-1 rounded-full bg-green-400/20 text-green-300 text-xs">
+              {overview.streamingPercent}% of Total
+            </span>
+            <span className="px-3 py-1 rounded-full bg-[#29B6F6]/20 text-[#29B6F6] text-xs">
+              +${overview.streamingGrowth.toLocaleString()}
+            </span>
+          </div>
+        </SinoxisCard>
+
+        {/* Digital Downloads */}
+        <SinoxisCard>
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-gray-300 text-sm">Digital Downloads</p>
+              <h2 className="text-3xl font-bold mt-1">${overview.downloadsRevenue.toLocaleString()}</h2>
+
+              <p className="text-xs mt-2 text-gray-400">
+                <span className="text-yellow-400 flex items-center gap-1 font-semibold">
+                  <ArrowDownCircle size={14} /> {overview.downloadsChange}
+                </span>
+                vs previous period
+              </p>
+            </div>
+
+            <Download className="text-[#29B6F6] w-8 h-8" />
+          </div>
+
+          <div className="flex gap-2 mt-4 flex-wrap">
+            <span className="px-3 py-1 rounded-full bg-[#29B6F6]/20 text-[#29B6F6] text-xs">12.2% of Total</span>
+            <span className="px-3 py-1 rounded-full bg-yellow-400/20 text-yellow-300 text-xs">-$1,412</span>
+          </div>
+        </SinoxisCard>
+
+        {/* Royalties */}
+        <SinoxisCard>
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-gray-300 text-sm">Royalties & Licensing</p>
+              <h2 className="text-3xl font-bold mt-1">${overview.royaltiesRevenue.toLocaleString()}</h2>
+
+              <p className="text-xs mt-2 text-gray-400">
+                <span className="text-green-300 flex items-center gap-1 font-semibold">
+                  <ArrowUpCircle size={14} /> {overview.royaltiesChange}
+                </span>
+                vs previous period
+              </p>
+            </div>
+
+            <Award className="text-yellow-300 w-8 h-8" />
+          </div>
+
+          <div className="flex gap-2 mt-4 flex-wrap">
+            <span className="px-3 py-1 rounded-full bg-yellow-400/20 text-yellow-300 text-xs">7.8% of Total</span>
+            <span className="px-3 py-1 rounded-full bg-green-400/20 text-green-300 text-xs">+$2,156</span>
+          </div>
+        </SinoxisCard>
       </div>
 
-      {/* REVENUE DISTRIBUTION + TRENDS */}
+      {/* ============================
+           TRENDS + DISTRIBUTION
+      ============================== */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
 
-        {/* TRENDS PANEL */}
-        <div className="xl:col-span-8 bg-white rounded-xl border border-gray-100 shadow-sm">
-          <div className="p-5 flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-800">Revenue Trends - Last 12 Months</h3>
-            <select className="border rounded-lg px-3 py-1.5 text-sm text-gray-600">
+        {/* TRENDS */}
+        <SinoxisCard className="xl:col-span-8">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold">Revenue Trends - Last 12 Months</h3>
+
+            <select className="bg-[#0a1039] border border-white/10 rounded-lg px-3 py-1.5 text-sm text-gray-300">
               <option>By Month</option>
               <option>By Quarter</option>
               <option>By Platform</option>
             </select>
           </div>
 
-          <div className="p-6 pt-0">
-            <div className="rounded-xl border border-dashed border-gray-200 text-center p-8">
-              <BarChart2 size={40} className="mx-auto mb-3 text-red-600" />
-              <h5 className="font-semibold text-gray-800">Revenue Trends Visualization</h5>
-              <p className="text-sm text-gray-500">Monthly revenue breakdown across all income streams</p>
+          <div className="border border-white/10 rounded-xl p-8 text-center">
+            <BarChart2 className="mx-auto mb-3 text-[#29B6F6]" size={40} />
+            <h5 className="font-semibold">Revenue Trends Visualization</h5>
+            <p className="text-gray-400 text-sm">Monthly revenue breakdown across all income streams</p>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 mt-6 gap-4">
-                <div className="border-r border-gray-200 pr-4">
-                  <p className="font-bold text-red-600">${overview.yearToDate.toLocaleString()}</p>
-                  <small className="text-gray-500">Year to Date</small>
-                </div>
-                <div className="border-r border-gray-200 pr-4">
-                  <p className="font-bold text-emerald-600"> ${overview.currentMonth.toLocaleString()}</p>
-                  <small className="text-gray-500">Current Month</small>
-                </div>
-                <div className="border-r border-gray-200 pr-4">
-                  <p className="font-bold text-blue-600">{overview.growthRate}</p>
-                  <small className="text-gray-500">Growth Rate</small>
-                </div>
-                <div>
-                  <p className="font-bold text-amber-500">{overview.revenueSources}</p>
-                  <small className="text-gray-500">Revenue Sources</small>
-                </div>
+            <div className="grid grid-cols-4 gap-4 mt-6 text-center">
+              <div className="border-r border-white/10 pr-3">
+                <div className="text-[#29B6F6] font-bold">$2.1M</div>
+                <small className="text-gray-400">Year to Date</small>
+              </div>
+
+              <div className="border-r border-white/10 pr-3">
+                <div className="text-green-300 font-bold">$347K</div>
+                <small className="text-gray-400">Current Month</small>
+              </div>
+
+              <div className="border-r border-white/10 pr-3">
+                <div className="text-blue-300 font-bold">{overview.growthRate}</div>
+                <small className="text-gray-400">Growth Rate</small>
+              </div>
+
+              <div>
+                <div className="text-yellow-300 font-bold">{overview.revenueSources}</div>
+                <small className="text-gray-400">Revenue Sources</small>
               </div>
             </div>
           </div>
-        </div>
+        </SinoxisCard>
 
-        {/* DISTRIBUTION PANEL */}
-        <div className="xl:col-span-4 bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-6">Revenue Distribution</h3>
+        {/* DISTRIBUTION */}
+        <SinoxisCard className="xl:col-span-4">
+          <h3 className="text-lg font-semibold mb-6">Revenue Distribution</h3>
 
           <div className="flex justify-center mb-6">
-            <div className="w-40 h-40 rounded-full bg-red-500 text-white flex items-center justify-center font-bold">
-              100%
+            <div className="w-40 h-40 rounded-full bg-gradient-to-b from-[#29B6F6] to-[#0288D1] flex items-center justify-center">
+              <span className="text-white text-3xl font-semibold">100%</span>
             </div>
           </div>
 
-           <div className="space-y-4">
+          <div className="space-y-4">
             {[
               {
                 label: "Streaming Services",
-                color: "bg-emerald-500",
+                color: "bg-green-400",
                 amount: overview.streamingRevenue,
                 percent: overview.distribution.streaming,
               },
               {
                 label: "Digital Downloads",
-                color: "bg-blue-500",
+                color: "bg-blue-400",
                 amount: overview.downloadsRevenue,
                 percent: overview.distribution.downloads,
               },
               {
                 label: "Royalties",
-                color: "bg-amber-500",
+                color: "bg-yellow-300",
                 amount: overview.royaltiesRevenue,
                 percent: overview.distribution.royalties,
               },
-            ].map((d, i) => (
-              <div key={i} className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <span className={`w-3 h-3 rounded ${d.color}`} />
-                  <span>{d.title}</span>
+            ].map((item, idx) => (
+              <div key={idx} className="flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  <span className={`w-3 h-3 rounded-full ${item.color}`} />
+                  <span className="text-gray-200">{item.label}</span>
                 </div>
+
                 <div className="text-right">
-                  <p className="font-semibold">${d.amount.toLocaleString()}</p>
-                  <small className="text-gray-500">{d.percent}%</small>
+                  <p className="font-semibold text-[#29B6F6]">${item.amount.toLocaleString()}</p>
+                  <small className="text-gray-400">{item.percent}%</small>
                 </div>
               </div>
             ))}
           </div>
 
           <div className="mt-6">
-            <div className="flex justify-between mb-2">
-              <span className="text-gray-500">Platform Diversity</span>
-              <span className="font-semibold text-emerald-600">High</span>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Platform Diversity</span>
+              <span className="font-semibold text-green-300">High</span>
             </div>
-            <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
-              <div className="h-2 bg-emerald-600 rounded-full" style={{ width: "85%" }} />
+
+            <div className="w-full h-2 bg-white/10 rounded-full mt-2">
+              <div className="h-2 bg-green-300 rounded-full" style={{ width: "85%" }}></div>
             </div>
           </div>
-        </div>
+        </SinoxisCard>
       </div>
 
-      {/* PLATFORM PERFORMANCE TABLE */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
-        <div className="p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <h3 className="text-lg font-semibold text-gray-800">Platform Revenue Performance</h3>
+      {/* PLATFORM TABLE */}
+      <SinoxisCard>
+        <div className="flex flex-col md:flex-row justify-between items-center mb-5">
+          <h3 className="text-lg font-semibold">Platform Revenue Performance</h3>
 
-          <div className="flex items-center rounded-lg border border-gray-200 overflow-hidden">
+          <div className="flex border border-white/10 rounded-lg overflow-hidden">
             <input
               type="text"
               placeholder="Search platforms..."
-              className="h-9 w-56 pl-3 outline-none text-sm bg-transparent placeholder:text-gray-400"
+              className="bg-transparent px-3 py-1.5 outline-none w-48 text-sm text-gray-200 placeholder:text-gray-500"
             />
-            <button className="h-9 px-3 bg-red-500 text-white hover:bg-red-500">
-              <Search size={16} />
+            <button className="bg-gradient-to-r from-[#29B6F6] to-[#0288D1] px-3 flex items-center justify-center">
+              <Search size={16} className="text-[#020726]" />
             </button>
           </div>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-sm text-gray-700">
-            <thead className="bg-gray-50 text-gray-600">
+          <table className="w-full text-sm">
+            <thead className="text-gray-400 border-b border-white/10">
               <tr>
-                <th className="p-4 text-left">Platform</th>
-                <th className="p-4 text-right">Streams</th>
-                <th className="p-4 text-right">Revenue</th>
-                <th className="p-4 text-right">Avg. per Stream</th>
-                <th className="p-4 text-center">Growth</th>
-                <th className="p-4 text-right">Market Share</th>
+                <th className="text-left py-3">Platform</th>
+                <th className="text-right py-3">Streams</th>
+                <th className="text-right py-3">Revenue</th>
+                <th className="text-right py-3">Avg. Per Stream</th>
+                <th className="text-center py-3">Growth</th>
+                <th className="text-right py-3">Market Share</th>
               </tr>
             </thead>
 
-           <tbody className="divide-y">
-  {overview.platforms.map((p, i) => (
-    <tr key={i} className="hover:bg-gray-50">
-      
-      {/* Platform Name + Icon */}
-      <td className="p-4">
-        <div className="flex items-center gap-3">
-          <span className="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center">
-            {p.icon === "spotify" && <Music size={16} className="text-white" />}
-            {p.icon === "apple" && <Play size={16} className="text-white" />}
-            {p.icon === "youtube" && <Youtube size={16} className="text-white" />}
-            {p.icon === "amazon" && <Headphones size={16} className="text-white" />}
-          </span>
+            <tbody className="text-gray-300">
+              {overview.platforms.map((p, idx) => (
+                <tr key={idx} className="border-b border-white/5 hover:bg-white/5 transition">
+                  <td className="py-3">
+                    <div className="flex items-center gap-3">
 
-          <div>
-            <p className="font-medium text-gray-800">{p.name}</p>
-            <small className="text-gray-500">{p.category}</small>
-          </div>
-        </div>
-      </td>
+                      {/* ICON BOX */}
+                      <div
+                        className="w-10 h-10 rounded-lg flex items-center justify-center"
+                        style={{
+                          background:
+                            p.icon === "spotify"
+                              ? "#1DB954"
+                              : p.icon === "apple"
+                              ? "#2DB3B1"
+                              : p.icon === "youtube"
+                              ? "#1976D2"
+                              : "#f2b03d",
+                        }}
+                      >
+                        {p.icon === "spotify" && <Music size={18} className="text-white" />}
+                        {p.icon === "apple" && <Play size={18} className="text-white" />}
+                        {p.icon === "youtube" && <Youtube size={18} className="text-white" />}
+                        {p.icon === "amazon" && <Headphones size={18} className="text-white" />}
+                      </div>
 
-      {/* Streams */}
-      <td className="p-4 text-right">
-        {p.streams.toLocaleString()}
-      </td>
+                      <div>
+                        <p className="font-medium text-white">{p.name}</p>
+                        <p className="text-xs text-gray-400">{p.category}</p>
+                      </div>
 
-      {/* Revenue */}
-      <td className="p-4 text-right font-semibold text-red-600">
-        ${p.revenue.toLocaleString()}
-      </td>
+                    </div>
+                  </td>
 
-      {/* Avg Per Stream */}
-      <td className="p-4 text-right">
-        ${p.avgPerStream.toFixed(4)}
-      </td>
+                  <td className="text-right">{p.streams}</td>
 
-      {/* Growth Badge */}
-      <td className="p-4 text-center">
-        <span
-          className={`px-2.5 py-1 text-xs rounded-full inline-flex items-center gap-1
-            ${p.growth < 0 ? "bg-red-50 text-red-600" : "bg-emerald-50 text-emerald-600"}
-          `}
-        >
-          {p.growth < 0 ? <ArrowDownCircle size={14} /> : <ArrowUpCircle size={14} />}
-          {p.growth}%
-        </span>
-      </td>
+                  <td className="text-right font-semibold text-[#29B6F6]">
+                    ${p.revenue.toLocaleString()}
+                  </td>
 
-      {/* Market Share Bar */}
-      <td className="p-4 text-right">
-        <div className="flex items-center justify-end gap-2">
-          <div className="h-2 w-32 bg-gray-200 rounded-full overflow-hidden">
-            <div
-              className="h-2 bg-red-500"
-              style={{ width: `${p.marketShare}%` }}
-            />
-          </div>
-          <span className="font-medium">{p.marketShare}%</span>
-        </div>
-      </td>
+                  <td className="text-right">${p.avgPerStream.toFixed(4)}</td>
 
-    </tr>
-  ))}
-</tbody>
+                  <td className="text-center">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs inline-flex items-center gap-1 ${
+                        p.growth < 0
+                          ? "bg-yellow-400/20 text-yellow-300"
+                          : "bg-green-400/20 text-green-300"
+                      }`}
+                    >
+                      {p.growth < 0 ? <ArrowDownCircle size={14} /> : <ArrowUpCircle size={14} />}
+                      {Math.abs(p.growth)}%
+                    </span>
+                  </td>
 
+                  <td className="text-right">
+                    <div className="flex items-center justify-end gap-3">
+                      <div className="w-32 h-2 bg-white/10 rounded-full">
+                        <div
+                          className="h-2 bg-[#29B6F6] rounded-full"
+                          style={{ width: `${p.marketShare}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-white">{p.marketShare}%</span>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
           </table>
         </div>
+      </SinoxisCard>
 
-      </div>
     </div>
   );
-};
-
-export default TotalRevenueAnalytics;
+}

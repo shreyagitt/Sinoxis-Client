@@ -2,18 +2,15 @@ import React from "react";
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-100 border-t border-gray-200 py-4 mt-10">
-      <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row items-center justify-center text-center text-gray-600">
-          <p className="text-sm">
-            Copyright © <span id="year">{new Date().getFullYear()}</span>{" "}
-            <a
-              href="javascript:void(0)"
-              className="text-red-500 font-semibold hover:underline"
-            >
-              Sinoxis Music Group
-            </a>{" "}
-            — All rights reserved.
+    <footer className="bg-[#020726] border-t border-white/10 py-4 mt-10 w-full">
+      <div className="w-full px-4">
+        <div className="flex items-center justify-center text-center">
+          <p className="text-sm text-white">
+            Copyright © {new Date().getFullYear()}{" "}
+            <span className="font-semibold bg-gradient-to-r from-[#29B6F6] to-[#0288D1] text-transparent bg-clip-text">
+              Sinoxis Digital
+            </span>{" "}
+            All rights reserved.
           </p>
         </div>
       </div>
@@ -22,3 +19,4 @@ const Footer = () => {
 };
 
 export default Footer;
+

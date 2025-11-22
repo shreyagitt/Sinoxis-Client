@@ -22,15 +22,9 @@ const ChangePassword = () => {
   const navigate = useNavigate();
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
-  // ===============================
-  // SUBMIT HANDLER (NO TYPESCRIPT)
-  // ===============================
   const handleSubmit = async (values, { resetForm, setSubmitting }) => {
     try {
       const token = localStorage.getItem("token");
-
-      console.log("Submitting values:", values);
-      console.log("Using token:", token);
 
       if (!token) {
         toast.error("Session expired. Please login again.");
@@ -48,7 +42,6 @@ const ChangePassword = () => {
       });
 
       const data = await res.json();
-      console.log("Backend Response:", data); // IMPORTANT — shows exact 400 reason
 
       if (!data.success) {
         toast.error(data.details?.[0]?.msg || data.error || "Failed to change password");
@@ -59,14 +52,12 @@ const ChangePassword = () => {
       toast.success("Password changed successfully!");
       resetForm();
 
-      // Auto logout
       setTimeout(() => {
         localStorage.clear();
         navigate("/login");
       }, 1200);
 
     } catch (err) {
-      console.error("Server Error:", err);
       toast.error("Server error! Please try again.");
     } finally {
       setSubmitting(false);
@@ -74,19 +65,19 @@ const ChangePassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-[#020726] text-white flex flex-col">
 
       {/* Breadcrumb */}
-      <div className="bg-gray-100 py-3 px-10 flex justify-between items-center">
-        <h2 className="text-base font-semibold text-gray-800">Change Password</h2>
-        <div className="text-base text-gray-500">
-          Home <span className="text-red-500"> / Change Password</span>
+      <div className="py-4 px-10 flex justify-between items-center">
+        <h2 className="text-xl font-semibold">Change Password</h2>
+        <div className="text-sm text-gray-300">
+          Home <span className="text-[#29B6F6]"> / Change Password</span>
         </div>
       </div>
 
       {/* Main Form Container */}
-      <div className="flex justify-start py-8 px-4 ml-10">
-        <div className="bg-white rounded-xl shadow-2xl p-10 w-full max-w-5xl border border-gray-200">
+      <div className="flex justify-start px-10 pb-16">
+        <div className="bg-[#0a1039] rounded-xl shadow-2xl p-10 w-full max-w-5xl border border-white/10">
 
           <Formik
             initialValues={{
@@ -101,67 +92,40 @@ const ChangePassword = () => {
               <Form className="space-y-6">
 
                 {/* CURRENT PASSWORD */}
-                <div>
-                  <label className="block text-base font-semibold text-gray-800 mb-2">
-                    Current Password
-                  </label>
-                  <Field
-                    type="password"
-                    name="currentPassword"
-                    placeholder="Enter current password"
-                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-red-500"
-                  />
-                  <ErrorMessage
-                    name="currentPassword"
-                    component="div"
-                    className="text-red-500 text-sm mt-1"
-                  />
-                </div>
+                <FieldGroup
+                  name="currentPassword"
+                  label="Current Password"
+                  placeholder="Enter current password"
+                  type="password"
+                />
 
                 {/* NEW PASSWORD */}
                 <div>
-                  <label className="block text-base font-semibold text-gray-800 mb-2">
-                    New Password
-                  </label>
-                  <Field
-                    type="password"
+                  <FieldGroup
                     name="newPassword"
+                    label="New Password"
                     placeholder="Enter new password"
-                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-red-500"
+                    type="password"
                   />
-                  <small className="text-gray-500 text-xs">
+                  <p className="text-xs text-gray-400 mt-1">
                     Must be at least 8 characters and include a number or special character.
-                  </small>
-                  <ErrorMessage
-                    name="newPassword"
-                    component="div"
-                    className="text-red-500 text-sm mt-1"
-                  />
+                  </p>
                 </div>
 
                 {/* CONFIRM PASSWORD */}
-                <div>
-                  <label className="block text-base font-semibold text-gray-800 mb-2">
-                    Confirm Password
-                  </label>
-                  <Field
-                    type="password"
-                    name="confirmPassword"
-                    placeholder="Confirm new password"
-                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-red-500"
-                  />
-                  <ErrorMessage
-                    name="confirmPassword"
-                    component="div"
-                    className="text-red-500 text-sm mt-1"
-                  />
-                </div>
+                <FieldGroup
+                  name="confirmPassword"
+                  label="Confirm Password"
+                  placeholder="Confirm new password"
+                  type="password"
+                />
 
                 {/* SUBMIT BUTTON */}
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+                  className="px-6 py-2 bg-gradient-to-r from-[#29B6F6] to-[#0288D1] 
+                  text-white font-semibold rounded-md hover:opacity-90 disabled:opacity-50"
                 >
                   {isSubmitting ? "Updating..." : "Change Password"}
                 </button>
@@ -177,4 +141,27 @@ const ChangePassword = () => {
 };
 
 export default ChangePassword;
+
+/* Reusable Field Component */
+const FieldGroup = ({ label, name, placeholder, type }) => (
+  <div>
+    <label className="block text-sm font-semibold mb-1 text-white">
+      {label}
+    </label>
+    <Field
+      type={type}
+      name={name}
+      placeholder={placeholder}
+      className="w-full bg-[#2c2f4a] text-white placeholder-gray-400 
+      border border-transparent rounded-md px-4 py-2
+      focus:outline-none focus:ring-1 focus:ring-[#29B6F6]"
+    />
+    <ErrorMessage
+      name={name}
+      component="div"
+      className="text-red-400 text-xs mt-1"
+    />
+  </div>
+);
+
 

@@ -1,3 +1,4 @@
+// src/components/Topbar.jsx
 import React, { useState, useRef, useEffect } from "react";
 import { FaBell, FaBars } from "react-icons/fa";
 import { ChevronDown, UserCircle, Settings, LogOut, Home } from "lucide-react";
@@ -8,13 +9,12 @@ import Notifications from "./Notifications";
 const Topbar = ({ isCollapsed, toggleSidebar }) => {
   const navigate = useNavigate();
 
-  const [open, setOpen] = useState(false); // user dropdown
-  const [showNotifications, setShowNotifications] = useState(false); // notification popup
+  const [open, setOpen] = useState(false); 
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const dropdownRef = useRef(null);
   const notifRef = useRef(null);
 
-  // Dummy Notification State
   const [notificationsList, setNotificationsList] = useState([
     {
       title: "Desktop notification turned on",
@@ -38,59 +38,68 @@ const Topbar = ({ isCollapsed, toggleSidebar }) => {
     },
   ]);
 
-  // Remove one notification
   const removeNotification = (index) => {
     setNotificationsList((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Mark all notifications as read
   const markAllAsRead = () => {
     setNotificationsList([]);
   };
 
-  // Close dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setOpen(false);
-      if (notifRef.current && !notifRef.current.contains(e.target)) setShowNotifications(false);
+    const handleOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
+        setShowNotifications(false);
+      }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+
+    document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
   }, []);
 
-  // ⭐ REAL LOGOUT FUNCTION
   const handleLogout = () => {
-    localStorage.removeItem("token"); // remove JWT
-    navigate("/login"); // redirect to login
+    localStorage.removeItem("token");
+    navigate("/login");
   };
 
   return (
-    <div className={`topbar ${isCollapsed ? "collapsed" : ""}`}>
+    <div className={`topbar ${isCollapsed ? "collapsed" : ""}` }>
       <div className="left-section">
-        {/* Sidebar toggle button */}
+        {/* Sidebar Toggle */}
         <button className="toggle-btn" onClick={toggleSidebar}>
-          <FaBars size={20} />
+          <FaBars size={20} className="text-white" />
         </button>
 
+        {/* Search Box */}
         <div className="search-box">
           <input type="text" placeholder="Search for results..." />
         </div>
       </div>
 
+      {/* RIGHT SECTION */}
       <div className="topbar-right flex items-center gap-6">
-
-        {/* Home Icon */}
-        <Link to="/" className="text-red-700 hover:text-red-800 transition">
-          <Home size={18} />
+        
+        {/* HOME ICON - WHITE */}
+        <Link to="/" className="transition">
+          <Home size={20} strokeWidth={2.4} className="text-white hover:text-white" />
         </Link>
 
-        {/* Notifications */}
+        {/* NOTIFICATIONS */}
         <div className="relative" ref={notifRef}>
-          <button onClick={() => setShowNotifications(!showNotifications)} className="relative">
-            <FaBell className="cursor-pointer text-red-600 transition" size={20} />
+          <button
+            onClick={() => setShowNotifications(!showNotifications)}
+            className="relative"
+          >
+            <FaBell
+              size={20}
+              className="text-white hover:text-white transition"
+            />
 
             {notificationsList.length > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
+              <span className="absolute -top-1 -right-1 bg-[#00FF66] text-white text-[9px] w-3.5 h-3.5 flex items-center justify-center rounded-full shadow-md">
                 {notificationsList.length}
               </span>
             )}
@@ -105,33 +114,76 @@ const Topbar = ({ isCollapsed, toggleSidebar }) => {
           )}
         </div>
 
-        {/* User Menu */}
+        {/* USER DROPDOWN */}
         <div className="user-dropdown" ref={dropdownRef}>
-          <button className="user-info flex items-center gap-2" onClick={() => setOpen((prev) => !prev)}>
-            <UserCircle className="user-icon" />
+          <button
+            className="user-info flex items-center gap-2"
+            onClick={() => setOpen((prev) => !prev)}
+          >
+            {/* USER ICON WITH GRADIENT */}
+            <UserCircle 
+              size={32}
+              strokeWidth={2.2}
+              className="text-white p-1.5 rounded-full bg-gradient-to-br from-[#29B6F6] to-[#0288D1]"
+            />
+
             <div className="user-text">
               <span className="user-name">John Doe</span>
-              <span className="user-role">User</span>
             </div>
-            <ChevronDown className={`chevron ${open ? "rotate" : ""}`} size={16} />
+
+            <ChevronDown
+              size={18}
+              strokeWidth={2.2}
+              className={`text-white transition ${open ? "rotate-180" : ""}`}
+            />
           </button>
 
-          {open && (
-            <div className="dropdown-menu animate-fadeIn">
-              <Link to="/profile" className="dropdown-item" onClick={() => setOpen(false)}>
-                <UserCircle size={16} className="dropdown-icon" /> Profile
-              </Link>
+        {open && (
+  <div className="dropdown-menu animate-fadeIn">
+    <Link
+      to="/profile"
+      className="dropdown-item"
+      onClick={() => setOpen(false)}
+    >
+      <UserCircle
+  size={16}
+  className="dropdown-icon stroke-current"
+  strokeWidth={2}
+  stroke="currentColor"
+/>
+      <span className="text-white">Profile</span>
+    </Link>
 
-              <Link to="/settings" className="dropdown-item" onClick={() => setOpen(false)}>
-                <Settings size={16} className="dropdown-icon" /> Settings
-              </Link>
+    <Link
+      to="/settings"
+      className="dropdown-item"
+      onClick={() => setOpen(false)}
+    >
+      <Settings
+  size={16}
+  className="dropdown-icon stroke-current"
+  strokeWidth={2}
+  stroke="currentColor"
+/>
+      <span className="text-white">Settings</span>
+    </Link>
 
-              {/* LOGOUT BUTTON */}
-              <button className="dropdown-item logout" onClick={handleLogout}>
-                <LogOut size={16} className="dropdown-icon" /> Logout
-              </button>
-            </div>
-          )}
+    <button 
+      className="dropdown-item logout" 
+      onClick={handleLogout}
+    >
+      <LogOut
+  size={16}
+  className="dropdown-icon stroke-current"
+  strokeWidth={2}
+  stroke="currentColor"
+/>
+      <span className="text-white">Logout</span>
+    </button>
+  </div>
+)}
+
+
         </div>
 
       </div>
@@ -140,5 +192,3 @@ const Topbar = ({ isCollapsed, toggleSidebar }) => {
 };
 
 export default Topbar;
-
-

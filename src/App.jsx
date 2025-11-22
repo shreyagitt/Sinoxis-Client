@@ -25,6 +25,8 @@ import SocialIsrcSubmitForm from "./components/SocialIsrcSubmitForm";
 import FacebookVideoLinkSubmitForm from "./components/FacebookVideoLinkSubmitForm";
 import MetadataUpdateForm from "./components/MetadataUpdateForm";
 import Register from "./components/Register";
+import CopyrightClaim from "./components/CopyrightClaim";
+import OfficialArtistChannel from "./components/OfficialArtistChannel";
 
 
 
@@ -148,6 +150,24 @@ function App() {
         element={
           <Layout>
             < MetadataUpdateForm />
+          </Layout>
+        }
+      />
+
+      <Route
+        path="/requests/claim"
+        element={
+          <Layout>
+            < CopyrightClaim />
+          </Layout>
+        }
+      />
+
+       <Route
+        path="/requests/artist"
+        element={
+          <Layout>
+            < OfficialArtistChannel />
           </Layout>
         }
       />
