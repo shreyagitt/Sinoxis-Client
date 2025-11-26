@@ -1,6 +1,8 @@
+// src/pages/YouTubeOACRequestForm.jsx
 import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import { useTheme } from "../components/Topbar";
 
 const validationSchema = Yup.object({
   channelName: Yup.string().required("Channel name is required"),
@@ -11,6 +13,23 @@ const validationSchema = Yup.object({
 
 const YouTubeOACRequestForm = () => {
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
+  const { theme } = useTheme();
+
+  // THEME-BASED UI CLASSES
+  const pageBg = theme === "dark" ? "bg-[#020726] text-white" : "bg-white text-[#020726]";
+  const cardBg =
+    theme === "dark"
+      ? "bg-[#0a1039] border border-white/10 shadow-2xl text-white"
+      : "bg-white border border-gray-200 shadow-md text-[#020726]";
+
+  const labelColor = theme === "dark" ? "text-white" : "text-[#020726]";
+  const inputBg =
+    theme === "dark"
+      ? "bg-[#2c2f4a] text-white placeholder-[#9bb6d8] border border-transparent"
+      : "bg-gray-50 text-[#020726] placeholder-gray-500 border border-gray-300";
+
+  const breadcrumbText = theme === "dark" ? "text-white" : "text-[#020726]";
+  const hintText = theme === "dark" ? "text-[#9bb6d8]" : "text-gray-500";
 
   const handleSubmit = async (values, { resetForm }) => {
     try {
@@ -21,7 +40,6 @@ const YouTubeOACRequestForm = () => {
       });
 
       const data = await res.json();
-
       if (!data.success) {
         alert(data.error || "❌ Failed to submit!");
         return;
@@ -29,7 +47,6 @@ const YouTubeOACRequestForm = () => {
 
       alert("✅ Request Submitted Successfully!");
       resetForm();
-
     } catch (error) {
       console.error(error);
       alert("❌ Server error! Please try again.");
@@ -37,23 +54,20 @@ const YouTubeOACRequestForm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#020726] flex flex-col pb-20">
-
-      {/* Breadcrumb Header */}
+    <div className={`min-h-screen pb-20 transition-colors duration-200 ${pageBg}`}>
+      
+      {/* HEADER */}
       <div className="py-4 px-10 flex justify-between items-center">
-        <h2 className="text-xl font-semibold text-white">
-          YouTube OAC Request Form
-        </h2>
+        <h2 className={`text-xl font-semibold ${labelColor}`}>YouTube OAC Request Form</h2>
 
-        <div className="text-sm text-white">
+        <div className={`text-sm ${breadcrumbText}`}>
           Home <span className="text-[#29B6F6]"> / YouTube OAC Request Form</span>
         </div>
       </div>
 
-      {/* Form Container */}
+      {/* FORM CARD */}
       <div className="flex justify-start px-10">
-        <div className="bg-[#0a1039] rounded-xl shadow-2xl p-10 w-full max-w-5xl border border-white/10">
-
+        <div className={`rounded-xl p-10 w-full max-w-5xl ${cardBg}`}>
           <Formik
             initialValues={{
               channelName: "",
@@ -66,28 +80,33 @@ const YouTubeOACRequestForm = () => {
           >
             <Form className="space-y-6">
 
+              {/* INPUTS */}
               <FieldGroup
+                theme={theme}
                 label="YouTube Channel Name"
                 name="channelName"
                 placeholder="Enter youtube channel name"
               />
 
               <FieldGroup
+                theme={theme}
                 label="YouTube Channel Url"
                 name="channelUrl"
                 placeholder="https://www.youtube.com/channel..."
               />
 
               <FieldGroup
+                theme={theme}
                 label="YouTube Topic Channel Url"
                 name="topicUrl"
-                placeholder="YouTube Topic Channel Url"
+                placeholder="https://www.youtube.com/topic/..."
               />
 
               <FieldGroup
+                theme={theme}
                 label={
                   <>
-                    URL of Official Video or Art Track we distributed{" "}
+                    URL of Official Video or Art Track distributed{" "}
                     <span className="text-red-400">*</span>
                   </>
                 }
@@ -95,17 +114,15 @@ const YouTubeOACRequestForm = () => {
                 placeholder="https://www.youtube.com/watch?v=..."
               />
 
-              {/* Submit Button */}
+              {/* SUBMIT BUTTON */}
               <button
                 type="submit"
-                className="bg-gradient-to-r from-[#29B6F6] to-[#0288D1] hover:opacity-90 text-white font-semibold rounded-md px-6 py-2 text-base transition"
+                className="bg-gradient-to-r from-[#29B6F6] to-[#0288D1] text-white font-semibold px-6 py-2 rounded-md hover:opacity-90 transition"
               >
                 Submit Request
               </button>
-
             </Form>
           </Formik>
-
         </div>
       </div>
     </div>
@@ -114,19 +131,26 @@ const YouTubeOACRequestForm = () => {
 
 export default YouTubeOACRequestForm;
 
-/* Reusable Field Group Component */
-const FieldGroup = ({ label, name, placeholder }) => (
-  <div>
-    <label className="block text-sm font-semibold text-white mb-1">{label}</label>
-    <Field
-      name={name}
-      placeholder={placeholder}
-      className="w-full bg-[#2c2f4a] text-white placeholder-[#9bb6d8] border border-transparent rounded-md px-4 py-2 focus:outline-none focus:ring-1 focus:ring-[#29B6F6]"
-    />
-    <ErrorMessage
-      name={name}
-      component="div"
-      className="text-red-400 text-xs mt-1"
-    />
-  </div>
-);
+/* ---------------------- REUSABLE FIELD COMPONENT ---------------------- */
+
+const FieldGroup = ({ theme, label, name, placeholder }) => {
+  const labelColor = theme === "dark" ? "text-white" : "text-[#020726]";
+  const inputBg =
+    theme === "dark"
+      ? "bg-[#2c2f4a] text-white placeholder-[#9bb6d8] border border-transparent"
+      : "bg-white text-[#020726] placeholder-gray-500 border border-gray-300";
+
+  return (
+    <div>
+      <label className={`block text-sm font-semibold mb-1 ${labelColor}`}>{label}</label>
+
+      <Field
+        name={name}
+        placeholder={placeholder}
+        className={`w-full rounded-md px-4 py-2 outline-none focus:ring-1 focus:ring-[#29B6F6] ${inputBg}`}
+      />
+
+      <ErrorMessage name={name} component="div" className="text-red-400 text-xs mt-1" />
+    </div>
+  );
+};

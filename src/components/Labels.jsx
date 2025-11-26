@@ -3,65 +3,76 @@ import React, { useState } from "react";
 import { Eye, X, Edit3 } from "lucide-react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import { useTheme } from "../components/Topbar";
 
-/**
- * Reference screenshot files (embedded hidden)
- * Your environment/tool will transform these local paths to usable URLs.
- */
-const refScreenshot1 = "/mnt/data/f09cc21d-4389-4f0b-ad92-6d4ad2b212f7.png";
-const refScreenshot2 = "/mnt/data/787fa7b9-b418-4141-b9e8-dd43afa56821.png";
-const refScreenshotA = "/mnt/data/b5d532c3-6fbf-4590-9325-0f27abb93a88.png";
-const refScreenshotB = "/mnt/data/ec35233f-1d75-4f80-85bc-52bc8c480664.png";
-const refScreenshotC = "/mnt/data/66583bfc-b614-4e1d-a972-83c127b432cd.png";
-
+// Placeholder image for Aadhar previews
 const placeholderImage =
   "https://media.istockphoto.com/id/1147544807/vector/thumbnail-image-vector-graphic.jpg";
 
-/* format date helper */
+// Format date
 function formatDisplayDate(date) {
   if (!date) return "-";
   const d = new Date(date);
-  const options = { day: "2-digit", month: "short", year: "numeric" };
-  return d.toLocaleDateString("en-GB", options);
+  return d.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 }
 
-/* Status styles map (kept for table display only) */
-const STATUS_STYLES = {
+// Status styles (light + dark)
+const STATUS_STYLES = (theme) => ({
   Active: {
-    bg: "#22e788",   // bright green
-    color: "#073b1d", 
+    bg: theme === "dark" ? "#22e788" : "#d1fae5",
+    color: theme === "dark" ? "#073b1d" : "#065f46",
   },
   Pending: {
-    bg: "#ffd626",   // bright yellow
-    color: "#5b4600",
+    bg: theme === "dark" ? "#ffd626" : "#fef3c7",
+    color: theme === "dark" ? "#5b4600" : "#92400e",
   },
   Rejected: {
-    bg: "#ff2d2d",   // bold red
-    color: "#4d0000",
+    bg: theme === "dark" ? "#ff2d2d" : "#fee2e2",
+    color: theme === "dark" ? "#4d0000" : "#b91c1c",
   },
   Inactive: {
-    bg: "#4c8df6",   // bright blue
-    color: "#001b4d",
+    bg: theme === "dark" ? "#4c8df6" : "#dbeafe",
+    color: theme === "dark" ? "#001b4d" : "#1e40af",
   },
-};
+});
 
-
-
+// Validation schema
 const LabelSchema = Yup.object().shape({
-  fullName: Yup.string().min(3, "At least 3 characters").required("Full name is required"),
-  labelName: Yup.string().min(3, "At least 3 characters").required("Label name is required"),
-  email: Yup.string().email("Enter a valid email").nullable(),
+  fullName: Yup.string().min(3).required("Full name is required"),
+  labelName: Yup.string().min(3).required("Label name is required"),
+  email: Yup.string().email().nullable(),
   phone: Yup.string()
     .required("Phone is required")
     .matches(/^[6-9]\d{9}$/, "Enter a valid 10-digit Indian phone number"),
-  youtube: Yup.string().url("Enter a valid URL").nullable(),
+  youtube: Yup.string().url("Invalid URL").nullable(),
   language: Yup.string().required("Song language is required"),
   aadharFront: Yup.mixed().nullable(),
   aadharBack: Yup.mixed().nullable(),
 });
 
 export default function Labels() {
-  // ---------- Demo data (3 items) ----------
+  const { theme } = useTheme();
+
+  // Theme adaptive vars
+  const pageBg = theme === "dark" ? "bg-[#020726] text-white" : "bg-white text-[#020726]";
+  const cardBg =
+    theme === "dark"
+      ? "bg-[#0a1039] border-white/10"
+      : "bg-white border-gray-200 shadow-md";
+
+  const tableText = theme === "dark" ? "text-white" : "text-[#020726]";
+  const headerSecondary = theme === "dark" ? "text-gray-300" : "text-gray-600";
+
+  const inputBg =
+    theme === "dark"
+      ? "bg-[#111a3b] border-white/10 text-white placeholder-gray-400"
+      : "bg-gray-100 border-gray-300 text-[#020726] placeholder-gray-500";
+
+  // Demo data
   const [labels, setLabels] = useState([
     {
       id: 1,
@@ -73,7 +84,7 @@ export default function Labels() {
         fullName: "John Doe",
         email: "john@example.com",
         phone: "9888888888",
-        youtube: "https://youtube.com/universalmusic",
+        youtube: "https://youtube.com/universal",
         language: "English",
         aadharFront: null,
         aadharBack: null,
@@ -95,34 +106,16 @@ export default function Labels() {
         aadharBack: null,
       },
     },
-    {
-      id: 3,
-      name: "Demo Label",
-      created: "2025-03-01",
-      expiry: "2030-03-01",
-      status: "Inactive",
-      meta: {
-        fullName: "",
-        email: "",
-        phone: "",
-        youtube: "",
-        language: "",
-        aadharFront: null,
-        aadharBack: null,
-      },
-    },
   ]);
 
-  // ---------- UI state ----------
+  // UI state
   const [showAddModal, setShowAddModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedLabel, setSelectedLabel] = useState(null);
-  // view modal tab: "details" | "form" | "images"
   const [viewTab, setViewTab] = useState("details");
 
-  // initial values for formik
   const emptyValues = {
     fullName: "",
     labelName: "",
@@ -134,19 +127,17 @@ export default function Labels() {
     aadharBack: null,
   };
 
-  // for form initial state (used with enableReinitialize)
   const [initialFormValues, setInitialFormValues] = useState({ ...emptyValues });
 
-  /* -------- helpers for file -> dataURL for previews -------- */
+  // Read file as Base64
   const readFileAsDataURL = (file) =>
-    new Promise((resolve, reject) => {
+    new Promise((resolve) => {
       const reader = new FileReader();
-      reader.onerror = () => reject(new Error("File read error"));
       reader.onload = () => resolve(reader.result);
       reader.readAsDataURL(file);
     });
 
-  /* ---------- Open Add Modal (fresh form) ---------- */
+  // Open Add Modal
   const openAddModal = () => {
     setInitialFormValues({ ...emptyValues });
     setEditMode(false);
@@ -154,7 +145,7 @@ export default function Labels() {
     setShowAddModal(true);
   };
 
-  /* ---------- Open Edit (prefill form with chosen label's data) ---------- */
+  // Open Edit
   const openEdit = (label) => {
     setInitialFormValues({
       fullName: label.meta.fullName || "",
@@ -169,155 +160,154 @@ export default function Labels() {
     setEditMode(true);
     setEditingId(label.id);
     setShowAddModal(true);
-    setShowViewModal(false);
   };
 
-  /* ---------- Open View ---------- */
+  // Open View
   const openView = (label) => {
     setSelectedLabel(label);
     setViewTab("details");
     setShowViewModal(true);
   };
 
-  /* ---------- Delete ---------- */
+  // Delete
   const handleDelete = (id) => {
-    if (!confirm("Are you sure you want to delete this label?")) return;
-    setLabels((s) => s.filter((x) => x.id !== id));
+    if (!confirm("Delete this label?")) return;
+    setLabels((prev) => prev.filter((l) => l.id !== id));
     setShowViewModal(false);
   };
 
-  /* ---------- On submit (Formik) ---------- */
-  const onSubmit = async (values, { setSubmitting, resetForm }) => {
-    try {
-      if (editMode && editingId) {
-        // update
-        setLabels((prev) =>
-          prev.map((row) =>
-            row.id === editingId
-              ? {
-                  ...row,
-                  name: values.labelName || row.name,
-                  meta: {
-                    fullName: values.fullName || "",
-                    email: values.email || "",
-                    phone: values.phone || "",
-                    youtube: values.youtube || "",
-                    language: values.language || "",
-                    aadharFront: values.aadharFront || row.meta.aadharFront,
-                    aadharBack: values.aadharBack || row.meta.aadharBack,
-                  },
-                }
-              : row
-          )
-        );
-      } else {
-        // add
-        const createdIso = new Date().toISOString();
-        const expiryIso = new Date(new Date().setFullYear(new Date().getFullYear() + 5)).toISOString();
+  // Submit
+  const onSubmit = async (values, { resetForm }) => {
+    if (editMode) {
+      setLabels((prev) =>
+        prev.map((row) =>
+          row.id === editingId
+            ? {
+                ...row,
+                name: values.labelName,
+                meta: { ...values },
+              }
+            : row
+        )
+      );
+    } else {
+      const createdIso = new Date().toISOString();
+      const expiryIso = new Date(
+        new Date().setFullYear(new Date().getFullYear() + 5)
+      ).toISOString();
 
-        const newLabel = {
+      setLabels((prev) => [
+        ...prev,
+        {
           id: Date.now(),
-          name: values.labelName || "Untitled Label",
+          name: values.labelName,
           created: createdIso,
           expiry: expiryIso,
           status: "Active",
-          meta: {
-            fullName: values.fullName || "",
-            email: values.email || "",
-            phone: values.phone || "",
-            youtube: values.youtube || "",
-            language: values.language || "",
-            aadharFront: values.aadharFront,
-            aadharBack: values.aadharBack,
-          },
-        };
-        setLabels((s) => [...s, newLabel]);
-      }
-
-      // reset + close
-      resetForm();
-      setShowAddModal(false);
-      setEditMode(false);
-      setEditingId(null);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setSubmitting(false);
+          meta: { ...values },
+        },
+      ]);
     }
+
+    resetForm();
+    setShowAddModal(false);
+    setEditMode(false);
   };
 
+  // =============== PAGE ===============
   return (
-    <div className="min-h-screen bg-[#020726] text-white p-8">
-      {/* hidden reference screenshots for environment transform */}
-      <img src={refScreenshot1} alt="ref1" className="hidden" />
-      <img src={refScreenshot2} alt="ref2" className="hidden" />
-      <img src={refScreenshotA} alt="refA" className="hidden" />
-      <img src={refScreenshotB} alt="refB" className="hidden" />
-      <img src={refScreenshotC} alt="refC" className="hidden" />
-
+    <div className={`min-h-screen p-8 transition-all duration-300 ${pageBg}`}>
       {/* Header */}
       <div className="flex justify-between mb-8">
         <h1 className="text-xl font-semibold">Labels</h1>
-        <span className=" ">
-          Home / <span className="text-sky-400">Labels</span>
-        </span>
+        <p className={`text-sm ${headerSecondary}`}>
+          Home / <span className="text-[#29B6F6]">Labels</span>
+        </p>
       </div>
 
       {/* Main Card */}
-      <div className="bg-[#0a1039] rounded-2xl p-8 border border-white/10">
+      <div className={`rounded-2xl p-8 border transition-all duration-300 ${cardBg}`}>
         <div className="flex justify-between mb-6">
           <h2 className="text-xl font-medium">Manage Labels</h2>
+
           <button
             onClick={openAddModal}
-            className="px-5 py-2 rounded-full text-white font-semibold"
-            style={{ background: "linear-gradient(90deg,#00AEEF,#007BFF)" }}
+            className="px-5 py-2 rounded-full text-white font-semibold bg-gradient-to-r from-[#29B6F6] to-[#0288D1]"
           >
             Add Label
           </button>
         </div>
 
-        {/* Table header */}
-        <div className="grid grid-cols-12 py-4 px-3 text-gray-10 border-b border-white/10 font-bold">
+        {/* Table Header */}
+        <div
+          className={`grid grid-cols-12 py-4 px-3 border-b font-semibold ${
+            theme === "dark" ? "border-white/10 text-gray-300" : "border-gray-200 text-gray-700"
+          }`}
+        >
           <div className="col-span-4">Label Name</div>
-          <div className="col-span-2">Created Date</div>
-          <div className="col-span-2">Expire Date</div>
+          <div className="col-span-2">Created</div>
+          <div className="col-span-2">Expires</div>
           <div className="col-span-2">Status</div>
-          <div className="col-span-2 flex justify-center">Action</div>
+          <div className="col-span-2 text-center">Action</div>
         </div>
 
         {/* Rows */}
         {labels.map((l) => {
-          const st = STATUS_STYLES[l.status] || STATUS_STYLES.Active;
+          const st = STATUS_STYLES(theme)[l.status];
           return (
             <div
               key={l.id}
-              className="grid grid-cols-12 py-4 px-3 items-center border-b border-white/5 hover:bg-white/5"
+              className={`grid grid-cols-12 py-4 px-3 items-center border-b ${
+                theme === "dark"
+                  ? "border-white/5 hover:bg-white/5"
+                  : "border-gray-200 hover:bg-gray-50"
+              }`}
             >
               <div className="col-span-4">{l.name}</div>
               <div className="col-span-2">{formatDisplayDate(l.created)}</div>
               <div className="col-span-2">{formatDisplayDate(l.expiry)}</div>
 
               <div className="col-span-2">
-                <span className="px-4 py-1 rounded-full text-sm font-semibold" style={{ background: st.bg, color: st.color }}>
+                <span
+                  className="px-4 py-1 rounded-full text-sm font-semibold"
+                  style={{
+                    background: st.bg,
+                    color: st.color,
+                  }}
+                >
                   {l.status}
                 </span>
               </div>
 
               <div className="col-span-2 flex justify-center gap-3">
+                {/* VIEW */}
                 <button
                   onClick={() => openView(l)}
-                  className="w-10 h-10 rounded-full flex items-center justify-center border border-sky-500 hover:bg-sky-500 group transition"
-                  title="View"
+                  className={`w-10 h-10 rounded-full flex items-center justify-center border transition ${
+                    theme === "dark"
+                      ? "border-sky-500 hover:bg-sky-500"
+                      : "border-sky-400 hover:bg-sky-100"
+                  }`}
                 >
-                  <Eye className="text-sky-400 group-hover:text-white" size={18} />
+                  <Eye
+                    size={18}
+                    className={theme === "dark" ? "text-sky-400" : "text-sky-600"}
+                  />
                 </button>
 
+                {/* EDIT */}
                 <button
                   onClick={() => openEdit(l)}
-                  className="w-10 h-10 rounded-full flex items-center justify-center border border-amber-400 hover:bg-amber-400 group transition"
-                  title="Edit"
+                  className={`w-10 h-10 rounded-full flex items-center justify-center border transition ${
+                    theme === "dark"
+                      ? "border-amber-400 hover:bg-amber-400"
+                      : "border-amber-500 hover:bg-amber-100"
+                  }`}
                 >
-                  <Edit3 className="text-amber-300 group-hover:text-white" size={16} />
+                  <Edit3
+                    size={16}
+                    className={theme === "dark" ? "text-amber-300" : "text-amber-700"}
+                  />
                 </button>
               </div>
             </div>
@@ -325,270 +315,428 @@ export default function Labels() {
         })}
       </div>
 
-      {/* ------------------ Add / Edit Modal (Formik) ------------------ */}
+      {/* ADD / EDIT MODAL */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex justify-center items-start overflow-y-auto py-10">
-          <div className="bg-[#0a1039] w-[920px] rounded-xl p-6 border border-white/10">
-            <div className="flex justify-between border-b border-white/10 pb-3">
-              <h2 className="text-xl font-semibold">{editMode ? "Edit Label" : "Add Label"}</h2>
-              <button
-                onClick={() => {
-                  setShowAddModal(false);
-                  setEditMode(false);
-                  setEditingId(null);
-                  setInitialFormValues({ ...emptyValues });
-                }}
-              >
-                <X className="text-gray-300 hover:text-white" />
-              </button>
-            </div>
-
-            {/* Formik form with enableReinitialize so initialFormValues prefill on edit */}
-            <Formik initialValues={initialFormValues} enableReinitialize validationSchema={LabelSchema} onSubmit={onSubmit}>
-              {({ values, setFieldValue, isSubmitting, isValid }) => (
-                <Form>
-                  {/* Fixed aligned two-column form */}
-                  <div className="grid grid-cols-2 gap-6 mt-6">
-                    {/* LEFT */}
-                    <div>
-                      <label className="text-sm text-gray-300">Full Name</label>
-                      <Field name="fullName" placeholder="Full Name" className="w-full mt-1 bg-[#111a3b] border border-white/10 px-4 py-3 rounded-lg text-white" />
-                      <ErrorMessage name="fullName" component="div" className="text-xs text-red-400 mt-1" />
-
-                      <label className="text-sm text-gray-300 mt-4">Email</label>
-                      <Field name="email" placeholder="label@example.com" className="w-full mt-1 bg-[#111a3b] border border-white/10 px-4 py-3 rounded-lg text-white" />
-                      <ErrorMessage name="email" component="div" className="text-xs text-red-400 mt-1" />
-
-                      <label className="text-sm text-gray-300 mt-4">YouTube Channel Link</label>
-                      <Field name="youtube" placeholder="https://www.youtube.com/channel/..." className="w-full mt-1 bg-[#111a3b] border border-white/10 px-4 py-3 rounded-lg text-white" />
-                      <ErrorMessage name="youtube" component="div" className="text-xs text-red-400 mt-1" />
-
-                      {/* Aadhar Front - file input + preview under it */}
-                      <label className="text-sm text-gray-300 mt-4 block">Aadhar - Front Photo</label>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={async (e) => {
-                          const file = e.target.files?.[0];
-                          if (!file) return;
-                          const dataUrl = await readFileAsDataURL(file);
-                          setFieldValue("aadharFront", dataUrl);
-                        }}
-                        className="mt-1 text-gray-300 file:bg-[#1c2b57] file:px-4 file:py-2 file:rounded-lg file:border-none"
-                      />
-                      <p className="text-xs text-gray-400 mt-1">Optional. JPG/PNG</p>
-
-                      {/* Preview directly under front input */}
-                      <div className="mt-3 w-[150px] h-[115px] bg-gray-300 rounded-lg overflow-hidden">
-                        <img src={values.aadharFront || placeholderImage} className="w-full h-full object-cover" alt="aadhar-front" />
-                      </div>
-                    </div>
-
-                    {/* RIGHT */}
-                    <div>
-                      <label className="text-sm text-gray-300">Label Name</label>
-                      <Field name="labelName" placeholder="Label Name" className="w-full mt-1 bg-[#111a3b] border border-white/10 px-4 py-3 rounded-lg text-white" />
-                      <ErrorMessage name="labelName" component="div" className="text-xs text-red-400 mt-1" />
-
-                      <label className="text-sm text-gray-300 mt-4">Phone Number</label>
-                      <Field name="phone" placeholder="+91xxxxxxxxxx" className="w-full mt-1 bg-[#111a3b] border border-white/10 px-4 py-3 rounded-lg text-white" />
-                      <ErrorMessage name="phone" component="div" className="text-xs text-red-400 mt-1" />
-
-                      <label className="text-sm text-gray-300 mt-4">Song Language</label>
-                      <Field name="language" placeholder="e.g., Hindi / English" className="w-full mt-1 bg-[#111a3b] border border-white/10 px-4 py-3 rounded-lg text-white" />
-                      <ErrorMessage name="language" component="div" className="text-xs text-red-400 mt-1" />
-
-                      {/* Aadhar Back - file input + preview under it */}
-                      <label className="text-sm text-gray-300 mt-4 block">Aadhar - Back Photo</label>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={async (e) => {
-                          const file = e.target.files?.[0];
-                          if (!file) return;
-                          const dataUrl = await readFileAsDataURL(file);
-                          setFieldValue("aadharBack", dataUrl);
-                        }}
-                        className="mt-1 text-gray-300 file:bg-[#1c2b57] file:px-4 file:py-2 file:rounded-lg file:border-none"
-                      />
-                      <p className="text-xs text-gray-400 mt-1">&nbsp;</p>
-
-                      {/* Preview directly under back input */}
-                      <div className="mt-3 w-[150px] h-[115px] bg-gray-300 rounded-lg overflow-hidden">
-                        <img src={values.aadharBack || placeholderImage} className="w-full h-full object-cover" alt="aadhar-back" />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Footer */}
-                  <div className="flex justify-end gap-4 mt-10 border-t border-white/10 pt-4">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowAddModal(false);
-                        setEditMode(false);
-                        setEditingId(null);
-                        setInitialFormValues({ ...emptyValues });
-                      }}
-                      className="px-6 py-2 rounded-full border border-white/20 text-gray-300 hover:text-white"
-                    >
-                      Cancel
-                    </button>
-
-                    <button
-                      type="submit"
-                      disabled={isSubmitting || !isValid}
-                      className={`px-6 py-2 rounded-full text-white font-semibold ${isSubmitting || !isValid ? "opacity-60 cursor-not-allowed" : ""}`}
-                      style={{ background: "linear-gradient(90deg,#00AEEF,#007BFF)" }}
-                    >
-                      {editMode ? "Save Changes" : "Submit Request"}
-                    </button>
-                  </div>
-                </Form>
-              )}
-            </Formik>
-          </div>
-        </div>
+        <ModalWrapper>
+          <AddEditModal
+            theme={theme}
+            title={editMode ? "Edit Label" : "Add Label"}
+            onClose={() => setShowAddModal(false)}
+            onSubmit={onSubmit}
+            initialFormValues={initialFormValues}
+            inputBg={inputBg}
+          />
+        </ModalWrapper>
       )}
 
-      {/* ------------------ View Modal (3 modes) ------------------ */}
+      {/* VIEW MODAL */}
       {showViewModal && selectedLabel && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex justify-center items-start overflow-y-auto py-10">
-          <div className="bg-[#0a1039] w-[920px] rounded-xl p-6 border border-white/10">
-            <div className="flex justify-between items-center border-b border-white/10 pb-3">
-              <h2 className="text-xl font-semibold">View Label</h2>
-              <div className="flex items-center gap-3">
-                {/* tabs */}
-                <div className="flex bg-white/5 rounded-full p-1">
-                  <button
-                    onClick={() => setViewTab("details")}
-                    className={`px-3 py-1 rounded-full ${viewTab === "details" ? "bg-[#111a3b] text-white" : "text-gray-300"}`}
-                  >
-                    Details
-                  </button>
-                  <button
-                    onClick={() => setViewTab("form")}
-                    className={`px-3 py-1 rounded-full ${viewTab === "form" ? "bg-[#111a3b] text-white" : "text-gray-300"}`}
-                  >
-                    Form View
-                  </button>
-                  <button
-                    onClick={() => setViewTab("images")}
-                    className={`px-3 py-1 rounded-full ${viewTab === "images" ? "bg-[#111a3b] text-white" : "text-gray-300"}`}
-                  >
-                    Images
-                  </button>
-                </div>
-
-                <button onClick={() => setShowViewModal(false)}>
-                  <X className="text-gray-300 hover:text-white" />
-                </button>
-              </div>
-            </div>
-
-            {/* DETAILS TAB (A) */}
-            {viewTab === "details" && (
-              <div className="mt-6 grid grid-cols-2 gap-6">
-                <div>
-                  <p className="text-sm text-gray-300">Full Name</p>
-                  <div className="p-3 bg-[#111a3b] border border-white/10 rounded-lg mt-1">{selectedLabel.meta.fullName || "-"}</div>
-
-                  <p className="text-sm text-gray-300 mt-4">Email</p>
-                  <div className="p-3 bg-[#111a3b] border border-white/10 rounded-lg mt-1">{selectedLabel.meta.email || "-"}</div>
-
-                  <p className="text-sm text-gray-300 mt-4">YouTube</p>
-                  <div className="p-3 bg-[#111a3b] border border-white/10 rounded-lg mt-1 break-all">{selectedLabel.meta.youtube || "-"}</div>
-
-                  <p className="text-sm text-gray-300 mt-4">Aadhar Front</p>
-                  <img src={selectedLabel.meta.aadharFront || placeholderImage} className="w-40 h-24 rounded-lg object-cover mt-2" alt="aadhar-front" />
-                </div>
-
-                <div>
-                  <p className="text-sm text-gray-300">Label Name</p>
-                  <div className="p-3 bg-[#111a3b] border border-white/10 rounded-lg mt-1">{selectedLabel.name}</div>
-
-                  <p className="text-sm text-gray-300 mt-4">Phone</p>
-                  <div className="p-3 bg-[#111a3b] border border-white/10 rounded-lg mt-1">{selectedLabel.meta.phone || "-"}</div>
-
-                  <p className="text-sm text-gray-300 mt-4">Language</p>
-                  <div className="p-3 bg-[#111a3b] border border-white/10 rounded-lg mt-1">{selectedLabel.meta.language || "-"}</div>
-
-                  <p className="text-sm text-gray-300 mt-4">Aadhar Back</p>
-                  <img src={selectedLabel.meta.aadharBack || placeholderImage} className="w-40 h-24 rounded-lg object-cover mt-2" alt="aadhar-back" />
-                </div>
-              </div>
-            )}
-
-            {/* FORM VIEW TAB (B) - read-only fields styled like form */}
-            {viewTab === "form" && (
-              <div className="mt-6 grid grid-cols-2 gap-6">
-                <div>
-                  <label className="text-sm text-gray-300">Full Name</label>
-                  <div className="p-3 bg-[#111a3b] border border-white/10 rounded-lg mt-1">{selectedLabel.meta.fullName || "-"}</div>
-
-                  <label className="text-sm text-gray-300 mt-4">Email</label>
-                  <div className="p-3 bg-[#111a3b] border border-white/10 rounded-lg mt-1">{selectedLabel.meta.email || "-"}</div>
-
-                  <label className="text-sm text-gray-300 mt-4">YouTube Channel</label>
-                  <div className="p-3 bg-[#111a3b] border border-white/10 rounded-lg mt-1 break-all">{selectedLabel.meta.youtube || "-"}</div>
-
-                  <label className="text-sm text-gray-300 mt-4">Aadhar Front</label>
-                  <div className="mt-2">
-                    <img src={selectedLabel.meta.aadharFront || placeholderImage} className="w-48 h-28 rounded-lg object-cover" alt="aadhar-front" />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-sm text-gray-300">Label Name</label>
-                  <div className="p-3 bg-[#111a3b] border border-white/10 rounded-lg mt-1">{selectedLabel.name}</div>
-
-                  <label className="text-sm text-gray-300 mt-4">Phone</label>
-                  <div className="p-3 bg-[#111a3b] border border-white/10 rounded-lg mt-1">{selectedLabel.meta.phone || "-"}</div>
-
-                  <label className="text-sm text-gray-300 mt-4">Song Language</label>
-                  <div className="p-3 bg-[#111a3b] border border-white/10 rounded-lg mt-1">{selectedLabel.meta.language || "-"}</div>
-
-                  <label className="text-sm text-gray-300 mt-4">Aadhar Back</label>
-                  <div className="mt-2">
-                    <img src={selectedLabel.meta.aadharBack || placeholderImage} className="w-48 h-28 rounded-lg object-cover" alt="aadhar-back" />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* IMAGES TAB (C) - large image focus */}
-            {viewTab === "images" && (
-              <div className="mt-6 grid grid-cols-2 gap-6 items-start">
-                <div>
-                  <p className="text-sm text-gray-300">Aadhar Front (Large)</p>
-                  <div className="mt-2 bg-[#0b1730] p-3 rounded-lg border border-white/5">
-                    <img src={selectedLabel.meta.aadharFront || placeholderImage} className="w-full h-[360px] object-contain rounded" alt="aadhar-front-large" />
-                  </div>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-300">Aadhar Back (Large)</p>
-                  <div className="mt-2 bg-[#0b1730] p-3 rounded-lg border border-white/5">
-                    <img src={selectedLabel.meta.aadharBack || placeholderImage} className="w-full h-[360px] object-contain rounded" alt="aadhar-back-large" />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Footer with Edit + Delete + Close */}
-            <div className="flex justify-end gap-3 mt-8 border-t border-white/10 pt-4">
-              <button onClick={() => setShowViewModal(false)} className="px-6 py-2 rounded-full border border-white/20 text-gray-300 hover:text-white">Close</button>
-
-              <button onClick={() => openEdit(selectedLabel)} className="px-6 py-2 rounded-full flex items-center gap-2 bg-amber-500/10 border border-amber-400 text-amber-300 hover:bg-amber-400">
-                <Edit3 size={14} /> Edit
-              </button>
-
-              <button onClick={() => handleDelete(selectedLabel.id)} className="px-6 py-2 rounded-full text-white font-semibold" style={{ background: "linear-gradient(90deg,#FF4B4B,#CC0000)" }}>
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
+        <ModalWrapper>
+          <ViewModal
+            theme={theme}
+            selectedLabel={selectedLabel}
+            viewTab={viewTab}
+            setViewTab={setViewTab}
+            onClose={() => setShowViewModal(false)}
+            onEdit={() => openEdit(selectedLabel)}
+            onDelete={() => handleDelete(selectedLabel.id)}
+          />
+        </ModalWrapper>
       )}
+    </div>
+  );
+}
+
+/* ========================= MODAL WRAPPER ========================= */
+function ModalWrapper({ children }) {
+  return (
+    <div className="fixed inset-0 z-50 bg-black/60 flex justify-center items-start overflow-y-auto py-10">
+      {children}
+    </div>
+  );
+}
+
+/* ========================= ADD / EDIT MODAL ========================= */
+function AddEditModal({
+  theme,
+  title,
+  onClose,
+  onSubmit,
+  initialFormValues,
+  inputBg,
+}) {
+  const labelColor = theme === "dark" ? "text-white" : "text-[#020726]";
+  const modalBg =
+    theme === "dark"
+      ? "bg-[#0a1039] border-white/10"
+      : "bg-white border-gray-200 shadow-xl";
+
+  return (
+    <div className={`w-[920px] rounded-xl p-6 border ${modalBg}`}>
+      <div className="flex justify-between border-b border-gray-300/20 pb-3">
+        <h2 className="text-xl font-semibold">{title}</h2>
+        <button onClick={onClose}>
+          <X className="text-gray-400 hover:text-gray-600" />
+        </button>
+      </div>
+
+      <Formik
+        enableReinitialize
+        initialValues={initialFormValues}
+        validationSchema={LabelSchema}
+        onSubmit={onSubmit}
+      >
+        {({ values, setFieldValue, isSubmitting }) => (
+          <Form>
+            <div className="grid grid-cols-2 gap-6 mt-6">
+              {/* LEFT */}
+              <div>
+                <FieldBox
+                  theme={theme}
+                  label="Full Name"
+                  name="fullName"
+                  placeholder="Full Name"
+                  inputBg={inputBg}
+                />
+
+                <FieldBox
+                  theme={theme}
+                  label="Email"
+                  name="email"
+                  placeholder="label@example.com"
+                  inputBg={inputBg}
+                />
+
+                <FieldBox
+                  theme={theme}
+                  label="YouTube"
+                  name="youtube"
+                  placeholder="YouTube link"
+                  inputBg={inputBg}
+                />
+
+                {/* Aadhar Front */}
+                <FileUploadPreview
+                  theme={theme}
+                  label="Aadhar - Front Photo"
+                  value={values.aadharFront}
+                  onChange={async (file) => {
+                    const dataUrl = await readFileAsDataURL(file);
+                    setFieldValue("aadharFront", dataUrl);
+                  }}
+                />
+              </div>
+
+              {/* RIGHT */}
+              <div>
+                <FieldBox
+                  theme={theme}
+                  label="Label Name"
+                  name="labelName"
+                  placeholder="Label Name"
+                  inputBg={inputBg}
+                />
+
+                <FieldBox
+                  theme={theme}
+                  label="Phone Number"
+                  name="phone"
+                  placeholder="+91XXXXXXXXXX"
+                  inputBg={inputBg}
+                />
+
+                <FieldBox
+                  theme={theme}
+                  label="Language"
+                  name="language"
+                  placeholder="Hindi / English"
+                  inputBg={inputBg}
+                />
+
+                {/* Aadhar Back */}
+                <FileUploadPreview
+                  theme={theme}
+                  label="Aadhar - Back Photo"
+                  value={values.aadharBack}
+                  onChange={async (file) => {
+                    const dataUrl = await readFileAsDataURL(file);
+                    setFieldValue("aadharBack", dataUrl);
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="flex justify-end gap-4 mt-10 border-t border-gray-300/20 pt-4">
+              <button
+                type="button"
+                onClick={onClose}
+                className={`px-6 py-2 rounded-full ${
+                  theme === "dark"
+                    ? "border border-white/20 text-gray-300 hover:bg-white/10"
+                    : "border border-gray-300 text-[#020726] hover:bg-gray-100"
+                }`}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="px-6 py-2 rounded-full text-white font-semibold bg-gradient-to-r from-[#29B6F6] to-[#0288D1]"
+              >
+                {title.includes("Edit") ? "Save Changes" : "Submit Request"}
+              </button>
+            </div>
+          </Form>
+        )}
+      </Formik>
+    </div>
+  );
+}
+
+/* ========================= VIEW MODAL ========================= */
+function ViewModal({
+  theme,
+  selectedLabel,
+  viewTab,
+  setViewTab,
+  onClose,
+  onEdit,
+  onDelete,
+}) {
+  const modalBg =
+    theme === "dark"
+      ? "bg-[#0a1039] border-white/10"
+      : "bg-white border-gray-200 shadow-xl";
+
+  return (
+    <div className={`w-[920px] rounded-xl p-6 border ${modalBg}`}>
+      <div className="flex justify-between items-center border-b border-gray-300/20 pb-3">
+        <h2 className="text-xl font-semibold">View Label</h2>
+
+        <div className="flex items-center gap-3">
+          <Tabs theme={theme} viewTab={viewTab} setViewTab={setViewTab} />
+          <button onClick={onClose}>
+            <X className="text-gray-400 hover:text-gray-600" />
+          </button>
+        </div>
+      </div>
+
+      {/* DETAILS */}
+      {viewTab === "details" && (
+        <DetailsTab selectedLabel={selectedLabel} theme={theme} />
+      )}
+
+      {/* FORM VIEW */}
+      {viewTab === "form" && (
+        <FormTab selectedLabel={selectedLabel} theme={theme} />
+      )}
+
+      {/* IMAGES */}
+      {viewTab === "images" && (
+        <ImagesTab selectedLabel={selectedLabel} theme={theme} />
+      )}
+
+      {/* Footer */}
+      <div className="flex justify-end gap-3 mt-8 border-t border-gray-300/20 pt-4">
+        <button
+          onClick={onClose}
+          className={`px-6 py-2 rounded-full ${
+            theme === "dark"
+              ? "border border-white/20 text-gray-300 hover:bg-white/10"
+              : "border border-gray-300 text-[#020726] hover:bg-gray-100"
+          }`}
+        >
+          Close
+        </button>
+
+        <button
+          onClick={onEdit}
+          className="px-6 py-2 rounded-full flex items-center gap-2 bg-amber-500/10 border border-amber-400 text-amber-600"
+        >
+          <Edit3 size={14} /> Edit
+        </button>
+
+        <button
+          onClick={onDelete}
+          className="px-6 py-2 rounded-full text-white font-semibold bg-gradient-to-r from-red-500 to-red-700"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------------- COMPONENTS ---------------------- */
+
+function FieldBox({ theme, label, name, placeholder, inputBg }) {
+  const labelColor = theme === "dark" ? "text-white" : "text-[#020726]";
+
+  return (
+    <div>
+      <label className={`text-sm font-semibold ${labelColor}`}>{label}</label>
+      <Field
+        name={name}
+        placeholder={placeholder}
+        className={`w-full mt-1 rounded-lg px-4 py-3 outline-none focus:ring-1 focus:ring-[#29B6F6] ${inputBg}`}
+      />
+      <ErrorMessage
+        name={name}
+        component="div"
+        className="text-xs text-red-500 mt-1"
+      />
+    </div>
+  );
+}
+
+function FileUploadPreview({ theme, label, value, onChange }) {
+  const labelColor = theme === "dark" ? "text-white" : "text-[#020726]";
+
+  return (
+    <div className="mt-4">
+      <label className={`text-sm font-semibold ${labelColor}`}>
+        {label}
+      </label>
+
+      <input
+        type="file"
+        accept="image/*"
+        className={`mt-2 text-sm ${
+          theme === "dark"
+            ? "text-gray-300 file:bg-[#1c2b57]"
+            : "text-[#020726] file:bg-gray-300"
+        } file:px-4 file:py-2 file:rounded-md`}
+        onChange={(e) => onChange(e.target.files[0])}
+      />
+
+      <div className="mt-3 w-[160px] h-[110px] bg-gray-200 rounded-lg overflow-hidden border">
+        <img
+          src={value || placeholderImage}
+          className="w-full h-full object-cover"
+        />
+      </div>
+    </div>
+  );
+}
+
+function Tabs({ theme, viewTab, setViewTab }) {
+  return (
+    <div
+      className={`flex rounded-full p-1 ${
+        theme === "dark" ? "bg-white/10" : "bg-gray-200"
+      }`}
+    >
+      {["details", "form", "images"].map((t) => (
+        <button
+          key={t}
+          onClick={() => setViewTab(t)}
+          className={`px-3 py-1 rounded-full capitalize ${
+            viewTab === t
+              ? theme === "dark"
+                ? "bg-[#111a3b] text-white"
+                : "bg-white text-[#020726] shadow"
+              : theme === "dark"
+              ? "text-gray-300"
+              : "text-gray-600"
+          }`}
+        >
+          {t}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/* DETAILS TAB */
+function DetailsTab({ selectedLabel, theme }) {
+  const card =
+    theme === "dark"
+      ? "bg-[#111a3b] border-white/10 text-white"
+      : "bg-gray-100 border-gray-300 text-[#020726]";
+
+  return (
+    <div className="mt-6 grid grid-cols-2 gap-6">
+      <DetailBox theme={theme} label="Full Name" value={selectedLabel.meta.fullName} />
+      <DetailBox theme={theme} label="Label Name" value={selectedLabel.name} />
+
+      <DetailBox theme={theme} label="Email" value={selectedLabel.meta.email} />
+      <DetailBox theme={theme} label="Phone" value={selectedLabel.meta.phone} />
+
+      <DetailBox theme={theme} label="Language" value={selectedLabel.meta.language} />
+
+      <DetailImage theme={theme} label="Aadhar Front" src={selectedLabel.meta.aadharFront} />
+      <DetailImage theme={theme} label="Aadhar Back" src={selectedLabel.meta.aadharBack} />
+    </div>
+  );
+}
+
+/* FORM VIEW (READONLY) */
+function FormTab({ selectedLabel, theme }) {
+  return (
+    <div className="mt-6 grid grid-cols-2 gap-6">
+      <DetailBox theme={theme} label="Full Name" value={selectedLabel.meta.fullName} />
+      <DetailBox theme={theme} label="Label Name" value={selectedLabel.name} />
+
+      <DetailBox theme={theme} label="Email" value={selectedLabel.meta.email} />
+      <DetailBox theme={theme} label="Phone" value={selectedLabel.meta.phone} />
+
+      <DetailBox theme={theme} label="Language" value={selectedLabel.meta.language} />
+
+      <DetailImageLarge theme={theme} label="Aadhar Front" src={selectedLabel.meta.aadharFront} />
+      <DetailImageLarge theme={theme} label="Aadhar Back" src={selectedLabel.meta.aadharBack} />
+    </div>
+  );
+}
+
+/* IMAGES TAB */
+function ImagesTab({ selectedLabel, theme }) {
+  return (
+    <div className="mt-6 grid grid-cols-2 gap-6">
+      <DetailImageLarge theme={theme} label="Aadhar Front" src={selectedLabel.meta.aadharFront} />
+      <DetailImageLarge theme={theme} label="Aadhar Back" src={selectedLabel.meta.aadharBack} />
+    </div>
+  );
+}
+
+/* SMALL BOX */
+function DetailBox({ theme, label, value }) {
+  const card =
+    theme === "dark"
+      ? "bg-[#111a3b] border-white/10 text-white"
+      : "bg-gray-100 border-gray-300 text-[#020726]";
+
+  return (
+    <div>
+      <p className={`text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>{label}</p>
+      <div className={`p-3 border rounded mt-1 ${card}`}>{value || "-"}</div>
+    </div>
+  );
+}
+
+/* SMALL IMAGE */
+function DetailImage({ theme, label, src }) {
+  return (
+    <div>
+      <p className={`text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>{label}</p>
+      <img
+        src={src || placeholderImage}
+        className="w-40 h-24 rounded-lg object-cover border mt-2"
+      />
+    </div>
+  );
+}
+
+/* LARGE IMAGE */
+function DetailImageLarge({ theme, label, src }) {
+  return (
+    <div>
+      <p className={`text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>{label}</p>
+      <img
+        src={src || placeholderImage}
+        className="w-full h-[300px] rounded-lg object-contain border mt-2 bg-gray-50"
+      />
     </div>
   );
 }

@@ -1,7 +1,10 @@
+// src/pages/CopyrightClaim.jsx
 import React, { useState } from "react";
-import { Link } from "react-router-dom"; 
+import { Link } from "react-router-dom";
+import { useTheme } from "../components/Topbar";
 
 const CopyrightClaim = () => {
+  const { theme } = useTheme();
   const [openModal, setOpenModal] = useState(false);
 
   const requests = [
@@ -25,33 +28,47 @@ const CopyrightClaim = () => {
     },
   ];
 
-  const statusColor = {
-    Pending: "bg-yellow-400 text-black",
-    Rejected: "bg-red-600 text-white",
-    Released: "bg-green-500 text-white",
+  const statusClass = (status) => {
+    if (status === "Pending") return theme === "dark" ? "bg-yellow-400 text-black" : "bg-yellow-100 text-black";
+    if (status === "Rejected") return theme === "dark" ? "bg-red-600 text-white" : "bg-red-100 text-red-700";
+    if (status === "Released") return theme === "dark" ? "bg-green-500 text-white" : "bg-green-100 text-green-700";
+    return theme === "dark" ? "bg-gray-600 text-white" : "bg-gray-100 text-gray-800";
   };
 
+  const pageBg = theme === "dark" ? "bg-[#020726] text-white" : "bg-white text-[#020726]";
+  const cardBg = theme === "dark" ? "bg-[#0a1039] border border-white/10" : "bg-white border border-gray-200";
+  const headerText = theme === "dark" ? "text-white" : "text-[#020726]";
+  const subText = theme === "dark" ? "text-gray-300" : "text-gray-600";
+  const btnOutline = theme === "dark"
+    ? "border border-[#29B6F6] text-[#29B6F6] hover:bg-[#29B6F6]/20"
+    : "border border-[#29B6F6] text-[#29B6F6] hover:bg-[#29B6F6]/10";
+
+  const rowText = theme === "dark" ? "text-gray-200" : "text-gray-800";
+  const rowBorder = theme === "dark" ? "border-b border-white/10" : "border-b border-gray-100";
+  const tableHeading = theme === "dark" ? "text-gray-300" : "text-gray-600";
+  const inputBg = theme === "dark" ? "bg-[#1b214d] text-white border border-white/10" : "bg-gray-50 text-[#020726] border border-gray-200";
+
   return (
-    <div className="min-h-screen bg-[#020726] text-white p-10">
+    <div className={`${pageBg} min-h-screen p-10`}>
 
       {/* Breadcrumb */}
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-semibold">Copyright Claim</h1>
-        <p className="text-gray-300">
-          Home <span className="text-[#29B6F6]"> / Copyright Claim</span>
+        <h1 className={`text-2xl font-semibold ${headerText}`}>Copyright Claim</h1>
+        <p className={`${subText}`}>
+          Home <span className="text-[#29B6F6"> / Copyright Claim</span>
         </p>
       </div>
 
       {/* Card */}
-      <div className="bg-[#0a1039] rounded-xl p-10 border border-white/10 shadow-xl">
+      <div className={`${cardBg} rounded-xl p-10 shadow-xl`}>
 
         {/* Header + Add button */}
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold">Requests</h2>
+          <h2 className={`text-xl font-semibold ${headerText}`}>Requests</h2>
 
           <button
             onClick={() => setOpenModal(true)}
-            className="px-5 py-2 rounded-xl border border-[#29B6F6] text-[#29B6F6] hover:bg-[#29B6F6]/20 transition"
+            className={`px-5 py-2 rounded-xl transition ${btnOutline}`}
           >
             Add Request
           </button>
@@ -74,27 +91,36 @@ const CopyrightClaim = () => {
           </Link>
         </div>
 
-        {/* Table */}
-        <div className="grid grid-cols-4 text-left text-gray-10 font-medium mb-4">
+        {/* Table headings */}
+        <div className={`grid grid-cols-4 text-left ${tableHeading} font-medium mb-4`}>
           <div>Link</div>
           <div>Platform</div>
           <div>Requested at</div>
           <div>Status</div>
         </div>
 
+        {/* Rows */}
         <div className="space-y-5">
           {requests.map((row, idx) => (
             <div
               key={idx}
-              className="grid grid-cols-4 items-center py-3 border-b border-white/10 text-gray-200"
+              className={`grid grid-cols-4 items-center py-3 ${rowBorder} ${rowText}`}
             >
-              <div>{row.link}</div>
+              <div>
+                <a
+                  href={`https://${row.link}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={theme === "dark" ? "text-sky-300 hover:text-white" : "text-[#0288D1] hover:underline"}
+                >
+                  {row.link}
+                </a>
+              </div>
+
               <div>{row.platform}</div>
               <div>{row.date}</div>
               <div>
-                <span
-                  className={`px-4 py-1 rounded-full text-sm ${statusColor[row.status]}`}
-                >
+                <span className={`px-4 py-1 rounded-full text-sm ${statusClass(row.status)}`}>
                   {row.status}
                 </span>
               </div>
@@ -107,14 +133,14 @@ const CopyrightClaim = () => {
       {/* MODAL */}
       {openModal && (
         <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50">
-          <div className="bg-[#0a1039] w-full max-w-lg rounded-xl shadow-xl border border-white/10 p-6">
+          <div className={`${theme === "dark" ? "bg-[#0a1039] border border-white/10" : "bg-white border border-gray-200"} w-full max-w-lg rounded-xl shadow-xl p-6`}>
 
             {/* Modal Header */}
             <div className="flex justify-between items-center mb-5">
-              <h2 className="text-lg font-semibold">Copyright Claim Removal</h2>
+              <h2 className={`text-lg font-semibold ${headerText}`}>Copyright Claim Removal</h2>
               <button
                 onClick={() => setOpenModal(false)}
-                className="text-gray-300 hover:text-white"
+                className={`${theme === "dark" ? "text-gray-300 hover:text-white" : "text-gray-600 hover:text-black"}`}
               >
                 ✖
               </button>
@@ -124,10 +150,8 @@ const CopyrightClaim = () => {
             <form className="space-y-4">
 
               <div>
-                <label className="block mb-1 text-sm text-gray-300">
-                  Platform
-                </label>
-                <select className="w-full p-3 rounded-lg bg-[#1b214d] text-white border border-white/10">
+                <label className={`block mb-1 text-sm ${subText}`}>Platform</label>
+                <select className={`w-full p-3 rounded-lg ${inputBg}`}>
                   <option value="">Select platform</option>
                   <option value="YouTube">YouTube</option>
                   <option value="Facebook">Facebook</option>
@@ -135,23 +159,19 @@ const CopyrightClaim = () => {
               </div>
 
               <div>
-                <label className="block mb-1 text-sm text-gray-300">
-                  Video Link
-                </label>
+                <label className={`block mb-1 text-sm ${subText}`}>Video Link</label>
                 <input
                   type="url"
                   placeholder="https://www.youtube.com/watch?v=..."
-                  className="w-full p-3 rounded-lg bg-[#1b214d] text-white border border-white/10"
+                  className={`w-full p-3 rounded-lg ${inputBg}`}
                 />
               </div>
 
               <div>
-                <label className="block mb-1 text-sm text-gray-300">
-                  Notes (optional)
-                </label>
+                <label className={`block mb-1 text-sm ${subText}`}>Notes (optional)</label>
                 <textarea
                   rows="3"
-                  className="w-full p-3 rounded-lg bg-[#1b214d] text-white border border-white/10"
+                  className={`w-full p-3 rounded-lg ${inputBg}`}
                   placeholder="Explain why this claim should be removed..."
                 />
               </div>
@@ -161,14 +181,15 @@ const CopyrightClaim = () => {
                 <button
                   type="button"
                   onClick={() => setOpenModal(false)}
-                  className="px-5 py-2 rounded-lg border border-gray-400 text-gray-300"
+                  className={`${theme === "dark" ? "px-5 py-2 rounded-lg border border-gray-400 text-gray-300" : "px-5 py-2 rounded-lg border border-gray-300 text-gray-700"}`}
                 >
                   Cancel
                 </button>
 
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-lg text-white font-medium bg-gradient-to-r from-[#29B6F6] to-[#0288D1]"
+                  className="px-5 py-2 rounded-lg text-white font-medium"
+                  style={{ background: "linear-gradient(90deg,#29B6F6,#0288D1)" }}
                 >
                   Submit Request
                 </button>

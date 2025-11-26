@@ -1,8 +1,10 @@
+// src/pages/SocialIsrcSubmitForm.jsx
 import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { useTheme } from "../components/Topbar"; // theme provider
 
 const SocialISRCschema = Yup.object({
   artistNameSocial: Yup.string().required("Artist name is required"),
@@ -19,6 +21,20 @@ const SocialISRCschema = Yup.object({
 
 const SocialIsrcSubmitForm = () => {
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
+  const { theme } = useTheme();
+
+  // theme-aware classes
+  const pageBg = theme === "dark" ? "bg-[#020726] text-white" : "bg-white text-[#020726]";
+  const cardBg =
+    theme === "dark"
+      ? "bg-[#0a1039] border border-white/10 shadow-2xl"
+      : "bg-white border border-gray-200 shadow-sm";
+  const labelColor = theme === "dark" ? "text-white" : "text-[#020726]";
+  const inputBg =
+    theme === "dark"
+      ? "bg-[#2c2f4a] text-white placeholder-[#9bb6d8] border-transparent"
+      : "bg-gray-50 text-[#020726] placeholder-gray-500 border border-gray-200";
+  const smallHint = theme === "dark" ? "text-[#9bb6d8]" : "text-gray-500";
 
   const handleSubmit = async (values, { resetForm }) => {
     try {
@@ -39,14 +55,13 @@ const SocialIsrcSubmitForm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#020726] flex flex-col pb-20">
-
+    <div className={`min-h-screen transition-colors duration-200 pb-20 ${pageBg}`}>
       {/* Header */}
-      <div className="py-4 px-10 flex justify-between items-center">
-        <h1 className="text-xl font-semibold text-white">
+      <div className="py-4 px-6 md:px-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+        <h1 className={`text-xl font-semibold ${labelColor}`}>
           Social Profile Links & Music ISRC Submit Form
         </h1>
-        <p className="text-sm text-white">
+        <p className={`text-sm ${smallHint}`}>
           Home{" "}
           <span className="text-[#29B6F6]">
             / Social Profile Links & Music ISRC Submit Form
@@ -55,9 +70,8 @@ const SocialIsrcSubmitForm = () => {
       </div>
 
       {/* Form Container */}
-      <div className="flex justify-start px-10">
-        <div className="bg-[#0a1039] rounded-xl shadow-2xl p-10 w-full max-w-4xl border border-white/10">
-
+      <div className="flex justify-start px-6 md:px-10">
+        <div className={`rounded-xl p-8 md:p-10 w-full max-w-4xl ${cardBg}`}>
           <Formik
             initialValues={{
               artistNameSocial: "",
@@ -74,107 +88,114 @@ const SocialIsrcSubmitForm = () => {
             validationSchema={SocialISRCschema}
             onSubmit={handleSubmit}
           >
-            <Form className="space-y-6">
+            {() => (
+              <Form className="space-y-6">
+                {/* Artist + Label */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FieldGroup
+                    theme={theme}
+                    label="Artist Name *"
+                    name="artistNameSocial"
+                    placeholder="Enter artist name"
+                  />
+                  <FieldGroup
+                    theme={theme}
+                    label="Label Name"
+                    name="labelName"
+                    placeholder="Enter label name (if applicable)"
+                  />
+                </div>
 
-              {/* Artist + Label */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Facebook / Instagram */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FieldGroup
+                    theme={theme}
+                    label="Facebook Profile URL"
+                    name="facebookLink"
+                    placeholder="https://facebook.com/..."
+                  />
+                  <FieldGroup
+                    theme={theme}
+                    label="Instagram Profile URL"
+                    name="instagramLink"
+                    placeholder="https://instagram.com/..."
+                  />
+                </div>
+
+                {/* Spotify / Apple */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FieldGroup
+                    theme={theme}
+                    label="Spotify Artist URL"
+                    name="spotifyLink"
+                    placeholder="https://open.spotify.com/artist/..."
+                  />
+                  <FieldGroup
+                    theme={theme}
+                    label="Apple Music Artist URL"
+                    name="appleMusicLink"
+                    placeholder="https://music.apple.com/..."
+                  />
+                </div>
+
+                {/* ISRC */}
                 <FieldGroup
-                  label="Artist Name *"
-                  name="artistNameSocial"
-                  placeholder="Enter artist name"
+                  theme={theme}
+                  label="Music ISRC Code *"
+                  name="isrcCode"
+                  placeholder="Enter ISRC code (e.g., USABC1234567)"
                 />
+
                 <FieldGroup
-                  label="Label Name"
-                  name="labelName"
-                  placeholder="Enter label name (if applicable)"
+                  theme={theme}
+                  label="Track Title"
+                  name="trackTitleSocial"
+                  placeholder="Enter track title"
                 />
-              </div>
 
-              {/* Facebook / Instagram */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FieldGroup
-                  label="Facebook Profile URL"
-                  name="facebookLink"
-                  placeholder="https://facebook.com/..."
+                  theme={theme}
+                  label="Official YouTube Video (optional)"
+                  name="officialVideoUrlSocial"
+                  placeholder="https://www.youtube.com/watch?v=..."
                 />
-                <FieldGroup
-                  label="Instagram Profile URL"
-                  name="instagramLink"
-                  placeholder="https://instagram.com/..."
-                />
-              </div>
 
-              {/* Spotify / Apple */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FieldGroup
-                  label="Spotify Artist URL"
-                  name="spotifyLink"
-                  placeholder="https://open.spotify.com/artist/..."
-                />
-                <FieldGroup
-                  label="Apple Music Artist URL"
-                  name="appleMusicLink"
-                  placeholder="https://music.apple.com/..."
-                />
-              </div>
-
-              {/* ISRC */}
-              <FieldGroup
-                label="Music ISRC Code *"
-                name="isrcCode"
-                placeholder="Enter ISRC code (e.g., USABC1234567)"
-              />
-
-              <FieldGroup
-                label="Track Title"
-                name="trackTitleSocial"
-                placeholder="Enter track title"
-              />
-
-              <FieldGroup
-                label="Official YouTube Video (optional)"
-                name="officialVideoUrlSocial"
-                placeholder="https://www.youtube.com/watch?v=..."
-              />
-
-              {/* Confirm */}
-              <div className="flex items-start gap-2">
-                <Field
-                  type="checkbox"
+                {/* Confirm */}
+                <div className="flex items-start gap-2">
+                  <Field
+                    type="checkbox"
+                    name="confirmSocial"
+                    className={`mt-1 ${theme === "dark" ? "accent-[#29B6F6]" : "accent-[#29B6F6]"}`}
+                  />
+                  <span className={`text-sm ${labelColor}`}>
+                    I confirm that all information provided is accurate
+                  </span>
+                </div>
+                <ErrorMessage
                   name="confirmSocial"
-                  className="mt-1 accent-[#29B6F6]"
+                  component="p"
+                  className="text-red-400 text-xs"
                 />
-                <span className="text-sm text-white">
-                  I confirm that all information provided is accurate
-                </span>
-              </div>
-              <ErrorMessage
-                name="confirmSocial"
-                component="p"
-                className="text-red-400 text-xs"
-              />
 
-              {/* Buttons */}
-              <div className="flex justify-end gap-3 pt-2">
-                <button
-                  type="reset"
-                  className="border border-white/20 text-white px-5 py-2 rounded-md hover:bg-white/5"
-                >
-                  Reset Form
-                </button>
+                {/* Buttons */}
+                <div className="flex justify-end gap-3 pt-2">
+                  <button
+                    type="reset"
+                    className={`border rounded-md px-5 py-2 ${theme === "dark" ? "border-white/20 text-white hover:bg-white/5" : "border-gray-200 text-[#020726] hover:bg-gray-50"}`}
+                  >
+                    Reset Form
+                  </button>
 
-                <button
-                  type="submit"
-                  className="bg-gradient-to-r from-[#29B6F6] to-[#0288D1] 
-                  hover:opacity-90 text-white px-5 py-2 rounded-md font-medium"
-                >
-                  Submit Details
-                </button>
-              </div>
-
-            </Form>
+                  <button
+                    type="submit"
+                    className="bg-gradient-to-r from-[#29B6F6] to-[#0288D1] hover:opacity-90 text-white px-5 py-2 rounded-md font-medium"
+                  >
+                    Submit Details
+                  </button>
+                </div>
+              </Form>
+            )}
           </Formik>
-
         </div>
       </div>
     </div>
@@ -183,18 +204,27 @@ const SocialIsrcSubmitForm = () => {
 
 export default SocialIsrcSubmitForm;
 
+/* ---------------------- Reusable Field Component (THEMED) ---------------------- */
 
-// Reusable Field Component (THEMED)
-const FieldGroup = ({ label, name, placeholder }) => (
-  <div>
-    <label className="block text-sm font-semibold text-white mb-1">{label}</label>
-    <Field
-      name={name}
-      placeholder={placeholder}
-      className="w-full bg-[#2c2f4a] text-white placeholder-[#9bb6d8]
-      border border-transparent rounded-md px-4 py-2 
-      focus:outline-none focus:ring-1 focus:ring-[#29B6F6]"
-    />
-    <ErrorMessage name={name} component="p" className="text-red-400 text-xs mt-1" />
-  </div>
-);
+const FieldGroup = ({ theme, label, name, placeholder }) => {
+  // input classes depend on theme
+  const labelColor = theme === "dark" ? "text-white" : "text-[#020726]";
+  const inputBg =
+    theme === "dark"
+      ? "bg-[#2c2f4a] text-white placeholder-[#9bb6d8] border border-transparent"
+      : "bg-white text-[#020726] placeholder-gray-400 border border-gray-200";
+
+  const hintColor = theme === "dark" ? "text-[#9bb6d8]" : "text-gray-500";
+
+  return (
+    <div>
+      <label className={`block text-sm font-semibold mb-1 ${labelColor}`}>{label}</label>
+      <Field
+        name={name}
+        placeholder={placeholder}
+        className={`w-full rounded-md px-4 py-2 outline-none focus:ring-1 focus:ring-[#29B6F6] ${inputBg}`}
+      />
+      <ErrorMessage name={name} component="p" className="text-red-400 text-xs mt-1" />
+    </div>
+  );
+};

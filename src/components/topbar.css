@@ -1,41 +1,65 @@
 /* ================================
    SINOXIS DIGITAL TOPBAR THEME
-   ================================ */
+================================ */
 
+/* VARIABLES */
 :root {
   --sinoxis-blue-start: #29B6F6;
   --sinoxis-blue-end: #0288D1;
   --sinoxis-navy: #020726;
   --white: #ffffff;
+
+  /* Light Mode Additions */
+  --light-bg: #ffffff;
+  --light-text: #020726;
+  --light-border: #e5e7eb;
+  --light-search: #f1f5f9;
 }
 
-/* TOPBAR MAIN */
+/* =====================================================
+    TOPBAR CONTAINER (LIGHT BY DEFAULT)
+===================================================== */
 .topbar {
   height: 70px;
-  background-color: var(--sinoxis-navy);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background-color: var(--light-bg);
+  border-bottom: 1px solid var(--light-border);
+  color: var(--light-text);
+
   display: flex;
   align-items: center;
   justify-content: space-between;
+
   padding: 0 25px;
-  font-family: "Poppins", sans-serif;
   position: fixed;
   top: 0;
   left: 240px;
   right: 0;
   width: calc(100% - 240px);
+
   z-index: 20;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+
   transition: all 0.3s ease;
-  color: var(--white);
 }
 
+/* When Sidebar Collapses */
 .topbar.collapsed {
   left: 80px;
   width: calc(100% - 80px);
 }
 
-/* Left Section */
+/* =====================================================
+    🌙 DARK MODE OVERRIDES
+===================================================== */
+.dark .topbar {
+  background-color: var(--sinoxis-navy);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--white);
+}
+
+/* =====================================================
+    LEFT SECTION
+===================================================== */
 .left-section {
   display: flex;
   align-items: center;
@@ -45,57 +69,72 @@
 /* Sidebar Toggle */
 .toggle-btn {
   background: none;
-  border: none;
+  border: 1px solid rgba(41, 182, 246, 0.3);
   font-size: 22px;
   cursor: pointer;
-  color: var(--sinoxis-blue-start);
-  border: 1px solid rgba(41,182,246,0.3);
   padding: 8px;
   border-radius: 8px;
+  color: var(--sinoxis-blue-start);
   transition: 0.3s ease;
 }
 
 .toggle-btn:hover {
-  background: rgba(255, 255, 255, 0.07);
-  border-color: var(--sinoxis-blue-end);
+  background: rgba(0,0,0,0.05);
 }
 
-/* Search Box */
+/* DARK MODE TOGGLE */
+.dark .toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+/* =====================================================
+    SEARCH BOX
+===================================================== */
+
+/* Light mode search */
 .search-box {
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--white);
+  background: var(--light-search);
+  border: 1px solid var(--light-border);
+  color: var(--light-text);
   border-radius: 10px;
   padding: 8px 14px;
   width: 300px;
-  backdrop-filter: blur(4px);
+}
+
+/* Dark mode search override */
+.dark .search-box {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--white);
 }
 
 .search-box input {
   border: none;
   outline: none;
   background: none;
-  color: var(--white);
+  color: inherit;
   width: 100%;
   font-size: 14px;
 }
 
 .search-box input::placeholder {
-  color: #9bb6d8;
+  color: #8d9bb7;
 }
 
-/* Right Section */
+/* =====================================================
+    RIGHT SECTION
+===================================================== */
 .topbar-right {
   display: flex;
   align-items: center;
   gap: 25px;
 }
 
-/* Home Icon */
+/* Home icon */
 .topbar-right a {
-  color: var(--sinoxis-blue-start);
+  color: var(--light-text);
   transition: 0.2s;
 }
 
@@ -103,26 +142,37 @@
   color: var(--sinoxis-blue-end);
 }
 
+/* DARK MODE */
+.dark .topbar-right a {
+  color: var(--white);
+}
+
 /* Notifications */
 .bell-icon {
-  color: var(--white);
   font-size: 18px;
   cursor: pointer;
   transition: 0.2s;
+  color: var(--light-text);
+}
+
+.dark .bell-icon {
+  color: var(--white);
 }
 
 .bell-icon:hover {
   color: var(--sinoxis-blue-end);
 }
 
+/* Notification badge */
 .notification-badge {
   background: var(--sinoxis-blue-end);
 }
 
-/* User Dropdown */
+/* =====================================================
+    USER DROPDOWN
+===================================================== */
 .user-dropdown {
   position: relative;
-  
 }
 
 .user-info {
@@ -132,50 +182,54 @@
   cursor: pointer;
 }
 
-/* User Icon Circle */
-.user-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  padding: 6px;
-  color: var(--white);
-  background: linear-gradient(90deg, #29B6F6, #0288D1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
 .user-name {
   font-size: 13px;
   font-weight: 600;
+  color: var(--light-text);
+}
+
+.dark .user-name {
   color: var(--white);
 }
 
-.user-role {
-  color: #9bb6d8;
-  font-size: 12px;
+.chevron {
+  transition: 0.25s;
+  color: #7084a6;
 }
 
-.chevron {
+.dark .chevron {
   color: #9bb6d8;
-  transition: 0.25s;
 }
 
 .chevron.rotate {
   transform: rotate(180deg);
 }
 
-/* Dropdown Menu */
+/* =====================================================
+    DROPDOWN MENU
+===================================================== */
 .dropdown-menu {
   position: absolute;
   top: 55px;
   right: 0;
   width: 180px;
-  background: #020726; /* Dark navy background */
-  border: 1px solid rgba(255, 255, 255, 0.08); /* Soft white border */
+
+  background: var(--light-bg);
+  border: 1px solid var(--light-border);
+
   border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.20);
+
   padding: 6px 0;
   animation: fadeIn 0.2s ease-in-out;
-  color: #ffffff; /* White text */
+  color: var(--light-text);
+}
+
+/* DARK MODE */
+.dark .dropdown-menu {
+  background: #020726;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--white);
 }
 
 /* Dropdown item */
@@ -184,37 +238,21 @@
   align-items: center;
   padding: 10px 14px;
   font-size: 14px;
-  color: #ffffff; /* White text */
   transition: 0.2s ease;
+  color: inherit;
 }
 
-/* WHITE ICONS */
 .dropdown-icon {
-  color: var(--sinoxis-blue-end);
   margin-right: 8px;
+  color: var(--sinoxis-blue-end);
 }
 
-/* Hover effect */
+/* Hover */
 .dropdown-item:hover {
-  background: rgba(255, 255, 255, 0.1); /* white/10 glow */
+  background: rgba(0,0,0,0.05);
 }
 
-/* Logout hover effect */
-.logout:hover {
-  background: rgba(255, 255, 255, 0.15); /* slightly stronger hover */
+.dark .dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.10);
 }
 
-
-
-
-/* Fade Animation */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}

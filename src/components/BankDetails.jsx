@@ -1,6 +1,8 @@
+// src/pages/BankDetails.jsx
 import React, { useEffect, useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import { useTheme } from "../components/Topbar";
 
 const BankDetailsSchema = Yup.object().shape({
   accountName: Yup.string().required("Account holder name is required"),
@@ -14,6 +16,7 @@ const BankDetailsSchema = Yup.object().shape({
 
 const BankDetails = () => {
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
+  const { theme } = useTheme();
 
   const [initialValues, setInitialValues] = useState({
     accountName: "",
@@ -48,6 +51,7 @@ const BankDetails = () => {
 
   useEffect(() => {
     fetchBankDetails();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSubmit = async (values) => {
@@ -78,25 +82,39 @@ const BankDetails = () => {
   };
 
   if (loading)
-    return <div className="p-10 text-center text-xl text-white">Loading…</div>;
+    return (
+      <div className={`p-10 text-center text-xl ${theme === "dark" ? "text-white" : "text-[#020726]"}`}>
+        Loading…
+      </div>
+    );
+
+  /* THEME CLASSES */
+  const pageBg = theme === "dark" ? "bg-[#020726]" : "bg-white";
+  const pageText = theme === "dark" ? "text-white" : "text-[#020726]";
+  const cardBg = theme === "dark" ? "bg-[#0a1039]" : "bg-white";
+  const cardBorder = theme === "dark" ? "border-white/10" : "border-gray-200";
+  const titleColor = theme === "dark" ? "text-white" : "text-[#020726]";
+  const subText = theme === "dark" ? "text-gray-300" : "text-gray-600";
+  const inputBg = theme === "dark" ? "bg-[#2c2f4a] text-white" : "bg-gray-50 text-[#020726]";
+  const inputBorder = theme === "dark" ? "border-transparent" : "border-gray-200";
+  const helperColor = theme === "dark" ? "text-gray-400" : "text-gray-500";
+  const checkboxAccent = theme === "dark" ? "accent-[#29B6F6]" : "accent-[#29B6F6]";
 
   return (
-    <div className="min-h-screen bg-[#020726] text-white p-8">
-
+    <div className={`${pageBg} ${pageText} min-h-screen p-8`}>
       {/* TITLE + BREADCRUMB */}
       <div className="flex justify-between mb-8 px-2">
-        <h1 className="text-3xl font-semibold">Bank Details</h1>
+        <h1 className={`text-3xl font-semibold ${titleColor}`}>Bank Details</h1>
 
-        <p className="text-sm text-gray-300">
+        <p className={`text-sm ${subText}`}>
           Home / <span className="text-[#29B6F6]">Bank Details</span>
         </p>
       </div>
 
       {/* MAIN FORM CONTAINER */}
-      <div className="bg-[#0a1039] rounded-xl shadow-2xl p-10 w-full max-w-5xl border border-white/10">
-
-        <h2 className="text-xl font-semibold mb-1">Bank Details</h2>
-        <p className="text-gray-300 mb-6">
+      <div className={`${cardBg} rounded-xl shadow-2xl p-10 w-full max-w-5xl border ${cardBorder}`}>
+        <h2 className={`text-xl font-semibold mb-1 ${titleColor}`}>Bank Details</h2>
+        <p className={`mb-6 ${subText}`}>
           Provide your bank details accurately. All information is securely encrypted.
         </p>
 
@@ -106,7 +124,7 @@ const BankDetails = () => {
           validationSchema={BankDetailsSchema}
           onSubmit={handleSubmit}
         >
-          {() => (
+          {({ isSubmitting }) => (
             <Form className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
               {/* Account Holder Name */}
@@ -114,6 +132,10 @@ const BankDetails = () => {
                 label="Account Holder Name"
                 name="accountName"
                 placeholder="Enter account holder name"
+                inputBg={inputBg}
+                inputBorder={inputBorder}
+                helper={null}
+                helperColor={helperColor}
               />
 
               {/* Account Number */}
@@ -121,6 +143,10 @@ const BankDetails = () => {
                 label="Account Number"
                 name="accountNumber"
                 placeholder="Enter account number"
+                inputBg={inputBg}
+                inputBorder={inputBorder}
+                helper={null}
+                helperColor={helperColor}
               />
 
               {/* Bank Name */}
@@ -128,6 +154,10 @@ const BankDetails = () => {
                 label="Bank Name"
                 name="bankName"
                 placeholder="Enter bank name"
+                inputBg={inputBg}
+                inputBorder={inputBorder}
+                helper={null}
+                helperColor={helperColor}
               />
 
               {/* IFSC Code */}
@@ -136,6 +166,9 @@ const BankDetails = () => {
                 name="ifscCode"
                 placeholder="Enter IFSC code"
                 helper="Example: SBIN0001234"
+                inputBg={inputBg}
+                inputBorder={inputBorder}
+                helperColor={helperColor}
               />
 
               {/* Bank Branch */}
@@ -143,6 +176,10 @@ const BankDetails = () => {
                 label="Bank Branch (Optional)"
                 name="bankBranch"
                 placeholder="Enter bank branch"
+                inputBg={inputBg}
+                inputBorder={inputBorder}
+                helper={null}
+                helperColor={helperColor}
               />
 
               {/* PAN Number */}
@@ -150,12 +187,16 @@ const BankDetails = () => {
                 label="PAN Number (Optional)"
                 name="panNumber"
                 placeholder="Enter PAN number"
+                inputBg={inputBg}
+                inputBorder={inputBorder}
+                helper={null}
+                helperColor={helperColor}
               />
 
               {/* CONFIRMATION CHECKBOX */}
               <div className="col-span-2 flex items-start gap-2 mt-3">
-                <Field type="checkbox" name="confirm" className="mt-1 w-4 h-4 accent-[#29B6F6]" />
-                <label className="text-sm text-gray-300">
+                <Field type="checkbox" name="confirm" className={`mt-1 w-4 h-4 ${checkboxAccent}`} />
+                <label className={`text-sm ${subText}`}>
                   I confirm that the above bank details are correct.
                 </label>
               </div>
@@ -165,17 +206,19 @@ const BankDetails = () => {
               <div className="col-span-2 mt-4">
                 <button
                   type="submit"
-                  className="px-6 py-2 text-white font-semibold rounded-md 
-                  bg-gradient-to-r from-[#29B6F6] to-[#0288D1] hover:opacity-90"
+                  disabled={isSubmitting}
+                  className="px-6 py-2 text-white font-semibold rounded-md transition"
+                  style={{
+                    background: "linear-gradient(90deg,#29B6F6,#0288D1)",
+                  }}
                 >
-                  Submit
+                  {isSubmitting ? "Saving..." : "Submit"}
                 </button>
               </div>
 
             </Form>
           )}
         </Formik>
-
       </div>
     </div>
   );
@@ -184,22 +227,22 @@ const BankDetails = () => {
 export default BankDetails;
 
 /* Reusable Input Component */
-const FieldBox = ({ label, name, placeholder, helper }) => (
-  <div>
-    <label className="block text-sm font-semibold mb-1 text-white">
-      {label}
-    </label>
+const FieldBox = ({ label, name, placeholder, helper, inputBg, inputBorder, helperColor }) => {
+  return (
+    <div>
+      <label className="block text-sm font-semibold mb-1" style={{ color: "inherit" }}>
+        {label}
+      </label>
 
-    <Field
-      name={name}
-      placeholder={placeholder}
-      className="w-full bg-[#2c2f4a] text-white placeholder-gray-400 
-      border border-transparent rounded-md px-4 py-2
-      focus:outline-none focus:ring-1 focus:ring-[#29B6F6]"
-    />
+      <Field
+        name={name}
+        placeholder={placeholder}
+        className={`w-full ${inputBg} placeholder-gray-400 ${inputBorder} rounded-md px-4 py-2 focus:outline-none`}
+      />
 
-    {helper && <p className="text-xs text-gray-400 mt-1">{helper}</p>}
+      {helper && <p className={`text-xs mt-1 ${helperColor}`}>{helper}</p>}
 
-    <ErrorMessage name={name} component="p" className="text-red-400 text-xs mt-1" />
-  </div>
-);
+      <ErrorMessage name={name} component="p" className="text-red-400 text-xs mt-1" />
+    </div>
+  );
+};

@@ -1,7 +1,9 @@
+// src/pages/LoginPage.jsx
 import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "../components/Topbar"; // ⭐ THEME SUPPORT
 
 const LoginSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email").required("Email is required"),
@@ -11,12 +13,28 @@ const LoginSchema = Yup.object().shape({
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const { theme } = useTheme(); // ⭐ GET CURRENT THEME
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
+
+  // THEME COLORS
+  const pageBg = theme === "dark" ? "bg-[#020726] text-white" : "bg-gray-100 text-[#020726]";
+  const cardBg =
+    theme === "dark"
+      ? "bg-[#0a1039] border-white/10"
+      : "bg-white border border-gray-300 shadow-md";
+
+  const labelColor = theme === "dark" ? "text-white" : "text-[#020726]";
+  const subtleText = theme === "dark" ? "text-gray-300" : "text-gray-600";
+
+  const inputBg =
+    theme === "dark"
+      ? "bg-[#1f233d] text-white border-white/20 placeholder-gray-300"
+      : "bg-gray-100 text-[#020726] border-gray-300 placeholder-gray-500";
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
       const payload = {
-        email: values.email.toLowerCase(), // ⭐ FIXED
+        email: values.email.toLowerCase(),
         password: values.password,
       };
 
@@ -29,7 +47,6 @@ const LoginPage = () => {
       const data = await res.json();
 
       if (data.success) {
-        // save token
         localStorage.setItem("token", data.data.token);
         navigate("/dashboard");
       } else {
@@ -44,17 +61,16 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-gray-10 p-4">
-      
-      <img
-        src="/image/logo.webp"
-        alt="Sinoxis Logo"
-        className="w-24 h-24 object-contain mb-6"
-      />
+    <div
+      className={`min-h-screen flex flex-col justify-center items-center p-4 transition-all duration-300 ${pageBg}`}
+    >
+      {/* LOGO */}
+      <img src="/image/logo.webp" alt="Sinoxis Logo" className="w-24 h-24 mb-6" />
 
-      <div className="bg-white rounded-xl shadow-md w-full max-w-md p-6">
-        <h3 className="text-2xl font-semibold text-center mb-2">Login</h3>
-        <p className="text-center text-gray-500 mb-6">
+      {/* LOGIN CARD */}
+      <div className={`w-full max-w-md rounded-xl p-8 transition-all duration-300 ${cardBg}`}>
+        <h3 className="text-3xl font-semibold text-center mb-2">Login</h3>
+        <p className={`text-center mb-6 ${subtleText}`}>
           Enter your credentials to access your account.
         </p>
 
@@ -64,64 +80,59 @@ const LoginPage = () => {
           onSubmit={handleSubmit}
         >
           {({ errors, touched, isSubmitting }) => (
-            <Form className="space-y-4">
-              
-              {/* Email */}
+            <Form className="space-y-5">
+
+              {/* EMAIL */}
               <div>
-                <label className="block mb-1 font-medium">Email</label>
+                <label className={`block mb-1 text-sm font-medium ${labelColor}`}>Email</label>
                 <Field
                   name="email"
                   type="email"
                   placeholder="Enter your email"
-                  className={`w-full p-2 border rounded-lg focus:outline-none focus:ring-2 ${
-                    errors.email && touched.email
-                      ? "border-red-500 ring-red-300"
-                      : "border-gray-300 ring-red-500"
-                  }`}
+                  className={`w-full p-3 rounded-lg outline-none border focus:ring-1 focus:ring-[#29B6F6] ${inputBg}`}
                 />
-                <ErrorMessage name="email" component="div" className="text-red-500 text-sm" />
+                <ErrorMessage name="email" component="div" className="text-red-500 text-sm mt-1" />
               </div>
 
-              {/* Password */}
+              {/* PASSWORD */}
               <div>
-                <label className="block mb-1 font-medium">Password</label>
+                <label className={`block mb-1 text-sm font-medium ${labelColor}`}>Password</label>
                 <Field
                   name="password"
                   type="password"
                   placeholder="Enter password"
-                  className={`w-full p-2 border rounded-lg focus:outline-none focus:ring-2 ${
-                    errors.password && touched.password
-                      ? "border-red-500 ring-red-300"
-                      : "border-gray-300 ring-red-500"
-                  }`}
+                  className={`w-full p-3 rounded-lg outline-none border focus:ring-1 focus:ring-[#29B6F6] ${inputBg}`}
                 />
-                <ErrorMessage name="password" component="div" className="text-red-500 text-sm" />
+                <ErrorMessage name="password" component="div" className="text-red-500 text-sm mt-1" />
               </div>
 
-              {/* Remember + Register */}
+              {/* REMEMBER + REGISTER */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Field type="checkbox" name="remember" className="w-4 h-4" />
-                  <label className="text-gray-700 text-sm">Remember me</label>
+                  <Field type="checkbox" name="remember" className="w-4 h-4 accent-[#29B6F6]" />
+                  <label className={`text-sm ${labelColor}`}>Remember me</label>
                 </div>
 
                 <button
                   type="button"
                   onClick={() => navigate("/register")}
-                  className="text-gray-700 text-sm hover:underline"
+                  className={`text-sm hover:underline ${labelColor}`}
                 >
                   Register
                 </button>
               </div>
 
+              {/* SUBMIT BUTTON */}
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-red-600 hover:bg-red-500 text-white font-semibold py-2 rounded-lg transition disabled:opacity-50"
+                className="w-full py-3 rounded-lg text-white font-semibold transition disabled:opacity-50"
+                style={{
+                  background: "linear-gradient(90deg, #29B6F6, #0288D1)",
+                }}
               >
                 {isSubmitting ? "Logging in..." : "Login"}
               </button>
-
             </Form>
           )}
         </Formik>
@@ -131,4 +142,5 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
+
 

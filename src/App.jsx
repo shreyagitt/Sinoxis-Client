@@ -28,6 +28,7 @@ import Register from "./components/Register";
 import CopyrightClaim from "./components/CopyrightClaim";
 import OfficialArtistChannel from "./components/OfficialArtistChannel";
 import ReleaseForm from "./components/ReleaseForm";
+import Pending from "./components/Pending";
 
 
 
@@ -58,6 +59,16 @@ function App() {
           </Layout>
         }
       />
+
+  <Route
+        path="/pending"
+        element={
+          <Layout>
+            < Pending/>
+          </Layout>
+        }
+      />
+
 
       <Route
         path="/releases/myRelease"

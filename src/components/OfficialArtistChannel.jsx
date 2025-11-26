@@ -1,6 +1,7 @@
 // src/pages/OfficialArtistChannel.jsx
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { useTheme } from "../components/Topbar"; // ⭐ THEME SUPPORT
 
 const sampleRequests = [
   {
@@ -20,20 +21,55 @@ const sampleRequests = [
 ];
 
 const StatusPill = ({ status = "Submitted" }) => {
-  const map = {
-    Submitted: "bg-yellow-400 text-black",
-    Pending: "bg-yellow-400 text-black",
-    Rejected: "bg-red-600 text-white",
-    Released: "bg-green-500 text-white",
-  };
   return (
-    <span className={`px-4 py-1 rounded-full text-sm ${map[status] || map.Submitted}`}>
+    <span
+      className={`
+        inline-flex items-center justify-center 
+        px-3 py-1 rounded-full text-sm font-semibold
+      `}
+      style={{
+        width: "fit-content",
+        background:
+          status === "Pending" || status === "Submitted"
+            ? "#F4C20D"
+            : status === "Rejected"
+            ? "#DB0000"
+            : "#00C851",
+        color:
+          status === "Rejected" || status === "Released"
+            ? "white"
+            : "black",
+      }}
+    >
       {status}
     </span>
   );
 };
 
+
 export default function OfficialArtistChannel() {
+  const { theme } = useTheme(); // ⭐ GET THEME
+
+  // THEME COLORS
+  const pageBg = theme === "dark" ? "bg-[#020726] text-white" : "bg-white text-[#020726]";
+  const cardBg =
+    theme === "dark"
+      ? "bg-[#0a1039] border-white/10"
+      : "bg-white border-gray-300 shadow-md";
+
+  const labelColor = theme === "dark" ? "text-white" : "text-[#020726]";
+  const inputBg =
+    theme === "dark"
+      ? "bg-[#1b214d] border-white/10 text-white"
+      : "bg-gray-100 border-gray-300 text-[#020726]";
+
+  const modalBg =
+    theme === "dark"
+      ? "bg-[#0a1039] border-white/10"
+      : "bg-white border-gray-300";
+
+  const subtleText = theme === "dark" ? "text-gray-300" : "text-gray-600";
+
   const [openOACModal, setOpenOACModal] = useState(false);
   const [openAddSongModal, setOpenAddSongModal] = useState(false);
 
@@ -74,26 +110,29 @@ export default function OfficialArtistChannel() {
   };
 
   return (
-    <div className="min-h-screen bg-[#020726] text-white px-10 py-8">
+    <div className={`min-h-screen px-10 py-8 transition-all duration-300 ${pageBg}`}>
 
       {/* Header */}
       <div className="flex justify-between items-center mb-10">
         <h1 className="text-3xl font-semibold">Official Artist Channel</h1>
-        <p className="text-gray-300">
+        <p className={subtleText}>
           Home <span className="text-[#29B6F6]"> / Official Artist Channel</span>
         </p>
       </div>
 
       {/* MAIN CARD */}
-      <div className="bg-[#0a1039] border border-white/10 rounded-xl p-10 shadow-lg">
+      <div className={`rounded-xl p-10 border shadow-lg transition-all duration-300 ${cardBg}`}>
 
-        {/* Title + Button */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold">Official Artist Channel</h2>
 
           <button
             onClick={() => setOpenOACModal(true)}
-            className="px-5 py-2 rounded-full border border-[#29B6F6] text-[#29B6F6] hover:bg-[#29B6F6]/20"
+            className={`px-5 py-2 rounded-full border ${
+              theme === "dark"
+                ? "border-[#29B6F6] text-[#29B6F6] hover:bg-[#29B6F6]/20"
+                : "border-[#0288D1] text-[#0288D1] hover:bg-[#0288D1] hover:text-white"
+            }`}
           >
             Add Request
           </button>
@@ -103,21 +142,33 @@ export default function OfficialArtistChannel() {
         <div className="flex gap-4 my-6">
           <Link
             to="/requests/claim"
-            className="px-5 py-2 border border-[#29B6F6] rounded-full text-[#29B6F6] hover:bg-[#29B6F6] hover:text-white"
+            className={`px-5 py-2 rounded-full border transition ${
+              theme === "dark"
+                ? "border-[#29B6F6] text-[#29B6F6] hover:bg-[#29B6F6] hover:text-white"
+                : "border-[#0288D1] text-[#0288D1] hover:bg-[#0288D1] hover:text-white"
+            }`}
           >
             Copyright Claims
           </Link>
 
           <Link
             to="/requests/artist"
-            className="px-5 py-2 border border-[#29B6F6] rounded-full text-[#29B6F6] hover:bg-[#29B6F6] hover:text-white"
+            className={`px-5 py-2 rounded-full border transition ${
+              theme === "dark"
+                ? "border-[#29B6F6] text-[#29B6F6] hover:bg-[#29B6F6] hover:text-white"
+                : "border-[#0288D1] text-[#0288D1] hover:bg-[#0288D1] hover:text-white"
+            }`}
           >
             Official Artist Channel
           </Link>
         </div>
 
         {/* TABLE HEADER */}
-        <div className="grid grid-cols-5 gap-6 text-gray-10 font-semibold py-3 border-t border-white/10">
+        <div
+          className={`grid grid-cols-5 gap-6 font-semibold py-3 border-t ${
+            theme === "dark" ? "border-white/10" : "border-gray-300"
+          } ${subtleText}`}
+        >
           <div>YouTube Channel Link</div>
           <div>Topic Channel Link</div>
           <div>Artist Name</div>
@@ -130,102 +181,114 @@ export default function OfficialArtistChannel() {
           {requests.map((item, i) => (
             <div
               key={i}
-              className="grid grid-cols-5 gap-6 py-4 border-b border-white/10"
+              className={`grid grid-cols-5 gap-6 py-4 border-b ${
+                theme === "dark" ? "border-white/10" : "border-gray-300"
+              }`}
             >
               <div>{item.ytChannel}</div>
               <div>{item.topicChannel}</div>
               <div>{item.artist}</div>
               <div>{item.date}</div>
-              <div><StatusPill status={item.status} /></div>
+              <StatusPill status={item.status} theme={theme} />
             </div>
           ))}
         </div>
       </div>
 
-      {/* -------------------------------------------------------------------------------- */}
-      {/*                         OAC REQUEST MODAL (FIXED STRUCTURE)                     */}
-      {/* -------------------------------------------------------------------------------- */}
-
+      {/* OAC REQUEST MODAL */}
       {openOACModal && (
         <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center p-4">
-          <div className="bg-[#0a1039] w-full max-w-3xl border border-white/10 rounded-xl shadow-xl p-6">
+          <div className={`w-full max-w-3xl rounded-xl p-6 border shadow-xl ${modalBg}`}>
 
-            {/* HEADER FIXED */}
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-semibold">YouTube Official Artist Channel</h3>
-
               <button
                 onClick={() => setOpenOACModal(false)}
-                className="text-gray-300 hover:text-white text-xl"
+                className={`${subtleText} hover:text-red-500 text-xl`}
               >
                 ✖
               </button>
             </div>
 
-            {/* SONG COUNT */}
-            <div className="mb-4 text-gray-300">
+            <div className={`mb-4 ${subtleText}`}>
               Songs Added: <span className="font-semibold">{songs.length}</span>
             </div>
 
-            {/* FORM */}
             <form onSubmit={handleOacSubmit} className="space-y-5">
 
+              {/* YouTube Channel */}
               <div>
-                <label className="text-sm">YouTube Channel Link *</label>
+                <label className={`text-sm ${labelColor}`}>YouTube Channel Link *</label>
                 <input
                   type="url"
                   value={oacForm.ytChannel}
                   onChange={(e) => setOacForm({ ...oacForm, ytChannel: e.target.value })}
-                  className="w-full px-4 py-2 bg-[#1b214d] text-white border border-white/10 rounded-lg"
+                  className={`w-full px-4 py-2 rounded-lg border ${inputBg}`}
                   required
                 />
               </div>
 
+              {/* Topic Channel */}
               <div>
-                <label className="text-sm">Topic Channel Link</label>
+                <label className={`text-sm ${labelColor}`}>Topic Channel Link</label>
                 <input
                   type="url"
                   value={oacForm.topicChannel}
                   onChange={(e) => setOacForm({ ...oacForm, topicChannel: e.target.value })}
-                  className="w-full px-4 py-2 bg-[#1b214d] text-white border border-white/10 rounded-lg"
+                  className={`w-full px-4 py-2 rounded-lg border ${inputBg}`}
                 />
               </div>
 
+              {/* Artist Name */}
               <div>
-                <label className="text-sm">Artist Name *</label>
+                <label className={`text-sm ${labelColor}`}>Artist Name *</label>
                 <input
                   type="text"
                   value={oacForm.artistName}
                   onChange={(e) => setOacForm({ ...oacForm, artistName: e.target.value })}
-                  className="w-full px-4 py-2 bg-[#1b214d] text-white border border-white/10 rounded-lg"
+                  className={`w-full px-4 py-2 rounded-lg border ${inputBg}`}
                   required
                 />
               </div>
 
               {/* SONGS AREA */}
               <div className="flex justify-between items-center">
-                <div className="text-gray-300 text-sm">
-                  Songs ({songs.length}) - Add minimum <b>3 songs</b>
+                <div className={`text-sm ${subtleText}`}>
+                  Songs ({songs.length}) — Add minimum <b>3 songs</b>
                 </div>
 
                 <button
                   type="button"
                   onClick={() => setOpenAddSongModal(true)}
-                  className="px-4 py-1 rounded-md border border-[#29B6F6] text-[#29B6F6]"
+                  className={`px-4 py-1 rounded-md border ${
+                    theme === "dark"
+                      ? "border-[#29B6F6] text-[#29B6F6]"
+                      : "border-[#0288D1] text-[#0288D1]"
+                  }`}
                 >
                   Add Song
                 </button>
               </div>
 
-              <div className="max-h-48 overflow-auto bg-[#11152b] rounded-lg p-3 border border-white/10">
+              <div
+                className={`max-h-48 overflow-auto rounded-lg p-3 border ${
+                  theme === "dark"
+                    ? "bg-[#11152b] border-white/10"
+                    : "bg-gray-100 border-gray-300"
+                }`}
+              >
                 {songs.length === 0 && (
-                  <div className="text-gray-400 text-sm">No songs added</div>
+                  <div className={`${subtleText} text-sm`}>No songs added</div>
                 )}
 
                 {songs.map((song, i) => (
                   <div
                     key={i}
-                    className="flex justify-between items-center bg-[#0f1633] p-3 my-2 rounded-lg"
+                    className={`flex justify-between items-center p-3 my-2 rounded-lg ${
+                      theme === "dark"
+                        ? "bg-[#0f1633]"
+                        : "bg-gray-200"
+                    }`}
                   >
                     <div>
                       <div className="font-medium">{song.title}</div>
@@ -235,7 +298,7 @@ export default function OfficialArtistChannel() {
                     <button
                       type="button"
                       onClick={() => handleRemoveSong(i)}
-                      className="text-red-400 hover:text-red-600 text-sm"
+                      className="text-red-500 hover:text-red-700 text-sm"
                     >
                       Remove
                     </button>
@@ -243,12 +306,16 @@ export default function OfficialArtistChannel() {
                 ))}
               </div>
 
-              {/* SUBMIT / CANCEL BUTTONS */}
-              <div className="flex justify-end gap-3">
+              {/* SUBMIT / CANCEL */}
+              <div className="flex justify-end gap-3 mt-4">
                 <button
                   type="button"
                   onClick={() => setOpenOACModal(false)}
-                  className="px-5 py-2 border border-gray-400 rounded-lg text-gray-300"
+                  className={`px-5 py-2 rounded-lg border ${
+                    theme === "dark"
+                      ? "border-gray-400 text-gray-300"
+                      : "border-gray-400 text-[#020726]"
+                  }`}
                 >
                   Cancel
                 </button>
@@ -259,29 +326,28 @@ export default function OfficialArtistChannel() {
                   className={`px-5 py-2 rounded-lg text-white ${
                     oacCanSubmit
                       ? "bg-gradient-to-r from-[#29B6F6] to-[#0288D1]"
-                      : "bg-gray-600 opacity-50 cursor-not-allowed"
+                      : "bg-gray-400 opacity-60 cursor-not-allowed"
                   }`}
                 >
                   Submit Application
                 </button>
               </div>
+
             </form>
           </div>
         </div>
       )}
 
-      {/* -------------------------------------------------------------------------------- */}
-      {/*                                ADD SONG MODAL                                     */}
-      {/* -------------------------------------------------------------------------------- */}
+      {/* ADD SONG MODAL */}
       {openAddSongModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center p-4">
-          <div className="bg-[#0a1039] w-full max-w-md p-6 border border-white/10 rounded-xl shadow-xl">
+        <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center p-4">
+          <div className={`w-full max-w-md rounded-xl p-6 border shadow-xl ${modalBg}`}>
 
             <div className="flex justify-between items-center mb-5">
               <h4 className="text-lg font-semibold">Add Song</h4>
               <button
                 onClick={() => setOpenAddSongModal(false)}
-                className="text-gray-300 hover:text-white"
+                className={`${subtleText} hover:text-red-500`}
               >
                 ✖
               </button>
@@ -290,23 +356,23 @@ export default function OfficialArtistChannel() {
             <form onSubmit={handleAddSong} className="space-y-5">
 
               <div>
-                <label className="text-sm">Song Title</label>
+                <label className={`text-sm ${labelColor}`}>Song Title</label>
                 <input
                   type="text"
                   value={tempSong.title}
                   onChange={(e) => setTempSong({ ...tempSong, title: e.target.value })}
-                  className="w-full px-4 py-2 bg-[#1b214d] text-white border border-white/10 rounded-lg"
+                  className={`w-full px-4 py-2 rounded-lg border ${inputBg}`}
                   required
                 />
               </div>
 
               <div>
-                <label className="text-sm">ISRC</label>
+                <label className={`text-sm ${labelColor}`}>ISRC</label>
                 <input
                   type="text"
                   value={tempSong.isrc}
                   onChange={(e) => setTempSong({ ...tempSong, isrc: e.target.value })}
-                  className="w-full px-4 py-2 bg-[#1b214d] text-white border border-white/10 rounded-lg"
+                  className={`w-full px-4 py-2 rounded-lg border ${inputBg}`}
                   required
                 />
               </div>
@@ -315,23 +381,28 @@ export default function OfficialArtistChannel() {
                 <button
                   type="button"
                   onClick={() => setOpenAddSongModal(false)}
-                  className="px-4 py-2 border border-gray-500 text-gray-300 rounded-md"
+                  className={`px-4 py-2 border rounded-md ${
+                    theme === "dark"
+                      ? "border-gray-500 text-gray-300"
+                      : "border-gray-500 text-[#020726]"
+                  }`}
                 >
                   Cancel
                 </button>
 
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#29B6F6] hover:bg-[#0288D1] text-white rounded-md"
+                  className="px-4 py-2 rounded-md text-white bg-[#29B6F6] hover:bg-[#0288D1]"
                 >
                   Add Song
                 </button>
               </div>
-            </form>
 
+            </form>
           </div>
         </div>
       )}
+
     </div>
   );
 }

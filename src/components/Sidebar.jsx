@@ -11,8 +11,13 @@ import {
 } from "react-icons/fa";
 import { Link, useLocation } from "react-router-dom";
 
+// THEME IMPORT
+import { useTheme } from "../components/Topbar";
+
 const Sidebar = ({ collapsed }) => {
   const location = useLocation();
+  const { theme } = useTheme(); // 🌗 GET CURRENT THEME
+
   const [openMenu, setOpenMenu] = useState(null);
 
   const toggleMenu = (menu) => {
@@ -89,15 +94,23 @@ const Sidebar = ({ collapsed }) => {
     },
   ];
 
+  /* LIGHT + DARK STYLES */
+  const bgColor = theme === "dark" ? "bg-[#020726]" : "bg-white border-r border-gray-200";
+  const textColor = theme === "dark" ? "text-white" : "text-[#020726]";
+  const hoverBg = theme === "dark" ? "hover:bg-white/10" : "hover:bg-[#E8F4FF]";
+  const menuText = theme === "dark" ? "text-[#DDE7FF]" : "text-[#020726]";
+  const subText = theme === "dark" ? "text-gray-300" : "text-[#020726]";
+  const subHoverBg = theme === "dark" ? "hover:bg-white/10" : "hover:bg-[#E8F4FF]";
+
   return (
     <div
-      className={`fixed top-0 left-0 h-screen flex flex-col
-      bg-[#020726] text-white
-      transition-all duration-300 shadow-xl
-      ${collapsed ? "w-20" : "w-64"}`}
+      className={`fixed top-0 left-0 h-screen flex flex-col transition-all duration-300 shadow-xl
+      ${bgColor} 
+      ${collapsed ? "w-20" : "w-60"}
+    `}
     >
       {/* Logo */}
-      <div className="h-[70px] flex items-center justify-center border-b border-white/10">
+      <div className={`h-[70px] flex items-center justify-center border-b ${theme === "dark" ? "border-white/10" : "border-gray-200"}`}>
         <img
           src="/image/logo.webp"
           alt="Logo"
@@ -122,8 +135,8 @@ const Sidebar = ({ collapsed }) => {
                   ${collapsed ? "justify-center py-3" : "px-4 py-3 pr-4 gap-3"}
                   ${
                     isActive
-                      ? "bg-gradient-to-r from-[#29B6F6] to-[#0288D1]"
-                      : "hover:bg-white/10 text-[#DDE7FF]"
+                      ? "bg-gradient-to-r from-[#29B6F6] to-[#0288D1] text-white"
+                      : `${hoverBg} ${menuText}`
                   }
                 `}
               >
@@ -134,7 +147,8 @@ const Sidebar = ({ collapsed }) => {
                     <span className="flex-1 text-[15px]">{item.label}</span>
                     <FaChevronDown
                       className={`transition-transform text-[13px]
-                      ${isOpen ? "rotate-180 text-white" : "text-gray-400"}`}
+                      ${isOpen ? "rotate-180 text-white" : "text-gray-400"}
+                    `}
                     />
                   </>
                 )}
@@ -144,6 +158,7 @@ const Sidebar = ({ collapsed }) => {
                 <ul className="ml-8 mt-1 space-y-1 pr-4">
                   {item.subItems.map((sub) => {
                     const activeSub = location.pathname === sub.path;
+
                     return (
                       <li key={sub.path}>
                         <Link
@@ -152,7 +167,7 @@ const Sidebar = ({ collapsed }) => {
                           ${
                             activeSub
                               ? "bg-[#0288D1] text-white"
-                              : "text-gray-300 hover:bg-white/10"
+                              : `${subText} ${subHoverBg}`
                           }`}
                         >
                           • {sub.label}
@@ -167,12 +182,13 @@ const Sidebar = ({ collapsed }) => {
         })}
       </ul>
 
-      <div className="h-6 bg-gradient-to-t from-[#020726] to-transparent" />
+      <div className={`h-6 ${theme === "dark" ? "bg-gradient-to-t from-[#020726]" : "bg-gradient-to-t from-white"}`} />
     </div>
   );
 };
 
 export default Sidebar;
+
 
 
 
