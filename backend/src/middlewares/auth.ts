@@ -18,87 +18,89 @@ export const authenticate = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
-): Promise<void> => {
-  try {
-    const authHeader = req.headers.authorization;
+) => {
+  const authHeader = req.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      res.status(HTTP_STATUS.UNAUTHORIZED).json({
-        success: false,
-        error: "Access token is required",
-      });
-      return;
-    }
-
-    const token = authHeader.substring(7); // Remove 'Bearer ' prefix
-
-    try {
-      const decoded = await AuthService.verifyToken(token);
-      req.user = decoded; // attach user info
-      next();
-    } catch (error) {
-      res.status(HTTP_STATUS.UNAUTHORIZED).json({
-        success: false,
-        error: ERROR_MESSAGES.UNAUTHORIZED,
-      });
-    }
-  } catch (error) {
-    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+  // ❌ No token
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(HTTP_STATUS.UNAUTHORIZED).json({
       success: false,
-      error: ERROR_MESSAGES.INTERNAL_ERROR,
+      error: "Access token is required",
+    });
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  try {
+    // 🔐 Validate token & attach user info
+    const decoded = await AuthService.verifyToken(token);
+
+    req.user = {
+      userId: decoded.userId,
+      email: decoded.email,
+      role: decoded.role,
+    };
+
+    return next();
+  } catch (error) {
+    return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+      success: false,
+      error: ERROR_MESSAGES.UNAUTHORIZED,
     });
   }
 };
 
 /**
- * ✅ Role-based authorization middleware
+ * 🔐 Role-based authorization middleware
+ *    Example: authorize("admin")
+ *             authorize("client")
+ *             authorize("admin", "client")
  */
 export const authorize = (...roles: string[]) => {
-  return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
+  return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     if (!req.user) {
-      res.status(HTTP_STATUS.UNAUTHORIZED).json({
+      return res.status(HTTP_STATUS.UNAUTHORIZED).json({
         success: false,
         error: ERROR_MESSAGES.UNAUTHORIZED,
       });
-      return;
     }
 
+    // ❌ User role not allowed
     if (!roles.includes(req.user.role)) {
-      res.status(HTTP_STATUS.FORBIDDEN).json({
+      return res.status(HTTP_STATUS.FORBIDDEN).json({
         success: false,
         error: ERROR_MESSAGES.FORBIDDEN,
       });
-      return;
     }
 
-    next();
+    return next();
   };
 };
 
 /**
- * 🟡 Optional authentication (allows guest access)
+ * 🟡 Optional authentication (guest allowed)
  */
 export const optionalAuth = async (
   req: AuthenticatedRequest,
-  res: Response,
+  _res: Response,
   next: NextFunction
-): Promise<void> => {
+) => {
   try {
     const authHeader = req.headers.authorization;
 
-    if (authHeader && authHeader.startsWith("Bearer ")) {
-      const token = authHeader.substring(7);
+    if (authHeader?.startsWith("Bearer ")) {
+      const token = authHeader.split(" ")[1];
+
       try {
         const decoded = await AuthService.verifyToken(token);
         req.user = decoded;
       } catch {
-        req.user = undefined; // invalid token, continue as guest
+        req.user = undefined; // invalid token → treat as guest
       }
     }
-
-    next();
   } catch {
     req.user = undefined;
-    next();
   }
+
+  next();
 };

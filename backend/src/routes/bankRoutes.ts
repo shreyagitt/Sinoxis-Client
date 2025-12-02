@@ -4,9 +4,41 @@ import { authenticate, authorize } from "../middlewares/auth";
 
 const router = Router();
 
-router.get("/", authenticate, bankController.list);
-router.get("/:id", authenticate, bankController.getOne);
-router.put("/:id/verify", authenticate, bankController.verify);
-router.delete("/:id", authenticate, bankController.delete);
+/* ============================================================
+   BANK MANAGEMENT ROUTES (ADMIN ONLY)
+   ============================================================ */
+
+// Get all bank entries
+router.get(
+  "/",
+  authenticate,
+  authorize("admin"),
+  bankController.list
+);
+
+// Get single bank entry
+router.get(
+  "/:id",
+  authenticate,
+  authorize("admin"),
+  bankController.getOne
+);
+
+// Verify bank record (admin only)
+router.put(
+  "/:id/verify",
+  authenticate,
+  authorize("admin"),
+  bankController.verify
+);
+
+// Delete bank record
+router.delete(
+  "/:id",
+  authenticate,
+  authorize("admin"),
+  bankController.delete
+);
 
 export default router;
+

@@ -2,3 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Remove SweetAlert2 scroll issues */
+.swal2-popup {
+  max-height: none !important;
+}
+
+.swal2-html-container {
+  overflow: visible !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.swal2-input, .swal2-textarea, .swal2-select {
+  margin: 0 !important;
+}

@@ -1,11 +1,31 @@
 import { Router } from "express";
 import multer from "multer";
 import { ClientYouTubeClaimController } from "../../controllers/client/YouTubeClaimController";
+import { authenticate, authorize } from "../../middlewares/auth";
 
 const upload = multer({ dest: "uploads/" });
 const router = Router();
 
-router.post("/", upload.single("screenshot"), ClientYouTubeClaimController.submit);
-router.get("/", ClientYouTubeClaimController.list);
+/* ============================================================
+   CLIENT YOUTUBE CLAIM ROUTES (CLIENT ONLY)
+   ============================================================ */
+
+// Submit a YouTube claim
+router.post(
+  "/",
+  authenticate,
+  authorize("client"),
+  upload.single("screenshot"),
+  ClientYouTubeClaimController.submit
+);
+
+// Get all claims of the logged-in client
+router.get(
+  "/",
+  authenticate,
+  authorize("client"),
+  ClientYouTubeClaimController.list
+);
 
 export default router;
+

@@ -4,8 +4,33 @@ import { authenticate, authorize } from "../middlewares/auth";
 
 const router = Router();
 
-router.post("/", authenticate, AdminRevenueController.upsert);
-router.get("/", authenticate,  AdminRevenueController.list);
-router.delete("/", authenticate,  AdminRevenueController.deleteAll);
+/* ============================================================
+   REVENUE ROUTES (ADMIN ONLY)
+   ============================================================ */
+
+// Create or update revenue
+router.post(
+  "/",
+  authenticate,
+  authorize("admin"),
+  AdminRevenueController.upsert
+);
+
+// List revenue
+router.get(
+  "/",
+  authenticate,
+  authorize("admin"),
+  AdminRevenueController.list
+);
+
+// Delete all revenue
+router.delete(
+  "/",
+  authenticate,
+  authorize("admin"),
+  AdminRevenueController.deleteAll
+);
 
 export default router;
+

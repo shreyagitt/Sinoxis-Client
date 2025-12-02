@@ -4,10 +4,40 @@ import { authenticate, authorize } from "../middlewares/auth";
 
 const router = Router();
 
-router.get("/", authenticate, AdminApplicationController.list);
-// Create new applicant
-router.post("/",  authenticate,AdminApplicationController.create);
-router.patch("/:id/status", authenticate, AdminApplicationController.updateStatus);
-router.delete("/:id", authenticate, AdminApplicationController.delete);
+// ======================================================
+// ADMIN ROUTES (Protected by RBAC)
+// ======================================================
+
+// Get all applications (ADMIN ONLY)
+router.get(
+  "/",
+  authenticate,
+  authorize("admin"),
+  AdminApplicationController.list
+);
+
+// Create new applicant (ADMIN ONLY)
+router.post(
+  "/",
+  authenticate,
+  authorize("admin"),
+  AdminApplicationController.create
+);
+
+// Update applicant status (ADMIN ONLY)
+router.patch(
+  "/:id/status",
+  authenticate,
+  authorize("admin"),
+  AdminApplicationController.updateStatus
+);
+
+// Delete applicant (ADMIN ONLY)
+router.delete(
+  "/:id",
+  authenticate,
+  authorize("admin"),
+  AdminApplicationController.delete
+);
 
 export default router;

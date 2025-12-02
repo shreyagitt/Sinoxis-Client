@@ -1,81 +1,94 @@
+// src/pages/RegisterPage.tsx
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, Mail, Lock } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
 import toast from "react-hot-toast";
-import { useAppDispatch } from "../store/hook";
-import { loginSuccess } from "../features/auth/authSlice";
-import { useLoginMutation, useRegisterMutation } from "../features/auth/authApi"; 
+import { useRegisterMutation } from "../features/auth/authApi";
 import Layout from "../Components/layout/Layout";
 
-interface LoginForm {
+// ⭐ TS Interface
+interface RegisterForm {
+  firstName: string;
+  lastName: string;
   email: string;
   password: string;
 }
 
-const Login = () => {
+const RegisterPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>();
 
-  const dispatch = useAppDispatch();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegisterForm>();
+
   const navigate = useNavigate();
 
-  // ⭐ Admin Login API
-  const [login, { isLoading }] = useLoginMutation();
+  const [registerUser, { isLoading }] = useRegisterMutation();
 
-  // ⭐ Register API (added)
-  const [registerUser] = useRegisterMutation();
-
-  const onSubmit = async (data: LoginForm) => {
+  const onSubmit = async (data: RegisterForm) => {
     try {
-      const response = await login({
-        email: data.email,
-        password: data.password,
-      }).unwrap();
+      const payload = { ...data, role: "admin" };
 
-      console.log("LOGIN SUCCESS:", response);
+      const response = await registerUser(payload).unwrap();
 
-      const { user, token, refreshToken } = response.data;
-
-      // Save in Redux
-      dispatch(loginSuccess({ user, token, refreshToken }));
-
-      // Save token
-      localStorage.setItem("token", token);
-      if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
-
-      toast.success("Login Successful!");
-
-      // ⭐ Redirect based on role
-      if (user.role === "admin") navigate("/dashboard");
-      else navigate("/client/dashboard");
-
+      toast.success("Registration successful! Please login.");
+      navigate("/login");
     } catch (error: any) {
-      console.error("LOGIN ERROR:", error);
-      toast.error(error?.data?.error || "Invalid email or password.");
+      console.error("REGISTER ERROR:", error);
+      toast.error(error?.data?.error || "Registration failed.");
     }
   };
 
   return (
     <Layout hideChrome>
-      <div className="min-h-screen flex justify-center items-center bg-gray-100 px-4">
+      <div className="min-h-screen flex justify-center bg-gray-100 px-4 py-10 overflow-y-auto">
         <div className="max-w-md w-full bg-white shadow-lg rounded-xl p-8">
 
           <div className="text-center mb-6">
-            <img
-              src="/logo.png"
-              alt="Admin"
-              className="mx-auto w-24 h-24 object-contain"
-            />
+            <img src="/image/logo.webp" alt="Admin Register"
+              className="mx-auto w-24 h-24 object-contain" />
             <h1 className="text-2xl font-semibold text-gray-900 mt-3">
-              Admin Login
+              Admin Register
             </h1>
             <p className="text-gray-500 text-sm mt-1">
-              Sign in to access the admin panel
+              Create your admin account
             </p>
           </div>
 
           <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
+
+            {/* FIRST NAME */}
+            <div>
+              <label className="text-sm font-medium text-gray-700">First Name</label>
+              <div className="relative mt-1">
+                <User className="absolute left-3 top-3 text-gray-400" size={18} />
+                <input
+                  {...register("firstName", { required: "First name is required" })}
+                  className="w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+                  placeholder="John"
+                />
+              </div>
+              {errors.firstName && <p className="text-sm text-red-600 mt-1">{errors.firstName.message}</p>}
+            </div>
+
+            {/* LAST NAME */}
+            <div>
+              <label className="text-sm font-medium text-gray-700">Last Name</label>
+              <div className="relative mt-1">
+                <User className="absolute left-3 top-3 text-gray-400" size={18} />
+                <input
+                  {...register("lastName", { required: "Last name is required" })}
+                  className="w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+                  placeholder="Doe"
+                />
+              </div>
+              {errors.lastName && <p className="text-sm text-red-600 mt-1">{errors.lastName.message}</p>}
+            </div>
+
+            {/* EMAIL */}
             <div>
               <label className="text-sm font-medium text-gray-700">Email</label>
               <div className="relative mt-1">
@@ -90,6 +103,7 @@ const Login = () => {
               {errors.email && <p className="text-sm text-red-600 mt-1">{errors.email.message}</p>}
             </div>
 
+            {/* PASSWORD */}
             <div>
               <label className="text-sm font-medium text-gray-700">Password</label>
               <div className="relative mt-1">
@@ -111,20 +125,21 @@ const Login = () => {
               {errors.password && <p className="text-sm text-red-600 mt-1">{errors.password.message}</p>}
             </div>
 
+            {/* SUBMIT */}
             <button
               type="submit"
               disabled={isLoading}
               className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition disabled:opacity-50"
             >
-              {isLoading ? "Signing in..." : "Login"}
+              {isLoading ? "Registering..." : "Register"}
             </button>
           </form>
 
-          {/* ⭐ Replaced OLD "Need help?" with Register */}
+          {/* LOGIN LINK */}
           <p className="text-center text-sm mt-4 text-gray-600">
-            Don’t have an account?{" "}
-            <Link className="text-green-600 font-medium hover:underline" to="/register">
-              Register Now
+            Already have an account?{" "}
+            <Link className="text-green-600 font-medium hover:underline" to="/login">
+              Login
             </Link>
           </p>
 
@@ -134,4 +149,5 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default RegisterPage;
+

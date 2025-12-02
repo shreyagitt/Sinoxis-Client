@@ -14,6 +14,7 @@ import RevenueRoutes from './RevenueRoutes';
 import RevenueReportRoutes from './RevenueReportRoutes';
 import paymentRoutes from './PaymentRoutes';
 import LabelRoutes from './LabelRoutes';
+import CopyClaimRoutes from './CopyClaimRoutes';
 
 
 
@@ -35,6 +36,7 @@ clientRouter.use(CLIENT_API_ENDPOINTS.REVENUE, RevenueRoutes);
 clientRouter.use(CLIENT_API_ENDPOINTS.REVENUEREPORTS, RevenueReportRoutes);
 clientRouter.use(CLIENT_API_ENDPOINTS.PAYMENT, paymentRoutes);
 clientRouter.use(CLIENT_API_ENDPOINTS.LABEL, LabelRoutes);
+clientRouter.use(CLIENT_API_ENDPOINTS.COPYRIGHTCLAIM, CopyClaimRoutes);
 
 
 export default clientRouter;

@@ -1,7 +1,12 @@
 import jwt from "jsonwebtoken";
 import { User } from "../models/User";
 import { JWT_CONFIG, ERROR_MESSAGES } from "../config/constants";
-import { LoginRequest, RegisterRequest, LoginResponse, User as UserType } from "../types/index";
+import {
+  LoginRequest,
+  RegisterRequest,
+  LoginResponse,
+  User as UserType,
+} from "../types/index";
 
 // Unified error creator
 export const createError = (message: string, statusCode: number = 400) => {
@@ -15,21 +20,29 @@ export class AuthService {
    * 🔐 Generate a JWT token
    */
   private static generateToken(payload: any, expiresIn: string): string {
-    return jwt.sign(payload, JWT_CONFIG.SECRET, { expiresIn } as jwt.SignOptions);
+    return jwt.sign(payload, JWT_CONFIG.SECRET, {
+      expiresIn,
+    } as jwt.SignOptions);
   }
 
   /**
    * 🔁 Generate access and refresh tokens
    */
-  private static generateTokens(user: UserType): { token: string; refreshToken: string } {
+  private static generateTokens(user: UserType): {
+    token: string;
+    refreshToken: string;
+  } {
     const payload = {
       userId: user._id,
       email: user.email,
-      role: user.role,
+      role: user.role, // ⭐ ROLE INCLUDED IN JWT
     };
 
     const token = this.generateToken(payload, JWT_CONFIG.EXPIRES_IN);
-    const refreshToken = this.generateToken(payload, JWT_CONFIG.REFRESH_EXPIRES_IN);
+    const refreshToken = this.generateToken(
+      payload,
+      JWT_CONFIG.REFRESH_EXPIRES_IN
+    );
 
     return { token, refreshToken };
   }
@@ -40,16 +53,18 @@ export class AuthService {
   static async login(loginData: LoginRequest): Promise<LoginResponse> {
     const { email, password } = loginData;
 
-    // 1️⃣ Find user by email
+    // 1️⃣ Find user
     const user = await User.findOne({ email });
     if (!user) throw createError(ERROR_MESSAGES.INVALID_CREDENTIALS, 401);
 
-    // 2️⃣ Check if user is active
-    if (!user.isActive) throw createError("Account is deactivated", 401);
+    // 2️⃣ Check if active
+    if (!user.isActive)
+      throw createError("Account is deactivated", 401);
 
     // 3️⃣ Validate password
     const isPasswordValid = await user.comparePassword(password);
-    if (!isPasswordValid) throw createError(ERROR_MESSAGES.INVALID_CREDENTIALS, 401);
+    if (!isPasswordValid)
+      throw createError(ERROR_MESSAGES.INVALID_CREDENTIALS, 401);
 
     // 4️⃣ Update last login
     user.lastLogin = new Date();
@@ -64,7 +79,7 @@ export class AuthService {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
-        role: user.role,
+        role: user.role, // ⭐ ROLE RETURNED TO FRONTEND
         isActive: user.isActive,
         lastLogin: user.lastLogin,
         createdAt: user.createdAt,
@@ -76,24 +91,26 @@ export class AuthService {
   }
 
   /**
-   * 🧾 Register new user
+   * 🧾 Register new user (UPDATED FOR RBAC)
    */
   static async register(registerData: RegisterRequest): Promise<LoginResponse> {
-    const { email, password, firstName, lastName } = registerData;
+    const { email, password, firstName, lastName, role } = registerData;
 
-    // 1️⃣ Check for existing user
+    // 1️⃣ Check existing user
     const existingUser = await User.findOne({ email });
-    if (existingUser) throw createError(ERROR_MESSAGES.USER_EXISTS, 409);
+    if (existingUser)
+      throw createError(ERROR_MESSAGES.USER_EXISTS, 409);
 
-    // 2️⃣ Create new user
+    // 2️⃣ Create new user with role
     const user = new User({
       email,
       password,
       firstName,
       lastName,
-      role: "user",
+      role: role || "client", // ⭐ DEFAULT ROLE (IMPORTANT)
       isActive: true,
     });
+
     await user.save();
 
     // 3️⃣ Generate tokens
@@ -105,7 +122,7 @@ export class AuthService {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
-        role: user.role,
+        role: user.role, // ⭐ ROLE SENT TO FRONTEND
         isActive: user.isActive,
         lastLogin: user.lastLogin,
         createdAt: user.createdAt,
@@ -124,12 +141,13 @@ export class AuthService {
       const decoded = jwt.verify(refreshToken, JWT_CONFIG.SECRET) as any;
 
       const user = await User.findById(decoded.userId);
-      if (!user || !user.isActive) throw createError(ERROR_MESSAGES.UNAUTHORIZED, 401);
+      if (!user || !user.isActive)
+        throw createError(ERROR_MESSAGES.UNAUTHORIZED, 401);
 
       const payload = {
         userId: user._id,
         email: user.email,
-        role: user.role,
+        role: user.role, // ⭐ ROLE INCLUDED
       };
 
       const token = this.generateToken(payload, JWT_CONFIG.EXPIRES_IN);
@@ -140,16 +158,17 @@ export class AuthService {
   }
 
   /**
-   * ✅ Verify access token
+   * 🔎 Verify access token
    */
   static async verifyToken(token: string): Promise<any> {
     try {
       const decoded = jwt.verify(token, JWT_CONFIG.SECRET) as any;
 
       const user = await User.findById(decoded.userId);
-      if (!user || !user.isActive) throw createError(ERROR_MESSAGES.UNAUTHORIZED, 401);
+      if (!user || !user.isActive)
+        throw createError(ERROR_MESSAGES.UNAUTHORIZED, 401);
 
-      return decoded;
+      return decoded; // ⭐ Contains userId, email, role
     } catch (error) {
       throw createError(ERROR_MESSAGES.UNAUTHORIZED, 401);
     }

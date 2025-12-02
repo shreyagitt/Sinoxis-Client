@@ -4,8 +4,32 @@ import { authenticate, authorize } from "../middlewares/auth";
 
 const router = Router();
 
-router.post("/", authenticate,  AdminNotificationController.create);
-router.get("/", authenticate,  AdminNotificationController.list);
-router.delete("/:id", authenticate,  AdminNotificationController.delete);
+/* ============================================================
+   NOTIFICATION MANAGEMENT ROUTES (ADMIN ONLY)
+   ============================================================ */
+
+// Create Notification
+router.post(
+  "/",
+  authenticate,
+  authorize("admin"),
+  AdminNotificationController.create
+);
+
+// List Notifications
+router.get(
+  "/",
+  authenticate,
+  authorize("admin"),
+  AdminNotificationController.list
+);
+
+// Delete Notification
+router.delete(
+  "/:id",
+  authenticate,
+  authorize("admin"),
+  AdminNotificationController.delete
+);
 
 export default router;

@@ -4,10 +4,14 @@ import { optionalAuth } from "../../middlewares/auth";
 
 const router = Router();
 
-// List all active labels
+/* ============================================================
+   CLIENT LABEL ROUTES (PUBLIC)
+   ============================================================ */
+
+// Public — list all active labels
 router.get("/", optionalAuth, ClientLabelController.list);
 
-// Get single label
+// Public — get single label details
 router.get("/:id", optionalAuth, ClientLabelController.getOne);
 
 export default router;

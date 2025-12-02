@@ -4,8 +4,33 @@ import { authenticate, authorize } from "../middlewares/auth";
 
 const router = Router();
 
-router.get("/", authenticate, AdminYouTubeOACController.list);
-router.patch("/:id/status", authenticate,  AdminYouTubeOACController.updateStatus);
-router.delete("/:id", authenticate,  AdminYouTubeOACController.delete);
+/* ============================================================
+   YOUTUBE OAC ROUTES (ADMIN ONLY)
+   ============================================================ */
+
+// List all OAC requests
+router.get(
+  "/",
+  authenticate,
+  authorize("admin"),
+  AdminYouTubeOACController.list
+);
+
+// Update OAC status
+router.patch(
+  "/:id/status",
+  authenticate,
+  authorize("admin"),
+  AdminYouTubeOACController.updateStatus
+);
+
+// Delete OAC request
+router.delete(
+  "/:id",
+  authenticate,
+  authorize("admin"),
+  AdminYouTubeOACController.delete
+);
 
 export default router;
+

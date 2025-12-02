@@ -1,10 +1,27 @@
 import { Router } from "express";
 import { ClientPaymentController } from "../../controllers/client/PaymentController";
-import { authenticate } from "../../middlewares/auth";
+import { authenticate, authorize } from "../../middlewares/auth";
 
 const router = Router();
 
-router.post("/", authenticate, ClientPaymentController.create);
-router.get("/", authenticate, ClientPaymentController.list);
+/* ============================================================
+   CLIENT PAYMENT ROUTES (CLIENT ONLY)
+   ============================================================ */
+
+// Create a new payment entry (client)
+router.post(
+  "/",
+  authenticate,
+  authorize("client"),
+  ClientPaymentController.create
+);
+
+// List payments of the logged-in client
+router.get(
+  "/",
+  authenticate,
+  authorize("client"),
+  ClientPaymentController.list
+);
 
 export default router;

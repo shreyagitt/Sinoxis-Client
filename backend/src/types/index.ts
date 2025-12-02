@@ -1,23 +1,26 @@
 // ======================
-// User types
+// User Role Enum
 // ======================
-export interface User {
-  _id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: UserRole;
-  tenantId?: string; // Required for tenant users, optional for super admin
-  isActive: boolean;
-  lastLogin?: Date;
-  createdAt: Date;
-  updatedAt: Date;
+export enum UserRole {
+  ADMIN = "admin",
+  CLIENT = "client",
 }
 
-export enum UserRole {
-  SUPER_ADMIN = 'super_admin',
-  ADMIN = 'admin',
-  USER = 'user'
+// ======================
+// User types (MATCH schema EXACTLY)
+// ======================
+export interface User {
+  _id?: string;
+  email: string;
+  password: string;          // ⭐ required for schema
+  firstName: string;
+  lastName: string;
+  role: UserRole;            // ⭐ matches enum + schema
+  tenantId?: string | null;  // ⭐ FIX: added to match schema
+  isActive: boolean;
+  lastLogin?: Date | null;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 // ======================
@@ -38,10 +41,10 @@ export interface Tenant {
 }
 
 export enum SubscriptionPlan {
-  FREE = 'free',
-  BASIC = 'basic',
-  PRO = 'pro',
-  ENTERPRISE = 'enterprise'
+  FREE = "free",
+  BASIC = "basic",
+  PRO = "pro",
+  ENTERPRISE = "enterprise",
 }
 
 export interface TenantSettings {
@@ -67,8 +70,8 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  user: Omit<User, 'password'>;
-  tenant?: Omit<Tenant, 'settings'>; // optional tenant info
+  user: Omit<User, "password">;
+  tenant?: Omit<Tenant, "settings">;
   token: string;
   refreshToken: string;
 }
@@ -78,11 +81,15 @@ export interface RegisterRequest {
   password: string;
   firstName: string;
   lastName: string;
-  // Tenant fields for new tenant creation (optional if user joins existing tenant)
+
+  // Multi-tenant optional fields
   organizationName?: string;
   mobile?: string;
   website?: string;
   tenantName?: string;
+
+  // ⭐ FIX: role added
+  role?: UserRole | "admin" | "client";
 }
 
 // ======================
@@ -118,7 +125,7 @@ export interface PaginationQuery {
   page?: number;
   limit?: number;
   sort?: string;
-  order?: 'asc' | 'desc';
+  order?: "asc" | "desc";
 }
 
 

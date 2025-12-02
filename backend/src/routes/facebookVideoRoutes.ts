@@ -4,9 +4,33 @@ import { authenticate, authorize } from "../middlewares/auth";
 
 const router = Router();
 
-// Only admin can access these endpoints
-router.get("/", authenticate, facebookVideoController.list);
-router.patch("/:id/status", authenticate, facebookVideoController.updateStatus);
-router.delete("/:id", authenticate, facebookVideoController.delete);
+/* ============================================================
+   FACEBOOK VIDEO ROUTES (ADMIN ONLY)
+   ============================================================ */
+
+// List all Facebook videos
+router.get(
+  "/",
+  authenticate,
+  authorize("admin"),
+  facebookVideoController.list
+);
+
+// Update video status
+router.patch(
+  "/:id/status",
+  authenticate,
+  authorize("admin"),
+  facebookVideoController.updateStatus
+);
+
+// Delete video
+router.delete(
+  "/:id",
+  authenticate,
+  authorize("admin"),
+  facebookVideoController.delete
+);
 
 export default router;
+

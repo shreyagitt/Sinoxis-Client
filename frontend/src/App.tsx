@@ -30,6 +30,8 @@ import AdminYouTubeClaims from "./pages/YouTubeClaim";
 import AdminSocialISRC from "./pages/SocialISRC";
 import Metadata from './pages/Metadata';
 import FacebookClaim from './pages/FacebookVideo'
+import RegisterPage from "./pages/RegisterPage";
+import CopyClaimManagement from "./pages/CopyClaimManagement";
 
 const AppRoutes: React.FC = () => {
   const dispatch = useDispatch();
@@ -70,6 +72,16 @@ const AppRoutes: React.FC = () => {
                 </Layout>
               }
             />
+
+
+          <Route
+              path="/register"
+              element={
+                <Layout hideChrome>
+                  <RegisterPage />
+                </Layout>
+              }
+            />  
 
             {/* Redirect root → login */}
             <Route path="/" element={<Navigate to="/login" replace />} />
@@ -135,6 +147,15 @@ const AppRoutes: React.FC = () => {
               element={
                 <ProtectedRoute>
                   <Layout><TotalRevenue /></Layout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/requests/copyright"
+              element={
+                <ProtectedRoute>
+                  <Layout><CopyClaimManagement/></Layout>
                 </ProtectedRoute>
               }
             />

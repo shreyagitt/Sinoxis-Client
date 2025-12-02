@@ -53,7 +53,15 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
         { label: "Metadata Update Request", to: "/services/metadata-update" },
       ],
     },
-
+    {
+  to: "/requests",
+  label: "Requests",
+  icon: <FileText className="w-5 h-5" />,
+  subItems: [
+    { label: "Copyright Claim", to: "/requests/copyright" },
+    { label: "Official Artist Channel", to: "/requests/channel" },
+  ],
+},
     { to: "/notifications", label: "Notifications", icon: <Bell className="w-5 h-5" /> },
     { to: "/banksettings", label: "Bank Settings", icon: <FolderCog className="w-5 h-5" /> },
     { to: "/form", label: "Apply Form Management", icon: <FileText className="w-5 h-5" /> },

@@ -41,10 +41,11 @@ const userSchema = new Schema<UserDocument>(
       maxlength: [50, 'Last name cannot exceed 50 characters'],
     },
     role: {
-      type: String,
-      enum: Object.values(UserRole),
-      default: UserRole.USER,
-    },
+  type: String,
+  enum: Object.values(UserRole), // ⭐ safer
+  default: UserRole.CLIENT,
+},
+
     tenantId: {
       type: Schema.Types.ObjectId,
       ref: 'Tenant',
