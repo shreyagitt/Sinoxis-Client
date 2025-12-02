@@ -3,7 +3,7 @@ import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
-import { useTheme } from "../components/Topbar"; // ⭐ THEME SUPPORT
+import { useTheme } from "../components/Topbar";
 
 const LoginSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email").required("Email is required"),
@@ -13,24 +13,24 @@ const LoginSchema = Yup.object().shape({
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const { theme } = useTheme(); // ⭐ GET CURRENT THEME
+  const { theme } = useTheme();
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
-  // THEME COLORS
   const pageBg = theme === "dark" ? "bg-[#020726] text-white" : "bg-gray-100 text-[#020726]";
   const cardBg =
     theme === "dark"
       ? "bg-[#0a1039] border-white/10"
       : "bg-white border border-gray-300 shadow-md";
-
   const labelColor = theme === "dark" ? "text-white" : "text-[#020726]";
   const subtleText = theme === "dark" ? "text-gray-300" : "text-gray-600";
-
   const inputBg =
     theme === "dark"
       ? "bg-[#1f233d] text-white border-white/20 placeholder-gray-300"
       : "bg-gray-100 text-[#020726] border-gray-300 placeholder-gray-500";
 
+  /* ============================================================
+        ⭐ FIXED LOGIN — correct tokens + user stored properly
+     ============================================================ */
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
       const payload = {
@@ -47,13 +47,26 @@ const LoginPage = () => {
       const data = await res.json();
 
       if (data.success) {
-        localStorage.setItem("token", data.data.token);
-        navigate("/dashboard");
+        // ============================
+        // ⭐ CORRECTED TOKEN STORAGE
+        // ============================
+        localStorage.setItem("token", data.data.token);            // FIXED
+        localStorage.setItem("refreshToken", data.data.refreshToken);
+
+        // ⭐ Save logged-in user for Topbar/Profile
+        localStorage.setItem("user", JSON.stringify(data.data.user));
+
+        // ⭐ Redirect according to role (optional)
+        if (data.data.user.role === "admin") {
+          navigate("/dashboard");
+        } else {
+          navigate("/dashboard");
+        }
       } else {
         alert(data.error || "Invalid login credentials");
       }
-    } catch (error) {
-      console.error("Login error:", error);
+    } catch (err) {
+      console.error("Login error:", err);
       alert("Something went wrong!");
     } finally {
       setSubmitting(false);
@@ -64,10 +77,8 @@ const LoginPage = () => {
     <div
       className={`min-h-screen flex flex-col justify-center items-center p-4 transition-all duration-300 ${pageBg}`}
     >
-      {/* LOGO */}
       <img src="/image/logo.webp" alt="Sinoxis Logo" className="w-24 h-24 mb-6" />
 
-      {/* LOGIN CARD */}
       <div className={`w-full max-w-md rounded-xl p-8 transition-all duration-300 ${cardBg}`}>
         <h3 className="text-3xl font-semibold text-center mb-2">Login</h3>
         <p className={`text-center mb-6 ${subtleText}`}>
@@ -79,7 +90,7 @@ const LoginPage = () => {
           validationSchema={LoginSchema}
           onSubmit={handleSubmit}
         >
-          {({ errors, touched, isSubmitting }) => (
+          {({ isSubmitting }) => (
             <Form className="space-y-5">
 
               {/* EMAIL */}
@@ -106,7 +117,7 @@ const LoginPage = () => {
                 <ErrorMessage name="password" component="div" className="text-red-500 text-sm mt-1" />
               </div>
 
-              {/* REMEMBER + REGISTER */}
+              {/* REGISTER LINK */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Field type="checkbox" name="remember" className="w-4 h-4 accent-[#29B6F6]" />
@@ -127,12 +138,11 @@ const LoginPage = () => {
                 type="submit"
                 disabled={isSubmitting}
                 className="w-full py-3 rounded-lg text-white font-semibold transition disabled:opacity-50"
-                style={{
-                  background: "linear-gradient(90deg, #29B6F6, #0288D1)",
-                }}
+                style={{ background: "linear-gradient(90deg, #29B6F6, #0288D1)" }}
               >
                 {isSubmitting ? "Logging in..." : "Login"}
               </button>
+
             </Form>
           )}
         </Formik>
@@ -142,5 +152,7 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
+
+
 
 

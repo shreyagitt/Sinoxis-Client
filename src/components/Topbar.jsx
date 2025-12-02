@@ -39,13 +39,9 @@ export const ThemeProvider = ({ children }) => {
     localStorage.setItem("theme", newTheme);
   };
 
-  // Apply Tailwind's dark class
   useEffect(() => {
-    if (theme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
+    if (theme === "dark") document.documentElement.classList.add("dark");
+    else document.documentElement.classList.remove("dark");
   }, [theme]);
 
   return (
@@ -61,6 +57,12 @@ export const ThemeProvider = ({ children }) => {
 const Topbar = ({ isCollapsed, toggleSidebar }) => {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+
+  // 🔹 Get user from localStorage
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+  const userName = storedUser
+    ? `${storedUser.firstName} ${storedUser.lastName}`
+    : "User";
 
   const [open, setOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -95,26 +97,24 @@ const Topbar = ({ isCollapsed, toggleSidebar }) => {
     setNotificationsList((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const markAllAsRead = () => {
-    setNotificationsList([]);
-  };
+  const markAllAsRead = () => setNotificationsList([]);
 
-  // Close dropdowns when clicking outside
+  // Close dropdowns outside click
   useEffect(() => {
     const handleOutside = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setOpen(false);
-      }
-      if (notifRef.current && !notifRef.current.contains(e.target)) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setOpen(false);
+      if (notifRef.current && !notifRef.current.contains(e.target))
         setShowNotifications(false);
-      }
     };
+
     document.addEventListener("mousedown", handleOutside);
     return () => document.removeEventListener("mousedown", handleOutside);
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("user");
     navigate("/login");
   };
 
@@ -127,9 +127,7 @@ const Topbar = ({ isCollapsed, toggleSidebar }) => {
       : "bg-white border-b border-gray-200";
 
   const textColor = theme === "dark" ? "text-white" : "text-[#020726]";
-
   const iconColor = theme === "dark" ? "text-white" : "text-[#020726]";
-
   const searchBg =
     theme === "dark"
       ? "bg-[#1f233d] text-white placeholder-gray-400"
@@ -138,21 +136,20 @@ const Topbar = ({ isCollapsed, toggleSidebar }) => {
   const dropdownBg =
     theme === "dark"
       ? "bg-[#0a1039] border-white/10"
-      : "bg-white border border-gray-300 text-[#020726]";
+      : "bg-white border border-gray-300";
 
   return (
     <div className={`topbar flex justify-between items-center px-4 h-[70px] ${topbarBg}`}>
       
       {/* LEFT SECTION */}
       <div className="left-section flex items-center gap-4">
-
         {/* Sidebar Toggle */}
         <button className="toggle-btn" onClick={toggleSidebar}>
           <FaBars size={20} className={iconColor} />
         </button>
 
         {/* Search box */}
-        <div className={`search-box`}>
+        <div className="search-box">
           <input
             type="text"
             placeholder="Search for results..."
@@ -164,35 +161,31 @@ const Topbar = ({ isCollapsed, toggleSidebar }) => {
       {/* RIGHT SECTION */}
       <div className="topbar-right flex items-center gap-6">
 
-        {/* 🌗 THEME TOGGLE BUTTON */}
+        {/* 🌗 Theme Toggle */}
         <button
           onClick={toggleTheme}
-          className={`p-2 rounded-full border transition ${
+          className={`p-2 rounded-full border ${
             theme === "dark"
               ? "border-white/20 hover:bg-white/10"
               : "border-gray-300 hover:bg-gray-100"
           }`}
         >
-          {theme === "dark" ? (
-            <Sun size={20} className="text-white" />
-          ) : (
-            <Moon size={20} className="text-[#020726]" />
-          )}
+          {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
         </button>
 
-        {/* HOME ICON */}
-        <Link to="/" className="transition">
-          <Home size={20} strokeWidth={2.4} className={iconColor} />
+        {/* Home */}
+        <Link to="/">
+          <Home size={20} className={iconColor} />
         </Link>
 
-        {/* NOTIFICATIONS */}
+        {/* Notifications */}
         <div className="relative" ref={notifRef}>
           <button onClick={() => setShowNotifications(!showNotifications)}>
             <FaBell size={20} className={iconColor} />
           </button>
 
           {notificationsList.length > 0 && (
-            <span className="absolute -top-1 -right-1 bg-[#00FF66] text-white text-[9px] w-3.5 h-3.5 flex items-center justify-center rounded-full shadow-md">
+            <span className="absolute -top-1 -right-1 bg-[#00FF66] text-white text-[9px] w-3.5 h-3.5 flex items-center justify-center rounded-full">
               {notificationsList.length}
             </span>
           )}
@@ -210,24 +203,16 @@ const Topbar = ({ isCollapsed, toggleSidebar }) => {
 
         {/* USER DROPDOWN */}
         <div className="user-dropdown relative" ref={dropdownRef}>
-          <button
-            className="flex items-center gap-2"
-            onClick={() => setOpen((prev) => !prev)}
-          >
-            {/* USER ICON */}
+          <button className="flex items-center gap-2" onClick={() => setOpen(!open)}>
             <UserCircle
               size={32}
-              strokeWidth={2.2}
               className="p-1.5 rounded-full bg-gradient-to-br from-[#29B6F6] to-[#0288D1] text-white"
             />
 
-            <span className={`${textColor} font-medium`}>John Doe</span>
+            {/* 🔹 Dynamic user name */}
+            <span className={`${textColor} font-medium`}>{userName}</span>
 
-            <ChevronDown
-              size={18}
-              strokeWidth={2.2}
-              className={`${iconColor} transition ${open ? "rotate-180" : ""}`}
-            />
+            <ChevronDown size={18} className={`${iconColor} ${open ? "rotate-180" : ""}`} />
           </button>
 
           {open && (
@@ -244,10 +229,7 @@ const Topbar = ({ isCollapsed, toggleSidebar }) => {
                 <span className={textColor}>Settings</span>
               </Link>
 
-              <button
-                className="dropdown-item flex items-center gap-2"
-                onClick={handleLogout}
-              >
+              <button className="dropdown-item flex items-center gap-2" onClick={handleLogout}>
                 <LogOut size={16} className={iconColor} />
                 <span className={textColor}>Logout</span>
               </button>
@@ -261,4 +243,3 @@ const Topbar = ({ isCollapsed, toggleSidebar }) => {
 };
 
 export default Topbar;
-
