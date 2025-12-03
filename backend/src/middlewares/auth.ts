@@ -58,6 +58,11 @@ export const authenticate = async (
  */
 export const authorize = (...roles: string[]) => {
   return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+
+    console.log("▶ AUTHORIZE CHECK:");
+    console.log("   Allowed roles:", roles);
+    console.log("   Req.user.role:", req.user?.role);
+
     if (!req.user) {
       return res.status(HTTP_STATUS.UNAUTHORIZED).json({
         success: false,
@@ -65,17 +70,23 @@ export const authorize = (...roles: string[]) => {
       });
     }
 
-    // ❌ User role not allowed
-    if (!roles.includes(req.user.role)) {
+    // ⭐ SUPERADMIN CAN ACCESS EVERYTHING
+    if (req.user.role.toLowerCase() === "superadmin") {
+      return next();
+    }
+
+    if (!roles.map(r => r.toLowerCase()).includes(req.user.role.toLowerCase())) {
       return res.status(HTTP_STATUS.FORBIDDEN).json({
         success: false,
         error: ERROR_MESSAGES.FORBIDDEN,
       });
     }
 
-    return next();
+    next();
   };
 };
+
+
 
 /**
  * 🟡 Optional authentication (guest allowed)

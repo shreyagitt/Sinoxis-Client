@@ -12,7 +12,8 @@ const router = Router();
 router.get(
   "/",
   authenticate,
-  authorize("admin"),
+  authorize("admin", "superadmin"),
+
   bankController.list
 );
 
@@ -20,7 +21,8 @@ router.get(
 router.get(
   "/:id",
   authenticate,
-  authorize("admin"),
+  authorize("admin", "superadmin"),
+
   bankController.getOne
 );
 
@@ -28,7 +30,8 @@ router.get(
 router.put(
   "/:id/verify",
   authenticate,
-  authorize("admin"),
+  authorize("admin", "superadmin"),
+
   bankController.verify
 );
 
@@ -36,7 +39,8 @@ router.put(
 router.delete(
   "/:id",
   authenticate,
-  authorize("admin"),
+  authorize("admin", "superadmin"),
+
   bankController.delete
 );
 
