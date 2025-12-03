@@ -19,7 +19,7 @@ export const authApi = createApi({
   endpoints: (builder) => ({
     login: builder.mutation<LoginResponse, LoginRequest>({
       query: (credentials) => ({
-        url: '/auth/login',
+        url: '/auth/admin/login',
         method: 'POST',
         body: credentials,
       }),
@@ -27,7 +27,7 @@ export const authApi = createApi({
     }),
     register: builder.mutation<any, any>({
       query: (data) => ({
-        url: '/auth/register',
+        url: '/auth/admin/register',
         method: 'POST',
         body: data,
       }),

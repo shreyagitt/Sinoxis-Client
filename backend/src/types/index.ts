@@ -2,9 +2,11 @@
 // User Role Enum
 // ======================
 export enum UserRole {
+  SUPERADMIN = "superadmin",
   ADMIN = "admin",
   CLIENT = "client",
 }
+
 
 // ======================
 // User types (MATCH schema EXACTLY)

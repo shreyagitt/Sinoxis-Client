@@ -1,56 +1,61 @@
-import { Router, Request, Response, NextFunction } from "express";
-import { AuthController,
-   loginValidation, 
-   registerValidation ,
-  changePasswordValidation, } 
-  from "../controllers/authController";
-import { authenticate } from "../middlewares/auth";
+import { Router } from "express";
+import {
+  AuthController,
+  loginValidation,
+  registerValidation,
+  changePasswordValidation,
+} from "../controllers/authController";
+
+import { authenticate, authorize } from "../middlewares/auth";
+import { UserRole } from "../types";
 
 const router = Router();
 
-// ----------------------
-// Health Check
-// ----------------------
-router.get("/", (_req: Request, res: Response) => {
+/* -------------------- HEALTH CHECK -------------------- */
+router.get("/", (req, res) => {
   res.json({
     success: true,
-    message: "Sinoxis Admin Backend API is running",
+    message: "Sinoxis Backend API running",
     timestamp: new Date().toISOString(),
-    version: process.env.API_VERSION || "v1",
   });
 });
 
-// ----------------------
-// Public Routes
-// ----------------------
-router.post("/login", loginValidation, (req: Request, res: Response, next: NextFunction) =>
-  AuthController.login(req, res, next)
+/* -------------------- PUBLIC AUTH -------------------- */
+router.post("/client/login", loginValidation, AuthController.loginClient);
+router.post("/admin/login", loginValidation, AuthController.loginAdmin);
+router.post("/client/register", registerValidation, AuthController.registerClient);
+
+/* -------------------- ADMIN REGISTRATION -------------------- */
+// ⭐ Only SUPER ADMIN can create an ADMIN
+router.post(
+  "/admin/register",
+  authenticate,
+  authorize(UserRole.SUPERADMIN),
+  registerValidation,
+  AuthController.registerAdmin
 );
 
-router.post("/register", registerValidation, (req: Request, res: Response, next: NextFunction) =>
-  AuthController.register(req, res, next)
+// -------------------- FIRST SUPERADMIN SETUP --------------------
+router.post(
+  "/superadmin/init",
+  registerValidation,
+  AuthController.registerSuperAdmin
 );
 
-router.post("/refresh-token", (req: Request, res: Response, next: NextFunction) =>
-  AuthController.refreshToken(req, res, next)
-);
 
-// ----------------------
-// Protected Routes
-// ----------------------
-router.get("/profile", authenticate, (req: Request, res: Response, next: NextFunction) =>
-  AuthController.getProfile(req, res, next)
-);
+/* -------------------- TOKEN REFRESH -------------------- */
+router.post("/refresh-token", AuthController.refreshToken);
 
-router.post("/logout", authenticate, (req: Request, res: Response, next: NextFunction) =>
-  AuthController.logout(req, res, next)
-);
-
+/* -------------------- PROTECTED ROUTES -------------------- */
+router.get("/profile", authenticate, AuthController.getProfile);
+router.post("/logout", authenticate, AuthController.logout);
 router.post(
   "/change-password",
   authenticate,
   changePasswordValidation,
-  (req: Request, res: Response, next: NextFunction) => AuthController.changePassword(req, res, next)
+  AuthController.changePassword
 );
 
 export default router;
+
+

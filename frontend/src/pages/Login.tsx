@@ -23,8 +23,6 @@ const Login = () => {
   // ⭐ Admin Login API
   const [login, { isLoading }] = useLoginMutation();
 
-  // ⭐ Register API (added)
-  const [registerUser] = useRegisterMutation();
 
   const onSubmit = async (data: LoginForm) => {
     try {
@@ -119,14 +117,6 @@ const Login = () => {
               {isLoading ? "Signing in..." : "Login"}
             </button>
           </form>
-
-          {/* ⭐ Replaced OLD "Need help?" with Register */}
-          <p className="text-center text-sm mt-4 text-gray-600">
-            Don’t have an account?{" "}
-            <Link className="text-green-600 font-medium hover:underline" to="/register">
-              Register Now
-            </Link>
-          </p>
 
         </div>
       </div>

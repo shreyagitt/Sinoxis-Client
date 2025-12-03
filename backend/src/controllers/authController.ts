@@ -3,13 +3,13 @@ import { body, validationResult } from "express-validator";
 import { AuthService } from "../services/authService";
 import { HTTP_STATUS } from "../config/constants";
 import { asyncHandler } from "../middlewares/errorHandler";
-import { LoginRequest, RegisterRequest } from "../types/index";
+import { LoginRequest, RegisterRequest, UserRole } from "../types/index";
 
 export class AuthController {
-  /**
-   * 🧩 User Login
-   */
-  static login = asyncHandler(async (req: Request, res: Response) => {
+  // ============================================================
+  // 📌 CLIENT LOGIN
+  // ============================================================
+  static loginClient = asyncHandler(async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
@@ -20,19 +20,56 @@ export class AuthController {
     }
 
     const loginData: LoginRequest = req.body;
-    const result = await AuthService.login(loginData);
 
-    res.status(HTTP_STATUS.OK).json({
+    // ⭐ ENFORCE CLIENT ONLY LOGIN
+    const result = await AuthService.login(loginData, UserRole.CLIENT);
+
+    return res.status(HTTP_STATUS.OK).json({
       success: true,
       data: result,
-      message: "Login successful",
+      message: "Client login successful",
     });
   });
 
-  /**
-   * 📝 Register User
-   */
-  static register = asyncHandler(async (req: Request, res: Response) => {
+  // ============================================================
+  // 📌 ADMIN LOGIN
+  // ============================================================
+
+  static loginAdmin = asyncHandler(async (req: Request, res: Response) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(HTTP_STATUS.BAD_REQUEST).json({
+      success: false,
+      error: "Validation failed",
+      details: errors.array(),
+    });
+  }
+
+  const loginData: LoginRequest = req.body;
+
+  // DO NOT enforce a single role here
+  const result = await AuthService.login(loginData);
+
+  // Allow ADMIN + SUPERADMIN
+  if (![UserRole.ADMIN, UserRole.SUPERADMIN].includes(result.user.role)) {
+    return res.status(HTTP_STATUS.FORBIDDEN).json({
+      success: false,
+      error: "Only Admin or Superadmin can access admin panel",
+    });
+  }
+
+  return res.status(HTTP_STATUS.OK).json({
+    success: true,
+    data: result,
+    message: "Admin login successful",
+  });
+});
+
+
+  // ============================================================
+  // 📌 REGISTER CLIENT (PUBLIC)
+  // ============================================================
+  static registerClient = asyncHandler(async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
@@ -42,19 +79,87 @@ export class AuthController {
       });
     }
 
-    const registerData: RegisterRequest = req.body;
+    const registerData: RegisterRequest = {
+      ...req.body,
+      role: UserRole.CLIENT, // ⭐ Force role = client
+    };
+
     const result = await AuthService.register(registerData);
 
-    res.status(HTTP_STATUS.CREATED).json({
+    return res.status(HTTP_STATUS.CREATED).json({
       success: true,
       data: result,
-      message: "Registration successful",
+      message: "Client registered successfully",
     });
   });
 
-  /**
-   * ♻️ Refresh Token
-   */
+  // ============================================================
+  // 📌 REGISTER ADMIN (ONLY SUPER ADMIN CAN DO THIS)
+  // ============================================================
+  static registerAdmin = asyncHandler(async (req: Request, res: Response) => {
+    const requester = (req as any).user;
+
+    if (requester?.role !== UserRole.SUPERADMIN) {
+      return res.status(HTTP_STATUS.FORBIDDEN).json({
+        success: false,
+        error: "Only superadmins can create admins",
+      });
+    }
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        error: "Validation failed",
+        details: errors.array(),
+      });
+    }
+
+    const registerData: RegisterRequest = {
+      ...req.body,
+      role: UserRole.ADMIN,
+    };
+
+    const result = await AuthService.register(registerData);
+
+    return res.status(HTTP_STATUS.CREATED).json({
+      success: true,
+      data: result,
+      message: "Admin created successfully",
+    });
+  });
+
+
+  static registerSuperAdmin = asyncHandler(async (req: Request, res: Response) => {
+  const { User } = await import("../models/User");
+
+  const existingSuperAdmin = await User.findOne({ role: UserRole.SUPERADMIN });
+
+  if (existingSuperAdmin) {
+    return res.status(403).json({
+      success: false,
+      error: "Super Admin already exists",
+    });
+  }
+
+  const registerData = {
+    ...req.body,
+    role: UserRole.SUPERADMIN,
+  };
+
+  const result = await AuthService.register(registerData);
+
+  return res.status(201).json({
+    success: true,
+    data: result,
+    message: "Super Admin created successfully",
+  });
+});
+
+
+  // ============================================================
+  // ♻️ REFRESH TOKEN
+  // ============================================================
   static refreshToken = asyncHandler(async (req: Request, res: Response) => {
     const { refreshToken } = req.body;
 
@@ -67,28 +172,27 @@ export class AuthController {
 
     const result = await AuthService.refreshToken(refreshToken);
 
-    res.status(HTTP_STATUS.OK).json({
+    return res.status(HTTP_STATUS.OK).json({
       success: true,
       data: result,
       message: "Token refreshed successfully",
     });
   });
 
-  /**
-   * 👤 Get Profile
-   */
+  // ============================================================
+  // 👤 GET PROFILE
+  // ============================================================
   static getProfile = asyncHandler(async (req: Request, res: Response) => {
-    const user = (req as any).user;
-    res.status(HTTP_STATUS.OK).json({
+    return res.status(HTTP_STATUS.OK).json({
       success: true,
-      data: user,
+      data: (req as any).user,
       message: "Profile retrieved successfully",
     });
   });
 
-  /**
-   * 🔐 Change Password — FIXED VERSION
-   */
+  // ============================================================
+  // 🔐 CHANGE PASSWORD
+  // ============================================================
   static changePassword = asyncHandler(async (req: Request, res: Response) => {
     const user = (req as any).user;
     const userId = user?.userId;
@@ -98,7 +202,7 @@ export class AuthController {
     if (!userId) {
       return res.status(HTTP_STATUS.UNAUTHORIZED).json({
         success: false,
-        error: "Unauthorized access",
+        error: "Unauthorized",
       });
     }
 
@@ -119,47 +223,43 @@ export class AuthController {
     const { User } = await import("../models/User");
     const bcrypt = (await import("bcryptjs")).default;
 
-    const existingUser = await User.findById(userId).select("+password");
-    if (!existingUser) {
+    const foundUser = await User.findById(userId).select("+password");
+    if (!foundUser)
       return res.status(HTTP_STATUS.NOT_FOUND).json({
         success: false,
         error: "User not found",
       });
-    }
 
-    const isMatch = await bcrypt.compare(currentPassword, existingUser.password);
-    if (!isMatch) {
+    const isMatch = await bcrypt.compare(currentPassword, foundUser.password);
+    if (!isMatch)
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         error: "Incorrect current password",
       });
-    }
 
-    // ❗ DO NOT HASH HERE — User model pre('save') does it
-    existingUser.password = newPassword;
+    foundUser.password = newPassword;
+    await foundUser.save();
 
-    await existingUser.save();
-
-    res.status(HTTP_STATUS.OK).json({
+    return res.status(HTTP_STATUS.OK).json({
       success: true,
       message: "Password changed successfully",
     });
   });
 
-  /**
-   * 🚪 Logout
-   */
+  // ============================================================
+  // 🚪 LOGOUT
+  // ============================================================
   static logout = asyncHandler(async (_req: Request, res: Response) => {
-    res.status(HTTP_STATUS.OK).json({
+    return res.status(HTTP_STATUS.OK).json({
       success: true,
       message: "Logout successful",
     });
   });
 }
 
-/**
- * Validation Middleware
- */
+/* ============================================================
+   VALIDATION SCHEMAS
+   ============================================================ */
 export const loginValidation = [
   body("email").isEmail().withMessage("Please provide a valid email"),
   body("password")
@@ -172,7 +272,7 @@ export const registerValidation = [
   body("password")
     .isLength({ min: 8 })
     .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-    .withMessage("Password must contain uppercase, lowercase, and a number"),
+    .withMessage("Password must include uppercase, lowercase, and a number"),
   body("firstName").trim().isLength({ min: 2, max: 50 }),
   body("lastName").trim().isLength({ min: 2, max: 50 }),
 ];
@@ -182,9 +282,8 @@ export const changePasswordValidation = [
   body("newPassword")
     .isLength({ min: 8 })
     .matches(/[0-9!@#$%^&*]/)
-    .withMessage("New password must include a number or special character"),
+    .withMessage("Password must include a number or special character"),
   body("confirmPassword")
     .custom((value, { req }) => value === req.body.newPassword)
     .withMessage("Passwords do not match"),
 ];
-
