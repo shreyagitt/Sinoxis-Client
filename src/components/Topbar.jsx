@@ -139,7 +139,11 @@ const Topbar = ({ isCollapsed, toggleSidebar }) => {
       : "bg-white border border-gray-300";
 
   return (
-    <div className={`topbar flex justify-between items-center px-4 h-[70px] ${topbarBg}`}>
+    <div
+  className={`topbar ${isCollapsed ? "collapsed" : ""} 
+    flex justify-between items-center px-4 h-[70px] ${topbarBg}`}
+>
+
       
       {/* LEFT SECTION */}
       <div className="left-section flex items-center gap-4">

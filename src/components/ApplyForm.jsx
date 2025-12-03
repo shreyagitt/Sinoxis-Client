@@ -2,7 +2,7 @@ import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
-import { useTheme } from "../components/Topbar"; // ⭐ THEME
+import { useTheme } from "../components/Topbar";
 
 // VALIDATION SCHEMA
 const ApplyFormSchema = Yup.object().shape({
@@ -21,7 +21,7 @@ const ApplyFormSchema = Yup.object().shape({
 
 const ApplyForm = () => {
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
-  const { theme } = useTheme(); // ⭐ GET THEME
+  const { theme } = useTheme();
 
   // 🎨 THEME COLORS
   const pageBg = theme === "dark" ? "bg-[#020726]" : "bg-white";
@@ -47,21 +47,25 @@ const ApplyForm = () => {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col items-center p-6 ${pageBg}`}>
+    <div className={`min-h-screen w-full flex flex-col items-center p-4 sm:p-6 lg:p-10 ${pageBg}`}>
 
       {/* LOGO */}
       <img
         src="/image/logo.webp"
         alt="Sinoxis Logo"
-        className="w-28 h-28 object-contain mb-4"
+        className="w-20 sm:w-24 md:w-28 h-auto object-contain mb-6"
       />
 
       {/* FORM CARD */}
-      <div className={`${cardBg} w-full max-w-4xl rounded-2xl p-10 shadow-xl border ${borderColor}`}>
-
+      <div
+        className={`${cardBg} w-full max-w-4xl rounded-2xl p-6 sm:p-8 md:p-10 shadow-xl border ${borderColor}`}
+      >
         {/* TITLE */}
-        <h1 className={`text-3xl font-semibold text-center ${titleColor}`}>Apply Form</h1>
-        <p className={`text-center mt-2 mb-8 ${subtitleColor}`}>
+        <h1 className={`text-2xl sm:text-3xl font-semibold text-center ${titleColor}`}>
+          Apply Form
+        </h1>
+
+        <p className={`text-center mt-2 mb-6 sm:mb-10 text-sm sm:text-base ${subtitleColor}`}>
           Fill out the details below to apply to Sinoxis Digital.
         </p>
 
@@ -81,98 +85,43 @@ const ApplyForm = () => {
           onSubmit={handleSubmit}
         >
           {({ isSubmitting }) => (
-            <Form className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Form className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
 
               {/* FULL NAME */}
-              <div>
-                <label className={`text-sm ${labelColor}`}>Full Name</label>
-                <Field
-                  name="fullName"
-                  placeholder="Enter your full name"
-                  className={`w-full p-3 mt-1 rounded-lg border outline-none ${inputBg} ${borderColor} ${placeholderColor}`}
-                />
-                <ErrorMessage name="fullName" className="text-red-400 text-sm mt-1" component="div" />
-              </div>
+              <FormField label="Full Name" name="fullName" labelColor={labelColor} inputBg={inputBg} placeholderColor={placeholderColor} borderColor={borderColor} />
 
               {/* ARTIST NAME */}
-              <div>
-                <label className={`text-sm ${labelColor}`}>Artist Name</label>
-                <Field
-                  name="artistName"
-                  placeholder="Enter your artist name"
-                  className={`w-full p-3 mt-1 rounded-lg border outline-none ${inputBg} ${borderColor} ${placeholderColor}`}
-                />
-                <ErrorMessage name="artistName" className="text-red-400 text-sm mt-1" component="div" />
-              </div>
+              <FormField label="Artist Name" name="artistName" labelColor={labelColor} inputBg={inputBg} placeholderColor={placeholderColor} borderColor={borderColor} />
 
               {/* EMAIL */}
-              <div>
-                <label className={`text-sm ${labelColor}`}>Email Address</label>
-                <Field
-                  name="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  className={`w-full p-3 mt-1 rounded-lg border outline-none ${inputBg} ${borderColor} ${placeholderColor}`}
-                />
-                <ErrorMessage name="email" className="text-red-400 text-sm mt-1" component="div" />
-              </div>
+              <FormField label="Email" name="email" type="email" labelColor={labelColor} inputBg={inputBg} placeholderColor={placeholderColor} borderColor={borderColor} />
 
               {/* PHONE */}
-              <div>
-                <label className={`text-sm ${labelColor}`}>Phone Number</label>
-                <Field
-                  name="phone"
-                  placeholder="Enter your phone number"
-                  className={`w-full p-3 mt-1 rounded-lg border outline-none ${inputBg} ${borderColor} ${placeholderColor}`}
-                />
-                <ErrorMessage name="phone" className="text-red-400 text-sm mt-1" component="div" />
-              </div>
+              <FormField label="Phone Number" name="phone" labelColor={labelColor} inputBg={inputBg} placeholderColor={placeholderColor} borderColor={borderColor} />
 
               {/* INSTAGRAM */}
-              <div>
-                <label className={`text-sm ${labelColor}`}>Instagram Profile Link</label>
-                <Field
-                  name="instagram"
-                  placeholder="Instagram Profile Link"
-                  className={`w-full p-3 mt-1 rounded-lg border outline-none ${inputBg} ${borderColor}`}
-                />
-              </div>
+              <FormField label="Instagram Profile Link" name="instagram" labelColor={labelColor} inputBg={inputBg} placeholderColor={placeholderColor} borderColor={borderColor} />
 
               {/* YOUTUBE */}
-              <div>
-                <label className={`text-sm ${labelColor}`}>YouTube Channel Link</label>
-                <Field
-                  name="youtube"
-                  placeholder="YouTube Channel Link"
-                  className={`w-full p-3 mt-1 rounded-lg border outline-none ${inputBg} ${borderColor}`}
-                />
-              </div>
+              <FormField label="YouTube Channel Link" name="youtube" labelColor={labelColor} inputBg={inputBg} placeholderColor={placeholderColor} borderColor={borderColor} />
 
-              {/* LABEL NAME */}
-              <div className="md:col-span-2">
-                <label className={`text-sm ${labelColor}`}>Label/Channel/Studio Name</label>
-                <Field
-                  name="labelName"
-                  placeholder="Label/Channel/Studio Name"
-                  className={`w-full p-3 mt-1 rounded-lg border outline-none ${inputBg} ${borderColor}`}
-                />
+              {/* LABEL NAME (Full Width) */}
+              <div className="sm:col-span-2">
+                <FormField label="Label/Channel/Studio Name" name="labelName" labelColor={labelColor} inputBg={inputBg} borderColor={borderColor} />
               </div>
 
               {/* RELEASED BEFORE */}
               <div>
                 <label className={`text-sm ${labelColor}`}>Have you released music before?</label>
-
                 <div className={`flex gap-4 mt-2 ${labelColor}`}>
                   <label className="flex items-center gap-2">
                     <Field type="radio" value="Yes" name="releasedBefore" /> Yes
                   </label>
-
                   <label className="flex items-center gap-2">
                     <Field type="radio" value="No" name="releasedBefore" /> No
                   </label>
                 </div>
-
-                <ErrorMessage name="releasedBefore" className="text-red-400 text-sm mt-1" component="div" />
+                <ErrorMessage name="releasedBefore" className="text-red-400 text-sm" component="div" />
               </div>
 
               {/* HEARD ABOUT US */}
@@ -189,16 +138,15 @@ const ApplyForm = () => {
                   <option value="Friend">Friend</option>
                   <option value="Advertisement">Advertisement</option>
                 </Field>
-
-                <ErrorMessage name="heardAbout" className="text-red-400 text-sm mt-1" component="div" />
+                <ErrorMessage name="heardAbout" className="text-red-400 text-sm" component="div" />
               </div>
 
-              {/* SUBMIT BUTTON */}
-              <div className="md:col-span-2 mt-4">
+              {/* SUBMIT BUTTON (FULL WIDTH) */}
+              <div className="sm:col-span-2 mt-4">
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-3 rounded-xl text-white font-semibold shadow-lg transition"
+                  className="w-full py-3 rounded-xl text-white font-semibold text-sm sm:text-base shadow-lg transition"
                   style={{
                     background: "linear-gradient(90deg,#29B6F6,#0288D1)",
                   }}
@@ -215,7 +163,22 @@ const ApplyForm = () => {
   );
 };
 
+// ⭐ Reusable Form Field Component
+const FormField = ({ label, name, type = "text", labelColor, inputBg, placeholderColor, borderColor }) => (
+  <div>
+    <label className={`text-sm ${labelColor}`}>{label}</label>
+    <Field
+      name={name}
+      type={type}
+      placeholder={`Enter ${label.toLowerCase()}`}
+      className={`w-full p-3 mt-1 rounded-lg border outline-none ${inputBg} ${placeholderColor} ${borderColor}`}
+    />
+    <ErrorMessage name={name} className="text-red-400 text-sm mt-1" component="div" />
+  </div>
+);
+
 export default ApplyForm;
+
 
 
 

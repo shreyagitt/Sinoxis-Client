@@ -51,7 +51,7 @@ const RegisterPage = () => {
         password: values.password,
       };
 
-      const res = await fetch(`${baseUrl}/auth/register`, {
+      const res = await fetch(`${baseUrl}/auth/client/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

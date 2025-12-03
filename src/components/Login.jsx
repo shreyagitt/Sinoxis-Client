@@ -38,7 +38,7 @@ const LoginPage = () => {
         password: values.password,
       };
 
-      const res = await fetch(`${baseUrl}/auth/login`, {
+      const res = await fetch(`${baseUrl}/auth/client/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
