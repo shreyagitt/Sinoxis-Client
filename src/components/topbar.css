@@ -256,3 +256,154 @@
   background: rgba(255, 255, 255, 0.10);
 }
 
+/* ==========================================================
+   FULL RESPONSIVE TOPBAR — ALL DEVICES
+   WITHOUT CHANGING ANY STRUCTURE
+========================================================== */
+
+/* 📱 Extra Small Phones (0–380px) */
+@media (max-width: 380px) {
+  .topbar {
+    padding: 0 10px !important;
+    height: 60px !important;
+  }
+
+  .left-section {
+    gap: 6px !important;
+  }
+
+  .search-box {
+    width: 120px !important;
+    padding: 6px 10px !important;
+  }
+
+  .search-box input {
+    font-size: 11px !important;
+  }
+
+  .topbar-right {
+    gap: 10px !important;
+  }
+
+  .user-dropdown span {
+    font-size: 11px !important;
+  }
+}
+
+/* 📱 Small Mobile (381–480px) */
+@media (max-width: 480px) {
+  .topbar {
+    padding: 0 12px !important;
+  }
+
+  .search-box {
+    width: 150px !important;
+  }
+
+  .topbar-right {
+    gap: 14px !important;
+  }
+
+  .user-dropdown button {
+    gap: 6px !important;
+  }
+
+  .user-dropdown span {
+    font-size: 12px !important;
+  }
+}
+
+/* 📲 Regular Mobile (481–600px) */
+@media (max-width: 600px) {
+  .topbar {
+    padding: 0 14px !important;
+  }
+
+  .search-box {
+    width: 180px !important;
+  }
+
+  .search-box input {
+    font-size: 13px !important;
+  }
+
+  .topbar-right {
+    gap: 18px !important;
+  }
+
+  .user-dropdown span {
+    font-size: 13px !important;
+  }
+}
+
+/* 📱 Tablets (601–768px) */
+@media (max-width: 768px) {
+  .topbar {
+    padding: 0 16px !important;
+  }
+
+  .left-section {
+    gap: 14px !important;
+  }
+
+  .search-box {
+    width: 210px !important;
+  }
+
+  .topbar-right {
+    gap: 20px !important;
+  }
+
+  .user-dropdown span {
+    font-size: 14px !important;
+  }
+}
+
+/* 💻 Small Laptops (769–1024px) */
+@media (max-width: 1024px) {
+  .topbar {
+    padding: 0 20px !important;
+  }
+
+  .search-box {
+    width: 240px !important;
+  }
+
+  .topbar-right {
+    gap: 22px !important;
+  }
+}
+
+/* 🖥️ Medium Screens (1025–1280px) */
+@media (max-width: 1280px) {
+  .left-section {
+    gap: 16px !important;
+  }
+
+  .topbar-right {
+    gap: 24px !important;
+  }
+}
+
+/* 🖥️ Large Screens (1281–1536px) */
+@media (max-width: 1536px) {
+  .topbar {
+    padding: 0 28px !important;
+  }
+}
+
+/* 🌐 Ultra-wide Screens (1537px and above) */
+@media (min-width: 1537px) {
+  .topbar {
+    padding-left: 40px !important;
+    padding-right: 40px !important;
+  }
+
+  .topbar-right {
+    gap: 32px !important;
+  }
+
+  .left-section {
+    gap: 24px !important;
+  }
+}

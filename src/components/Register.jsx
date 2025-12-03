@@ -3,7 +3,7 @@ import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
-import { useTheme } from "../components/Topbar"; // ⭐ THEME CONTEXT
+import { useTheme } from "../components/Topbar";
 
 // Validation schema
 const RegisterSchema = Yup.object().shape({
@@ -25,15 +25,15 @@ const RegisterSchema = Yup.object().shape({
 
 const RegisterPage = () => {
   const navigate = useNavigate();
-  const { theme } = useTheme(); // ⭐ GET THEME
+  const { theme } = useTheme();
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
-  // THEME COLORS
   const pageBg = theme === "dark" ? "bg-[#020726] text-white" : "bg-gray-100 text-[#020726]";
   const cardBg =
     theme === "dark"
       ? "bg-[#0a1039] border-white/10"
       : "bg-white border border-gray-300 shadow-lg";
+
   const labelColor = theme === "dark" ? "text-white" : "text-[#020726]";
   const inputBg =
     theme === "dark"
@@ -75,16 +75,23 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col justify-center items-center p-4 transition-all duration-300 ${pageBg}`}>
-      
+    <div
+      className={`min-h-screen flex flex-col justify-center items-center px-4 py-8 sm:py-10 md:py-12 transition-all duration-300 ${pageBg}`}
+    >
       {/* LOGO */}
-      <img src="/image/logo.webp" className="w-24 h-24 mb-6" />
+      <img
+        src="/image/logo.webp"
+        className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 mb-6"
+      />
 
       {/* CARD */}
-      <div className={`rounded-xl w-full max-w-md p-8 transition-all duration-300 ${cardBg}`}>
-
-        <h3 className="text-3xl font-semibold text-center mb-2">Register</h3>
-        <p className={`text-center mb-6 ${subtleText}`}>Create your account</p>
+      <div
+        className={`rounded-xl w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-md p-6 sm:p-8 md:p-10 transition-all duration-300 ${cardBg}`}
+      >
+        <h3 className="text-2xl sm:text-3xl font-semibold text-center mb-2">Register</h3>
+        <p className={`text-center mb-6 sm:mb-8 text-sm sm:text-base ${subtleText}`}>
+          Create your account
+        </p>
 
         <Formik
           initialValues={{
@@ -98,76 +105,76 @@ const RegisterPage = () => {
           onSubmit={handleSubmit}
         >
           {({ isSubmitting }) => (
-            <Form className="space-y-5">
+            <Form className="space-y-4 sm:space-y-5">
 
               {/* FIRST NAME */}
               <div>
-                <label className={`block mb-1 text-sm font-medium ${labelColor}`}>
+                <label className={`block mb-1 text-sm sm:text-base font-medium ${labelColor}`}>
                   First Name
                 </label>
                 <Field
                   name="firstName"
-                  className={`w-full p-3 rounded-lg outline-none border ${inputBg}`}
+                  className={`w-full p-3 sm:p-3.5 rounded-lg outline-none border text-sm sm:text-base ${inputBg}`}
                 />
-                <ErrorMessage name="firstName" className="text-red-500 text-sm" component="div" />
+                <ErrorMessage name="firstName" className="text-red-500 text-xs sm:text-sm" component="div" />
               </div>
 
               {/* LAST NAME */}
               <div>
-                <label className={`block mb-1 text-sm font-medium ${labelColor}`}>
+                <label className={`block mb-1 text-sm sm:text-base font-medium ${labelColor}`}>
                   Last Name
                 </label>
                 <Field
                   name="lastName"
-                  className={`w-full p-3 rounded-lg outline-none border ${inputBg}`}
+                  className={`w-full p-3 sm:p-3.5 rounded-lg outline-none border text-sm sm:text-base ${inputBg}`}
                 />
-                <ErrorMessage name="lastName" className="text-red-500 text-sm" component="div" />
+                <ErrorMessage name="lastName" className="text-red-500 text-xs sm:text-sm" component="div" />
               </div>
 
               {/* EMAIL */}
               <div>
-                <label className={`block mb-1 text-sm font-medium ${labelColor}`}>
+                <label className={`block mb-1 text-sm sm:text-base font-medium ${labelColor}`}>
                   Email
                 </label>
                 <Field
                   name="email"
                   type="email"
-                  className={`w-full p-3 rounded-lg outline-none border ${inputBg}`}
+                  className={`w-full p-3 sm:p-3.5 rounded-lg outline-none border text-sm sm:text-base ${inputBg}`}
                 />
-                <ErrorMessage name="email" className="text-red-500 text-sm" component="div" />
+                <ErrorMessage name="email" className="text-red-500 text-xs sm:text-sm" component="div" />
               </div>
 
               {/* PASSWORD */}
               <div>
-                <label className={`block mb-1 text-sm font-medium ${labelColor}`}>
+                <label className={`block mb-1 text-sm sm:text-base font-medium ${labelColor}`}>
                   Password
                 </label>
                 <Field
                   name="password"
                   type="password"
-                  className={`w-full p-3 rounded-lg outline-none border ${inputBg}`}
+                  className={`w-full p-3 sm:p-3.5 rounded-lg outline-none border text-sm sm:text-base ${inputBg}`}
                 />
-                <ErrorMessage name="password" className="text-red-500 text-sm" component="div" />
+                <ErrorMessage name="password" className="text-red-500 text-xs sm:text-sm" component="div" />
               </div>
 
               {/* CONFIRM PASSWORD */}
               <div>
-                <label className={`block mb-1 text-sm font-medium ${labelColor}`}>
+                <label className={`block mb-1 text-sm sm:text-base font-medium ${labelColor}`}>
                   Confirm Password
                 </label>
                 <Field
                   name="confirmPassword"
                   type="password"
-                  className={`w-full p-3 rounded-lg outline-none border ${inputBg}`}
+                  className={`w-full p-3 sm:p-3.5 rounded-lg outline-none border text-sm sm:text-base ${inputBg}`}
                 />
-                <ErrorMessage name="confirmPassword" className="text-red-500 text-sm" component="div" />
+                <ErrorMessage name="confirmPassword" className="text-red-500 text-xs sm:text-sm" component="div" />
               </div>
 
               {/* BUTTON */}
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-3 rounded-lg text-white font-semibold transition-all"
+                className="w-full py-3 sm:py-3.5 rounded-lg text-white font-semibold text-sm sm:text-lg transition-all disabled:opacity-50"
                 style={{
                   background: "linear-gradient(90deg, #29B6F6, #0288D1)",
                 }}
@@ -176,7 +183,7 @@ const RegisterPage = () => {
               </button>
 
               {/* LOGIN LINK */}
-              <p className={`text-center mt-2 text-sm ${subtleText}`}>
+              <p className={`text-center mt-3 text-xs sm:text-sm ${subtleText}`}>
                 Already have an account?{" "}
                 <span
                   className="text-[#29B6F6] cursor-pointer hover:underline"
@@ -195,4 +202,5 @@ const RegisterPage = () => {
 };
 
 export default RegisterPage;
+
 

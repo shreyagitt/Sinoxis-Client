@@ -1,61 +1,82 @@
 // src/components/Layout.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import Footer from "./Footer";
-import { useTheme } from "./Topbar"; // ⭐ Import theme hook
+import { useTheme } from "./Topbar";
 
 const Layout = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-  // ⭐ Get current theme (dark / light)
   const { theme } = useTheme();
 
   /* -------------------------------------------
-      THEME-AWARE STYLES
+      RESPONSIVE WINDOW HANDLING
   ------------------------------------------- */
-  const layoutBg =
-    theme === "dark" ? "bg-[#020726]" : "bg-white";
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
 
+      // Auto collapse sidebar on mobile
+      if (mobile) setCollapsed(true);
+    };
+
+    window.addEventListener("resize", handleResize);
+    handleResize();
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  /* -------------------------------------------
+      THEME COLORS
+  ------------------------------------------- */
+  const layoutBg = theme === "dark" ? "bg-[#020726]" : "bg-white";
   const separatorColor =
-    theme === "dark"
-      ? "rgba(255,255,255,0.12)"
-      : "rgba(0,0,0,0.08)";
-
+    theme === "dark" ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)";
   const topSeparatorColor =
-    theme === "dark"
-      ? "rgba(255,255,255,0.10)"
-      : "rgba(0,0,0,0.06)";
+    theme === "dark" ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.06)";
+
+  /* -------------------------------------------
+      RESPONSIVE LAYOUT LOGIC
+  ------------------------------------------- */
+
+  // Desktop sizes
+  const sidebarWidth = collapsed ? 80 : 240;
+
+  // Mobile: no offset
+  const mainOffset = isMobile ? 0 : sidebarWidth;
 
   return (
     <div className={`min-h-screen flex flex-col transition-all duration-300 ${layoutBg}`}>
+      
       {/* SIDEBAR */}
-      <Sidebar collapsed={collapsed} />
+      <Sidebar collapsed={collapsed} isMobile={isMobile} />
 
       {/* TOPBAR */}
-      <Topbar
-        toggleSidebar={() => setCollapsed(!collapsed)}
-        isCollapsed={collapsed}
-      />
+      <Topbar toggleSidebar={() => setCollapsed(!collapsed)} isCollapsed={collapsed} />
 
-      {/* ─── VERTICAL SEPARATOR LINE ─── */}
-      <div
-        className="fixed top-0 bottom-0 pointer-events-none transition-all duration-300"
-        style={{
-          left: collapsed ? "80px" : "240px",
-          width: "1px",
-          background: separatorColor,
-          boxShadow:
-            theme === "dark"
-              ? "2px 0 12px rgba(0,0,0,0.5)"
-              : "2px 0 8px rgba(0,0,0,0.08)",
-          zIndex: 50,
-        }}
-      />
+      {/* VERTICAL SEPARATOR (DESKTOP ONLY) */}
+      {!isMobile && (
+        <div
+          className="fixed top-0 bottom-0 pointer-events-none transition-all duration-300"
+          style={{
+            left: `${sidebarWidth}px`,
+            width: "1px",
+            background: separatorColor,
+            boxShadow:
+              theme === "dark"
+                ? "2px 0 12px rgba(0,0,0,0.5)"
+                : "2px 0 8px rgba(0,0,0,0.08)",
+            zIndex: 30,
+          }}
+        />
+      )}
 
-      {/* ─── HORIZONTAL UNDER TOPBAR LINE ─── */}
+      {/* TOPBAR UNDERLINE */}
       <div
-        className="fixed left-0 right-0 z-10 transition-all duration-300"
+        className="fixed left-0 right-0 z-20"
         style={{
           top: "70px",
           height: "1px",
@@ -63,11 +84,11 @@ const Layout = ({ children }) => {
         }}
       />
 
-      {/* ─── MAIN CONTENT ─── */}
+      {/* MAIN CONTENT */}
       <main
-        className="flex-1 transition-all duration-300 p-6"
+        className="flex-1 transition-all duration-300 p-4 md:p-6"
         style={{
-          marginLeft: collapsed ? "80px" : "240px",
+          marginLeft: `${mainOffset}px`,
           marginTop: "70px",
           minHeight: "calc(100vh - 70px)",
         }}
@@ -75,11 +96,11 @@ const Layout = ({ children }) => {
         {children}
       </main>
 
-      {/* ─── FOOTER ─── */}
+      {/* FOOTER */}
       <div
         className="transition-all duration-300"
         style={{
-          marginLeft: collapsed ? "80px" : "240px",
+          marginLeft: `${mainOffset}px`,
         }}
       >
         <Footer />
