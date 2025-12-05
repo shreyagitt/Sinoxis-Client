@@ -1,497 +1,266 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import {
-  DollarSign,
-  Music,
-  Download,
-  Award,
-  RefreshCcw,
-  Save,
-  Plus,
-  Trash2,
-} from "lucide-react";
 import { useAppSelector } from "../store/hook";
+import { Check, X, Plus, Trash, RefreshCcw } from "lucide-react";
 import toast from "react-hot-toast";
 
-/* ============================
-   TYPES
-============================ */
-interface PlatformPerformance {
-  platform: string;
-  streams: number;
-  revenue: number;
-  growth: number;
-  marketShare: number;
+// TYPES
+interface Transaction {
+  _id: string;
+  source: string;
+  amount: number;
+  period: string;
+  status: string;
 }
 
-interface ArtistRevenue {
-  name: string;
-  genre: string;
-  totalRevenue: number;
-  streaming: number;
-  downloads: number;
-  royalties: number;
-  growth: number;
+interface WithdrawRequest {
+  _id: string;
+  amount: number;
+  status: string;
+  createdAt: string;
 }
 
-interface TopTrack {
-  title: string;
-  artist: string;
-  revenue: number;
-  rank: number;
+interface RevenueData {
+  balance: number;
+  withdrawable: number;
+  transactions: Transaction[];
+  withdrawRequests: WithdrawRequest[];
 }
 
-interface RevenueSummary {
-  totalRevenue: number;
-  streamingRevenue: number;
-  downloadsRevenue: number;
-  royalties: number;
-}
-
-interface RevenueReport {
-  _id?: string;
-  summary: RevenueSummary;
-  platformPerformance: PlatformPerformance[];
-  artistRevenues: ArtistRevenue[];
-  topTracks: TopTrack[];
-  lastUpdated?: string;
-}
-
-/* ============================
-   EMPTY STRUCT SO UI ALWAYS LOADS
-============================ */
-const EMPTY_REPORT: RevenueReport = {
-  summary: {
-    totalRevenue: 0,
-    streamingRevenue: 0,
-    downloadsRevenue: 0,
-    royalties: 0,
-  },
-  platformPerformance: [],
-  artistRevenues: [],
-  topTracks: [],
-};
-
-/* ============================
-   MAIN ADMIN COMPONENT
-============================ */
-const AdminRevenueReport: React.FC = () => {
+export default function AdminRevenue() {
   const { token } = useAppSelector((s) => s.auth);
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
-  const [report, setReport] = useState<RevenueReport>(EMPTY_REPORT);
-  const [form, setForm] = useState<RevenueReport>(EMPTY_REPORT);
-  const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [revenue, setRevenue] = useState<RevenueData | null>(null);
 
-  /* ============================
-     FETCH REPORT (NEVER BLOCK UI)
-  ============================ */
-  const fetchReport = async () => {
-    setLoading(true);
+  const [newIncome, setNewIncome] = useState({
+    userId: "",
+    source: "",
+    amount: "",
+    period: "",
+  });
+
+  // ===============================
+  // FETCH REVENUE + WITHDRAW REQUESTS
+  // ===============================
+  const fetchData = async () => {
     try {
-      const res = await axios.get(`${baseUrl}/revenue-report`, {
-        headers: { Authorization: `Bearer ${token}` },
+      setLoading(true);
+
+      const [revRes, withdrawRes] = await Promise.all([
+        // CORRECT ADMIN SUMMARY ROUTE
+        axios.get(`${baseUrl}/revenue-report/summary`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+
+        axios.get(`${baseUrl}/revenue-report/withdraw-requests`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
+
+      const summary = revRes.data.data;
+
+      setRevenue({
+        balance: summary.balance,
+        withdrawable: summary.withdrawable,
+        transactions: summary.transactions,
+        withdrawRequests: withdrawRes.data.data,
       });
-
-      const data = res.data?.data;
-      const doc = Array.isArray(data) ? data[0] : data;
-
-      const finalReport = doc || EMPTY_REPORT;
-
-      setReport(finalReport);
-      setForm(JSON.parse(JSON.stringify(finalReport))); // deep clone
     } catch (err) {
       console.error(err);
-      toast.error("Failed to load revenue report");
-
-      // Still show empty UI
-      setReport(EMPTY_REPORT);
-      setForm(EMPTY_REPORT);
+      toast.error("Failed to load revenue data");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (token) fetchReport();
+    if (token) fetchData();
   }, [token]);
 
-  /* ============================
-     SAVE REPORT
-  ============================ */
-  const saveReport = async () => {
-    setSaving(true);
+  // ===============================
+  // ADD INCOME
+  // ===============================
+  const addIncome = async () => {
     try {
-      await axios.post(`${baseUrl}/revenue-report`, form, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      toast.success("Revenue report saved");
-      fetchReport();
+     await axios.post(
+  `${baseUrl}/revenue-report/add`,
+  {
+    userId: newIncome.userId,
+    source: newIncome.source,
+    amount: Number(newIncome.amount),
+    period: newIncome.period,
+  },
+  {
+    headers: { Authorization: `Bearer ${token}` },
+  }
+);
+
+
+      toast.success("Income added");
+      setNewIncome({ userId: "",source: "", amount: "", period: "" });
+      fetchData();
     } catch {
-      toast.error("Failed to save");
-    } finally {
-      setSaving(false);
+      toast.error("Failed to add income");
     }
   };
 
-  /* ============================
-     DELETE ALL
-  ============================ */
-  const deleteAllReports = async () => {
-    if (!confirm("Delete ALL revenue reports?")) return;
-
+  // ===============================
+  // UPDATE WITHDRAW REQUEST STATUS
+  // ===============================
+  const updateWithdraw = async (_id: string, status: "Approved" | "Rejected") => {
     try {
-      await axios.delete(`${baseUrl}/revenue-report`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.patch(
+        `${baseUrl}/revenue-report/withdraw/${_id}`,
+        { status },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-      toast.success("All reports deleted");
-      fetchReport();
+      toast.success(`Withdraw ${status}`);
+      fetchData();
     } catch {
-      toast.error("Delete failed");
+      toast.error("Failed to update request");
     }
   };
 
-  const { summary } = form;
+  // ===============================
+  // DELETE TRANSACTION
+  // ===============================
+  const deleteTransaction = async (_id: string) => {
+    try {
+      await axios.delete(`${baseUrl}/revenue-report/transaction/${_id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-  /* ============================
-     RENDER UI
-  ============================ */
+      toast.success("Transaction deleted");
+      fetchData();
+    } catch {
+      toast.error("Failed to delete");
+    }
+  };
+
+  if (loading || !revenue) return <p>Loading revenue data...</p>;
+
   return (
-    <div className="p-8 bg-[#f7f9fc] min-h-screen space-y-8">
+    <div className="p-8 space-y-8">
+
       {/* HEADER */}
       <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-800">
-            Admin • Revenue Reports
-          </h1>
-          {report?.lastUpdated && (
-            <p className="text-xs text-gray-500 mt-1">
-              Last updated: {new Date(report.lastUpdated).toLocaleString()}
-            </p>
-          )}
-        </div>
-
-        <div className="flex gap-3">
-          <button
-            onClick={fetchReport}
-            disabled={loading}
-            className="inline-flex items-center gap-2 px-4 py-2 border rounded-lg text-sm hover:bg-gray-50"
-          >
-            <RefreshCcw size={16} />
-            {loading ? "Refreshing..." : "Refresh"}
-          </button>
-
-          <button
-            onClick={saveReport}
-            disabled={saving}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"
-          >
-            <Save size={16} />
-            {saving ? "Saving..." : "Save"}
-          </button>
-
-          <button
-            onClick={deleteAllReports}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700"
-          >
-            <Trash2 size={16} /> Delete All
-          </button>
-        </div>
+        <h1 className="text-2xl font-bold">Admin Revenue Control</h1>
+        <button onClick={fetchData} className="flex items-center gap-2 px-4 py-2 border rounded-lg">
+          <RefreshCcw size={16} /> Refresh
+        </button>
       </div>
 
-      {/* SUMMARY CARDS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
-        <SummaryCard
-          label="Total Revenue"
-          icon={<DollarSign className="w-7 h-7 text-green-600" />}
-          value={summary.totalRevenue}
-          onChange={(v) =>
-            setForm({ ...form, summary: { ...summary, totalRevenue: v } })
-          }
-        />
-
-        <SummaryCard
-          label="Streaming Revenue"
-          icon={<Music className="w-7 h-7 text-green-600" />}
-          value={summary.streamingRevenue}
-          onChange={(v) =>
-            setForm({
-              ...form,
-              summary: { ...summary, streamingRevenue: v },
-            })
-          }
-        />
-
-        <SummaryCard
-          label="Downloads Revenue"
-          icon={<Download className="w-7 h-7 text-green-600" />}
-          value={summary.downloadsRevenue}
-          onChange={(v) =>
-            setForm({
-              ...form,
-              summary: { ...summary, downloadsRevenue: v },
-            })
-          }
-        />
-
-        <SummaryCard
-          label="Royalties"
-          icon={<Award className="w-7 h-7 text-green-600" />}
-          value={summary.royalties}
-          onChange={(v) =>
-            setForm({
-              ...form,
-              summary: { ...summary, royalties: v },
-            })
-          }
-        />
+      {/* SUMMARY */}
+      <div className="grid grid-cols-3 gap-6">
+        <SummaryCard label="Balance" value={revenue.balance} />
+        <SummaryCard label="Withdrawable" value={revenue.withdrawable} />
+        <SummaryCard label="Total Transactions" value={revenue.transactions.length} />
       </div>
 
-      {/* PLATFORM PERFORMANCE TABLE */}
-      <EditableTable
-        title="Platform Performance"
-        rows={form.platformPerformance}
-        fields={[
-          { key: "platform", label: "Platform" },
-          { key: "streams", label: "Streams" },
-          { key: "revenue", label: "Revenue" },
-          { key: "growth", label: "Growth (%)" },
-          { key: "marketShare", label: "Market Share (%)" },
-        ]}
-        addRow={() =>
-          setForm({
-            ...form,
-            platformPerformance: [
-              ...form.platformPerformance,
-              {
-                platform: "",
-                streams: 0,
-                revenue: 0,
-                growth: 0,
-                marketShare: 0,
-              },
-            ],
-          })
-        }
-        removeRow={(i) =>
-          setForm({
-            ...form,
-            platformPerformance: form.platformPerformance.filter(
-              (_, idx) => idx !== i
-            ),
-          })
-        }
-        updateField={(i, key, val) => {
-          const a = [...form.platformPerformance];
-          a[i][key] = key === "platform" ? val : Number(val);
-          setForm({ ...form, platformPerformance: a });
-        }}
-      />
+      {/* ADD INCOME */}
+      <AddIncomeSection newIncome={newIncome} setNewIncome={setNewIncome} addIncome={addIncome} />
 
-      {/* ARTIST REVENUES */}
-      <EditableTable
-        title="Revenue by Artist"
-        rows={form.artistRevenues}
-        fields={[
-          { key: "name", label: "Artist" },
-          { key: "genre", label: "Genre" },
-          { key: "totalRevenue", label: "Total Revenue" },
-          { key: "streaming", label: "Streaming" },
-          { key: "downloads", label: "Downloads" },
-          { key: "royalties", label: "Royalties" },
-          { key: "growth", label: "Growth (%)" },
-        ]}
-        addRow={() =>
-          setForm({
-            ...form,
-            artistRevenues: [
-              ...form.artistRevenues,
-              {
-                name: "",
-                genre: "",
-                totalRevenue: 0,
-                streaming: 0,
-                downloads: 0,
-                royalties: 0,
-                growth: 0,
-              },
-            ],
-          })
-        }
-        removeRow={(i) =>
-          setForm({
-            ...form,
-            artistRevenues: form.artistRevenues.filter(
-              (_, idx) => idx !== i
-            ),
-          })
-        }
-        updateField={(i, key, val) => {
-          const a = [...form.artistRevenues];
-          a[i][key] = key === "name" || key === "genre" ? val : Number(val);
-          setForm({ ...form, artistRevenues: a });
-        }}
-      />
+      {/* WITHDRAW REQUESTS */}
+      <WithdrawRequestsSection withdrawRequests={revenue.withdrawRequests} updateWithdraw={updateWithdraw} />
 
-      {/* TOP TRACKS */}
-      <EditableTable
-        title="Top Performing Tracks"
-        rows={form.topTracks}
-        fields={[
-          { key: "rank", label: "Rank" },
-          { key: "title", label: "Title" },
-          { key: "artist", label: "Artist" },
-          { key: "revenue", label: "Revenue" },
-        ]}
-        addRow={() =>
-          setForm({
-            ...form,
-            topTracks: [
-              ...form.topTracks,
-              {
-                title: "",
-                artist: "",
-                revenue: 0,
-                rank: form.topTracks.length + 1,
-              },
-            ],
-          })
-        }
-        removeRow={(i) =>
-          setForm({
-            ...form,
-            topTracks: form.topTracks.filter((_, idx) => idx !== i),
-          })
-        }
-        updateField={(i, key, val) => {
-          const a = [...form.topTracks];
-          a[i][key] =
-            key === "title" || key === "artist" ? val : Number(val);
-          setForm({ ...form, topTracks: a });
-        }}
-      />
+      {/* TRANSACTIONS */}
+      <TransactionsSection transactions={revenue.transactions} deleteTransaction={deleteTransaction} />
+
     </div>
   );
-};
+}
 
-export default AdminRevenueReport;
+// ============ SMALL COMPONENTS ============
 
-/* ============================
-   SUMMARY CARD
-============================ */
-const SummaryCard = ({
-  label,
-  icon,
-  value,
-  onChange,
-}: {
-  label: string;
-  icon: React.ReactNode;
-  value: number;
-  onChange: (v: number) => void;
-}) => (
-  <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6 relative">
-    <div className="absolute top-5 right-5 text-2xl opacity-80">{icon}</div>
-
-    <p className="text-gray-600 text-sm">{label}</p>
-
-    <div className="flex items-baseline gap-2 mt-2">
-      <span className="text-gray-400 text-sm">$</span>
-      <input
-        type="number"
-        className="w-32 text-2xl font-semibold text-gray-800 bg-transparent border-b border-gray-200 focus:border-green-600 focus:outline-none"
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-      />
-    </div>
+const SummaryCard = ({ label, value }: any) => (
+  <div className="bg-white p-6 rounded-xl shadow border">
+    <h2 className="text-sm text-gray-500">{label}</h2>
+    <p className="text-3xl font-bold mt-2">₹ {value}</p>
   </div>
 );
 
-/* ============================
-   EDITABLE TABLE
-============================ */
-const EditableTable = ({
-  title,
-  rows,
-  fields,
-  addRow,
-  removeRow,
-  updateField,
-}: {
-  title: string;
-  rows: any[];
-  fields: { key: string; label: string }[];
-  addRow: () => void;
-  removeRow: (i: number) => void;
-  updateField: (i: number, key: string, value: any) => void;
-}) => (
-  <div className="bg-white shadow-md rounded-xl border border-gray-100 overflow-hidden">
-    <div className="p-5 flex justify-between items-center">
-      <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
+const AddIncomeSection = ({ newIncome, setNewIncome, addIncome }: any) => (
+  <div className="bg-white p-6 rounded-xl shadow border space-y-4">
+    <h2 className="font-bold">Add Income</h2>
 
-      <button
-        type="button"
-        onClick={addRow}
-        className="inline-flex items-center gap-2 text-sm border px-3 py-1.5 rounded-lg hover:bg-gray-50"
-      >
-        <Plus size={16} /> Add Row
-      </button>
+    <div className="grid grid-cols-3 gap-4">
+      <input
+  placeholder="Client User ID"
+  className="border p-2 rounded"
+  value={newIncome.userId}
+  onChange={(e) =>
+    setNewIncome({ ...newIncome, userId: e.target.value })
+  }
+/>
+
+
+      <input className="border p-2 rounded" placeholder="Source" value={newIncome.source}
+        onChange={(e) => setNewIncome({ ...newIncome, source: e.target.value })} />
+
+      <input className="border p-2 rounded" type="number" placeholder="Amount" value={newIncome.amount}
+        onChange={(e) => setNewIncome({ ...newIncome, amount: e.target.value })} />
+
+      <input className="border p-2 rounded" placeholder="Period (Jan 2025)" value={newIncome.period}
+        onChange={(e) => setNewIncome({ ...newIncome, period: e.target.value })} />
     </div>
 
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm text-gray-700">
-        <thead className="bg-gray-50 text-gray-600">
-          <tr>
-            {fields.map((f) => (
-              <th key={f.key} className="p-3 text-left">
-                {f.label}
-              </th>
-            ))}
-            <th className="p-3 text-center">Actions</th>
-          </tr>
-        </thead>
+    <button className="px-4 py-2 bg-green-600 text-white rounded-lg flex items-center gap-2" onClick={addIncome}>
+      <Plus size={16} /> Add Income
+    </button>
+  </div>
+);
 
-        <tbody className="divide-y">
-          {rows.map((row, i) => (
-            <tr key={i} className="hover:bg-gray-50">
-              {fields.map((f) => (
-                <td key={f.key} className="p-3">
-                  <input
-                    className="w-full border rounded-md px-2 py-1 text-sm"
-                    value={row[f.key]}
-                    type={typeof row[f.key] === "number" ? "number" : "text"}
-                    onChange={(e) =>
-                      updateField(i, f.key, e.target.value)
-                    }
-                  />
-                </td>
-              ))}
+const WithdrawRequestsSection = ({ withdrawRequests, updateWithdraw }: any) => (
+  <div className="bg-white p-6 rounded-xl shadow border">
+    <h2 className="font-bold mb-4">Withdraw Requests</h2>
 
-              <td className="p-3 text-center">
-                <button
-                  onClick={() => removeRow(i)}
-                  className="text-red-600 hover:text-red-800"
-                >
-                  <Trash2 size={17} />
-                </button>
-              </td>
-            </tr>
-          ))}
+    {withdrawRequests.length === 0 ? (
+      <p className="text-gray-500">No requests</p>
+    ) : (
+      withdrawRequests.map((r: any) => (
+        <div key={r._id} className="flex justify-between items-center border-b py-3">
+          <div>
+            <p className="font-semibold">₹ {r.amount}</p>
+            <p className="text-sm text-gray-500">{new Date(r.createdAt).toLocaleString()}</p>
+          </div>
 
-          {rows.length === 0 && (
-            <tr>
-              <td
-                colSpan={fields.length + 1}
-                className="py-4 text-center text-gray-500 italic"
-              >
-                No data available. Click "Add Row" to start.
-              </td>
-            </tr>
+          {r.status === "Pending" ? (
+            <div className="flex gap-3">
+              <button className="px-3 py-1 bg-green-600 text-white rounded" onClick={() => updateWithdraw(r._id, "Approved")}>
+                <Check size={16} /> Approve
+              </button>
+
+              <button className="px-3 py-1 bg-red-600 text-white rounded" onClick={() => updateWithdraw(r._id, "Rejected")}>
+                <X size={16} /> Reject
+              </button>
+            </div>
+          ) : (
+            <span className="px-3 py-1 bg-gray-200 rounded text-gray-700">{r.status}</span>
           )}
-        </tbody>
-      </table>
-    </div>
+        </div>
+      ))
+    )}
+  </div>
+);
+
+const TransactionsSection = ({ transactions, deleteTransaction }: any) => (
+  <div className="bg-white p-6 rounded-xl shadow border">
+    <h2 className="font-bold mb-4">All Transactions</h2>
+
+    {transactions.map((t: any) => (
+      <div key={t._id} className="grid grid-cols-5 items-center border-b py-3">
+        <span>{t.source}</span>
+        <span>₹ {t.amount}</span>
+        <span>{t.period}</span>
+        <span>{t.status}</span>
+
+        <button className="text-red-600" onClick={() => deleteTransaction(t._id)}>
+          <Trash size={16} />
+        </button>
+      </div>
+    ))}
   </div>
 );

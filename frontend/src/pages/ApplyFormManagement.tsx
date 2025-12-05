@@ -1,32 +1,25 @@
 import React, { useState, useEffect } from "react";
-import {
-  Eye,
-  Edit,
-  Search,
-  CheckCircle,
-  XCircle,
-  Trash2,
-  Plus,
-} from "lucide-react";
+import { Eye, Search, CheckCircle, XCircle, Trash2 } from "lucide-react";
 import Swal from "sweetalert2";
 import axios from "axios";
 import { useAppSelector } from "../store/hook";
 
-interface Application {
+interface ClientApplication {
   _id: string;
   fullName: string;
+  artistName: string;
   email: string;
   phone: string;
-  role: string;
-  genre: string;
-  musicLink: string;
-  bio: string;
-  agree: boolean;
-  status: "Pending" | "Reviewed" | "Accepted" | "Rejected";
+  instagram?: string;
+  youtube?: string;
+  labelName?: string;
+  releasedBefore: boolean;
+  heardAbout: string;
+  status: "Pending" | "Approved" | "Rejected";
 }
 
 const ApplyFormManagement: React.FC = () => {
-  const [applications, setApplications] = useState<Application[]>([]);
+  const [applications, setApplications] = useState<ClientApplication[]>([]);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const itemsPerPage = 5;
@@ -35,30 +28,20 @@ const ApplyFormManagement: React.FC = () => {
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
   // =======================================================
-  // FETCH APPLICATIONS (WITH TOKEN CHECK)
+  // FETCH APPLICATIONS
   // =======================================================
   useEffect(() => {
-    if (!token) {
-      console.warn("❗ No token found. Skipping API call...");
-      return;
-    }
+    if (!token) return;
 
     const fetchApplications = async () => {
       try {
-        console.log("🔗 Calling API:", `${baseUrl}/apply`);
         const res = await axios.get(`${baseUrl}/apply`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        console.log("Response:", res.data);
-
-        if (Array.isArray(res.data.data)) {
-          setApplications(res.data.data);
-        } else {
-          console.warn("⚠ Unexpected API response:", res.data);
-        }
-      } catch (error: any) {
-        console.error("❌ Error fetching applications:", error.response?.data || error);
+        setApplications(res.data.data);
+      } catch (error) {
+        console.error("❌ Error Fetching:", error);
       }
     };
 
@@ -78,7 +61,7 @@ const ApplyFormManagement: React.FC = () => {
   // =======================================================
   // UPDATE STATUS
   // =======================================================
-  const updateStatus = async (id: string, status: Application["status"]) => {
+  const updateStatus = async (id: string, status: ClientApplication["status"]) => {
     try {
       await axios.patch(
         `${baseUrl}/apply/${id}/status`,
@@ -92,7 +75,6 @@ const ApplyFormManagement: React.FC = () => {
 
       Swal.fire("Updated!", `Status changed to ${status}`, "success");
     } catch (error) {
-      console.error(error);
       Swal.fire("Error", "Failed to update status", "error");
     }
   };
@@ -103,11 +85,10 @@ const ApplyFormManagement: React.FC = () => {
   const handleDelete = async (id: string) => {
     Swal.fire({
       title: "Delete this application?",
-      text: "This action cannot be undone.",
+      text: "This cannot be undone.",
       icon: "warning",
-      showCancelButton: true,
       confirmButtonColor: "#d33",
-      confirmButtonText: "Delete",
+      showCancelButton: true,
     }).then(async (res) => {
       if (res.isConfirmed) {
         try {
@@ -119,7 +100,6 @@ const ApplyFormManagement: React.FC = () => {
 
           Swal.fire("Deleted!", "Application removed.", "success");
         } catch (error) {
-          console.error(error);
           Swal.fire("Error", "Failed to delete", "error");
         }
       }
@@ -129,161 +109,48 @@ const ApplyFormManagement: React.FC = () => {
   // =======================================================
   // VIEW DETAILS
   // =======================================================
-  const handleView = (app: Application) => {
+  const handleView = (app: ClientApplication) => {
     Swal.fire({
       title: `<strong>${app.fullName}</strong>`,
       html: `
+        <p><b>Artist Name:</b> ${app.artistName}</p>
         <p><b>Email:</b> ${app.email}</p>
         <p><b>Phone:</b> ${app.phone}</p>
-        <p><b>Role:</b> ${app.role}</p>
-        <p><b>Genre:</b> ${app.genre}</p>
-        <p><b>Music Link:</b> <a href="${app.musicLink}" target="_blank">${app.musicLink}</a></p>
-        <p><b>Bio:</b> ${app.bio}</p>
-        <p><b>Agree:</b> ${app.agree ? "Yes" : "No"}</p>
+        <p><b>Instagram:</b> ${app.instagram || "N/A"}</p>
+        <p><b>YouTube:</b> ${app.youtube || "N/A"}</p>
+        <p><b>Label:</b> ${app.labelName || "N/A"}</p>
+        <p><b>Released Before:</b> ${app.releasedBefore ? "Yes" : "No"}</p>
+        <p><b>Heard About:</b> ${app.heardAbout}</p>
         <p><b>Status:</b> ${app.status}</p>
       `,
       confirmButtonColor: "#16a34a",
     });
   };
 
-  // =======================================================
-  // ADD APPLICANT
-  // =======================================================
-  const handleCreate = () => {
-    Swal.fire({
-      title: "Add New Applicant",
-      html: `
-        <input id="swal-fullName" class="swal2-input" placeholder="Full Name" />
-        <input id="swal-email" class="swal2-input" placeholder="Email" />
-        <input id="swal-phone" class="swal2-input" placeholder="Phone" />
-        <input id="swal-role" class="swal2-input" placeholder="Role" />
-        <input id="swal-genre" class="swal2-input" placeholder="Genre" />
-        <input id="swal-musicLink" class="swal2-input" placeholder="Music Link" />
-      `,
-      showCancelButton: true,
-      confirmButtonText: "Create",
-      preConfirm: () => {
-        const fullName = (document.getElementById("swal-fullName") as HTMLInputElement).value;
-        const email = (document.getElementById("swal-email") as HTMLInputElement).value;
-        const phone = (document.getElementById("swal-phone") as HTMLInputElement).value;
-        const role = (document.getElementById("swal-role") as HTMLInputElement).value;
-        const genre = (document.getElementById("swal-genre") as HTMLInputElement).value;
-        const musicLink = (document.getElementById("swal-musicLink") as HTMLInputElement).value;
-
-        if (!fullName || !email || !phone || !role || !genre || !musicLink) {
-          Swal.showValidationMessage("All fields are required!");
-          return;
-        }
-
-        return { fullName, email, phone, role, genre, musicLink };
-      },
-    }).then(async (res) => {
-      if (res.isConfirmed) {
-        try {
-          const payload = {
-            ...res.value,
-            bio: "New applicant",
-            agree: true,
-            status: "Pending",
-          };
-
-          const response = await axios.post(
-            `${baseUrl}/apply`,
-            payload,
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-
-          setApplications((prev) => [...prev, response.data.data]);
-
-          Swal.fire("Added!", "Applicant created successfully", "success");
-        } catch (error) {
-          console.error(error);
-          Swal.fire("Error", "Failed to add applicant", "error");
-        }
-      }
-    });
-  };
-
-  // =======================================================
-  // EDIT APPLICANT
-  // =======================================================
-  const handleEdit = (app: Application) => {
-    Swal.fire({
-      title: "Edit Applicant",
-      html: `
-        <input id="fullName" class="swal2-input" value="${app.fullName}" />
-        <input id="email" class="swal2-input" value="${app.email}" />
-        <input id="phone" class="swal2-input" value="${app.phone}" />
-        <input id="role" class="swal2-input" value="${app.role}" />
-        <input id="genre" class="swal2-input" value="${app.genre}" />
-      `,
-      showCancelButton: true,
-      confirmButtonText: "Save",
-      preConfirm: () => ({
-        fullName: (document.getElementById("fullName") as any).value,
-        email: (document.getElementById("email") as any).value,
-        phone: (document.getElementById("phone") as any).value,
-        role: (document.getElementById("role") as any).value,
-        genre: (document.getElementById("genre") as any).value,
-      }),
-    }).then(async (res) => {
-      if (res.isConfirmed) {
-        try {
-          await axios.patch(
-            `${baseUrl}/apply/${app._id}`,
-            res.value,
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-
-          setApplications((prev) =>
-            prev.map((a) =>
-              a._id === app._id ? { ...a, ...res.value } : a
-            )
-          );
-
-          Swal.fire("Updated!", "Applicant updated successfully.", "success");
-        } catch (error) {
-          console.error(error);
-          Swal.fire("Error", "Failed to update applicant", "error");
-        }
-      }
-    });
-  };
-
-  // =======================================================
-  // UI
-  // =======================================================
   return (
     <div className="p-6 bg-white min-h-screen">
-      <h2 className="text-2xl font-semibold mb-6">Apply Form Management</h2>
+      <h2 className="text-2xl font-semibold mb-6">Apply Form Submission</h2>
 
-      {/* Search + Add */}
+      {/* Search */}
       <div className="flex justify-between items-center mb-5">
         <div className="relative w-80">
           <Search size={18} className="absolute left-3 top-2.5 text-gray-400" />
           <input
             type="text"
-            placeholder="Search by name..."
+            placeholder="Search by Full Name"
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10 pr-4 py-2 w-full rounded-xl border shadow-sm focus:ring-2 focus:ring-green-400 outline-none"
+            className="pl-10 pr-4 py-2 w-full rounded-xl border shadow-sm"
           />
         </div>
-
-        <button
-          onClick={handleCreate}
-          className="flex items-center gap-2 bg-green-600 text-white px-5 py-2 rounded-xl shadow hover:bg-green-700"
-        >
-          <Plus size={18} /> Add Applicant
-        </button>
       </div>
 
       {/* Table */}
       <div className="overflow-x-auto rounded-xl border shadow-md">
-        <table className="w-full text-sm text-gray-700">
-          <thead className="bg-green-600 text-white rounded-t-xl">
+        <table className="w-full text-sm text-gray-700 table-auto">
+          <thead className="bg-green-600 text-white">
             <tr>
-              <th className="py-3 px-4 text-left">Name</th>
-              <th className="py-3 px-4 text-left">Role</th>
+              <th className="py-3 px-4 text-left">Full Name</th>
+              <th className="py-3 px-4 text-left">Artist Name</th>
               <th className="py-3 px-4 text-left">Email</th>
               <th className="py-3 px-4 text-left">Phone</th>
               <th className="py-3 px-4 text-left">Status</th>
@@ -300,19 +167,17 @@ const ApplyFormManagement: React.FC = () => {
                 }`}
               >
                 <td className="py-3 px-4">{app.fullName}</td>
-                <td className="py-3 px-4">{app.role}</td>
+                <td className="py-3 px-4">{app.artistName}</td>
                 <td className="py-3 px-4">{app.email}</td>
                 <td className="py-3 px-4">{app.phone}</td>
 
                 <td className="py-3 px-4">
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      app.status === "Accepted"
+                      app.status === "Approved"
                         ? "bg-green-200 text-green-800"
                         : app.status === "Rejected"
                         ? "bg-red-200 text-red-800"
-                        : app.status === "Reviewed"
-                        ? "bg-blue-200 text-blue-800"
                         : "bg-yellow-200 text-yellow-800"
                     }`}
                   >
@@ -320,36 +185,32 @@ const ApplyFormManagement: React.FC = () => {
                   </span>
                 </td>
 
-                <td className="py-3 px-4 flex gap-3 justify-center">
-                  <Eye
-                    size={18}
-                    className="text-blue-600 cursor-pointer hover:scale-110"
-                    onClick={() => handleView(app)}
-                  />
+                <td className="py-3 px-4">
+                  <div className="flex justify-center items-center gap-4">
+                    <Eye
+                      size={18}
+                      className="text-blue-600 cursor-pointer hover:scale-110"
+                      onClick={() => handleView(app)}
+                    />
 
-                  <Edit
-                    size={18}
-                    className="text-green-600 cursor-pointer hover:scale-110"
-                    onClick={() => handleEdit(app)}
-                  />
+                    <CheckCircle
+                      size={18}
+                      className="text-green-600 cursor-pointer hover:scale-110"
+                      onClick={() => updateStatus(app._id, "Approved")}
+                    />
 
-                  <CheckCircle
-                    size={18}
-                    className="text-green-500 cursor-pointer hover:scale-110"
-                    onClick={() => updateStatus(app._id, "Accepted")}
-                  />
+                    <XCircle
+                      size={18}
+                      className="text-yellow-600 cursor-pointer hover:scale-110"
+                      onClick={() => updateStatus(app._id, "Rejected")}
+                    />
 
-                  <XCircle
-                    size={18}
-                    className="text-yellow-600 cursor-pointer hover:scale-110"
-                    onClick={() => updateStatus(app._id, "Rejected")}
-                  />
-
-                  <Trash2
-                    size={18}
-                    className="text-red-600 cursor-pointer hover:scale-110"
-                    onClick={() => handleDelete(app._id)}
-                  />
+                    <Trash2
+                      size={18}
+                      className="text-red-600 cursor-pointer hover:scale-110"
+                      onClick={() => handleDelete(app._id)}
+                    />
+                  </div>
                 </td>
               </tr>
             ))}
@@ -361,7 +222,8 @@ const ApplyFormManagement: React.FC = () => {
       <div className="flex justify-between items-center mt-4">
         <p>
           Showing {(page - 1) * itemsPerPage + 1}–
-          {Math.min(page * itemsPerPage, filtered.length)} of {filtered.length}
+          {Math.min(page * itemsPerPage, filtered.length)} of{" "}
+          {filtered.length}
         </p>
 
         <div className="flex gap-2">
@@ -387,3 +249,4 @@ const ApplyFormManagement: React.FC = () => {
 };
 
 export default ApplyFormManagement;
+

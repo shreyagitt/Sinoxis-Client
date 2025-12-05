@@ -1,34 +1,75 @@
 import mongoose, { Document, Schema } from "mongoose";
 
-export interface ApplicationDocument extends Document {
+export interface ApplyFormDocument extends Document {
   fullName: string;
+  artistName: string;
   email: string;
   phone: string;
-  role: string;
-  genre: string;
-  musicLink: string;
-  bio: string;
-  status: "Pending" | "Reviewed" | "Accepted" | "Rejected";
-  agree: boolean;
+  instagram?: string;
+  youtube?: string;
+  labelName?: string;
+  releasedBefore: boolean;
+  heardAbout: string;
+
+  status: "Pending" | "Approved" | "Rejected";
 }
 
-const ApplicationSchema = new Schema<ApplicationDocument>(
+const ApplyFormSchema = new Schema<ApplyFormDocument>(
   {
-    fullName: { type: String, required: true, trim: true },
-    email: { type: String, required: true, lowercase: true },
-    phone: { type: String, required: true },
-    role: { type: String, required: true },
-    genre: { type: String, required: true },
-    musicLink: { type: String, required: true },
-    bio: { type: String, required: true },
+    fullName: {
+      type: String,
+      required: [true, "Full Name is required"],
+      trim: true,
+    },
+
+    artistName: {
+      type: String,
+      required: [true, "Artist Name is required"],
+      trim: true,
+    },
+
+    email: {
+      type: String,
+      required: [true, "Email is required"],
+      lowercase: true,
+      trim: true,
+    },
+
+    phone: {
+      type: String,
+      required: [true, "Phone number is required"],
+      trim: true,
+    },
+
+    instagram: { type: String },
+
+    youtube: { type: String },
+
+    labelName: { type: String },
+
+    releasedBefore: {
+      type: Boolean,
+      required: true,
+    },
+
+    heardAbout: {
+      type: String,
+      required: [true, "Source information is required"],
+    },
+
     status: {
       type: String,
-      enum: ["Pending", "Reviewed", "Accepted", "Rejected"],
+      enum: ["Pending", "Approved", "Rejected"],
       default: "Pending",
     },
-    agree: { type: Boolean, required: true },
   },
   { timestamps: true }
 );
 
-export default mongoose.model<ApplicationDocument>("Application", ApplicationSchema);
+// indexing for performance
+ApplyFormSchema.index({ email: 1 });
+
+export default mongoose.model<ApplyFormDocument>(
+  "ApplyForm",
+  ApplyFormSchema
+);

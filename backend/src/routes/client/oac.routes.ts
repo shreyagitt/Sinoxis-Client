@@ -1,22 +1,23 @@
 import { Router } from "express";
+import { ClientOACController } from "../../controllers/client/OACController";
 import { authenticate, authorize } from "../../middlewares/auth";
-import { ClientRevenueController } from "../../controllers/client/RevenueReportController";
 
 const router = Router();
 
+// Get my requests
 router.get(
-  "/revenue",
+  "/",
   authenticate,
   authorize("client"),
-  ClientRevenueController.getRevenue
+  ClientOACController.listMy
 );
 
+// Submit new request
 router.post(
-  "/withdraw-request",
+  "/",
   authenticate,
   authorize("client"),
-  ClientRevenueController.withdrawRequest
+  ClientOACController.create
 );
 
 export default router;
-

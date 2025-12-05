@@ -5,22 +5,22 @@ import upload from "../../middlewares/upload";
 
 const router = Router();
 
-/* ============================================================
-   PUBLIC CLIENT ROUTES (NO LOGIN REQUIRED)
-   ============================================================ */
+/* ============================
+   PUBLIC ROUTES
+   ============================ */
 
-// List all public artists
+// List artists (search + filter)
 router.get("/", optionalAuth, ClientArtistController.list);
 
-// Get a specific artist
+// Get single artist
 router.get("/:id", optionalAuth, ClientArtistController.getOne);
 
 
-/* ============================================================
-   PROTECTED CLIENT ROUTES (LOGIN REQUIRED)
-   ============================================================ */
+/* ============================
+   PROTECTED ROUTES (CLIENT ROLE)
+   ============================ */
 
-// Create artist
+// Create new artist
 router.post(
   "/",
   authenticate,

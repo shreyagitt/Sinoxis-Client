@@ -32,6 +32,7 @@ import Metadata from './pages/Metadata';
 import FacebookClaim from './pages/FacebookVideo'
 import RegisterPage from "./pages/RegisterPage";
 import CopyClaimManagement from "./pages/CopyClaimManagement";
+import AdminOACPage from "./pages/OACpage";
 
 const AppRoutes: React.FC = () => {
   const dispatch = useDispatch();
@@ -159,6 +160,15 @@ const AppRoutes: React.FC = () => {
                 </ProtectedRoute>
               }
             />
+<Route
+              path="/requests/channel"
+              element={
+                <ProtectedRoute>
+                  <Layout><AdminOACPage/></Layout>
+                </ProtectedRoute>
+              }
+            />
+
 
             <Route
               path="/services/youtube-oac"

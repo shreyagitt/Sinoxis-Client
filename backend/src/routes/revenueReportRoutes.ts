@@ -1,36 +1,42 @@
 import { Router } from "express";
-import { AdminRevenueReportController } from "../controllers/revenueReportController";
 import { authenticate, authorize } from "../middlewares/auth";
+import { RevenueAdminController } from "../controllers/revenueReportController";
 
 const router = Router();
 
-/* ============================================================
-   REVENUE REPORT ROUTES (ADMIN ONLY)
-   ============================================================ */
-
-// Create / Update revenue report
-router.post(
-  "/",
-  authenticate,
-  authorize("admin"),
-  AdminRevenueReportController.upsert
-);
-
-// List revenue reports
 router.get(
-  "/",
+  "/summary",
   authenticate,
   authorize("admin"),
-  AdminRevenueReportController.list
+  RevenueAdminController.getSummary
 );
 
-// Delete all revenue reports
-router.delete(
-  "/",
+router.post(
+  "/add",
   authenticate,
   authorize("admin"),
-  AdminRevenueReportController.deleteAll
+  RevenueAdminController.addIncome
+);
+
+router.get(
+  "/withdraw-requests",
+  authenticate,
+  authorize("admin"),
+  RevenueAdminController.listWithdraws
+);
+
+router.patch(
+  "/withdraw/:id",
+  authenticate,
+  authorize("admin"),
+  RevenueAdminController.updateWithdrawStatus
+);
+
+router.delete(
+  "/transaction/:id",
+  authenticate,
+  authorize("admin"),
+  RevenueAdminController.deleteTransaction
 );
 
 export default router;
-

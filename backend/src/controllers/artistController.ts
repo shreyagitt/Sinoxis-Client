@@ -7,13 +7,26 @@ import { HTTP_STATUS } from "../config/constants";
 export const artistController = {
 
   // ----------------------------------------------------
-  // 📌 GET ALL ARTISTS
+  // 📌 GET ALL ARTISTS (supports search + status filter)
   // ----------------------------------------------------
   list: asyncHandler(async (req: Request, res: Response) => {
-    const artists = await Artist.find().sort({ createdAt: -1 });
+    const { search, status } = req.query;
+
+    const filter: any = {};
+
+    if (search) {
+      filter.name = { $regex: new RegExp(search as string, "i") };
+    }
+
+    if (status) {
+      filter.status = status;
+    }
+
+    const artists = await Artist.find(filter).sort({ createdAt: -1 });
 
     res.status(HTTP_STATUS.OK).json({
       success: true,
+      count: artists.length,
       data: artists,
     });
   }),
@@ -25,9 +38,10 @@ export const artistController = {
     const artist = await Artist.findById(req.params.id);
 
     if (!artist) {
-      return res
-        .status(HTTP_STATUS.NOT_FOUND)
-        .json({ success: false, message: "Artist not found" });
+      return res.status(HTTP_STATUS.NOT_FOUND).json({
+        success: false,
+        message: "Artist not found",
+      });
     }
 
     res.status(HTTP_STATUS.OK).json({
@@ -37,7 +51,7 @@ export const artistController = {
   }),
 
   // ----------------------------------------------------
-  // 📌 CREATE ARTIST
+  // 📌 CREATE ARTIST (Cloudinary supported)
   // ----------------------------------------------------
   create: asyncHandler(async (req: Request, res: Response) => {
     const data: any = req.body;
@@ -58,18 +72,19 @@ export const artistController = {
   }),
 
   // ----------------------------------------------------
-  // 📌 UPDATE ARTIST
+  // 📌 UPDATE ARTIST (Safe update + Cloudinary replacement)
   // ----------------------------------------------------
   update: asyncHandler(async (req: Request, res: Response) => {
     const artist = await Artist.findById(req.params.id);
 
     if (!artist) {
-      return res
-        .status(HTTP_STATUS.NOT_FOUND)
-        .json({ success: false, message: "Artist not found" });
+      return res.status(HTTP_STATUS.NOT_FOUND).json({
+        success: false,
+        message: "Artist not found",
+      });
     }
 
-    // If new image uploaded → delete old one from Cloudinary
+    // If new image uploaded, delete old one first
     if (req.file) {
       if (artist.artistImageId) {
         try {
@@ -84,7 +99,7 @@ export const artistController = {
         (req.file as any).filename || (req.file as any).public_id;
     }
 
-    // Allowed updatable fields
+    // Allowed fields to update
     const allowed = [
       "name",
       "genre",
@@ -119,12 +134,12 @@ export const artistController = {
     const artist = await Artist.findById(req.params.id);
 
     if (!artist) {
-      return res
-        .status(HTTP_STATUS.NOT_FOUND)
-        .json({ success: false, message: "Artist not found" });
+      return res.status(HTTP_STATUS.NOT_FOUND).json({
+        success: false,
+        message: "Artist not found",
+      });
     }
 
-    // Delete image from Cloudinary
     if (artist.artistImageId) {
       try {
         await cloudinary.uploader.destroy(artist.artistImageId);
@@ -141,4 +156,3 @@ export const artistController = {
     });
   }),
 };
-

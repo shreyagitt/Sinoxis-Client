@@ -9,21 +9,11 @@ const router = Router();
    ARTIST ROUTES (ADMIN ONLY)
    ============================================================ */
 
-// Get all artists
-router.get(
-  "/",
-  authenticate,
-  authorize("admin"),
-  artistController.list
-);
+// Get all artists (search + filter)
+router.get("/", authenticate, authorize("admin"), artistController.list);
 
 // Get artist by ID
-router.get(
-  "/:id",
-  authenticate,
-  authorize("admin"),
-  artistController.getOne
-);
+router.get("/:id", authenticate, authorize("admin"), artistController.getOne);
 
 // Create new artist
 router.post(
