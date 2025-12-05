@@ -1,3 +1,4 @@
+// src/pages/ApplyForm.jsx
 import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
@@ -34,6 +35,9 @@ const ApplyForm = () => {
   const subtitleColor = theme === "dark" ? "text-gray-400" : "text-gray-600";
 
   const handleSubmit = async (values, { resetForm, setSubmitting }) => {
+    // Convert Yes/No string → boolean
+    values.releasedBefore = values.releasedBefore === "true";
+
     try {
       await axios.post(`${baseUrl}/client/apply`, values);
       alert("Application submitted successfully!");
@@ -60,7 +64,6 @@ const ApplyForm = () => {
       <div
         className={`${cardBg} w-full max-w-4xl rounded-2xl p-6 sm:p-8 md:p-10 shadow-xl border ${borderColor}`}
       >
-        {/* TITLE */}
         <h1 className={`text-2xl sm:text-3xl font-semibold text-center ${titleColor}`}>
           Apply Form
         </h1>
@@ -88,39 +91,42 @@ const ApplyForm = () => {
             <Form className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
 
               {/* FULL NAME */}
-              <FormField label="Full Name" name="fullName" labelColor={labelColor} inputBg={inputBg} placeholderColor={placeholderColor} borderColor={borderColor} />
+              <FormField label="Full Name" name="fullName" inputBg={inputBg} labelColor={labelColor} placeholderColor={placeholderColor} borderColor={borderColor} />
 
               {/* ARTIST NAME */}
-              <FormField label="Artist Name" name="artistName" labelColor={labelColor} inputBg={inputBg} placeholderColor={placeholderColor} borderColor={borderColor} />
+              <FormField label="Artist Name" name="artistName" inputBg={inputBg} labelColor={labelColor} placeholderColor={placeholderColor} borderColor={borderColor} />
 
               {/* EMAIL */}
-              <FormField label="Email" name="email" type="email" labelColor={labelColor} inputBg={inputBg} placeholderColor={placeholderColor} borderColor={borderColor} />
+              <FormField label="Email" name="email" type="email" inputBg={inputBg} labelColor={labelColor} placeholderColor={placeholderColor} borderColor={borderColor} />
 
               {/* PHONE */}
-              <FormField label="Phone Number" name="phone" labelColor={labelColor} inputBg={inputBg} placeholderColor={placeholderColor} borderColor={borderColor} />
+              <FormField label="Phone Number" name="phone" inputBg={inputBg} labelColor={labelColor} placeholderColor={placeholderColor} borderColor={borderColor} />
 
               {/* INSTAGRAM */}
-              <FormField label="Instagram Profile Link" name="instagram" labelColor={labelColor} inputBg={inputBg} placeholderColor={placeholderColor} borderColor={borderColor} />
+              <FormField label="Instagram Profile Link" name="instagram" inputBg={inputBg} labelColor={labelColor} placeholderColor={placeholderColor} borderColor={borderColor} />
 
               {/* YOUTUBE */}
-              <FormField label="YouTube Channel Link" name="youtube" labelColor={labelColor} inputBg={inputBg} placeholderColor={placeholderColor} borderColor={borderColor} />
+              <FormField label="YouTube Channel Link" name="youtube" inputBg={inputBg} labelColor={labelColor} placeholderColor={placeholderColor} borderColor={borderColor} />
 
               {/* LABEL NAME (Full Width) */}
               <div className="sm:col-span-2">
-                <FormField label="Label/Channel/Studio Name" name="labelName" labelColor={labelColor} inputBg={inputBg} borderColor={borderColor} />
+                <FormField label="Label/Studio Name" name="labelName" inputBg={inputBg} labelColor={labelColor} borderColor={borderColor} />
               </div>
 
-              {/* RELEASED BEFORE */}
+              {/* RELEASED BEFORE — FIXED BOOLEAN HANDLING */}
               <div>
                 <label className={`text-sm ${labelColor}`}>Have you released music before?</label>
+
                 <div className={`flex gap-4 mt-2 ${labelColor}`}>
                   <label className="flex items-center gap-2">
-                    <Field type="radio" value="Yes" name="releasedBefore" /> Yes
+                    <Field type="radio" value="true" name="releasedBefore" /> Yes
                   </label>
+
                   <label className="flex items-center gap-2">
-                    <Field type="radio" value="No" name="releasedBefore" /> No
+                    <Field type="radio" value="false" name="releasedBefore" /> No
                   </label>
                 </div>
+
                 <ErrorMessage name="releasedBefore" className="text-red-400 text-sm" component="div" />
               </div>
 
@@ -141,15 +147,13 @@ const ApplyForm = () => {
                 <ErrorMessage name="heardAbout" className="text-red-400 text-sm" component="div" />
               </div>
 
-              {/* SUBMIT BUTTON (FULL WIDTH) */}
+              {/* SUBMIT BUTTON */}
               <div className="sm:col-span-2 mt-4">
                 <button
                   type="submit"
                   disabled={isSubmitting}
                   className="w-full py-3 rounded-xl text-white font-semibold text-sm sm:text-base shadow-lg transition"
-                  style={{
-                    background: "linear-gradient(90deg,#29B6F6,#0288D1)",
-                  }}
+                  style={{ background: "linear-gradient(90deg,#29B6F6,#0288D1)" }}
                 >
                   {isSubmitting ? "Submitting..." : "Submit Application"}
                 </button>
@@ -178,7 +182,3 @@ const FormField = ({ label, name, type = "text", labelColor, inputBg, placeholde
 );
 
 export default ApplyForm;
-
-
-
-
