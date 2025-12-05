@@ -8,7 +8,6 @@ import { useTheme } from "./Topbar";
 const Layout = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-
   const { theme } = useTheme();
 
   /* -------------------------------------------
@@ -19,45 +18,49 @@ const Layout = ({ children }) => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
 
-      // Auto collapse sidebar on mobile
+      // Auto-collapse sidebar on mobile screens
       if (mobile) setCollapsed(true);
     };
 
     window.addEventListener("resize", handleResize);
     handleResize();
-
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   /* -------------------------------------------
-      THEME COLORS
+      THEME COLORS (FIXED BORDER ISSUE)
   ------------------------------------------- */
+
   const layoutBg = theme === "dark" ? "bg-[#020726]" : "bg-white";
+
+  // FIX: Remove border lines for light theme
   const separatorColor =
-    theme === "dark" ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)";
+    theme === "dark" ? "rgba(255,255,255,0.10)" : "transparent";
+
   const topSeparatorColor =
-    theme === "dark" ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.06)";
+    theme === "dark" ? "rgba(255,255,255,0.08)" : "transparent";
 
   /* -------------------------------------------
       RESPONSIVE LAYOUT LOGIC
   ------------------------------------------- */
 
-  // Desktop sizes
   const sidebarWidth = collapsed ? 80 : 240;
-
-  // Mobile: no offset
   const mainOffset = isMobile ? 0 : sidebarWidth;
 
   return (
-    <div className={`min-h-screen flex flex-col transition-all duration-300 ${layoutBg}`}>
-      
+    <div
+      className={`min-h-screen flex flex-col transition-all duration-300 ${layoutBg}`}
+    >
       {/* SIDEBAR */}
       <Sidebar collapsed={collapsed} isMobile={isMobile} />
 
       {/* TOPBAR */}
-      <Topbar toggleSidebar={() => setCollapsed(!collapsed)} isCollapsed={collapsed} />
+      <Topbar
+        toggleSidebar={() => setCollapsed((prev) => !prev)}
+        isCollapsed={collapsed}
+      />
 
-      {/* VERTICAL SEPARATOR (DESKTOP ONLY) */}
+      {/* LEFT SEPARATOR (DESKTOP ONLY, INVISIBLE IN LIGHT MODE) */}
       {!isMobile && (
         <div
           className="fixed top-0 bottom-0 pointer-events-none transition-all duration-300"
@@ -67,14 +70,14 @@ const Layout = ({ children }) => {
             background: separatorColor,
             boxShadow:
               theme === "dark"
-                ? "2px 0 12px rgba(0,0,0,0.5)"
-                : "2px 0 8px rgba(0,0,0,0.08)",
-            zIndex: 30,
+                ? "2px 0 12px rgba(0,0,0,0.35)"
+                : "none",
+            zIndex: 25,
           }}
         />
       )}
 
-      {/* TOPBAR UNDERLINE */}
+      {/* TOPBAR UNDERLINE (REMOVED IN LIGHT THEME) */}
       <div
         className="fixed left-0 right-0 z-20"
         style={{

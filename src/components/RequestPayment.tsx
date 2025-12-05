@@ -13,10 +13,17 @@ import {
 } from "lucide-react";
 import { useTheme } from "../components/Topbar"; // theme provider from Topbar
 
+/* =========================
+   RequestPayment page
+   - Mobile-first responsive layout
+   - Sidebar stacks under form on small screens (Option A)
+   - Preserves all functionality & colors
+   ========================= */
+
 const MAX_BALANCE = 89452;
 const QUICK_AMOUNTS = [1000, 2500, 5000, 10000];
 
-const RequestPayment = () => {
+function RequestPayment() {
   const { theme } = useTheme();
 
   // theme-aware classes
@@ -27,11 +34,13 @@ const RequestPayment = () => {
   const accentText = "text-[#29B6F6]";
   const accentGradient = "from-[#29B6F6] to-[#0288D1]";
 
+  // state
   const [amount, setAmount] = useState(5000);
   const [method, setMethod] = useState("bank");
   const [notes, setNotes] = useState("");
   const [agree, setAgree] = useState(false);
 
+  // derived
   const processingFee = amount > 5000 ? amount * 0.015 : 0;
   const tax = 0;
   const totalReceive = Math.max(0, amount - processingFee - tax);
@@ -40,24 +49,22 @@ const RequestPayment = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!agree) return alert("You must agree to the terms.");
-    alert("Payment Request Submitted (demo)");
+    alert(`Payment Request Submitted (demo)\nRequested: $${amount}`);
   };
 
   return (
-    <div className={`p-6 md:p-10 min-h-screen transition-colors duration-200 ${pageBg}`}>
+    <div className={`p-4 sm:p-6 lg:p-10 min-h-screen transition-colors duration-200 ${pageBg}`}>
       {/* HEADER */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-semibold">Request Payment</h1>
+          <h1 className="text-2xl sm:text-3xl font-semibold">Request Payment</h1>
           <p className={`text-sm mt-2 ${subtleText}`}>
             Request payouts from your available balance — secure & quick.
           </p>
         </div>
 
-        <ol className={`flex gap-2 text-sm ${accentText}`}>
+        <ol className={`flex gap-2 text-sm ${accentText} flex-wrap`}>
           <li className="cursor-pointer">Home</li>
-          <li>/</li>
-          <li className="cursor-pointer">Revenue Reports</li>
           <li>/</li>
           <li className="font-medium">Request Payment</li>
         </ol>
@@ -70,7 +77,7 @@ const RequestPayment = () => {
           title="Available Balance"
           value={`$${MAX_BALANCE.toLocaleString()}`}
           subtitle="Ready for withdrawal"
-          icon={<DollarSign className="w-8 h-8" />}
+          icon={<DollarSign className="w-6 h-6" />}
           badges={[
             { text: "Available Now", tone: "emerald" },
             { text: "Minimum: $50", tone: "blue" },
@@ -82,7 +89,7 @@ const RequestPayment = () => {
           title="Pending Revenue"
           value="$23,768"
           subtitle="Next payout cycle"
-          icon={<Clock className="w-8 h-8" />}
+          icon={<Clock className="w-6 h-6" />}
           badges={[
             { text: "Processing", tone: "yellow" },
             { text: "Due: 15th", tone: "blue" },
@@ -94,7 +101,7 @@ const RequestPayment = () => {
           title="Processing"
           value="$12,450"
           subtitle="Current requests"
-          icon={<RefreshCcw className="w-8 h-8" />}
+          icon={<RefreshCcw className="w-6 h-6" />}
           badges={[
             { text: "2 Requests", tone: "blue" },
             { text: "3–5 Days", tone: "emerald" },
@@ -106,7 +113,7 @@ const RequestPayment = () => {
           title="Total Processed"
           value="$247,890"
           subtitle="All time payments"
-          icon={<CheckCircle className="w-8 h-8" />}
+          icon={<CheckCircle className="w-6 h-6" />}
           badges={[
             { text: "48 Payments", tone: "blue" },
             { text: "100% Success", tone: "emerald" },
@@ -115,14 +122,16 @@ const RequestPayment = () => {
       </div>
 
       {/* MAIN GRID */}
+      {/* Grid: single column on small screens -> form first, sidebar below.
+          xl:12 layout places form (8) sidebar (4) on large screens. */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
         {/* FORM */}
         <form
           onSubmit={handleSubmit}
-          className={`xl:col-span-8 rounded-2xl p-6 shadow-sm ${cardBg}`}
+          className={`xl:col-span-8 rounded-2xl p-5 sm:p-6 lg:p-8 shadow-sm ${cardBg}`}
         >
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-semibold">New Payment Request</h3>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-3">
+            <h3 className="text-lg sm:text-xl font-semibold">New Payment Request</h3>
             <span className={`text-sm ${subtleText}`}>Step 1 of 3</span>
           </div>
 
@@ -132,14 +141,15 @@ const RequestPayment = () => {
               Request Amount
             </label>
 
-            <div className={`flex items-center justify-between rounded-xl p-4 ${theme === "dark" ? "bg-[#081435] border border-white/10" : "bg-gray-50 border border-gray-200"}`}>
+            <div className={`flex flex-col sm:flex-row items-center justify-between gap-3 rounded-xl p-4 ${theme === "dark" ? "bg-[#081435] border border-white/10" : "bg-gray-50 border border-gray-200"}`}>
               <span className={`text-sm ${subtleText}`}>USD</span>
 
+              {/* responsive width: full on tiny screens, fixed on sm+ */}
               <input
                 type="number"
                 value={amount}
                 onChange={(e) => setAmount(Number(e.target.value || 0))}
-                className={`w-40 text-center text-xl font-semibold focus:outline-none bg-transparent`}
+                className="w-full sm:w-40 text-center text-xl font-semibold focus:outline-none bg-transparent py-1"
                 min={0}
               />
 
@@ -207,7 +217,7 @@ const RequestPayment = () => {
               rows={3}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className={`w-full p-4 rounded-xl ${inputBg} focus:outline-none`}
+              className={`w-full p-4 rounded-xl ${inputBg} focus:outline-none resize-none`}
               placeholder="Add any special instructions..."
             />
           </div>
@@ -246,6 +256,7 @@ const RequestPayment = () => {
         </form>
 
         {/* SIDEBAR */}
+        {/* On small screens this will automatically appear below the form because grid is a single column */}
         <Sidebar
           theme={theme}
           amount={amount}
@@ -258,12 +269,11 @@ const RequestPayment = () => {
       </div>
     </div>
   );
-};
+}
 
-export default RequestPayment;
+/* ============== SUBCOMPONENTS ============== */
 
-/* ---------------------- SUBCOMPONENTS ---------------------- */
-
+/* MetricCard */
 const MetricCard = ({ theme, title, value, subtitle, icon, badges = [] }) => {
   const cardBg = theme === "dark" ? "bg-[#0a1039] border border-white/10" : "bg-white border border-gray-200";
   const subtleText = theme === "dark" ? "text-gray-300" : "text-gray-500";
@@ -277,7 +287,7 @@ const MetricCard = ({ theme, title, value, subtitle, icon, badges = [] }) => {
   };
 
   return (
-    <div className={`rounded-2xl p-5 shadow-sm ${cardBg}`}>
+    <div className={`rounded-2xl p-4 sm:p-5 shadow-sm ${cardBg}`}>
       <div className="flex justify-between items-start gap-4">
         <div>
           <p className={`text-sm ${titleColor}`}>{title}</p>
@@ -285,22 +295,25 @@ const MetricCard = ({ theme, title, value, subtitle, icon, badges = [] }) => {
           <p className={`text-xs mt-1 ${subtleText}`}>{subtitle}</p>
         </div>
 
-        <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-[#29B6F6] to-[#0288D1] flex items-center justify-center text-white">
+        <div className="w-11 h-11 rounded-lg bg-gradient-to-br from-[#29B6F6] to-[#0288D1] flex items-center justify-center text-white">
           {icon}
         </div>
       </div>
 
-      <div className="flex gap-2 mt-4 flex-wrap">
-        {badges.map((b, i) => (
-          <span key={i} className={`px-3 py-1 rounded-full text-xs ${toneMap[b.tone] || "bg-gray-100 text-gray-800"}`}>
-            {b.text}
-          </span>
-        ))}
-      </div>
+      {badges.length > 0 && (
+        <div className="flex gap-2 mt-4 flex-wrap">
+          {badges.map((b, i) => (
+            <span key={i} className={`px-3 py-1 rounded-full text-xs ${toneMap[b.tone] || "bg-gray-100 text-gray-800"}`}>
+              {b.text}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
 
+/* OptionCard - Payment Method */
 const OptionCard = ({ active, onClick, icon, title, subtitle, theme }) => {
   const activeBg = theme === "dark" ? "bg-[#29B6F6]/10 border-[#29B6F6]" : "bg-[#e8f6ff] border-[#cfeeff]";
   const defaultBg = theme === "dark" ? "bg-transparent border border-white/10" : "bg-white border border-gray-200";
@@ -310,9 +323,9 @@ const OptionCard = ({ active, onClick, icon, title, subtitle, theme }) => {
     <button
       onClick={onClick}
       type="button"
-      className={`p-4 rounded-xl flex items-center gap-4 border transition w-full ${active ? activeBg : defaultBg}`}
+      className={`p-3 sm:p-4 rounded-xl flex items-center gap-4 border transition w-full ${active ? activeBg : defaultBg}`}
     >
-      <div className={`w-12 h-12 rounded-full flex items-center justify-center ${active ? "bg-white/10" : "bg-gray-100/10"}`}>
+      <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center ${active ? "bg-white/10" : "bg-gray-100/10"}`}>
         <span className={`${active ? "text-white" : "text-[#29B6F6]"}`}>{icon}</span>
       </div>
 
@@ -326,6 +339,7 @@ const OptionCard = ({ active, onClick, icon, title, subtitle, theme }) => {
   );
 };
 
+/* ReadOnlyField */
 const ReadOnlyField = ({ theme, label, value }) => {
   const bg = theme === "dark" ? "bg-[#081435] border border-white/10 text-white" : "bg-gray-50 border border-gray-200 text-[#020726]";
   return (
@@ -336,12 +350,13 @@ const ReadOnlyField = ({ theme, label, value }) => {
   );
 };
 
+/* BankDetails */
 const BankDetails = ({ theme }) => (
   <div className="mb-6">
     <label className={`block text-sm font-medium mb-3 ${theme === "dark" ? "text-white" : "text-[#020726]"}`}>Bank Account Details</label>
 
     <div className={`rounded-2xl p-4 ${theme === "dark" ? "bg-[#081435] border border-white/10" : "bg-white border border-gray-200"}`}>
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <ReadOnlyField theme={theme} label="Account Holder Name" value="Alex Mora" />
         <ReadOnlyField theme={theme} label="Account Number" value="**** **** **** 7284" />
         <ReadOnlyField theme={theme} label="Bank Name" value="Chase Bank" />
@@ -357,12 +372,13 @@ const BankDetails = ({ theme }) => (
   </div>
 );
 
+/* PayPalDetails */
 const PayPalDetails = ({ theme }) => (
   <div className="mb-6">
     <label className={`block text-sm font-medium mb-3 ${theme === "dark" ? "text-white" : "text-[#020726]"}`}>PayPal Account Details</label>
 
     <div className={`rounded-2xl p-4 ${theme === "dark" ? "bg-[#081435] border border-white/10" : "bg-white border border-gray-200"}`}>
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <ReadOnlyField theme={theme} label="Account Holder Name" value="Alex Mora" />
         <ReadOnlyField theme={theme} label="PayPal Email" value="alex.mora@example.com" />
         <ReadOnlyField theme={theme} label="PayPal ID" value="PP-9823-ABX7" />
@@ -378,6 +394,7 @@ const PayPalDetails = ({ theme }) => (
   </div>
 );
 
+/* Sidebar */
 const Sidebar = ({ theme, amount, processingFee, tax, totalReceive, deliveryTime, method }) => {
   const cardBg = theme === "dark" ? "bg-[#0a1039] border border-white/10" : "bg-white border border-gray-200";
   const subtleText = theme === "dark" ? "text-gray-300" : "text-gray-600";
@@ -426,6 +443,7 @@ const Sidebar = ({ theme, amount, processingFee, tax, totalReceive, deliveryTime
   );
 };
 
+/* Row and RecentItem */
 const Row = ({ label, value, theme }) => (
   <div className="flex justify-between items-center">
     <span className={`text-sm ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>{label}</span>
@@ -454,3 +472,5 @@ const RecentItem = ({ theme, icon, amount, subtitle, badgeText, tone = "blue" })
     </div>
   );
 };
+
+export default RequestPayment;

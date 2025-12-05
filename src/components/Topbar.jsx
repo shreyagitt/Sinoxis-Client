@@ -161,30 +161,30 @@ const Topbar = ({ isCollapsed, toggleSidebar }) => {
 
 
         {/* Notifications */}
-        <div className="relative" ref={notifRef}>
-          <button onClick={() => setShowNotifications(!showNotifications)}>
-            <FaBell size={22} className={iconColor} />
-          </button>
+<div className="relative z-[9999]" ref={notifRef}>
+  <button onClick={() => setShowNotifications(!showNotifications)}>
+    <FaBell size={22} className={iconColor} />
+  </button>
 
-          {/* Badge */}
-          {notificationsList.length > 0 && (
-            <span className="absolute -top-1 -right-1 bg-green-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
-              {notificationsList.length}
-            </span>
-          )}
+  {/* Badge */}
+  {notificationsList.length > 0 && (
+    <span className="absolute -top-1 -right-1 bg-green-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
+      {notificationsList.length}
+    </span>
+  )}
 
-          {/* Dropdown */}
-          {showNotifications && (
-          
+  {/* DROPDOWN FIXED FOR ALL SCREEN SIZES */}
+  {showNotifications && (
+    <div className="absolute right-0 top-8 sm:top-10 z-[99999] min-w-[280px]">
+      <Notifications
+        notificationsList={notificationsList}
+        removeNotification={removeNotification}
+        markAllAsRead={markAllAsRead}
+      />
+    </div>
+  )}
+</div>
 
-              <Notifications
-                notificationsList={notificationsList}
-                removeNotification={removeNotification}
-                markAllAsRead={markAllAsRead}
-              />
-            
-          )}
-        </div>
 
         {/* USER DROPDOWN */}
         <div ref={dropdownRef} className="relative">

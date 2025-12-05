@@ -30,22 +30,32 @@ const ReleaseDetailsModal = ({ open, onClose, release }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50">
+    <div className=" inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+      {/* MODAL WRAPPER - scrollable */}
       <div
-        className={`w-full max-w-xl rounded-lg shadow-xl p-6 border relative transition-all duration-300 ${cardBg}`}
+        className={`
+          w-full max-w-xl max-h-[90vh] 
+          overflow-y-auto rounded-lg shadow-xl p-6 border relative 
+          transition-all duration-300 scrollbar-thin scrollbar-thumb-gray-500/30 scrollbar-track-transparent 
+          ${cardBg}
+        `}
       >
         {/* CLOSE BUTTON */}
         <button
           onClick={onClose}
           className={`absolute top-3 right-3 ${
-            theme === "dark" ? "text-gray-300 hover:text-red-400" : "text-gray-600 hover:text-red-600"
+            theme === "dark"
+              ? "text-gray-300 hover:text-red-400"
+              : "text-gray-600 hover:text-red-600"
           }`}
         >
           <X size={22} />
         </button>
 
         {/* TITLE */}
-        <h2 className="text-xl font-semibold mb-4">Release Details</h2>
+        <h2 className="text-xl font-semibold mb-4 text-center sm:text-left">
+          Release Details
+        </h2>
 
         {/* COVER + TITLE */}
         <div className="flex flex-col items-center mb-5">
@@ -58,8 +68,10 @@ const ReleaseDetailsModal = ({ open, onClose, release }) => {
             className="w-32 h-32 rounded-lg object-cover mb-3"
           />
 
-          <h3 className="text-lg font-bold">{release.title}</h3>
-          <p className={`${subtleText}`}>{release.subtitle || "No subtitle"}</p>
+          <h3 className="text-lg font-bold text-center">{release.title}</h3>
+          <p className={`${subtleText} text-center`}>
+            {release.subtitle || "No subtitle"}
+          </p>
 
           {/* STATUS */}
           <span
@@ -74,16 +86,20 @@ const ReleaseDetailsModal = ({ open, onClose, release }) => {
         {/* DETAILS */}
         <div className={`border-t pt-4 text-sm space-y-2 ${subtleText}`}>
           <p>
-            <span className="font-semibold">Release Date:</span> Not provided
+            <span className="font-semibold">Release Date:</span>{" "}
+            {release.releaseDate || "Not provided"}
           </p>
           <p>
-            <span className="font-semibold">Primary Artist:</span> Not provided
+            <span className="font-semibold">Primary Artist:</span>{" "}
+            {release.artist || "Not provided"}
           </p>
           <p>
-            <span className="font-semibold">Genre:</span> Not provided
+            <span className="font-semibold">Genre:</span>{" "}
+            {release.genre || "Not provided"}
           </p>
-          <p>
-            <span className="font-semibold">Track Link:</span> Not provided
+          <p className="break-all">
+            <span className="font-semibold">Track Link:</span>{" "}
+            {release.tracksPreview || "Not provided"}
           </p>
         </div>
 

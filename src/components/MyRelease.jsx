@@ -9,7 +9,9 @@ const COVER_PLACEHOLDER =
   "https://www.mixcloud.com/blog/wp-content/uploads/2023/11/Collage-1-2.png";
 
 const STORAGE_KEY = "my_releases_v1";
+
 const loadReleases = () => {
+  if (typeof window === "undefined") return null;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     return raw ? JSON.parse(raw) : null;
@@ -17,7 +19,11 @@ const loadReleases = () => {
     return null;
   }
 };
-const saveReleases = (arr) => localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+
+const saveReleases = (arr) => {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+};
 
 const initialDemo = [
   {
@@ -88,7 +94,8 @@ export default function Releases() {
   const { theme } = useTheme(); // ⭐ GET THEME
 
   // theme adaptive colors
-  const pageBg = theme === "dark" ? "bg-[#020726] text-white" : "bg-white text-[#020726]";
+  const pageBg =
+    theme === "dark" ? "bg-[#020726] text-white" : "bg-white text-[#020726]";
   const cardBg =
     theme === "dark"
       ? "bg-[#0a1039] border-white/10"
@@ -111,6 +118,11 @@ export default function Releases() {
     theme === "dark"
       ? "border-[#0A84FF] text-[#0A84FF] hover:bg-[#00AEEF] hover:text-white"
       : "border-[#0288D1] text-[#0288D1] hover:bg-[#29B6F6] hover:text-white";
+
+  const mobileCardBg =
+    theme === "dark"
+      ? "bg-[#050a26] border border-white/10"
+      : "bg-white border border-gray-200 shadow-sm";
 
   // states
   const [releases, setReleases] = useState(() => loadReleases() || initialDemo);
@@ -143,16 +155,17 @@ export default function Releases() {
   });
 
   const totalCount = releases.length;
-  const countText = `${Math.min(
-    countPage.page,
-    Math.ceil(totalCount / countPage.perPage) || 1
-  )} / ${Math.ceil(totalCount / countPage.perPage) || 1}`;
+  const totalPages = Math.ceil(totalCount / countPage.perPage) || 1;
+  const currentPage = Math.min(countPage.page, totalPages);
+  const countText = `${currentPage} / ${totalPages}`;
 
   return (
-    <div className={`min-h-screen px-6 py-8 transition-all duration-300 ${pageBg}`}>
+    <div
+      className={`min-h-screen px-6 py-8 transition-all duration-300 ${pageBg}`}
+    >
       {/* HEADER */}
-      <div className="flex justify-between items-start mb-8">
-        <h1 className="text-3xl font-semibold">My Releases</h1>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-8">
+        <h1 className="text-2xl md:text-3xl font-semibold">My Releases</h1>
         <div className="text-sm">
           <span className={subtleText}>Home / </span>
           <span className="text-[#29B6F6]">My Releases</span>
@@ -160,52 +173,52 @@ export default function Releases() {
       </div>
 
       {/* FILTERS */}
-      <div className="mb-6 flex flex-wrap justify-between gap-4">
+      <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <div className={`text-sm font-medium mb-3 ${subtleText}`}>
             Release Count
           </div>
-          <div className="flex gap-3 flex-wrap">
-            {["All", "Approved", "Pending", "Action Required", "Unfinished", "Rejected"].map(
-              (t) => (
-                <button
-                  key={t}
-                  onClick={() => setFilter(t)}
-                  className={`
-                    px-4 py-2 rounded-md border transition-all 
-                    ${
-                      filter === t
-                        ? `${filterActive} bg-transparent`
-                        : `${filterDefault}`
-                    }
-                  `}
-                >
-                  {t}
-                </button>
-              )
-            )}
+          <div className="flex flex-wrap gap-3">
+            {[
+              "All",
+              "Approved",
+              "Pending",
+              "Action Required",
+              "Unfinished",
+              "Rejected",
+            ].map((t) => (
+              <button
+                key={t}
+                onClick={() => setFilter(t)}
+                className={`px-4 py-2 rounded-md border text-sm transition-all ${
+                  filter === t ? filterActive : filterDefault
+                }`}
+              >
+                {t}
+              </button>
+            ))}
           </div>
         </div>
 
         <div className={`text-sm ${subtleText}`}>{countText}</div>
       </div>
 
-      {/* CARD */}
-      <div className={`rounded-2xl p-6 border ${cardBg}`}>
+      {/* MAIN CARD WRAPPER */}
+      <div className={`rounded-2xl p-4 md:p-6 border ${cardBg}`}>
         {/* TOP BAR */}
-        <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
           <h2 className="text-lg font-semibold">Manage Releases</h2>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Type & Enter to search"
-              className={`px-4 py-2 rounded-full focus:outline-none ${inputBg}`}
+              className={`px-4 py-2 rounded-full focus:outline-none text-sm ${inputBg}`}
             />
             <button
               onClick={openCreate}
-              className="px-5 py-2 rounded-full text-white font-semibold"
+              className="px-5 py-2 rounded-full text-white font-semibold text-sm"
               style={{ background: "linear-gradient(90deg,#00AEEF,#007BFF)" }}
             >
               Create Release
@@ -213,9 +226,119 @@ export default function Releases() {
           </div>
         </div>
 
-        {/* TABLE */}
-        <div className="overflow-x-auto">
-          <table className="min-w-[1100px] w-full text-left">
+        {/* ================== MOBILE & TABLET CARDS (Option B) ================== */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:hidden">
+          {filtered.map((r) => (
+            <div
+              key={r.id}
+              className={`rounded-2xl p-4 flex flex-col gap-3 ${mobileCardBg}`}
+            >
+              {/* TOP ROW: COVER + BASIC INFO */}
+              <div className="flex gap-4">
+                <img
+                  src={r.cover || COVER_PLACEHOLDER}
+                  className="w-16 h-16 sm:w-18 sm:h-18 rounded object-cover flex-shrink-0"
+                  alt={r.title}
+                />
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-base truncate">{r.title}</h3>
+                  <p
+                    className={`text-xs mt-1 truncate ${subtleText}`}
+                  >{`Artist: ${r.artist}`}</p>
+                  <p
+                    className={`text-xs truncate ${subtleText}`}
+                  >{`Label: ${r.label}`}</p>
+                </div>
+              </div>
+
+              {/* MIDDLE ROW: ISRC + UPC */}
+              <div className="grid grid-cols-2 gap-2 text-xs mt-2">
+                <div>
+                  <p className={subtleText}>ISRC</p>
+                  <p className="font-medium break-all">{r.isrc}</p>
+                </div>
+                <div>
+                  <p className={subtleText}>UPC</p>
+                  <p className="font-medium break-all">{r.upc}</p>
+                </div>
+              </div>
+
+              {/* STATUS + ACTIONS */}
+              <div className="mt-3 flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium">Status</span>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-medium ${statusClasses(
+                      r.status,
+                      theme
+                    )}`}
+                  >
+                    {r.status}
+                  </span>
+                </div>
+
+                {/* ACTION BUTTONS - FULL WIDTH UNDER DETAILS */}
+                <div className="flex gap-3 w-full">
+                  <button
+                    onClick={() => openView(r)}
+                    className={`
+                      flex-1 flex items-center justify-center gap-1 px-3 py-2 rounded-full border text-xs font-medium group
+                      ${
+                        theme === "dark"
+                          ? "border-sky-500 text-sky-400 hover:bg-sky-500 hover:text-white"
+                          : "border-sky-600 text-sky-700 hover:bg-sky-100"
+                      }
+                    `}
+                  >
+                    <Eye
+                      size={16}
+                      className={
+                        theme === "dark"
+                          ? "group-hover:text-white"
+                          : "group-hover:text-sky-900"
+                      }
+                    />
+                    <span>View</span>
+                  </button>
+
+                  <button
+                    onClick={() => openEdit(r.id)}
+                    className={`
+                      flex-1 flex items-center justify-center gap-1 px-3 py-2 rounded-full border text-xs font-medium group
+                      ${
+                        theme === "dark"
+                          ? "border-amber-400 text-amber-300 hover:bg-amber-400 hover:text-white"
+                          : "border-amber-600 text-amber-700 hover:bg-amber-100"
+                      }
+                    `}
+                  >
+                    <Edit3
+                      size={16}
+                      className={
+                        theme === "dark"
+                          ? "group-hover:text-white"
+                          : "group-hover:text-amber-800"
+                      }
+                    />
+                    <span>Edit</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {filtered.length === 0 && (
+            <div
+              className={`col-span-1 py-8 text-center text-sm ${subtleText}`}
+            >
+              No results
+            </div>
+          )}
+        </div>
+
+        {/* ================== DESKTOP TABLE (unchanged content) ================== */}
+        <div className="hidden lg:block overflow-x-auto mt-2">
+          <table className="min-w-[1100px] w-full text-left text-sm">
             <thead>
               <tr className={`${subtleText} ${tableBorder} border-b`}>
                 <th className="py-3 px-4">Cover Art</th>
@@ -241,6 +364,7 @@ export default function Releases() {
                     <img
                       src={r.cover || COVER_PLACEHOLDER}
                       className="w-14 h-14 rounded object-cover"
+                      alt={r.title}
                     />
                   </td>
 
@@ -262,10 +386,9 @@ export default function Releases() {
                     </span>
                   </td>
 
-                  {/* ACTION BUTTONS FIXED FOR LIGHT MODE */}
+                  {/* ACTION BUTTONS */}
                   <td className="px-4 py-3 text-center">
                     <div className="flex justify-center gap-3">
-
                       {/* EDIT BUTTON */}
                       <button
                         onClick={() => openEdit(r.id)}
@@ -277,16 +400,15 @@ export default function Releases() {
                               : "border-amber-600 hover:bg-amber-100"
                           }
                         `}
+                        title="Edit"
                       >
                         <Edit3
                           size={18}
-                          className={`
-                            ${
-                              theme === "dark"
-                                ? "text-amber-300 group-hover:text-white"
-                                : "text-amber-700 group-hover:text-amber-800"
-                            }
-                          `}
+                          className={`${
+                            theme === "dark"
+                              ? "text-amber-300 group-hover:text-white"
+                              : "text-amber-700 group-hover:text-amber-800"
+                          }`}
                         />
                       </button>
 
@@ -301,16 +423,15 @@ export default function Releases() {
                               : "border-sky-600 hover:bg-sky-100"
                           }
                         `}
+                        title="View"
                       >
                         <Eye
                           size={18}
-                          className={`
-                            ${
-                              theme === "dark"
-                                ? "text-sky-400 group-hover:text-white"
-                                : "text-sky-700 group-hover:text-sky-900"
-                            }
-                          `}
+                          className={`${
+                            theme === "dark"
+                              ? "text-sky-400 group-hover:text-white"
+                              : "text-sky-700 group-hover:text-sky-900"
+                          }`}
                         />
                       </button>
                     </div>
@@ -320,7 +441,10 @@ export default function Releases() {
 
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={8} className={`py-8 text-center ${subtleText}`}>
+                  <td
+                    colSpan={8}
+                    className={`py-8 text-center text-sm ${subtleText}`}
+                  >
                     No results
                   </td>
                 </tr>

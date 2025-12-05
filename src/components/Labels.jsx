@@ -54,6 +54,14 @@ const LabelSchema = Yup.object().shape({
   aadharBack: Yup.mixed().nullable(),
 });
 
+// Utility to read file as DataURL
+const readFileAsDataURL = (file) =>
+  new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.readAsDataURL(file);
+  });
+
 export default function Labels() {
   const { theme } = useTheme();
 
@@ -128,14 +136,6 @@ export default function Labels() {
   };
 
   const [initialFormValues, setInitialFormValues] = useState({ ...emptyValues });
-
-  // Read file as Base64
-  const readFileAsDataURL = (file) =>
-    new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.readAsDataURL(file);
-    });
 
   // Open Add Modal
   const openAddModal = () => {
@@ -214,36 +214,30 @@ export default function Labels() {
     setEditMode(false);
   };
 
-  // =============== PAGE ===============
   return (
-    <div className={`min-h-screen p-8 transition-all duration-300 ${pageBg}`}>
+    <div className={`min-h-screen p-4 sm:p-6 lg:p-8 transition-all duration-300 ${pageBg}`}>
       {/* Header */}
-      <div className="flex justify-between mb-8">
-        <h1 className="text-xl font-semibold">Labels</h1>
-        <p className={`text-sm ${headerSecondary}`}>
-          Home / <span className="text-[#29B6F6]">Labels</span>
-        </p>
+      <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-6">
+        <h1 className="text-xl sm:text-2xl font-semibold">Labels</h1>
+        <p className={`text-sm ${headerSecondary}`}>Home / <span className="text-[#29B6F6]">Labels</span></p>
       </div>
 
-      {/* Main Card */}
-      <div className={`rounded-2xl p-8 border transition-all duration-300 ${cardBg}`}>
-        <div className="flex justify-between mb-6">
-          <h2 className="text-xl font-medium">Manage Labels</h2>
+      <div className={`rounded-2xl p-4 sm:p-6 border ${cardBg}`}>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+          <h2 className="text-lg sm:text-xl font-medium">Manage Labels</h2>
 
-          <button
-            onClick={openAddModal}
-            className="px-5 py-2 rounded-full text-white font-semibold bg-gradient-to-r from-[#29B6F6] to-[#0288D1]"
-          >
-            Add Label
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={openAddModal}
+              className="px-4 sm:px-5 py-2 rounded-full text-white font-semibold bg-gradient-to-r from-[#29B6F6] to-[#0288D1]"
+            >
+              Add Label
+            </button>
+          </div>
         </div>
 
-        {/* Table Header */}
-        <div
-          className={`grid grid-cols-12 py-4 px-3 border-b font-semibold ${
-            theme === "dark" ? "border-white/10 text-gray-300" : "border-gray-200 text-gray-700"
-          }`}
-        >
+        {/* Table header for md+ */}
+        <div className={`hidden md:grid grid-cols-12 py-3 px-2 font-semibold border-b ${theme === "dark" ? "border-white/10 text-gray-300" : "border-gray-200 text-gray-700"}`}>
           <div className="col-span-4">Label Name</div>
           <div className="col-span-2">Created</div>
           <div className="col-span-2">Expires</div>
@@ -251,68 +245,98 @@ export default function Labels() {
           <div className="col-span-2 text-center">Action</div>
         </div>
 
-        {/* Rows */}
-        {labels.map((l) => {
-          const st = STATUS_STYLES(theme)[l.status];
-          return (
-            <div
-              key={l.id}
-              className={`grid grid-cols-12 py-4 px-3 items-center border-b ${
-                theme === "dark"
-                  ? "border-white/5 hover:bg-white/5"
-                  : "border-gray-200 hover:bg-gray-50"
-              }`}
-            >
-              <div className="col-span-4">{l.name}</div>
-              <div className="col-span-2">{formatDisplayDate(l.created)}</div>
-              <div className="col-span-2">{formatDisplayDate(l.expiry)}</div>
+        {/* Rows: on small screens become stacked cards */}
+        <div className="mt-3 space-y-3">
+          {labels.map((l) => {
+            const st = STATUS_STYLES(theme)[l.status];
+            return (
+              <div
+                key={l.id}
+                className={`bg-transparent rounded-lg overflow-hidden ${theme === "dark" ? "hover:bg-white/4" : "hover:bg-gray-50"} border ${theme === "dark" ? "border-white/5" : "border-gray-200"}`}
+              >
+                {/* MD+ grid row */}
+                <div className="hidden md:grid grid-cols-12 items-center py-4 px-3">
+                  <div className="col-span-4">{l.name}</div>
+                  <div className="col-span-2">{formatDisplayDate(l.created)}</div>
+                  <div className="col-span-2">{formatDisplayDate(l.expiry)}</div>
+                  <div className="col-span-2">
+                    <span
+                      className="px-4 py-1 rounded-full text-sm font-semibold"
+                      style={{
+                        background: st.bg,
+                        color: st.color,
+                      }}
+                    >
+                      {l.status}
+                    </span>
+                  </div>
+                  <div className="col-span-2 flex justify-center gap-3">
+                    <button
+                      onClick={() => openView(l)}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center border transition ${theme === "dark" ? "border-sky-500 hover:bg-sky-500/10" : "border-sky-400 hover:bg-sky-100"}`}
+                      title="View"
+                    >
+                      <Eye size={18} className={theme === "dark" ? "text-sky-400" : "text-sky-600"} />
+                    </button>
 
-              <div className="col-span-2">
-                <span
-                  className="px-4 py-1 rounded-full text-sm font-semibold"
-                  style={{
-                    background: st.bg,
-                    color: st.color,
-                  }}
-                >
-                  {l.status}
-                </span>
+                    <button
+                      onClick={() => openEdit(l)}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center border transition ${theme === "dark" ? "border-amber-400 hover:bg-amber-400/10" : "border-amber-500 hover:bg-amber-100"}`}
+                      title="Edit"
+                    >
+                      <Edit3 size={16} className={theme === "dark" ? "text-amber-300" : "text-amber-700"} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Mobile Card */}
+                <div className="md:hidden p-4 flex flex-col gap-3">
+                  <div className="flex justify-between items-start gap-3">
+                    <div>
+                      <p className="font-medium">{l.name}</p>
+                      <p className={`text-xs ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>Created: {formatDisplayDate(l.created)}</p>
+                    </div>
+
+                    <div className="flex flex-col items-end gap-2">
+                      <span
+                        className="px-3 py-1 rounded-full text-sm font-semibold"
+                        style={{
+                          background: st.bg,
+                          color: st.color,
+                        }}
+                      >
+                        {l.status}
+                      </span>
+
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => openView(l)}
+                          className={`w-9 h-9 rounded-full flex items-center justify-center border transition ${theme === "dark" ? "border-sky-500 hover:bg-sky-500/10" : "border-sky-400 hover:bg-sky-100"}`}
+                          title="View"
+                        >
+                          <Eye size={16} className={theme === "dark" ? "text-sky-400" : "text-sky-600"} />
+                        </button>
+
+                        <button
+                          onClick={() => openEdit(l)}
+                          className={`w-9 h-9 rounded-full flex items-center justify-center border transition ${theme === "dark" ? "border-amber-400 hover:bg-amber-400/10" : "border-amber-500 hover:bg-amber-100"}`}
+                          title="Edit"
+                        >
+                          <Edit3 size={14} className={theme === "dark" ? "text-amber-300" : "text-amber-700"} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <p className={`text-xs ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>Expires: {formatDisplayDate(l.expiry)}</p>
+                    <div className="text-xs text-gray-400">{/* reserved for any extra info */}</div>
+                  </div>
+                </div>
               </div>
-
-              <div className="col-span-2 flex justify-center gap-3">
-                {/* VIEW */}
-                <button
-                  onClick={() => openView(l)}
-                  className={`w-10 h-10 rounded-full flex items-center justify-center border transition ${
-                    theme === "dark"
-                      ? "border-sky-500 hover:bg-sky-500"
-                      : "border-sky-400 hover:bg-sky-100"
-                  }`}
-                >
-                  <Eye
-                    size={18}
-                    className={theme === "dark" ? "text-sky-400" : "text-sky-600"}
-                  />
-                </button>
-
-                {/* EDIT */}
-                <button
-                  onClick={() => openEdit(l)}
-                  className={`w-10 h-10 rounded-full flex items-center justify-center border transition ${
-                    theme === "dark"
-                      ? "border-amber-400 hover:bg-amber-400"
-                      : "border-amber-500 hover:bg-amber-100"
-                  }`}
-                >
-                  <Edit3
-                    size={16}
-                    className={theme === "dark" ? "text-amber-300" : "text-amber-700"}
-                  />
-                </button>
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
       {/* ADD / EDIT MODAL */}
@@ -350,7 +374,7 @@ export default function Labels() {
 /* ========================= MODAL WRAPPER ========================= */
 function ModalWrapper({ children }) {
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 flex justify-center items-start overflow-y-auto py-10">
+    <div className="fixed inset-0 z-50 bg-black/60 flex justify-center items-start overflow-y-auto py-8 px-4">
       {children}
     </div>
   );
@@ -365,17 +389,16 @@ function AddEditModal({
   initialFormValues,
   inputBg,
 }) {
-  const labelColor = theme === "dark" ? "text-white" : "text-[#020726]";
   const modalBg =
     theme === "dark"
       ? "bg-[#0a1039] border-white/10"
       : "bg-white border-gray-200 shadow-xl";
 
   return (
-    <div className={`w-[920px] rounded-xl p-6 border ${modalBg}`}>
-      <div className="flex justify-between border-b border-gray-300/20 pb-3">
-        <h2 className="text-xl font-semibold">{title}</h2>
-        <button onClick={onClose}>
+    <div className={`w-full max-w-2xl rounded-xl p-4 sm:p-6 border ${modalBg} mx-auto`}>
+      <div className="flex justify-between items-center border-b border-gray-300/10 pb-2">
+        <h2 className="text-lg sm:text-xl font-semibold">{title}</h2>
+        <button onClick={onClose} className="p-1">
           <X className="text-gray-400 hover:text-gray-600" />
         </button>
       </div>
@@ -388,9 +411,9 @@ function AddEditModal({
       >
         {({ values, setFieldValue, isSubmitting }) => (
           <Form>
-            <div className="grid grid-cols-2 gap-6 mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               {/* LEFT */}
-              <div>
+              <div className="space-y-3">
                 <FieldBox
                   theme={theme}
                   label="Full Name"
@@ -428,7 +451,7 @@ function AddEditModal({
               </div>
 
               {/* RIGHT */}
-              <div>
+              <div className="space-y-3">
                 <FieldBox
                   theme={theme}
                   label="Label Name"
@@ -441,7 +464,7 @@ function AddEditModal({
                   theme={theme}
                   label="Phone Number"
                   name="phone"
-                  placeholder="+91XXXXXXXXXX"
+                  placeholder="XXXXXXXXXX"
                   inputBg={inputBg}
                 />
 
@@ -467,15 +490,11 @@ function AddEditModal({
             </div>
 
             {/* Footer */}
-            <div className="flex justify-end gap-4 mt-10 border-t border-gray-300/20 pt-4">
+            <div className="flex flex-col sm:flex-row justify-end gap-3 mt-6 pt-4 border-t border-gray-300/10">
               <button
                 type="button"
                 onClick={onClose}
-                className={`px-6 py-2 rounded-full ${
-                  theme === "dark"
-                    ? "border border-white/20 text-gray-300 hover:bg-white/10"
-                    : "border border-gray-300 text-[#020726] hover:bg-gray-100"
-                }`}
+                className={`px-4 py-2 rounded-full ${theme === "dark" ? "border border-white/20 text-gray-300 hover:bg-white/10" : "border border-gray-300 text-[#020726] hover:bg-gray-100"}`}
               >
                 Cancel
               </button>
@@ -483,7 +502,7 @@ function AddEditModal({
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-6 py-2 rounded-full text-white font-semibold bg-gradient-to-r from-[#29B6F6] to-[#0288D1]"
+                className="px-4 py-2 rounded-full text-white font-semibold bg-gradient-to-r from-[#29B6F6] to-[#0288D1]"
               >
                 {title.includes("Edit") ? "Save Changes" : "Submit Request"}
               </button>
@@ -511,13 +530,13 @@ function ViewModal({
       : "bg-white border-gray-200 shadow-xl";
 
   return (
-    <div className={`w-[920px] rounded-xl p-6 border ${modalBg}`}>
-      <div className="flex justify-between items-center border-b border-gray-300/20 pb-3">
-        <h2 className="text-xl font-semibold">View Label</h2>
+    <div className={`w-full max-w-2xl rounded-xl p-4 sm:p-6 border ${modalBg} mx-auto`}>
+      <div className="flex justify-between items-center border-b border-gray-300/10 pb-2">
+        <h2 className="text-lg sm:text-xl font-semibold">View Label</h2>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <Tabs theme={theme} viewTab={viewTab} setViewTab={setViewTab} />
-          <button onClick={onClose}>
+          <button onClick={onClose} className="p-1">
             <X className="text-gray-400 hover:text-gray-600" />
           </button>
         </div>
@@ -539,28 +558,24 @@ function ViewModal({
       )}
 
       {/* Footer */}
-      <div className="flex justify-end gap-3 mt-8 border-t border-gray-300/20 pt-4">
+      <div className="flex flex-col sm:flex-row justify-end gap-3 mt-6 pt-4 border-t border-gray-300/10">
         <button
           onClick={onClose}
-          className={`px-6 py-2 rounded-full ${
-            theme === "dark"
-              ? "border border-white/20 text-gray-300 hover:bg-white/10"
-              : "border border-gray-300 text-[#020726] hover:bg-gray-100"
-          }`}
+          className={`px-4 py-2 rounded-full ${theme === "dark" ? "border border-white/20 text-gray-300 hover:bg-white/10" : "border border-gray-300 text-[#020726] hover:bg-gray-100"}`}
         >
           Close
         </button>
 
         <button
           onClick={onEdit}
-          className="px-6 py-2 rounded-full flex items-center gap-2 bg-amber-500/10 border border-amber-400 text-amber-600"
+          className="px-4 py-2 rounded-full flex items-center gap-2 bg-amber-500/10 border border-amber-400 text-amber-600"
         >
           <Edit3 size={14} /> Edit
         </button>
 
         <button
           onClick={onDelete}
-          className="px-6 py-2 rounded-full text-white font-semibold bg-gradient-to-r from-red-500 to-red-700"
+          className="px-4 py-2 rounded-full text-white font-semibold bg-gradient-to-r from-red-500 to-red-700"
         >
           Delete
         </button>
@@ -580,7 +595,7 @@ function FieldBox({ theme, label, name, placeholder, inputBg }) {
       <Field
         name={name}
         placeholder={placeholder}
-        className={`w-full mt-1 rounded-lg px-4 py-3 outline-none focus:ring-1 focus:ring-[#29B6F6] ${inputBg}`}
+        className={`w-full mt-1 rounded-lg px-4 py-2 outline-none focus:ring-1 focus:ring-[#29B6F6] ${inputBg}`}
       />
       <ErrorMessage
         name={name}
@@ -595,26 +610,21 @@ function FileUploadPreview({ theme, label, value, onChange }) {
   const labelColor = theme === "dark" ? "text-white" : "text-[#020726]";
 
   return (
-    <div className="mt-4">
-      <label className={`text-sm font-semibold ${labelColor}`}>
-        {label}
-      </label>
+    <div className="mt-2">
+      <label className={`text-sm font-semibold ${labelColor}`}>{label}</label>
 
       <input
         type="file"
         accept="image/*"
-        className={`mt-2 text-sm ${
-          theme === "dark"
-            ? "text-gray-300 file:bg-[#1c2b57]"
-            : "text-[#020726] file:bg-gray-300"
-        } file:px-4 file:py-2 file:rounded-md`}
-        onChange={(e) => onChange(e.target.files[0])}
+        className={`mt-2 text-sm block w-full text-left ${theme === "dark" ? "text-gray-300 file:bg-[#1c2b57]" : "text-[#020726] file:bg-gray-300"} file:px-3 file:py-1 file:rounded-md`}
+        onChange={(e) => onChange(e.target?.files?.[0])}
       />
 
-      <div className="mt-3 w-[160px] h-[110px] bg-gray-200 rounded-lg overflow-hidden border">
+      <div className="mt-2 w-full max-w-[240px] h-[140px] bg-gray-200 rounded-lg overflow-hidden border">
         <img
           src={value || placeholderImage}
           className="w-full h-full object-cover"
+          alt="preview"
         />
       </div>
     </div>
@@ -624,19 +634,17 @@ function FileUploadPreview({ theme, label, value, onChange }) {
 function Tabs({ theme, viewTab, setViewTab }) {
   return (
     <div
-      className={`flex rounded-full p-1 ${
-        theme === "dark" ? "bg-white/10" : "bg-gray-200"
-      }`}
+      className={`flex rounded-full p-1 ${theme === "dark" ? "bg-white/10" : "bg-gray-200"}`}
     >
       {["details", "form", "images"].map((t) => (
         <button
           key={t}
           onClick={() => setViewTab(t)}
-          className={`px-3 py-1 rounded-full capitalize ${
+          className={`px-3 py-1 rounded-full capitalize text-xs ${
             viewTab === t
               ? theme === "dark"
                 ? "bg-[#111a3b] text-white"
-                : "bg-white text-[#020726] shadow"
+                : "bg-white text-[#020726] shadow-sm"
               : theme === "dark"
               ? "text-gray-300"
               : "text-gray-600"
@@ -651,13 +659,8 @@ function Tabs({ theme, viewTab, setViewTab }) {
 
 /* DETAILS TAB */
 function DetailsTab({ selectedLabel, theme }) {
-  const card =
-    theme === "dark"
-      ? "bg-[#111a3b] border-white/10 text-white"
-      : "bg-gray-100 border-gray-300 text-[#020726]";
-
   return (
-    <div className="mt-6 grid grid-cols-2 gap-6">
+    <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
       <DetailBox theme={theme} label="Full Name" value={selectedLabel.meta.fullName} />
       <DetailBox theme={theme} label="Label Name" value={selectedLabel.name} />
 
@@ -675,7 +678,7 @@ function DetailsTab({ selectedLabel, theme }) {
 /* FORM VIEW (READONLY) */
 function FormTab({ selectedLabel, theme }) {
   return (
-    <div className="mt-6 grid grid-cols-2 gap-6">
+    <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
       <DetailBox theme={theme} label="Full Name" value={selectedLabel.meta.fullName} />
       <DetailBox theme={theme} label="Label Name" value={selectedLabel.name} />
 
@@ -693,7 +696,7 @@ function FormTab({ selectedLabel, theme }) {
 /* IMAGES TAB */
 function ImagesTab({ selectedLabel, theme }) {
   return (
-    <div className="mt-6 grid grid-cols-2 gap-6">
+    <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
       <DetailImageLarge theme={theme} label="Aadhar Front" src={selectedLabel.meta.aadharFront} />
       <DetailImageLarge theme={theme} label="Aadhar Back" src={selectedLabel.meta.aadharBack} />
     </div>
@@ -704,13 +707,13 @@ function ImagesTab({ selectedLabel, theme }) {
 function DetailBox({ theme, label, value }) {
   const card =
     theme === "dark"
-      ? "bg-[#111a3b] border-white/10 text-white"
-      : "bg-gray-100 border-gray-300 text-[#020726]";
+      ? "bg-[#111a3b] border border-white/10 text-white"
+      : "bg-gray-100 border border-gray-200 text-[#020726]";
 
   return (
     <div>
       <p className={`text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>{label}</p>
-      <div className={`p-3 border rounded mt-1 ${card}`}>{value || "-"}</div>
+      <div className={`p-3 rounded mt-1 ${card}`}>{value || "-"}</div>
     </div>
   );
 }
@@ -722,7 +725,8 @@ function DetailImage({ theme, label, src }) {
       <p className={`text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>{label}</p>
       <img
         src={src || placeholderImage}
-        className="w-40 h-24 rounded-lg object-cover border mt-2"
+        className="w-full max-w-[220px] h-[120px] rounded-lg object-cover border mt-2"
+        alt={label}
       />
     </div>
   );
@@ -733,10 +737,14 @@ function DetailImageLarge({ theme, label, src }) {
   return (
     <div>
       <p className={`text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>{label}</p>
-      <img
-        src={src || placeholderImage}
-        className="w-full h-[300px] rounded-lg object-contain border mt-2 bg-gray-50"
-      />
+      <div className="mt-2 rounded-lg border overflow-hidden bg-gray-50">
+        <img
+          src={src || placeholderImage}
+          className="w-full h-[260px] object-contain bg-white"
+          alt={label}
+        />
+      </div>
     </div>
   );
 }
+

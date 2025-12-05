@@ -5,7 +5,6 @@ import ViewReleaseModal from "../components/ViewReleaseModal";
 import { useTheme } from "../components/Topbar"; // 🌗 THEME
 
 const STORAGE_KEY = "my_releases_v1";
-
 const readFromStorage = () =>
   JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
 
@@ -14,9 +13,9 @@ const StatusPill = ({ status = "Pending" }) => (
   <span
     className="inline-flex items-center justify-center px-3 py-1 rounded-full text-sm font-semibold"
     style={{
+      background: "#F4C20D",
+      color: "#000",
       width: "fit-content",
-      background: "#F4C20D", // Yellow same as your screenshot
-      color: "black",
     }}
   >
     {status}
@@ -25,11 +24,13 @@ const StatusPill = ({ status = "Pending" }) => (
 
 export default function Pending() {
   const navigate = useNavigate();
-  const { theme } = useTheme(); // 🌗 GET THEME
+  const { theme } = useTheme();
 
   /* ------------------------- THEME COLORS ------------------------- */
   const pageBg =
-    theme === "dark" ? "bg-[#020726] text-white" : "bg-white text-[#020726]";
+    theme === "dark"
+      ? "bg-[#020726] text-white"
+      : "bg-white text-[#020726]";
 
   const cardBg =
     theme === "dark"
@@ -42,8 +43,6 @@ export default function Pending() {
       : "bg-gray-200 text-[#020726] placeholder-gray-600 border-gray-300";
 
   const subtleText = theme === "dark" ? "text-gray-300" : "text-gray-600";
-
-  const borderSoft = theme === "dark" ? "border-[#0d133d]" : "border-gray-300";
 
   /* ------------------------- STATES ------------------------- */
   const [releases, setReleases] = useState([]);
@@ -71,52 +70,53 @@ export default function Pending() {
   };
 
   return (
-    <div className={`min-h-screen px-10 py-8 transition-all duration-300 ${pageBg}`}>
+    <div className={`min-h-screen px-4 md:px-10 py-8 transition-all duration-300 ${pageBg}`}>
 
       {/* HEADER */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl font-semibold">Pending</h1>
 
-        <div className="text-right">
-          <nav className="text-md">
-            <span className={subtleText}>Home</span>
-            <span className="mx-1">/</span>
-            <span className="text-[#29B6F6] font-medium">Pending</span>
-          </nav>
+        <div className="text-md text-right">
+          <span className={subtleText}>Home</span>
+          <span className="mx-1">/</span>
+          <span className="text-[#29B6F6] font-medium">Pending</span>
         </div>
       </div>
 
-      {/* SEARCH + CREATE */}
-      <div className="flex items-center justify-between mt-10 gap-4">
+      {/* SEARCH + CREATE BUTTON (FULLY RESPONSIVE) */}
+      <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+
+        {/* Search Input */}
         <input
           type="text"
           placeholder="Type & Enter to search"
-          className={`w-full rounded-full px-5 py-3 outline-none border ${inputBg}`}
+          className={`w-full px-5 py-3 rounded-full outline-none border ${inputBg}`}
         />
 
+        {/* Create Button (full width on mobile) */}
         <button
           onClick={openCreate}
-          className="bg-gradient-to-r from-[#29B6F6] to-[#0288D1] px-6 py-3 text-white rounded-full font-medium hover:opacity-90"
+          className="bg-gradient-to-r from-[#29B6F6] to-[#0288D1] px-6 py-3 rounded-full text-white font-medium hover:opacity-90 w-full sm:w-auto"
         >
           Create
         </button>
       </div>
 
       {/* RELEASE COUNT */}
-      <div className="flex justify-between items-center mt-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-8 gap-2">
         <h2 className="text-lg font-semibold">Release Count</h2>
         <p className={subtleText}>{releases.length} / 10</p>
       </div>
 
       {/* EMPTY STATE */}
       {releases.length === 0 && (
-        <div className={`text-center mt-20 text-lg ${subtleText}`}>
+        <div className={`text-center mt-16 text-lg ${subtleText}`}>
           No pending releases found.
         </div>
       )}
 
-      {/* GRID */}
-      <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+      {/* GRID LIST (RESPONSIVE) */}
+      <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-8">
 
         {releases.map((release) => (
           <div
@@ -139,15 +139,12 @@ export default function Pending() {
                 {release.subtitle || "Music Release"}
               </p>
 
-              <h2 className="font-bold text-xl tracking-wide">
-                {release.title}
-              </h2>
+              <h2 className="font-bold text-xl">{release.title}</h2>
 
-              <div className="flex justify-between items-center mt-5">
-                {/* ⭐ STATUS PILL */}
+              <div className="flex justify-between items-center mt-6">
+
                 <StatusPill status="Pending" />
 
-                {/* VIEW BUTTON */}
                 <button
                   onClick={() => openModal(release)}
                   className={`
@@ -161,6 +158,7 @@ export default function Pending() {
                 >
                   View Details
                 </button>
+
               </div>
             </div>
           </div>

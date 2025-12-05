@@ -12,18 +12,20 @@ import {
 import { Link, useLocation } from "react-router-dom";
 import { useTheme } from "../components/Topbar";
 
-const Sidebar = ({ collapsed, isMobile }) => {
+const Sidebar = ({ collapsed, isMobile, toggleSidebar }) => {
   const location = useLocation();
   const { theme } = useTheme();
   const [openMenu, setOpenMenu] = useState(null);
+
+  /* -----------------------------
+      FIXED COLLAPSE LOGIC
+  ------------------------------ */
+  const isCollapsedState = isMobile ? false : collapsed;
 
   const toggleMenu = (menu) => {
     setOpenMenu(openMenu === menu ? null : menu);
   };
 
-  /* =========================
-      MENU ARRAY
-  ========================== */
   const menuItems = [
     {
       path: "/",
@@ -94,63 +96,67 @@ const Sidebar = ({ collapsed, isMobile }) => {
     },
   ];
 
-  /* =========================
-      THEME COLORS
-  ========================== */
+  /* -----------------------------
+        THEME COLORS
+  ------------------------------ */
   const bgColor =
-    theme === "dark" ? "bg-[#020726]" : "bg-white border-r border-gray-200";
+    theme === "dark"
+      ? "bg-[#020726]"
+      : "bg-white border-gray-200"; // fixed light mode
 
   const menuText = theme === "dark" ? "text-[#DDE7FF]" : "text-[#020726]";
   const subText = theme === "dark" ? "text-gray-300" : "text-[#020726]";
+
   const hoverBg = theme === "dark" ? "hover:bg-white/10" : "hover:bg-[#E8F4FF]";
   const subHoverBg =
     theme === "dark" ? "hover:bg-white/10" : "hover:bg-[#E8F4FF]";
 
-  /* =========================
-      RESPONSIVE WIDTH LOGIC
-  ========================== */
+  /* -----------------------------
+      SIDEBAR WIDTH (RESPONSIVE)
+  ------------------------------ */
   const sidebarWidth = isMobile
     ? collapsed
-      ? "translate-x-0 w-60" // mobile open
-      : "-translate-x-full w-60" // mobile closed
-    : collapsed
-    ? "w-16" // desktop collapsed
-    : "w-60"; // desktop expanded
+      ? "translate-x-0 w-60"
+      : "-translate-x-full w-60"
+    : isCollapsedState
+    ? "w-16"
+    : "w-60";
 
   return (
     <>
-      {/* MOBILE BACKDROP OVERLAY */}
+      {/* MOBILE OVERLAY */}
       {isMobile && collapsed && (
         <div
           className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
-          onClick={() => toggleMenu(null)}
+          onClick={toggleSidebar}
         />
       )}
 
       {/* SIDEBAR */}
       <div
         className={`
-          fixed top-0 left-0 h-screen flex flex-col overflow-y-auto pb-10
+          fixed top-0 left-0 h-screen pb-10 flex flex-col overflow-y-auto
           shadow-xl transition-all duration-300 z-50
-          ${bgColor} 
+          ${bgColor}
           ${sidebarWidth}
         `}
       >
         {/* LOGO */}
         <div
           className={`h-[70px] flex items-center justify-center border-b 
-          ${theme === "dark" ? "border-white/10" : "border-gray-200"}`}
+            ${theme === "dark" ? "border-white/10" : "border-gray-300"}
+          `}
         >
           <img
             src="/image/logo.webp"
             alt="Logo"
             className={`object-contain transition-all ${
-              collapsed ? "h-[45px]" : "h-[60px]"
+              isCollapsedState ? "h-[50px]" : "h-[65px]"
             }`}
           />
         </div>
 
-        {/* MENU */}
+        {/* MENU LIST */}
         <ul className="mt-3 px-3 space-y-1">
           {menuItems.map((item) => {
             const isActive =
@@ -161,11 +167,11 @@ const Sidebar = ({ collapsed, isMobile }) => {
 
             return (
               <li key={item.path}>
-                {/* MENU BUTTON */}
+                {/* MAIN MENU BUTTON */}
                 <div
                   onClick={() => toggleMenu(item.path)}
                   className={`flex items-center rounded-md cursor-pointer transition 
-                    ${collapsed ? "justify-center py-3" : "px-4 py-3 gap-3"}
+                    ${isCollapsedState ? "justify-center py-3" : "px-4 py-3 gap-3"}
                     ${
                       isActive
                         ? "bg-gradient-to-r from-[#29B6F6] to-[#0288D1] text-white"
@@ -175,7 +181,7 @@ const Sidebar = ({ collapsed, isMobile }) => {
                 >
                   <span className="text-[18px]">{item.icon}</span>
 
-                  {!collapsed && (
+                  {!isCollapsedState && (
                     <>
                       <span className="flex-1 text-[15px]">{item.label}</span>
                       <FaChevronDown
@@ -187,10 +193,10 @@ const Sidebar = ({ collapsed, isMobile }) => {
                   )}
                 </div>
 
-                {/* SUB MENUS */}
-                {!collapsed && isOpen && item.subItems && (
+                {/* SUBMENUS */}
+                {!isCollapsedState && isOpen && (
                   <ul className="ml-8 mt-1 space-y-1">
-                    {item.subItems.map((sub) => {
+                    {item.subItems?.map((sub) => {
                       const activeSub = location.pathname === sub.path;
 
                       return (
@@ -217,7 +223,7 @@ const Sidebar = ({ collapsed, isMobile }) => {
           })}
         </ul>
 
-        {/* SCROLL FADE */}
+        {/* FADE */}
         <div
           className={`h-6 ${
             theme === "dark"
