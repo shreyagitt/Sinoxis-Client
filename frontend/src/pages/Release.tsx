@@ -6,16 +6,7 @@ import { Plus } from "lucide-react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useAppSelector } from "../store/hook";
-
-export type Release = {
-  _id: string;
-  title: string;
-  subtitle?: string;
-  remarks?: string;
-  status: "Pending" | "Approved" | "Action Required";
-  coverImage?: string;
-  audioFile?: string;
-};
+import { Release } from "./ReleaseTypes";
 
 const ReleasesPage: React.FC = () => {
   const { token } = useAppSelector((s) => s.auth);
@@ -26,14 +17,13 @@ const ReleasesPage: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Release | null>(null);
 
-  // FETCH RELEASES
   const fetchReleases = async () => {
     try {
       const res = await axios.get(`${baseUrl}/release`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       setReleases(res.data.data || []);
-    } catch (error) {
+    } catch {
       toast.error("Failed to load releases");
     }
   };
@@ -43,15 +33,15 @@ const ReleasesPage: React.FC = () => {
   }, [token]);
 
   const filtered =
-    activeTab === "All" ? releases : releases.filter(r => r.status === activeTab);
+    activeTab === "All"
+      ? releases
+      : releases.filter((r) => r.status === activeTab);
 
-  // CREATE
   const handleCreate = async (fd: FormData) => {
     try {
       await axios.post(`${baseUrl}/release`, fd, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       toast.success("Release created");
       fetchReleases();
       setShowForm(false);
@@ -60,13 +50,11 @@ const ReleasesPage: React.FC = () => {
     }
   };
 
-  // UPDATE
   const handleUpdate = async (id: string, fd: FormData) => {
     try {
       await axios.put(`${baseUrl}/release/${id}`, fd, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       toast.success("Release updated");
       fetchReleases();
       setShowForm(false);
@@ -75,15 +63,12 @@ const ReleasesPage: React.FC = () => {
     }
   };
 
-  // DELETE
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this release?")) return;
-
     try {
       await axios.delete(`${baseUrl}/release/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       toast.success("Deleted");
       fetchReleases();
     } catch {
@@ -91,7 +76,6 @@ const ReleasesPage: React.FC = () => {
     }
   };
 
-  // STATUS CHANGE
   const handleStatus = async (id: string, status: Release["status"]) => {
     try {
       await axios.put(
@@ -99,17 +83,11 @@ const ReleasesPage: React.FC = () => {
         { status },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
       toast.success("Status updated");
       fetchReleases();
     } catch {
       toast.error("Failed to update status");
     }
-  };
-
-  const handleEdit = (release: Release) => {
-    setEditing(release);
-    setShowForm(true);
   };
 
   return (
@@ -118,7 +96,10 @@ const ReleasesPage: React.FC = () => {
         <h1 className="text-2xl font-semibold">Releases Management</h1>
 
         <button
-          onClick={() => { setEditing(null); setShowForm(true); }}
+          onClick={() => {
+            setEditing(null);
+            setShowForm(true);
+          }}
           className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-md"
         >
           <Plus size={18} /> Create Release
@@ -129,7 +110,7 @@ const ReleasesPage: React.FC = () => {
 
       <ReleaseTable
         releases={filtered}
-        onEdit={handleEdit}
+        onEdit={setEditing}
         onDelete={handleDelete}
         onChangeStatus={handleStatus}
       />
@@ -137,7 +118,10 @@ const ReleasesPage: React.FC = () => {
       {showForm && (
         <ReleaseForm
           initial={editing}
-          onCancel={() => { setShowForm(false); setEditing(null); }}
+          onCancel={() => {
+            setShowForm(false);
+            setEditing(null);
+          }}
           onCreate={handleCreate}
           onUpdate={handleUpdate}
         />

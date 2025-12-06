@@ -1,53 +1,46 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose from "mongoose";
 
-export interface PaymentRequestDocument extends Document {
-  userId: string;
-  amount: number;
-  method: "bank" | "paypal";
-  notes?: string;
-  processingFee: number;
-  tax: number;
-  totalReceive: number;
-  deliveryTime: string;
-  status: "Pending" | "Processing" | "Completed" | "Rejected";
-  accountDetails?: {
-    bankName?: string;
-    accountHolder?: string;
-    accountNumber?: string;
-    routingNumber?: string;
-    paypalEmail?: string;
-  };
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-const PaymentRequestSchema = new Schema<PaymentRequestDocument>(
+const PaymentRequestSchema = new mongoose.Schema(
   {
-    userId: { type: String, required: true },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+
     amount: { type: Number, required: true },
-    method: { type: String, enum: ["bank", "paypal"], required: true },
+    processingFee: { type: Number, default: 0 },
+    totalReceive: { type: Number },
+
+    method: {
+      type: String,
+      enum: ["bank", "paypal"],
+      required: true,
+    },
+
     notes: { type: String },
-    processingFee: { type: Number, required: true },
-    tax: { type: Number, required: true },
-    totalReceive: { type: Number, required: true },
-    deliveryTime: { type: String, required: true },
+
     status: {
       type: String,
-      enum: ["Pending", "Processing", "Completed", "Rejected"],
+      enum: ["Pending", "Paid", "Failed"],
       default: "Pending",
     },
-    accountDetails: {
-      bankName: String,
-      accountHolder: String,
-      accountNumber: String,
-      routingNumber: String,
-      paypalEmail: String,
+
+    paymentDetails: {
+      bank: {
+        accountHolder: String,
+        accountNumber: String,
+        bankName: String,
+        routingNumber: String,
+      },
+      paypal: {
+        name: String,
+        email: String,
+        paypalId: String,
+      },
     },
   },
   { timestamps: true }
 );
 
-export default mongoose.model<PaymentRequestDocument>(
-  "PaymentRequest",
-  PaymentRequestSchema
-);
+export default mongoose.model("PaymentRequest", PaymentRequestSchema);

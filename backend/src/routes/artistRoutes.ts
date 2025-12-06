@@ -9,18 +9,18 @@ const router = Router();
    ARTIST ROUTES (ADMIN ONLY)
    ============================================================ */
 
-// Get all artists (search + filter)
+// Get all artists (search)
 router.get("/", authenticate, authorize("admin"), artistController.list);
 
-// Get artist by ID
+// Get single artist
 router.get("/:id", authenticate, authorize("admin"), artistController.getOne);
 
-// Create new artist
+// Create artist
 router.post(
   "/",
   authenticate,
   authorize("admin"),
-  upload.single("artistImage"),
+  upload.single("avatar"),   // UPDATED FIELD NAME
   artistController.create
 );
 
@@ -29,7 +29,7 @@ router.put(
   "/:id",
   authenticate,
   authorize("admin"),
-  upload.single("artistImage"),
+  upload.single("avatar"),   // UPDATED FIELD NAME
   artistController.update
 );
 

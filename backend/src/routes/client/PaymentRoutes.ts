@@ -1,14 +1,14 @@
 import { Router } from "express";
 import { ClientPaymentController } from "../../controllers/client/PaymentController";
-import { authenticate, authorize } from "../../middlewares/auth";
+import { authenticate, authorize } from "../../middlewares/auth.js";
 
 const router = Router();
 
 /* ============================================================
-   CLIENT PAYMENT ROUTES (CLIENT ONLY)
-   ============================================================ */
+   CLIENT PAYMENT ROUTES
+============================================================ */
 
-// Create a new payment entry (client)
+// Create payment request
 router.post(
   "/",
   authenticate,
@@ -16,7 +16,7 @@ router.post(
   ClientPaymentController.create
 );
 
-// List payments of the logged-in client
+// List user's own payment requests
 router.get(
   "/",
   authenticate,
@@ -25,3 +25,4 @@ router.get(
 );
 
 export default router;
+

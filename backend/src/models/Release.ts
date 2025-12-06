@@ -4,22 +4,32 @@ const ReleaseSchema = new Schema(
   {
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
 
+    /* ==== FRONTEND BASIC FIELDS ==== */
     title: { type: String, required: true },
-    subtitle: { type: String },
+    artist: { type: String, required: true },
 
+    /* ==== FRONTEND EXTRA FIELDS ==== */
+    label: { type: String },           // frontend uses label
+    isrc: { type: String },            // frontend uses ISRC
+    upc: { type: String },             // frontend uses UPC
+
+    /* ==== COVER IMAGE ==== */
+    cover: { type: String },           // URL displayed in UI
+    coverImageId: { type: String },    // cloudinary public id
+
+    /* ==== STATUS ==== */
     status: {
       type: String,
-      enum: ["Pending", "Approved", "Action Required"],
+      enum: [
+        "Pending",
+        "Approved",
+        "Rejected",
+        "Inactive",
+        "Unfinished",
+        "Action Required",
+      ],
       default: "Pending",
     },
-
-    remarks: { type: String },
-
-    coverImage: { type: String },
-    coverImageId: { type: String },
-
-    audioFile: { type: String },
-    audioFileId: { type: String },
   },
   { timestamps: true }
 );

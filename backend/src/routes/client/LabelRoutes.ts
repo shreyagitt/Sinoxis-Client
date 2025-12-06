@@ -1,17 +1,40 @@
 import { Router } from "express";
 import { ClientLabelController } from "../../controllers/client/LabelController";
-import { optionalAuth } from "../../middlewares/auth";
+import { authenticate, authorize } from "../../middlewares/auth";
+import upload from "../../middlewares/upload";
 
 const router = Router();
 
-/* ============================================================
-   CLIENT LABEL ROUTES (PUBLIC)
-   ============================================================ */
+router.get("/", authenticate, authorize("client"), ClientLabelController.list);
+router.get("/:id", authenticate, authorize("client"), ClientLabelController.getOne);
 
-// Public — list all active labels
-router.get("/", optionalAuth, ClientLabelController.list);
+router.post(
+  "/",
+  authenticate,
+  authorize("client"),
+  upload.fields([
+    { name: "aadharFront", maxCount: 1 },
+    { name: "aadharBack", maxCount: 1 },
+  ]),
+  ClientLabelController.create
+);
 
-// Public — get single label details
-router.get("/:id", optionalAuth, ClientLabelController.getOne);
+router.put(
+  "/:id",
+  authenticate,
+  authorize("client"),
+  upload.fields([
+    { name: "aadharFront", maxCount: 1 },
+    { name: "aadharBack", maxCount: 1 },
+  ]),
+  ClientLabelController.update
+);
+
+router.delete(
+  "/:id",
+  authenticate,
+  authorize("client"),
+  ClientLabelController.delete
+);
 
 export default router;

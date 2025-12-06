@@ -6,34 +6,28 @@ import upload from "../middlewares/upload";
 const router = Router();
 
 /* ============================================================
-   RELEASE MANAGEMENT ROUTES (ADMIN ONLY)
+   ADMIN RELEASE MANAGEMENT ROUTES
    ============================================================ */
 
-// CREATE RELEASE
+// Create a release (admin optional)
 router.post(
   "/",
   authenticate,
   authorize("admin"),
-  upload.fields([
-    { name: "coverImage", maxCount: 1 },
-    { name: "audioFile", maxCount: 1 }
-  ]),
+  upload.single("coverImage"),   // Only cover upload supported
   releaseController.create
 );
 
-// UPDATE RELEASE
+// Update a release (admin full access)
 router.put(
   "/:id",
   authenticate,
   authorize("admin"),
-  upload.fields([
-    { name: "coverImage", maxCount: 1 },
-    { name: "audioFile", maxCount: 1 }
-  ]),
+  upload.single("coverImage"),   // Only cover upload supported
   releaseController.update
 );
 
-// LIST RELEASES
+// List all releases
 router.get(
   "/",
   authenticate,
@@ -41,7 +35,7 @@ router.get(
   releaseController.list
 );
 
-// UPDATE RELEASE STATUS
+// Update release status
 router.put(
   "/:id/status",
   authenticate,
@@ -49,7 +43,7 @@ router.put(
   releaseController.updateStatus
 );
 
-// DELETE RELEASE
+// Delete release
 router.delete(
   "/:id",
   authenticate,

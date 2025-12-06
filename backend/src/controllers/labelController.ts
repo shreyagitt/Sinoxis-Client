@@ -1,71 +1,80 @@
 import { Request, Response } from "express";
 import Label from "../models/Label";
-import cloudinary from "../config/cloudinary";
 import { asyncHandler } from "../middlewares/errorHandler";
-import { HTTP_STATUS } from "../config/constants";
+import cloudinary from "../config/cloudinary";
 
 export const AdminLabelController = {
 
-  create: asyncHandler(async (req: Request, res: Response) => {
-    const file = (req as any).file;
+  /* ────────────────────────────────────────────────
+     LIST ALL LABELS
+  ──────────────────────────────────────────────── */
+  list: asyncHandler(async (_req: Request, res: Response): Promise<void> => {
+    const labels = await Label.find().sort({ createdAt: -1 });
 
-    const label = await Label.create({
-      ...req.body,
-      labelImage: file?.path || null,
-      labelImageId: file?.filename || null,
+    res.json({
+      success: true,
+      data: labels,
     });
+  }),
 
-    res.status(HTTP_STATUS.CREATED).json({
+  /* ────────────────────────────────────────────────
+     GET SINGLE LABEL
+  ──────────────────────────────────────────────── */
+  getOne: asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const label = await Label.findById(req.params.id);
+
+    if (!label) {
+      res.status(404).json({ success: false, message: "Label not found" });
+      return;
+    }
+
+    res.json({
       success: true,
       data: label,
-      message: "Label created successfully",
     });
   }),
 
-  update: asyncHandler(async (req: Request, res: Response) => {
-    const label = await Label.findById(req.params.id);
-    if (!label)
-      return res.status(HTTP_STATUS.NOT_FOUND).json({
-        success: false,
-        message: "Label not found",
-      });
+  /* ────────────────────────────────────────────────
+     UPDATE LABEL STATUS
+  ──────────────────────────────────────────────── */
+  updateStatus: asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { status } = req.body;
 
-    const file = (req as any).file;
+    const label = await Label.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true }
+    );
 
-    if (file) {
-      if (label.labelImageId) {
-        await cloudinary.uploader.destroy(label.labelImageId);
-      }
-      req.body.labelImage = file.path;
-      req.body.labelImageId = file.filename;
+    if (!label) {
+      res.status(404).json({ success: false, message: "Label not found" });
+      return;
     }
 
-    const updated = await Label.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
-
-    res.status(HTTP_STATUS.OK).json({
+    res.json({
       success: true,
-      data: updated,
-      message: "Label updated successfully",
+      data: label,
     });
   }),
 
-  delete: asyncHandler(async (req: Request, res: Response) => {
+  /* ────────────────────────────────────────────────
+     DELETE LABEL
+  ──────────────────────────────────────────────── */
+  delete: asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const label = await Label.findById(req.params.id);
-    if (!label)
-      return res.status(HTTP_STATUS.NOT_FOUND).json({
-        success: false,
-        message: "Label not found",
-      });
 
-    if (label.labelImageId) {
-      await cloudinary.uploader.destroy(label.labelImageId);
+    if (!label) {
+      res.status(404).json({ success: false, message: "Label not found" });
+      return;
     }
 
-    await label.deleteOne();
+    // Delete cloudinary images
+    if (label.aadharFrontId) await cloudinary.uploader.destroy(label.aadharFrontId);
+    if (label.aadharBackId) await cloudinary.uploader.destroy(label.aadharBackId);
 
-    res.status(HTTP_STATUS.OK).json({
+    await Label.findByIdAndDelete(label._id);
+
+    res.json({
       success: true,
       message: "Label deleted successfully",
     });

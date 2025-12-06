@@ -25,27 +25,21 @@ router.get(
   ClientReleaseController.getOne
 );
 
-// Create new release
+// Create a new release
 router.post(
   "/",
   authenticate,
   authorize("client"),
-  upload.fields([
-    { name: "coverImage", maxCount: 1 },
-    { name: "audioFile", maxCount: 1 }
-  ]),
+  upload.single("coverImage"),   // File upload for cover
   ClientReleaseController.create
 );
 
-// Update existing release
+// Update release
 router.put(
   "/:id",
   authenticate,
   authorize("client"),
-  upload.fields([
-    { name: "coverImage", maxCount: 1 },
-    { name: "audioFile", maxCount: 1 }
-  ]),
+  upload.single("coverImage"),   // File upload for updated cover
   ClientReleaseController.update
 );
 

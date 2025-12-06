@@ -5,27 +5,40 @@ import { asyncHandler } from "../middlewares/errorHandler";
 import { HTTP_STATUS } from "../config/constants";
 
 export const releaseController = {
+
   // =====================================================
-  // CREATE RELEASE
+  // CREATE RELEASE (Admin rarely uses this)
   // =====================================================
   create: asyncHandler(async (req: Request, res: Response) => {
-    const files = req.files as any;
+    const file = (req as any).file;
 
-    const cover = files?.coverImage?.[0];
-    const audio = files?.audioFile?.[0];
-
-    const release = await Release.create({
+    const data: any = {
       userId: (req as any).user._id,
+
+      // FRONTEND MATCHING FIELDS
       title: req.body.title,
-      subtitle: req.body.subtitle,
-      remarks: req.body.remarks,
+      artist: req.body.artist,
+      label: req.body.label,
+      isrc: req.body.isrc,
+      upc: req.body.upc,
 
-      coverImage: cover?.path || null,
-      coverImageId: cover?.filename || null,
+      status: req.body.status || "Pending",
+    };
 
-      audioFile: audio?.path || null,
-      audioFileId: audio?.filename || null,
-    });
+    /* -------------------------------
+       Handle Cloudinary Cover Upload
+    -------------------------------- */
+    if (file) {
+      const uploaded = await cloudinary.uploader.upload(file.path, {
+        folder: "sinoxis/releases",
+        resource_type: "image",
+      });
+
+      data.cover = uploaded.secure_url;
+      data.coverImageId = uploaded.public_id;
+    }
+
+    const release = await Release.create(data);
 
     return res.status(HTTP_STATUS.CREATED).json({
       success: true,
@@ -35,78 +48,87 @@ export const releaseController = {
   }),
 
   // =====================================================
-  // UPDATE RELEASE
+  // UPDATE RELEASE (ADMIN FULL EDIT ACCESS)
   // =====================================================
   update: asyncHandler(async (req: Request, res: Response) => {
     const release = await Release.findById(req.params.id);
     if (!release) {
-      return res
-        .status(HTTP_STATUS.NOT_FOUND)
-        .json({ success: false, message: "Release not found" });
+      return res.status(HTTP_STATUS.NOT_FOUND).json({
+        success: false,
+        message: "Release not found",
+      });
     }
 
-    const files = req.files as any;
-    const cover = files?.coverImage?.[0];
-    const audio = files?.audioFile?.[0];
+    const file = (req as any).file;
 
-    // ---- Replace Cover Image ----
-    if (cover) {
+    /* -------------------------------
+       Update Frontend Fields Only
+    -------------------------------- */
+    release.title = req.body.title ?? release.title;
+    release.artist = req.body.artist ?? release.artist;
+    release.label = req.body.label ?? release.label;
+    release.isrc = req.body.isrc ?? release.isrc;
+    release.upc = req.body.upc ?? release.upc;
+    release.status = req.body.status ?? release.status;
+
+    /* -------------------------------
+       Update Cover Image via Cloudinary
+    -------------------------------- */
+    if (file) {
+      // Remove old image from Cloudinary
       if (release.coverImageId) {
-        await cloudinary.uploader.destroy(release.coverImageId);
+        try {
+          await cloudinary.uploader.destroy(release.coverImageId);
+        } catch (err) {
+          console.warn("Failed to delete old image:", err);
+        }
       }
-      req.body.coverImage = cover.path;
-      req.body.coverImageId = cover.filename;
+
+      const uploaded = await cloudinary.uploader.upload(file.path, {
+        folder: "sinoxis/releases",
+        resource_type: "image",
+      });
+
+      release.cover = uploaded.secure_url;
+      release.coverImageId = uploaded.public_id;
     }
 
-    // ---- Replace Audio ----
-    if (audio) {
-      if (release.audioFileId) {
-        await cloudinary.uploader.destroy(release.audioFileId);
-      }
-      req.body.audioFile = audio.path;
-      req.body.audioFileId = audio.filename;
-    }
-
-    const updated = await Release.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
+    await release.save();
 
     return res.status(HTTP_STATUS.OK).json({
       success: true,
       message: "Release updated successfully",
-      data: updated,
+      data: release,
     });
   }),
 
   // =====================================================
-  // LIST RELEASES
+  // LIST RELEASES (ADMIN FULL ACCESS)
   // =====================================================
   list: asyncHandler(async (req: Request, res: Response) => {
     const releases = await Release.find()
       .populate("userId", "firstName lastName email")
       .sort({ createdAt: -1 });
 
-    res.status(HTTP_STATUS.OK).json({
+    return res.status(HTTP_STATUS.OK).json({
       success: true,
       data: releases,
     });
   }),
 
   // =====================================================
-  // UPDATE STATUS
+  // UPDATE STATUS (Admin Approval / Reject / Inactive)
   // =====================================================
   updateStatus: asyncHandler(async (req: Request, res: Response) => {
-    const { status, remarks } = req.body;
+    const { status } = req.body;
 
     const updated = await Release.findByIdAndUpdate(
       req.params.id,
-      { status, remarks },
+      { status },
       { new: true }
     );
 
-    res.status(HTTP_STATUS.OK).json({
+    return res.status(HTTP_STATUS.OK).json({
       success: true,
       message: "Status updated",
       data: updated,
@@ -118,23 +140,27 @@ export const releaseController = {
   // =====================================================
   delete: asyncHandler(async (req: Request, res: Response) => {
     const release = await Release.findById(req.params.id);
-    if (!release) return;
-
-    // Remove files from Cloudinary
-    if (release.coverImageId) {
-      await cloudinary.uploader.destroy(release.coverImageId);
+    if (!release) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json({
+        success: false,
+        message: "Release not found",
+      });
     }
 
-    if (release.audioFileId) {
-      await cloudinary.uploader.destroy(release.audioFileId);
+    // Delete cover from Cloudinary
+    if (release.coverImageId) {
+      try {
+        await cloudinary.uploader.destroy(release.coverImageId);
+      } catch (err) {
+        console.warn("Cloudinary delete error:", err);
+      }
     }
 
     await release.deleteOne();
 
-    res.status(HTTP_STATUS.OK).json({
+    return res.status(HTTP_STATUS.OK).json({
       success: true,
       message: "Release deleted",
     });
   }),
 };
-

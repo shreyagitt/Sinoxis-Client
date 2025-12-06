@@ -5,7 +5,15 @@ interface TabsProps {
   setActiveTab: (tab: string) => void;
 }
 
-const tabList = ["All", "Pending", "Approved", "Rejected", "Unfinished"];
+const tabList = [
+  "All",
+  "Pending",
+  "Approved",
+  "Rejected",
+  "Inactive",
+  "Unfinished",
+  "Action Required",
+];
 
 const Tabs: React.FC<TabsProps> = ({ activeTab, setActiveTab }) => {
   return (
@@ -28,4 +36,5 @@ const Tabs: React.FC<TabsProps> = ({ activeTab, setActiveTab }) => {
 };
 
 export default Tabs;
+
 

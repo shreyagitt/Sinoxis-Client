@@ -1,61 +1,67 @@
 import { Request, Response } from "express";
-import RevenueRecord from "../../models/RevenueRecord";
+import Revenue from "../../models/RevenueReport";
 import { asyncHandler } from "../../middlewares/errorHandler";
-import { HTTP_STATUS } from "../../config/constants";
 
 export const ClientRevenueController = {
-  
-  // ------------------------------  
-  // GET /client/revenue  
-  // ------------------------------  
-  getRevenue: asyncHandler(async (req: any, res: Response) => {
-    const userId = req.user.userId;
 
-    const records = await RevenueRecord.find({ userId }).sort({ createdAt: -1 });
+list: asyncHandler(async (req: Request, res: Response) => {
+  const userId = req.user?.userId;
 
-    // Balance = all income - approved withdrawals
-    const balance = records.reduce((sum:any, r:any) => sum + r.amount, 0);
+  if (!userId) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
 
-    const pendingWithdraw = records
-      .filter((r:any) => r.type === "withdraw" && r.status === "Pending")
-      .reduce((sum:any, r:any) => sum + Math.abs(r.amount), 0); // positive
+  const data = await Revenue.find({ userId }).sort({ date: -1 });
 
-    const withdrawable = balance - pendingWithdraw;
+  const totalIn = data
+    .filter((t) => t.type === "in")
+    .reduce((sum, t) => sum + Number(t.amount), 0);
 
-    const transactions = records.map((r:any) => ({
-      source: r.type === "income" ? r.source : "Money Withdraw",
-      date: new Date(r.createdAt).toLocaleDateString(),
-      amount:
-        (r.amount >= 0 ? "+" : "-") + Math.abs(r.amount) + " ₹",
-      period: r.period || "—",
-      status: r.status,
-    }));
+  const totalPaidWithdraw = data
+    .filter((t) => t.type === "withdraw" && t.status === "Paid")
+    .reduce((sum, t) => sum + Number(t.amount), 0);
 
-    res.json({
-      success: true,
-      data: { balance, withdrawable, transactions },
-    });
-  }),
+  const availableBalance = totalIn - totalPaidWithdraw;
 
-  // ------------------------------  
-  // POST /client/withdraw-request  
-  // ------------------------------  
-  withdrawRequest: asyncHandler(async (req: any, res: Response) => {
-    const userId = req.user.userId;
-    const { amount } = req.body;
+  return res.json({
+    success: true,
+    balance: availableBalance,
+    withdrawable: availableBalance,
+    data, // all transactions (Pending, Failed, Paid, Income)
+  });
+})
+,
 
-    if (!amount || amount < 1000) {
-      return res.status(400).json({ success: false, error: "Invalid amount" });
+  withdraw: asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user?.userId;
+
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
-    await RevenueRecord.create({
+    const { amount } = req.body as { amount?: number };
+
+    if (!amount || amount < 1000) {
+      return res.status(400).json({
+        success: false,
+        message: "Minimum withdrawal amount is ₹1000",
+      });
+    }
+
+    await Revenue.create({
       userId,
+      source: "Money Withdraw",
       type: "withdraw",
-      amount: -amount, // negative entry
+      amount,
+      date: new Date(),
+      period: "",
       status: "Pending",
     });
 
-    res.json({ success: true, message: "Withdraw request submitted!" });
+    return res.json({
+      success: true,
+      message: "Withdrawal request submitted",
+    });
   }),
 };
 

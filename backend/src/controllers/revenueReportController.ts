@@ -1,85 +1,78 @@
 import { Request, Response } from "express";
-import RevenueRecord, { RevenueRecordDocument } from "../models/RevenueRecord";
+import Revenue from "../models/RevenueReport";
 import { asyncHandler } from "../middlewares/errorHandler";
-import { HTTP_STATUS } from "../config/constants";
 
-export const RevenueAdminController = {
+// Correct TypeScript union type
+type WithdrawStatus = "Pending" | "Paid" | "Failed";
 
-  getSummary: asyncHandler(async (_req: Request, res: Response) => {
-    const records: RevenueRecordDocument[] = await RevenueRecord.find().sort({
-      createdAt: -1,
-    });
+export const AdminRevenueController = {
 
-    const income = records.filter(r => r.type === "income");
-    const withdrawals = records.filter(r => r.type === "withdraw");
+  // ======================= LIST ALL REVENUES =======================
+  list: asyncHandler(async (_req: Request, res: Response) => {
+    const data = await Revenue.find()
+      .populate("userId", "fullName email")
+      .sort({ date: -1 });
 
-    const totalIncome = income.reduce((s, x) => s + x.amount, 0);
-
-    const approvedWithdraw = withdrawals
-      .filter(x => x.status === "Approved")
-      .reduce((s, x) => s + x.amount, 0);
-
-    res.json({
-      success: true,
-      data: {
-        balance: totalIncome,
-        withdrawable: totalIncome - approvedWithdraw,
-        transactions: records,
-      },
-    });
+    return res.json({ success: true, data });
   }),
 
- addIncome: asyncHandler(async (req: Request, res: Response) => {
-  const { userId, amount, source, period } = req.body;
-
-  if (!userId) {
-    return res.status(400).json({
-      success: false,
-      error: "userId is required to assign income"
-    });
-  }
-
-  const record = await RevenueRecord.create({
-    userId,
-    type: "income",
-    amount,
-    source,
-    period,
-    status: "Paid",
-  });
-
-  res.json({ success: true, data: record });
-}),
-
-
-  listWithdraws: asyncHandler(async (_req: Request, res: Response) => {
-    const list = await RevenueRecord.find({ type: "withdraw" }).sort({
-      createdAt: -1,
-    });
-
-    res.json({ success: true, data: list });
-  }),
-
+  // ======================= UPDATE WITHDRAWAL STATUS =======================
   updateWithdrawStatus: asyncHandler(async (req: Request, res: Response) => {
-    const updated = await RevenueRecord.findByIdAndUpdate(
-      req.params.id,
-      { status: req.body.status },
-      { new: true }
-    );
+    const { status } = req.body as { status?: string };
 
-    res.json({ success: true, data: updated });
-  }),
+    const allowedStatuses: WithdrawStatus[] = ["Paid", "Failed"];
 
-  deleteTransaction: asyncHandler(async (req: Request, res: Response) => {
-    const deleted = await RevenueRecord.findByIdAndDelete(req.params.id);
-
-    if (!deleted) {
-      return res.status(HTTP_STATUS.NOT_FOUND).json({
-        success: false,
-        error: "Transaction not found",
-      });
+    // Validate status
+    if (!status || !allowedStatuses.includes(status as WithdrawStatus)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid status" });
     }
 
-    res.json({ success: true, message: "Deleted" });
+    const id = req.params.id;
+
+    // Validate record exists
+    const rev = await Revenue.findById(id);
+    if (!rev) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Revenue record not found" });
+    }
+
+    // Ensure only withdrawal entries are updated
+    if (rev.type !== "withdraw") {
+      return res
+        .status(400)
+        .json({ success: false, message: "This entry is not a withdrawal" });
+    }
+
+    // FIX: Cast status correctly
+    rev.status = status as WithdrawStatus;
+
+    await rev.save();
+
+    return res.json({
+      success: true,
+      message: "Withdrawal status updated",
+      data: rev,
+    });
   }),
+  // ======================= DELETE TRANSACTION =======================
+deleteTransaction: asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const rev = await Revenue.findById(id);
+  if (!rev) {
+    return res.status(404).json({ success: false, message: "Transaction not found" });
+  }
+
+  await Revenue.findByIdAndDelete(id);
+
+  return res.json({
+    success: true,
+    message: "Transaction deleted successfully",
+  });
+}),
+
 };
+

@@ -1,42 +1,13 @@
 import { Router } from "express";
 import { authenticate, authorize } from "../middlewares/auth";
-import { RevenueAdminController } from "../controllers/revenueReportController";
+import { AdminRevenueController } from "../controllers/revenueReportController";
 
 const router = Router();
 
-router.get(
-  "/summary",
-  authenticate,
-  authorize("admin"),
-  RevenueAdminController.getSummary
-);
+router.get("/", authenticate, authorize("admin"), AdminRevenueController.list);
 
-router.post(
-  "/add",
-  authenticate,
-  authorize("admin"),
-  RevenueAdminController.addIncome
-);
+router.put("/:id/status", authenticate, authorize("admin"), AdminRevenueController.updateWithdrawStatus);
 
-router.get(
-  "/withdraw-requests",
-  authenticate,
-  authorize("admin"),
-  RevenueAdminController.listWithdraws
-);
-
-router.patch(
-  "/withdraw/:id",
-  authenticate,
-  authorize("admin"),
-  RevenueAdminController.updateWithdrawStatus
-);
-
-router.delete(
-  "/transaction/:id",
-  authenticate,
-  authorize("admin"),
-  RevenueAdminController.deleteTransaction
-);
+router.delete("/:id", authenticate, authorize("admin"), AdminRevenueController.deleteTransaction);
 
 export default router;

@@ -2,18 +2,16 @@ import mongoose, { Schema, Document } from "mongoose";
 
 export interface ArtistDocument extends Document {
   name: string;
-  genre?: string;
-  label?: string;
-  followers: number;
-  bio?: string;
+
+  mobile?: string;
+  email?: string;
 
   spotify?: string;
-  instagram?: string;
+  apple?: string;
+  youtube?: string;
 
-  status: "Active" | "Inactive";
-
-  artistImage?: string;     // Cloudinary URL
-  artistImageId?: string;   // Cloudinary public_id
+  avatar?: string;       // Cloudinary URL or Base64
+  avatarId?: string;     // Cloudinary public_id
 
   createdAt: Date;
   updatedAt: Date;
@@ -27,34 +25,25 @@ const ArtistSchema = new Schema<ArtistDocument>(
       trim: true,
     },
 
-    // UI fields
-    genre: { type: String, trim: true, default: "" },
-    label: { type: String, trim: true, default: "" },
-    followers: { type: Number, default: 0, min: 0 },
-
-    bio: { type: String, trim: true, default: "" },
+    // Contact fields
+    mobile: { type: String, trim: true, default: "" },
+    email: { type: String, trim: true, default: "" },
 
     // Social links
     spotify: { type: String, trim: true, default: "" },
-    instagram: { type: String, trim: true, default: "" },
+    apple: { type: String, trim: true, default: "" },
+    youtube: { type: String, trim: true, default: "" },
 
-    // Active / Inactive toggle
-    status: {
-      type: String,
-      enum: ["Active", "Inactive"],
-      default: "Active",
-    },
-
-    // Cloudinary image support
-    artistImage: { type: String, default: "" },     // URL
-    artistImageId: { type: String, default: "" },   // Public ID
+    // Avatar (Cloudinary URL or Base64)
+    avatar: { type: String, default: "" },
+    avatarId: { type: String, default: "" },
   },
   {
-    timestamps: true, // createdAt + updatedAt
+    timestamps: true, // createdAt & updatedAt
   }
 );
 
-// Improve performance on filtering
+// Index for fast search
 ArtistSchema.index({ name: 1 });
 
 export default mongoose.model<ArtistDocument>("Artist", ArtistSchema);

@@ -1,61 +1,72 @@
-import { Request, Response } from "express";
-import PaymentRequest from "../../models/PaymentRequest";
-import { asyncHandler } from "../../middlewares/errorHandler";
-import { HTTP_STATUS } from "../../config/constants";
-
-const MAX_BALANCE = 89452;
+import PaymentRequest from "../../models/PaymentRequest.js";
+import User from "../../models/User";
+import { asyncHandler } from "../../middlewares/errorHandler.js";
+import { HTTP_STATUS } from "../../config/constants.js";
 
 export const ClientPaymentController = {
-  /**
-   * 💸 Submit New Payment Request
-   * POST /api/v1/client/payments
-   */
-  create: asyncHandler(async (req: Request, res: Response) => {
-    const { amount, method, notes } = req.body;
-    const userId = (req as any).user?.userId || "guest";
 
-    if (amount > MAX_BALANCE) {
+  /* ----------------------------------------
+     CREATE PAYMENT REQUEST
+  ---------------------------------------- */
+  create: asyncHandler(async (req, res) => {
+    const userId = req.user.userId;
+    const { amount, method, notes } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    if (amount > user.balance) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
-        error: "Amount exceeds available balance.",
+        message: "Insufficient balance",
       });
     }
 
     const processingFee = amount > 5000 ? amount * 0.015 : 0;
-    const tax = 0;
-    const totalReceive = amount - processingFee - tax;
-    const deliveryTime = method === "bank" ? "3-5 business days" : "1-2 business days";
+    const totalReceive = amount - processingFee;
 
-    const payment = await PaymentRequest.create({
+    const request = await PaymentRequest.create({
       userId,
       amount,
       method,
       notes,
       processingFee,
-      tax,
       totalReceive,
-      deliveryTime,
-      status: "Pending",
+      paymentDetails: {
+        bank: user.bankDetails,
+        paypal: user.paypalDetails,
+      },
     });
 
-    res.status(HTTP_STATUS.CREATED).json({
+    // Deduct immediately
+    user.balance -= amount;
+    await user.save();
+
+    return res.status(HTTP_STATUS.CREATED).json({
       success: true,
-      message: "Payment request submitted successfully.",
-      data: payment,
+      message: "Payment request submitted",
+      data: request,
     });
   }),
 
-  /**
-   * 📋 View All User Payment Requests
-   * GET /api/v1/client/payments
-   */
-  list: asyncHandler(async (req: Request, res: Response) => {
-    const userId = (req as any).user?.userId || "guest";
-    const payments = await PaymentRequest.find({ userId }).sort({ createdAt: -1 });
+  /* ----------------------------------------
+     LIST USER REQUESTS
+  ---------------------------------------- */
+  list: asyncHandler(async (req, res) => {
+    const userId = req.user.userId;
 
-    res.status(HTTP_STATUS.OK).json({
+    const requests = await PaymentRequest.find({ userId }).sort({ createdAt: -1 });
+    const user = await User.findById(userId);
+
+    return res.status(HTTP_STATUS.OK).json({
       success: true,
-      data: payments,
+      balance: user.balance,
+      data: requests,
     });
   }),
 };

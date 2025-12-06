@@ -9,7 +9,7 @@ const router = Router();
    PUBLIC ROUTES
    ============================ */
 
-// List artists (search + filter)
+// List artists (search)
 router.get("/", optionalAuth, ClientArtistController.list);
 
 // Get single artist
@@ -25,7 +25,7 @@ router.post(
   "/",
   authenticate,
   authorize("client"),
-  upload.single("artistImage"),
+  upload.single("avatar"),   // UPDATED FIELD NAME
   ClientArtistController.create
 );
 
@@ -34,7 +34,7 @@ router.put(
   "/:id",
   authenticate,
   authorize("client"),
-  upload.single("artistImage"),
+  upload.single("avatar"),   // UPDATED FIELD NAME
   ClientArtistController.update
 );
 

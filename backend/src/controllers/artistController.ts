@@ -5,21 +5,17 @@ import { asyncHandler } from "../middlewares/errorHandler";
 import { HTTP_STATUS } from "../config/constants";
 
 export const artistController = {
-
+  
   // ----------------------------------------------------
-  // 📌 GET ALL ARTISTS (supports search + status filter)
+  // 📌 GET ALL ARTISTS (supports search)
   // ----------------------------------------------------
   list: asyncHandler(async (req: Request, res: Response) => {
-    const { search, status } = req.query;
+    const { search } = req.query;
 
     const filter: any = {};
 
     if (search) {
       filter.name = { $regex: new RegExp(search as string, "i") };
-    }
-
-    if (status) {
-      filter.status = status;
     }
 
     const artists = await Artist.find(filter).sort({ createdAt: -1 });
@@ -56,10 +52,14 @@ export const artistController = {
   create: asyncHandler(async (req: Request, res: Response) => {
     const data: any = req.body;
 
+    // Upload avatar if file exists
     if (req.file) {
-      data.artistImage = req.file.path;
-      data.artistImageId =
-        (req.file as any).filename || (req.file as any).public_id;
+      const upload = await cloudinary.uploader.upload(req.file.path, {
+        folder: "artists",
+      });
+
+      data.avatar = upload.secure_url;
+      data.avatarId = upload.public_id;
     }
 
     const artist = await Artist.create(data);
@@ -84,31 +84,32 @@ export const artistController = {
       });
     }
 
-    // If new image uploaded, delete old one first
+    // Replace image if new upload exists
     if (req.file) {
-      if (artist.artistImageId) {
+      if (artist.avatarId) {
         try {
-          await cloudinary.uploader.destroy(artist.artistImageId);
+          await cloudinary.uploader.destroy(artist.avatarId);
         } catch (err) {
           console.log("Cloudinary delete failed:", err);
         }
       }
 
-      artist.artistImage = req.file.path;
-      artist.artistImageId =
-        (req.file as any).filename || (req.file as any).public_id;
+      const upload = await cloudinary.uploader.upload(req.file.path, {
+        folder: "artists",
+      });
+
+      artist.avatar = upload.secure_url;
+      artist.avatarId = upload.public_id;
     }
 
-    // Allowed fields to update
+    // Allowed fields based on your new UI
     const allowed = [
       "name",
-      "genre",
-      "label",
-      "followers",
-      "bio",
+      "mobile",
+      "email",
       "spotify",
-      "instagram",
-      "status",
+      "apple",
+      "youtube",
     ];
 
     allowed.forEach((field) => {
@@ -140,9 +141,10 @@ export const artistController = {
       });
     }
 
-    if (artist.artistImageId) {
+    // Delete Cloudinary avatar
+    if (artist.avatarId) {
       try {
-        await cloudinary.uploader.destroy(artist.artistImageId);
+        await cloudinary.uploader.destroy(artist.avatarId);
       } catch (err) {
         console.log("Cloudinary delete failed:", err);
       }

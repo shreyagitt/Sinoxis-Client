@@ -4,19 +4,10 @@ import { ClientRevenueController } from "../../controllers/client/RevenueReportC
 
 const router = Router();
 
-router.get(
-  "/revenue",
-  authenticate,
-  authorize("client"),
-  ClientRevenueController.getRevenue
-);
+router.get("/", authenticate, authorize("client"), ClientRevenueController.list);
 
-router.post(
-  "/withdraw-request",
-  authenticate,
-  authorize("client"),
-  ClientRevenueController.withdrawRequest
-);
+router.post("/withdraw", authenticate, authorize("client"), ClientRevenueController.withdraw);
 
 export default router;
+
 
