@@ -11,14 +11,24 @@ const Layout = ({ children }) => {
   const { theme } = useTheme();
 
   /* -------------------------------------------
+      APPLY DARK/LIGHT THEME TO <HTML>
+  ------------------------------------------- */
+  useEffect(() => {
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [theme]);
+  // Now scrollbar CSS will work globally 🎉
+
+  /* -------------------------------------------
       RESPONSIVE WINDOW HANDLING
   ------------------------------------------- */
   useEffect(() => {
     const handleResize = () => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
-
-      // Auto-collapse sidebar on mobile screens
       if (mobile) setCollapsed(true);
     };
 
@@ -28,12 +38,10 @@ const Layout = ({ children }) => {
   }, []);
 
   /* -------------------------------------------
-      THEME COLORS (FIXED BORDER ISSUE)
+      THEME COLORS
   ------------------------------------------- */
-
   const layoutBg = theme === "dark" ? "bg-[#020726]" : "bg-white";
 
-  // FIX: Remove border lines for light theme
   const separatorColor =
     theme === "dark" ? "rgba(255,255,255,0.10)" : "transparent";
 
@@ -43,7 +51,6 @@ const Layout = ({ children }) => {
   /* -------------------------------------------
       RESPONSIVE LAYOUT LOGIC
   ------------------------------------------- */
-
   const sidebarWidth = collapsed ? 80 : 240;
   const mainOffset = isMobile ? 0 : sidebarWidth;
 
@@ -51,16 +58,12 @@ const Layout = ({ children }) => {
     <div
       className={`min-h-screen flex flex-col transition-all duration-300 ${layoutBg}`}
     >
-      {/* SIDEBAR */}
       <Sidebar collapsed={collapsed} isMobile={isMobile} />
-
-      {/* TOPBAR */}
       <Topbar
         toggleSidebar={() => setCollapsed((prev) => !prev)}
         isCollapsed={collapsed}
       />
 
-      {/* LEFT SEPARATOR (DESKTOP ONLY, INVISIBLE IN LIGHT MODE) */}
       {!isMobile && (
         <div
           className="fixed top-0 bottom-0 pointer-events-none transition-all duration-300"
@@ -77,7 +80,6 @@ const Layout = ({ children }) => {
         />
       )}
 
-      {/* TOPBAR UNDERLINE (REMOVED IN LIGHT THEME) */}
       <div
         className="fixed left-0 right-0 z-20"
         style={{
@@ -87,7 +89,6 @@ const Layout = ({ children }) => {
         }}
       />
 
-      {/* MAIN CONTENT */}
       <main
         className="flex-1 transition-all duration-300 p-4 md:p-6"
         style={{
@@ -99,7 +100,6 @@ const Layout = ({ children }) => {
         {children}
       </main>
 
-      {/* FOOTER */}
       <div
         className="transition-all duration-300"
         style={{

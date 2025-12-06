@@ -32,9 +32,13 @@ const YouTubeOACRequestForm = () => {
 
   const handleSubmit = async (values, { resetForm }) => {
     try {
+       const token = localStorage.getItem("token"); // ✅ GET TOKEN
+
       const res = await fetch(`${baseUrl}/client/youtube-oac`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" , 
+           Authorization: `Bearer ${token}`
+        },
         body: JSON.stringify(values),
       });
 

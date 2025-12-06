@@ -38,27 +38,51 @@ const MetadataUpdateForm = () => {
   const subtleText = theme === "dark" ? "text-gray-300" : "text-gray-700";
 
   const handleSubmit = async (values, { resetForm }) => {
-    try {
-      const formData = new FormData();
-      Object.keys(values).forEach((key) => {
-        if (key === "artwork" && values.artwork) {
-          formData.append("artwork", values.artwork);
-        } else {
-          formData.append(key, values[key]);
-        }
-      });
+  try {
+    const token = localStorage.getItem("token"); // ⭐ get token
 
-      await axios.post(`${baseUrl}/metadata-update`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+    if (!token) {
+      toast.error("You are not logged in!");
+      return;
+    }
 
+    const formData = new FormData();
+
+    Object.keys(values).forEach((key) => {
+      if (key === "artwork" && values.artwork instanceof File) {
+        formData.append("artwork", values.artwork); // ⭐ handle file correctly
+      } else {
+        formData.append(key, values[key] ?? "");
+      }
+    });
+
+    const res = await axios.post(
+      `${baseUrl}/client/metadata`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // ⭐ required fix
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    if (res.data?.success) {
       toast.success("Metadata Updated Successfully!");
       resetForm();
-      document.getElementById("artworkInput").value = "";
-    } catch (error) {
-      toast.error("Error submitting metadata");
+
+      // Clear file input manually
+      const input = document.getElementById("artworkInput");
+      if (input) input.value = "";
+    } else {
+      toast.error(res.data?.error || "Update failed");
     }
-  };
+  } catch (error) {
+    console.error(error);
+    toast.error("Error submitting metadata");
+  }
+};
+
 
   return (
     <div className={`min-h-screen pb-20 transition-all ${pageBg}`}>

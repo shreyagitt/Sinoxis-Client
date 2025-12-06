@@ -1,19 +1,9 @@
 // src/pages/RevenueReports.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import jsPDF from "jspdf";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../components/Topbar";
-
-// ================================
-// SAMPLE TRANSACTIONS
-// ================================
-const TRANSACTIONS = [
-  { source: "YouTube", date: "01 Nov 2025", amount: "+598.44 ₹", period: "January 2025", type: "in" },
-  { source: "Facebook", date: "01 Nov 2025", amount: "+598.44 ₹", period: "January 2025", type: "in" },
-  { source: "Money Withdraw", date: "01 Nov 2025", amount: "+598.44 ₹", period: "January 2025", type: "withdraw", status: "Pending" },
-  { source: "Money Withdraw", date: "01 Nov 2025", amount: "+598.44 ₹", period: "January 2025", type: "withdraw", status: "Failed" },
-  { source: "Money Withdraw", date: "01 Nov 2025", amount: "+598.44 ₹", period: "January 2025", type: "withdraw", status: "Paid" },
-  { source: "Spotify", date: "01 Nov 2025", amount: "+598.44 ₹", period: "January 2025", type: "in" },
-];
 
 // ================================
 // STATUS PILL (RESPONSIVE)
@@ -49,26 +39,132 @@ export default function RevenueReports() {
   const navigate = useNavigate();
   const { theme } = useTheme();
 
-  // Theme Classes
-  const pageBg = theme === "dark" ? "bg-[#020726] text-white" : "bg-white text-[#020726]";
-  const cardBg = theme === "dark" ? "bg-[#0a1039] border border-white/10" : "bg-white border border-gray-200 shadow-sm";
-  const inputBg = theme === "dark" ? "bg-[#1f233d] text-white placeholder-gray-400 border border-white/10" : "bg-gray-50 text-[#020726] placeholder-gray-500 border border-gray-200";
-  const subtleText = theme === "dark" ? "text-gray-300" : "text-gray-600";
-  const modalBg = theme === "dark" ? "bg-[#0b1138] border border-white/10" : "bg-white border border-gray-200";
+  const baseUrl = import.meta.env.VITE_API_BASE_URL;
+  const token = localStorage.getItem("token");
 
-  // Withdraw states
+  // ================================
+  // STATES
+  // ================================
+  const [transactions, setTransactions] = useState([]); // Application-wide transactions
+  const [balance, setBalance] = useState(5000);            // Real balance from DB
+  const [withdrawable, setWithdrawable] = useState(5000);  // Amount user can withdraw
+
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState("");
 
   const MIN_WITHDRAW = 1000;
-  const balance = 819.11;
-  const withdrawable = 1050;
-
   const withdrawAmtNum = parseFloat(withdrawAmount) || 0;
   const canWithdraw = withdrawAmtNum >= MIN_WITHDRAW && withdrawAmtNum <= withdrawable;
 
-  const formatCurrencyBig = (v) => `₹ ${v.toFixed(2)}`;
+  const formatCurrencyBig = (v) => `₹ ${parseFloat(v || 0).toFixed(2)}`;
 
+  // ================================
+  // FETCH USER REVENUE REPORT FROM API
+  // ================================
+  useEffect(() => {
+  axios
+    .get(`${baseUrl}/client/revenue-report`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    .then((res) => {
+      const d = res.data;
+
+      setBalance(d.balance || 0);
+      setWithdrawable(d.withdrawable || 0);
+
+      setTransactions(Array.isArray(d.data) ? d.data : []);
+    })
+    .catch((err) => {
+      console.error("Revenue fetch failed", err);
+      alert("Failed to load revenue");
+    });
+}, []);
+
+
+
+const handleDownload = (t) => {
+  const doc = new jsPDF();
+
+  doc.setFontSize(18);
+  doc.text("Transaction Receipt", 20, 20);
+
+  doc.setFontSize(12);
+  doc.text(`Source: ${t.source}`, 20, 40);
+  doc.text(`Amount: ₹ ${t.amount}`, 20, 50);
+  doc.text(`Type: ${t.type}`, 20, 60);
+  doc.text(`Status: ${t.status || "N/A"}`, 20, 70);
+  doc.text(`Period: ${t.period || "-"}`, 20, 80);
+  doc.text(`Date: ${t.date}`, 20, 90);
+
+  doc.save(`transaction-${t._id || Date.now()}.pdf`);
+};
+
+
+  // ================================
+  // WITHDRAW HANDLER WITH API
+  // ================================
+  const handleWithdraw = (e) => {
+  e.preventDefault();
+  if (!canWithdraw) return;
+
+  axios
+    .post(
+      `${baseUrl}/client/revenue-report/withdraw`,
+      { amount: withdrawAmtNum },
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+    .then(() => {
+      alert("Withdrawal request sent successfully!");
+
+      // Add temporary pending transaction before refresh
+      const newTransaction = {
+        source: "Money Withdraw",
+        amount: withdrawAmtNum,
+        type: "withdraw",
+        status: "Pending",
+        date: new Date().toLocaleDateString(),
+        period: "Current Month",
+      };
+
+      setTransactions((prev) => [newTransaction, ...prev]);
+
+      setShowWithdrawModal(false);
+      setWithdrawAmount("");
+
+      // Fetch updated balance + transactions from backend
+      return axios.get(`${baseUrl}/client/revenue-report`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    })
+    .then((res) => {
+      const d = res.data;
+
+      // backend returns "balance" & "withdrawable"
+      setBalance(d.balance);
+      setWithdrawable(d.withdrawable);
+
+      // backend returns all user transactions as "data"
+      setTransactions(Array.isArray(d.data) ? d.data : []);
+    })
+    .catch((err) => {
+      console.error(err);
+      alert(err?.response?.data?.message || "Withdraw failed.");
+    });
+};
+
+
+  // ================================
+  // THEME DESIGN
+  // ================================
+  const pageBg = theme === "dark" ? "bg-[#020726] text-white" : "bg-white text-[#020726]";
+  const cardBg = theme === "dark" ? "bg-[#0a1039] border border-white/10" : "bg-white border border-gray-200 shadow-sm";
+  const inputBg = theme === "dark" ? "bg-[#1f233d] text-white border border-white/10" : "bg-gray-50 border border-gray-200";
+  const subtleText = theme === "dark" ? "text-gray-300" : "text-gray-600";
+  const modalBg = theme === "dark" ? "bg-[#0b1138] border border-white/10" : "bg-white border border-gray-200";
+
+  // ================================
+  // UI START
+  // ================================
   return (
     <div className={`min-h-screen px-4 sm:px-6 md:px-12 py-6 md:py-8 transition-colors duration-200 ${pageBg}`}>
       
@@ -88,8 +184,8 @@ export default function RevenueReports() {
           <div>
             <div className={`text-sm ${subtleText} mb-2`}>Balance Available</div>
             <div className="flex items-baseline gap-2 sm:gap-4">
-              <span className="text-2xl sm:text-3xl font-extrabold">₹</span>
-              <span className="text-2xl sm:text-3xl font-extrabold">{balance.toFixed(2)}</span>
+              
+              <span className="text-2xl sm:text-3xl font-extrabold">{formatCurrencyBig(balance)}</span>
             </div>
           </div>
 
@@ -110,7 +206,11 @@ export default function RevenueReports() {
 
         {/* ================================ TRANSACTIONS LIST ================================ */}
         <div className="space-y-6">
-          {TRANSACTIONS.map((t, idx) => (
+          {transactions.length === 0 && (
+            <p className="text-center text-gray-400">No transactions yet</p>
+          )}
+
+          {transactions.map((t, idx) => (
             <div
               key={idx}
               className={`grid grid-cols-1 sm:grid-cols-12 gap-4 sm:gap-6 items-start sm:items-center ${
@@ -119,17 +219,7 @@ export default function RevenueReports() {
             >
               {/* SOURCE */}
               <div className="col-span-5 flex items-center gap-3 sm:gap-4">
-                {t.type === "in" ? (
-                  <svg width="18" height="18" viewBox="0 0 24 24">
-                    <path d="M7 7L17 17M17 17V7M17 17H7" stroke="#15b65b" strokeWidth="2" strokeLinecap="round" />
-                  </svg>
-                ) : (
-                  <svg width="18" height="18" viewBox="0 0 24 24">
-                    <path d="M17 17L7 7M7 7V16M7 7H16" stroke="#9aa4c5" strokeWidth="2" strokeLinecap="round" />
-                  </svg>
-                )}
                 <span className="text-base">{t.source}</span>
-
                 {t.status && <StatusPill status={t.status} theme={theme} />}
               </div>
 
@@ -140,19 +230,29 @@ export default function RevenueReports() {
 
               {/* AMOUNT */}
               <div className="col-span-3 text-right">
-                <div className="text-green-400 font-semibold">{t.amount}</div>
+                <div
+                  className={`font-semibold ${
+                    t.type === "withdraw" ? "text-red-400" : "text-green-400"
+                  }`}
+                >
+                  ₹ {t.amount}
+                </div>
                 <div className="text-xs text-gray-400 italic">{t.period}</div>
               </div>
 
               {/* ACTION */}
               <div className="col-span-2 flex justify-end">
-                <button className={`p-2 rounded-md ${theme === "dark" ? "hover:bg-white/5" : "hover:bg-gray-100"}`}>
-                  <svg width="22" height="22" viewBox="0 0 24 24">
-                    <path d="M12 3v10" stroke={theme === "dark" ? "#ffffff" : "#020726"} strokeWidth="1.5" strokeLinecap="round" />
-                    <path d="M8 11l4 4 4-4" stroke={theme === "dark" ? "#ffffff" : "#020726"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M5 17h14" stroke={theme === "dark" ? "#ffffff" : "#020726"} strokeWidth="1.5" strokeLinecap="round" />
-                  </svg>
-                </button>
+                <button
+  onClick={() => handleDownload(t)}
+  className={`p-2 rounded-md ${theme === "dark" ? "hover:bg-white/5" : "hover:bg-gray-100"}`}
+>
+  <svg width="22" height="22" viewBox="0 0 24 24">
+    <path d="M12 3v10" stroke={theme === "dark" ? "#ffffff" : "#020726"} strokeWidth="1.5" strokeLinecap="round" />
+    <path d="M8 11l4 4 4-4" stroke={theme === "dark" ? "#ffffff" : "#020726"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M5 17h14" stroke={theme === "dark" ? "#ffffff" : "#020726"} strokeWidth="1.5" strokeLinecap="round" />
+  </svg>
+</button>
+
               </div>
             </div>
           ))}
@@ -171,14 +271,7 @@ export default function RevenueReports() {
             <hr className={`my-4 ${theme === "dark" ? "border-white/10" : "border-gray-200"}`} />
 
             {/* FORM */}
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (canWithdraw) {
-                  alert(`Withdraw requested: ₹${withdrawAmtNum}`);
-                }
-              }}
-            >
+            <form onSubmit={handleWithdraw}>
               {/* AVAILABLE */}
               <div className="flex items-center justify-between mb-6">
                 <span className={`text-base sm:text-lg ${theme === "dark" ? "text-white" : "text-[#020726]"}`}>
@@ -220,19 +313,6 @@ export default function RevenueReports() {
                 </div>
               </div>
 
-              {/* BANK INFO */}
-              <div className={`flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs sm:text-sm mb-4 gap-2 ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
-                <span>To Bank Name, 000000009227</span>
-
-                <button
-                  type="button"
-                  onClick={() => navigate("/settings/bank-details")}
-                  className={`font-medium ${theme === "dark" ? "text-[#29B6F6]" : "text-[#0288D1]"}`}
-                >
-                  Change Bank
-                </button>
-              </div>
-
               {/* ERROR */}
               {withdrawAmtNum > withdrawable && (
                 <div
@@ -248,7 +328,7 @@ export default function RevenueReports() {
 
               <hr className={`my-4 ${theme === "dark" ? "border-white/10" : "border-gray-200"}`} />
 
-              {/* SUBMIT BUTTON */}
+              {/* SUBMIT */}
               <button
                 type="submit"
                 disabled={!canWithdraw}
@@ -268,4 +348,3 @@ export default function RevenueReports() {
     </div>
   );
 }
-

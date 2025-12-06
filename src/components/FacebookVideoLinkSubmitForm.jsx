@@ -68,23 +68,44 @@ const FacebookVideoLinkSubmitForm = () => {
               confirmFb: false,
             }}
             validationSchema={FacebookVideoSchema}
-            onSubmit={async (values, { resetForm }) => {
-              try {
-                const formData = new FormData();
-                Object.keys(values).forEach((key) => {
-                  formData.append(key, values[key]);
-                });
+           onSubmit={async (values, { resetForm }) => {
+  try {
+    const token = localStorage.getItem("token"); // ⭐ Get stored client token
 
-                await axios.post(`${baseUrl}/client/facebook-video`, formData, {
-                  headers: { "Content-Type": "multipart/form-data" },
-                });
+    if (!token) {
+      toast.error("You are not logged in!");
+      return;
+    }
 
-                toast.success("Video Link Submitted Successfully!");
-                resetForm();
-              } catch (err) {
-                toast.error("Submission failed!");
-              }
-            }}
+    const formData = new FormData();
+    Object.keys(values).forEach((key) => {
+      formData.append(key, values[key]);
+    });
+
+    const res = await axios.post(
+      `${baseUrl}/client/facebook-video`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // ⭐ REQUIRED FIX
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    if (res.data?.success) {
+      toast.success("Video Link Submitted Successfully!");
+      resetForm();
+    } else {
+      toast.error(res.data?.error || "Submission failed!");
+    }
+
+  } catch (err) {
+    console.error(err);
+    toast.error("Server error!");
+  }
+}}
+
           >
             {({ setFieldValue }) => (
               <Form className="space-y-6">

@@ -46,30 +46,42 @@ const YouTubeClaimRelease = () => {
 
   /* ---------------------- Submit Handler ---------------------- */
   const handleSubmit = async (values, { resetForm }) => {
-    try {
-      const formData = new FormData();
+  try {
+    const token = localStorage.getItem("token"); // ✅ Get saved token
 
-      Object.entries(values).forEach(([key, val]) => {
-        if (key === "screenshot" && val) {
-          formData.append("screenshot", val);
-        } else {
-          formData.append(key, val ?? "");
-        }
-      });
-
-      const res = await axios.post(`${baseUrl}/client/youtube-claim`, formData);
-
-      if (res.data.success) {
-        toast.success("Claim submitted successfully!");
-        resetForm();
-      } else {
-        toast.error(res.data.error || "Something went wrong");
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error("Server error while submitting claim");
+    if (!token) {
+      toast.error("You are not logged in! Please login again.");
+      return;
     }
-  };
+
+    const formData = new FormData();
+    Object.entries(values).forEach(([key, val]) => {
+      if (key === "screenshot" && val) {
+        formData.append("screenshot", val);
+      } else {
+        formData.append(key, val ?? "");
+      }
+    });
+
+    const res = await axios.post(`${baseUrl}/client/youtube-claim`, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,        // ✅ REQUIRED
+        "Content-Type": "multipart/form-data",  // ✅ REQUIRED
+      },
+    });
+
+    if (res.data.success) {
+      toast.success("Claim submitted successfully!");
+      resetForm();
+    } else {
+      toast.error(res.data.error || "Something went wrong");
+    }
+  } catch (error) {
+    console.error(error);
+    toast.error("Unauthorized or server error!");
+  }
+};
+
 
   /* ---------------------- Render ---------------------- */
   return (

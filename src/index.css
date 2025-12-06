@@ -18,4 +18,25 @@
   background: rgba(255, 255, 255, 0.35);
 }
 
+/* Light theme */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #e5e7eb;
+}
+::-webkit-scrollbar-thumb {
+  background: #9ca3af;
+  border-radius: 10px;
+}
+
+/* Dark theme */
+.dark ::-webkit-scrollbar-track {
+  background: #0a1029 !important;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #020726 !important;
+  border-radius: 10px;
+}
+
 

@@ -38,20 +38,38 @@ const SocialIsrcSubmitForm = () => {
   const smallHint = theme === "dark" ? "text-[#9bb6d8]" : "text-gray-600";
 
   const handleSubmit = async (values, { resetForm }) => {
-    try {
-      const res = await axios.post(`${baseUrl}/client/social`, values);
+  try {
+    const token = localStorage.getItem("token"); // ⭐ Get stored token
 
-      if (res.data?.success) {
-        toast.success("Form Submitted Successfully!");
-        resetForm();
-      } else {
-        toast.error(res.data?.error || "Something went wrong");
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("Server error!");
+    if (!token) {
+      toast.error("You are not logged in!");
+      return;
     }
-  };
+
+    const res = await axios.post(
+      `${baseUrl}/client/social`,
+      values,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // ⭐ REQUIRED
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (res.data?.success) {
+      toast.success("Form Submitted Successfully!");
+      resetForm();
+    } else {
+      toast.error(res.data?.error || "Something went wrong");
+    }
+
+  } catch (err) {
+    console.error(err);
+    toast.error("Server error!");
+  }
+};
+
 
   return (
     <div className={`min-h-screen pb-20 transition-all duration-300 ${pageBg}`}>
