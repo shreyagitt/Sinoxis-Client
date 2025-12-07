@@ -1,5 +1,6 @@
 // src/components/ViewReleaseModal.jsx
-import React from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import { X, Edit3 } from "lucide-react";
 import { useTheme } from "../components/Topbar";
 
@@ -22,10 +23,36 @@ const FieldBlock = ({ label, value, theme }) => {
 
 export default function ViewReleaseModal({ release, onClose, onEdit }) {
   const { theme } = useTheme();
+  const baseUrl = import.meta.env.VITE_API_BASE_URL;
+  const token = localStorage.getItem("token");
+
+  const [fullRelease, setFullRelease] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // ✅ FETCH FULL RELEASE DETAILS
+  const fetchRelease = async () => {
+    try {
+      const res = await axios.get(
+        `${baseUrl}/client/release/${release._id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setFullRelease(res.data.data);
+    } catch (err) {
+      console.error("Failed to fetch release details", err);
+      setFullRelease(release); // ✅ fallback
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (release?._id) fetchRelease();
+  }, [release]);
+
   if (!release) return null;
 
   const overlayBg = theme === "dark" ? "bg-black/70" : "bg-black/40";
-
   const panelBg =
     theme === "dark"
       ? "bg-[#0a1039] border border-white/10 text-white"
@@ -38,9 +65,10 @@ export default function ViewReleaseModal({ release, onClose, onEdit }) {
 
   const subText = theme === "dark" ? "text-gray-300" : "text-gray-600";
 
+  // ✅ FINAL IMAGE RESOLUTION LOGIC (UPLOAD SAFE)
   const coverSrc =
-    release.cover && typeof release.cover === "string"
-      ? release.cover
+    fullRelease?.cover?.startsWith("http")
+      ? fullRelease.cover
       : "/assets/cover-placeholder.png";
 
   return (
@@ -48,7 +76,6 @@ export default function ViewReleaseModal({ release, onClose, onEdit }) {
       className={`fixed inset-0 z-50 flex justify-center items-center ${overlayBg} backdrop-blur-sm p-4`}
       role="dialog"
     >
-      {/* --- SCROLLABLE MODAL CONTAINER --- */}
       <div
         className={`
           w-full max-w-[900px] max-h-[90vh]
@@ -58,125 +85,132 @@ export default function ViewReleaseModal({ release, onClose, onEdit }) {
         `}
       >
         {/* CLOSE BUTTON */}
-        <button
-          onClick={onClose}
-          className={`absolute top-3 right-3 ${closeIconColor}`}
-        >
+        <button onClick={onClose} className={`absolute top-3 right-3 ${closeIconColor}`}>
           <X size={22} />
         </button>
 
-        {/* HEADER */}
-        <div
-          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b pb-3"
-          style={{
-            borderColor:
-              theme === "dark"
-                ? "rgba(41,182,246,0.12)"
-                : "rgba(0,0,0,0.08)",
-          }}
-        >
-          <h3 className="text-xl font-semibold">Release Details</h3>
-
-          {/* EDIT BUTTON */}
-          <button
-            onClick={() => onEdit(release.id)}
-            className={`
-              px-3 py-1 rounded-full flex items-center gap-2 text-sm font-medium
-              ${
-                theme === "dark"
-                  ? "bg-[#29B6F6]/10 border border-[#29B6F6] text-[#29B6F6] hover:bg-[#29B6F6] hover:text-white"
-                  : "bg-white border border-gray-300 hover:bg-gray-50 text-[#0288D1]"
-              }
-            `}
-          >
-            <Edit3 size={14} /> Edit
-          </button>
-        </div>
-
-        {/* BODY CONTENT */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-          {/* LEFT COLUMN */}
-          <div>
-            <FieldBlock label="Release Title" value={release.title} theme={theme} />
-
-            <FieldBlock label="Release Date" value={release.releaseDate} theme={theme} />
-
-            <FieldBlock
-              label="Released Before?"
-              value={release.releasedBefore ? "Yes" : "No"}
-              theme={theme}
-            />
-
-            <FieldBlock label="Contact Phone" value={release.contactPhone} theme={theme} />
-
-            <FieldBlock label="Short Notes / Bio" value={release.notes} theme={theme} />
+        {/* LOADING */}
+        {loading && (
+          <div className="py-20 text-center text-sm opacity-70">
+            Loading release details...
           </div>
+        )}
 
-          {/* RIGHT COLUMN */}
-          <div>
-            <FieldBlock label="Primary Artist" value={release.artist} theme={theme} />
+        {!loading && fullRelease && (
+          <>
+            {/* HEADER */}
+            <div
+              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b pb-3"
+              style={{
+                borderColor:
+                  theme === "dark"
+                    ? "rgba(41,182,246,0.12)"
+                    : "rgba(0,0,0,0.08)",
+              }}
+            >
+              <h3 className="text-xl font-semibold">Release Details</h3>
 
-            <FieldBlock
-              label="Tracks / Preview Link"
-              value={release.tracksPreview}
-              theme={theme}
-            />
-
-            <FieldBlock label="Contact Email" value={release.contactEmail} theme={theme} />
-
-            {/* COVER */}
-            <div className="mt-4">
-              <p className={`text-sm ${subText}`}>Cover Art</p>
-
-              <div
-                className={`mt-2 w-[120px] h-[120px] rounded-xl overflow-hidden 
-                  ${theme === "dark" ? "bg-[#111a3b] border-white/10" : "bg-gray-100 border-gray-300"}
+              <button
+                onClick={() => onEdit(fullRelease._id)}
+                className={`
+                  px-3 py-1 rounded-full flex items-center gap-2 text-sm font-medium
+                  ${
+                    theme === "dark"
+                      ? "bg-[#29B6F6]/10 border border-[#29B6F6] text-[#29B6F6] hover:bg-[#29B6F6] hover:text-white"
+                      : "bg-white border border-gray-300 hover:bg-gray-50 text-[#0288D1]"
+                  }
                 `}
               >
-                <img
-                  src={coverSrc}
-                  alt="Cover"
-                  className="w-full h-full object-cover"
-                  onError={(e) => (e.currentTarget.src = "/assets/cover-placeholder.png")}
+                <Edit3 size={14} /> Edit
+              </button>
+            </div>
+
+            {/* BODY */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+
+              {/* LEFT */}
+              <div>
+                <FieldBlock label="Release Title" value={fullRelease.title} theme={theme} />
+                <FieldBlock label="Release Date" value={fullRelease.releaseDate} theme={theme} />
+                <FieldBlock label="Label" value={fullRelease.label} theme={theme} />
+                <FieldBlock label="ISRC" value={fullRelease.isrc} theme={theme} />
+                <FieldBlock label="UPC" value={fullRelease.upc} theme={theme} />
+                <FieldBlock
+                  label="Released Before?"
+                  value={fullRelease.releasedBefore ? "Yes" : "No"}
+                  theme={theme}
                 />
+                
+              </div>
+
+              {/* RIGHT */}
+              <div>
+                <FieldBlock label="Primary Artist" value={fullRelease.artist} theme={theme} />
+                <FieldBlock
+                  label="Tracks / Preview Link"
+                  value={fullRelease.tracksPreview}
+                  theme={theme}
+                />
+                <FieldBlock label="Contact Email" value={fullRelease.contactEmail} theme={theme} />
+                <FieldBlock label="Contact Phone" value={fullRelease.contactPhone} theme={theme} />
+                <FieldBlock label="Short Notes / Bio" value={fullRelease.notes} theme={theme} />
+
+                {/* ✅ COVER IMAGE */}
+                <div className="mt-4">
+                  <p className={`text-sm ${subText}`}>Cover Art</p>
+                  <div
+                    className={`mt-2 w-[120px] h-[120px] rounded-xl overflow-hidden border
+                      ${theme === "dark" ? "bg-[#111a3b] border-white/10" : "bg-gray-100 border-gray-300"}
+                    `}
+                  >
+                    <img
+                      src={coverSrc}
+                      alt="Cover"
+                      className="w-full h-full object-cover"
+                      onError={(e) =>
+                        (e.currentTarget.src = "/assets/cover-placeholder.png")
+                      }
+                    />
+                  </div>
+                </div>
+
+                <FieldBlock label="Status" value={fullRelease.status} theme={theme} />
               </div>
             </div>
 
-            <FieldBlock label="Status" value={release.status} theme={theme} />
-          </div>
-        </div>
+            {/* FOOTER */}
+            <div
+              className="flex flex-col sm:flex-row justify-end gap-3 mt-8 pt-4"
+              style={{
+                borderTop:
+                  theme === "dark"
+                    ? "1px solid rgba(41,182,246,0.12)"
+                    : "1px solid rgba(0,0,0,0.08)",
+              }}
+            >
+              <button
+                onClick={onClose}
+                className={`
+                  px-6 py-2 rounded-full border text-sm
+                  ${
+                    theme === "dark"
+                      ? "border-white/20 text-gray-300 hover:text-white hover:bg-white/10"
+                      : "border-gray-300 text-[#020726] hover:bg-gray-100"
+                  }
+                `}
+              >
+                Close
+              </button>
 
-        {/* FOOTER BUTTONS */}
-        <div
-          className="flex flex-col sm:flex-row justify-end gap-3 mt-8 pt-4"
-          style={{
-            borderTop:
-              theme === "dark"
-                ? "1px solid rgba(41,182,246,0.12)"
-                : "1px solid rgba(0,0,0,0.08)",
-          }}
-        >
-          <button
-            onClick={onClose}
-            className={`
-              px-6 py-2 rounded-full border text-sm
-              ${
-                theme === "dark"
-                  ? "border-white/20 text-gray-300 hover:text-white hover:bg-white/10"
-                  : "border-gray-300 text-[#020726] hover:bg-gray-100"
-              }
-            `}
-          >
-            Close
-          </button>
-
-          <button
-            onClick={() => onEdit(release.id)}
-            className="px-6 py-2 rounded-full bg-gradient-to-r from-[#29B6F6] to-[#0288D1] text-white text-sm"
-          >
-            <Edit3 size={14} /> Edit
-          </button>
-        </div>
+              <button
+                onClick={() => onEdit(fullRelease._id)}
+                className="px-6 py-2 rounded-full bg-gradient-to-r from-[#29B6F6] to-[#0288D1] text-white text-sm"
+              >
+                <Edit3 size={14} /> Edit
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

@@ -1,14 +1,68 @@
-// src/components/Notifications.jsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { useTheme } from "./Topbar"; // THEME SUPPORT
+import axios from "axios";
+import toast from "react-hot-toast";
 
-const Notifications = ({
-  notificationsList,
-  removeNotification,
-  markAllAsRead,
-}) => {
+const Notifications = () => {
   const { theme } = useTheme();
+
+  const baseUrl = import.meta.env.VITE_API_BASE_URL;
+  const token = localStorage.getItem("token");
+
+  const [notificationsList, setNotificationsList] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // ✅ FETCH MY NOTIFICATIONS
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get(`${baseUrl}/client/notifications`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setNotificationsList(res.data.data || []);
+    } catch (err) {
+      toast.error("Failed to load notifications");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  // ✅ DELETE SINGLE FROM API
+  const removeNotification = async (id) => {
+    try {
+      await axios.delete(`${baseUrl}/client/notifications/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setNotificationsList((prev) => prev.filter((n) => n._id !== id));
+      toast.success("Notification removed");
+    } catch {
+      toast.error("Delete failed");
+    }
+  };
+
+  // ✅ MARK ALL AS READ (API)
+  const markAllAsRead = async () => {
+    try {
+      await axios.patch(
+        `${baseUrl}/client/notifications/mark-all-read`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      toast.success("All marked as read");
+      fetchNotifications();
+    } catch {
+      toast.error("Action failed");
+    }
+  };
 
   // THEME COLORS
   const cardBg =
@@ -64,10 +118,12 @@ const Notifications = ({
 
       {/* LIST */}
       <ul className="max-h-[55vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400/40 scrollbar-track-transparent">
-        {notificationsList.length > 0 ? (
-          notificationsList.map((item, index) => (
+        {loading ? (
+          <li className="p-4 text-center text-sm">Loading...</li>
+        ) : notificationsList.length > 0 ? (
+          notificationsList.map((item) => (
             <li
-              key={index}
+              key={item._id}
               className={`px-4 py-3 flex justify-between gap-4 border-b text-sm transition ${itemBorder} ${hoverBg}`}
             >
               {/* LEFT SIDE */}
@@ -83,13 +139,13 @@ const Notifications = ({
               {/* RIGHT SIDE */}
               <div className="flex flex-col items-end justify-between gap-1">
                 <span className={`text-[10px] whitespace-nowrap ${timeText}`}>
-                  {item.time}
+                  {new Date(item.createdAt).toLocaleString()}
                 </span>
 
                 <X
                   size={16}
                   className={`cursor-pointer transition ${closeIconColor}`}
-                  onClick={() => removeNotification(index)}
+                  onClick={() => removeNotification(item._id)}
                 />
               </div>
             </li>
@@ -109,4 +165,5 @@ const Notifications = ({
 };
 
 export default Notifications;
+
 

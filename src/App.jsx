@@ -18,7 +18,6 @@ import ApplyForm from './components/ApplyForm';
 
 import RevenueReport from "./components/RevenueReport";
 import TotalRevenueAnalytics from "./components/TotalRevenueAnalytics";
-import RevenuePayment from './components/RequestPayment'
 import YouTubeOACRequestForm from "./components/YouTubeOACRequestForm";
 import YouTubeClaimRelease from "./components/YouTubeClaimRelease";
 import SocialIsrcSubmitForm from "./components/SocialIsrcSubmitForm";
@@ -29,6 +28,7 @@ import CopyrightClaim from "./components/CopyrightClaim";
 import OfficialArtistChannel from "./components/OfficialArtistChannel";
 import ReleaseForm from "./components/ReleaseForm";
 import Pending from "./components/Pending";
+import RequestPayment from "./components/RequestPayment";
 
 
 
@@ -137,7 +137,7 @@ function App() {
         path="/revenue/request"
         element={
           <Layout>
-            < RevenuePayment/>
+            < RequestPayment/>
           </Layout>
         }
       />

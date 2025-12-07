@@ -1,8 +1,11 @@
 // src/pages/Dashboard.jsx
-import React from "react";
+import React , {useState,useEffect} from "react";
 import { useNavigate } from "react-router-dom";
 import { FaMusic, FaRupeeSign, FaUser, FaEdit, FaTrash } from "react-icons/fa";
 import { useTheme } from "../components/Topbar";
+import axios from "axios";
+import toast from "react-hot-toast";
+
 
 // Dummy songs data
 const songs = [
@@ -15,6 +18,47 @@ const songs = [
 export default function Dashboard() {
   const navigate = useNavigate();
   const { theme } = useTheme();
+
+  const baseUrl = import.meta.env.VITE_API_BASE_URL;
+const token = localStorage.getItem("token");
+
+const [totalReleases, setTotalReleases] = useState(0);
+const [walletBalance, setWalletBalance] = useState(0);
+const [recentReleases, setRecentReleases] = useState([]);
+
+
+useEffect(() => {
+  const fetchDashboardData = async () => {
+    try {
+      // ✅ FETCH MY RELEASES
+      const releasesRes = await axios.get(`${baseUrl}/client/release`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const releases = releasesRes.data.data || [];
+      setTotalReleases(releases.length);
+      setRecentReleases(releases.slice(0, 4)); // ✅ Last 4
+
+      // ✅ FETCH WALLET BALANCE (CHANGE URL IF NEEDED)
+      try {
+        const walletRes = await axios.get(`${baseUrl}/client/revenue-report`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        setWalletBalance(walletRes.data.balance || 0);
+      } catch {
+        setWalletBalance(0); // ✅ fallback if API not ready
+      }
+
+    } catch (err) {
+      console.error(err);
+      toast.error("Dashboard data load failed");
+    }
+  };
+
+  fetchDashboardData();
+}, []);
+
 
   // THEME COLORS
   const pageBg = theme === "dark" ? "bg-[#020726] text-white" : "bg-white text-[#020726]";
@@ -84,7 +128,7 @@ export default function Dashboard() {
           </div>
           <div>
             <p className={textSecondary}>Total Releases</p>
-            <p className="text-xl font-bold">5</p>
+            <p className="text-xl font-bold">{totalReleases}</p>
           </div>
         </div>
 
@@ -94,7 +138,7 @@ export default function Dashboard() {
           </div>
           <div>
             <p className={textSecondary}>Account Balance</p>
-            <p className="text-xl font-bold">₹ 0.00</p>
+            <p className="text-xl font-bold">₹ {walletBalance}</p>
           </div>
         </div>
       </div>
@@ -112,15 +156,18 @@ export default function Dashboard() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map((_, i) => (
-            <div key={i} className={`rounded-xl overflow-hidden border ${boxDark}`}>
+          {recentReleases.map((r, i) => (
+  <div key={r._id || i} className={`rounded-xl overflow-hidden border ${boxDark}`}>
+
+            
               <img
-                src="https://www.mixcloud.com/blog/wp-content/uploads/2023/11/Collage-1-2.png"
+                src={r.cover || "https://www.mixcloud.com/blog/wp-content/uploads/2023/11/Collage-1-2.png"}
+
                 className="w-full h-40 sm:h-48 object-cover"
               />
               <div className="p-4">
-                <p className={textSecondary}>Artist Name Here</p>
-                <p className="text-lg font-semibold">Song Title Here</p>
+                <p className={textSecondary}>{r.artist}</p>
+<p className="text-lg font-semibold">{r.title}</p>
               </div>
             </div>
           ))}

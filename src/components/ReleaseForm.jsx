@@ -3,22 +3,21 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
+import axios from "axios";
 import { Listbox } from "@headlessui/react";
 import { ChevronDownIcon, CheckIcon } from "@heroicons/react/20/solid";
-import { useTheme } from "../components/Topbar"; // ⭐ THEME SUPPORT
+import { useTheme } from "../components/Topbar";
+import toast from "react-hot-toast";
 
 /* -------------------------------------------------------------------------- */
-/* LOCAL STORAGE HELPERS                                                      */
+/* PLACEHOLDER COVER                                                          */
 /* -------------------------------------------------------------------------- */
-const STORAGE_KEY = "my_releases_v1";
-const readFromStorage = () => JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-const writeToStorage = (arr) => localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
-
-/* COVER PLACEHOLDER */
 const CoverPlaceholder =
   "https://www.mixcloud.com/blog/wp-content/uploads/2023/11/Collage-1-2.png";
 
-/* FORM VALIDATION */
+/* -------------------------------------------------------------------------- */
+/* FORM VALIDATION                                                            */
+/* -------------------------------------------------------------------------- */
 const Schema = Yup.object().shape({
   title: Yup.string().required("Required"),
   artist: Yup.string().required("Required"),
@@ -27,7 +26,7 @@ const Schema = Yup.object().shape({
 });
 
 /* -------------------------------------------------------------------------- */
-/* CUSTOM FORM LISTBOX (SELECT) COMPONENT                                    */
+/* LISTBOX SELECT COMPONENT                                                   */
 /* -------------------------------------------------------------------------- */
 function FormikListbox({ label, name, options, values, setFieldValue, theme }) {
   const currentVal = values[name];
@@ -44,7 +43,6 @@ function FormikListbox({ label, name, options, values, setFieldValue, theme }) {
 
       <Listbox value={currentVal} onChange={(val) => setFieldValue(name, val)}>
         <div className="relative">
-          {/* BUTTON */}
           <Listbox.Button
             className={`w-full px-4 py-3 rounded-xl flex items-center justify-between border text-left
               ${
@@ -57,7 +55,6 @@ function FormikListbox({ label, name, options, values, setFieldValue, theme }) {
             <span className="truncate">
               {options.find((o) => o.value === currentVal)?.label || "Select"}
             </span>
-
             <ChevronDownIcon
               className={`w-5 h-5 ${
                 theme === "dark" ? "text-gray-300" : "text-gray-500"
@@ -65,14 +62,14 @@ function FormikListbox({ label, name, options, values, setFieldValue, theme }) {
             />
           </Listbox.Button>
 
-          {/* DROPDOWN OPTIONS */}
+          {/* DROPDOWN */}
           <Listbox.Options
             className={`absolute z-50 w-full mt-2 rounded-xl shadow-lg max-h-52 overflow-auto py-1
-            ${
-              theme === "dark"
-                ? "bg-[#0a1039] border border-white/10"
-                : "bg-white border border-gray-200"
-            }`}
+              ${
+                theme === "dark"
+                  ? "bg-[#0a1039] border border-white/10"
+                  : "bg-white border border-gray-200"
+              }`}
           >
             {options.map((opt, idx) => (
               <Listbox.Option
@@ -95,7 +92,6 @@ function FormikListbox({ label, name, options, values, setFieldValue, theme }) {
                 >
                   {opt.label}
                 </span>
-
                 {currentVal === opt.value && (
                   <CheckIcon
                     className={`w-5 h-5 ${
@@ -113,12 +109,15 @@ function FormikListbox({ label, name, options, values, setFieldValue, theme }) {
 }
 
 /* -------------------------------------------------------------------------- */
-/* MAIN COMPONENT: RELEASE FORM                                               */
+/* MAIN FORM                                                                  */
 /* -------------------------------------------------------------------------- */
 export default function ReleaseForm() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { theme } = useTheme();
+
+  const baseUrl = import.meta.env.VITE_API_BASE_URL;
+  const token = localStorage.getItem("token");
 
   const isEdit = Boolean(id);
 
@@ -136,32 +135,79 @@ export default function ReleaseForm() {
     confirm: false,
   });
 
-  /* LOAD EDIT DATA */
+  /* ---------------------------------------------------------------------- */
+  /* FETCH RELEASE FOR EDIT MODE                                            */
+  /* ---------------------------------------------------------------------- */
   useEffect(() => {
-    const list = readFromStorage();
-    if (isEdit) {
-      const found = list.find((r) => String(r.id) === String(id));
-      if (found) setInitial({ ...found, confirm: false });
-    }
+    if (!isEdit) return;
+
+    const fetchRelease = async () => {
+      try {
+        const res = await axios.get(`${baseUrl}/client/release/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        setInitial({
+          ...res.data.data,
+          confirm: false,
+        });
+      } catch (err) {
+        toast.error("Failed to load release");
+      }
+    };
+
+    fetchRelease();
   }, [id]);
 
-  /* FORM SUBMIT */
-  const handleSubmit = (values) => {
-    const list = readFromStorage();
+  /* ---------------------------------------------------------------------- */
+  /* SUBMIT HANDLER: CREATE OR UPDATE                                       */
+  /* ---------------------------------------------------------------------- */
+  const handleSubmit = async (values) => {
+  try {
+    const fd = new FormData();
 
-    if (isEdit) {
-      const updated = list.map((r) =>
-        String(r.id) === String(values.id) ? { ...values } : r
-      );
-      writeToStorage(updated);
-    } else {
-      writeToStorage([{ ...values, id: Date.now() }, ...list]);
+    fd.append("title", values.title);
+    fd.append("artist", values.artist);
+    fd.append("label", values.label);      // ✅ ADDED
+    fd.append("isrc", values.isrc);        // ✅ ADDED
+    fd.append("upc", values.upc);          // ✅ ADDED
+    fd.append("tracksPreview", values.tracksPreview || "");
+    fd.append("contactEmail", values.contactEmail || "");
+    fd.append("contactPhone", values.contactPhone || "");
+    fd.append("notes", values.notes || "");
+    fd.append("releaseDate", values.releaseDate || "");
+    fd.append("status", values.status);
+    fd.append("releasedBefore", String(values.releasedBefore));
+    fd.append("confirm", String(values.confirm));
+
+    if (values.cover instanceof File) {
+      fd.append("cover", values.cover);
     }
 
-    navigate("/releases");
-  };
+    if (isEdit) {
+      await axios.put(`${baseUrl}/client/release/${id}`, fd, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success("Release updated!");
+    } else {
+      await axios.post(`${baseUrl}/client/release`, fd, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success("Release created!");
+    }
 
-  /* THEME CLASSES */
+    navigate("/releases/myRelease");
+  } catch (err) {
+    console.error(err);
+    toast.error("Submit failed");
+  }
+};
+
+
+
+  /* ---------------------------------------------------------------------- */
+  /* THEME STYLES                                                            */
+  /* ---------------------------------------------------------------------- */
   const pageBg = theme === "dark" ? "bg-[#020726] text-white" : "bg-white text-[#020726]";
   const cardBg =
     theme === "dark"
@@ -188,20 +234,18 @@ export default function ReleaseForm() {
   ];
 
   /* ---------------------------------------------------------------------- */
-  /* UI                                                                     */
+  /* UI                                                                      */
   /* ---------------------------------------------------------------------- */
 
   return (
     <div className={`min-h-screen p-6 md:p-8 ${pageBg}`}>
-      {/* HEADER */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h1 className="text-2xl md:text-3xl font-semibold">
+      <div className="flex justify-between mb-6">
+        <h1 className="text-3xl font-semibold">
           {isEdit ? "Edit Release" : "Create Release"}
         </h1>
       </div>
 
-      {/* FORM CARD */}
-      <div className={`rounded-2xl p-6 md:p-8 border ${cardBg}`}>
+      <div className={`rounded-2xl p-8 border ${cardBg}`}>
         <Formik
           initialValues={initial}
           enableReinitialize
@@ -211,20 +255,16 @@ export default function ReleaseForm() {
           {({ values, setFieldValue, errors }) => (
             <Form className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-              {/* LEFT SIDE ------------------------------------------------ */}
+              {/* LEFT */}
               <div className="space-y-4">
-
-                {/* Title */}
                 <div>
                   <label>Release Title</label>
                   <Field
                     name="title"
-                    placeholder="Enter release title"
                     className={`w-full mt-2 p-3 rounded-xl border ${inputBg}`}
                   />
                 </div>
 
-                {/* Release Date */}
                 <div>
                   <label>Release Date</label>
                   <Field
@@ -234,9 +274,8 @@ export default function ReleaseForm() {
                   />
                 </div>
 
-                {/* Released Before (Listbox) */}
                 <FormikListbox
-                  label="Have you released music before?"
+                  label="Released Before?"
                   name="releasedBefore"
                   options={yesNoOptions}
                   values={values}
@@ -244,69 +283,31 @@ export default function ReleaseForm() {
                   theme={theme}
                 />
 
-                {/* Phone */}
                 <div>
                   <label>Contact Phone</label>
                   <Field
                     name="contactPhone"
-                    placeholder="+91 98765 43210"
                     className={`w-full mt-2 p-3 rounded-xl border ${inputBg}`}
                   />
                 </div>
 
-                {/* Notes */}
                 <div>
                   <label>Short Notes / Bio</label>
                   <Field
                     as="textarea"
-                    name="notes"
                     rows="5"
-                    placeholder="Tell us about the release..."
-                    className={`w-full mt-2 p-3 rounded-xl border ${inputBg}`}
-                  />
-                </div>
-              </div>
-
-              {/* RIGHT SIDE ----------------------------------------------- */}
-              <div className="space-y-4">
-
-                {/* Artist */}
-                <div>
-                  <label>Primary Artist</label>
-                  <Field
-                    name="artist"
-                    placeholder="Artist name"
+                    name="notes"
                     className={`w-full mt-2 p-3 rounded-xl border ${inputBg}`}
                   />
                 </div>
 
-                {/* Track preview */}
-                <div>
-                  <label>Tracks / Preview Link</label>
-                  <Field
-                    name="tracksPreview"
-                    placeholder="Drive / Dropbox / SoundCloud"
-                    className={`w-full mt-2 p-3 rounded-xl border ${inputBg}`}
-                  />
-                </div>
-
-                {/* Email */}
-                <div>
-                  <label>Contact Email</label>
-                  <Field
-                    name="contactEmail"
-                    placeholder="you@example.com"
-                    className={`w-full mt-2 p-3 rounded-xl border ${inputBg}`}
-                  />
-                </div>
-
-                {/* Cover Upload */}
+{/* COVER UPLOAD */}
                 <div>
                   <label>Cover Art</label>
-                  <div className="flex gap-4 items-center mt-2 flex-col sm:flex-row">
-                    {/* Preview */}
+
+                  <div className="flex gap-4 mt-2 items-center">
                     <div
-                      className={`w-[90px] h-[90px] rounded-xl overflow-hidden border flex-shrink-0
+                      className={`w-[90px] h-[90px] rounded-xl overflow-hidden border
                         ${
                           theme === "dark"
                             ? "bg-[#1b254b] border-white/10"
@@ -319,7 +320,6 @@ export default function ReleaseForm() {
                       />
                     </div>
 
-                    {/* Input */}
                     <input
                       type="file"
                       accept="image/*"
@@ -334,7 +334,64 @@ export default function ReleaseForm() {
                   </div>
                 </div>
 
-                {/* Status */}
+              </div>
+
+              {/* RIGHT */}
+              <div className="space-y-4">
+                <div>
+                  <label>Artist</label>
+                  <Field
+                    name="artist"
+                    className={`w-full mt-2 p-3 rounded-xl border ${inputBg}`}
+                  />
+                </div>
+
+                {/* LABEL */}
+<div>
+  <label>Label</label>
+  <Field
+    name="label"
+    className={`w-full mt-2 p-3 rounded-xl border ${inputBg}`}
+  />
+</div>
+
+{/* ISRC */}
+<div>
+  <label>ISRC</label>
+  <Field
+    name="isrc"
+    className={`w-full mt-2 p-3 rounded-xl border ${inputBg}`}
+  />
+</div>
+
+{/* UPC */}
+<div>
+  <label>UPC</label>
+  <Field
+    name="upc"
+    className={`w-full mt-2 p-3 rounded-xl border ${inputBg}`}
+  />
+</div>
+
+
+                <div>
+                  <label>Tracks / Preview Link</label>
+                  <Field
+                    name="tracksPreview"
+                    className={`w-full mt-2 p-3 rounded-xl border ${inputBg}`}
+                  />
+                </div>
+
+                <div>
+                  <label>Email</label>
+                  <Field
+                    name="contactEmail"
+                    className={`w-full mt-2 p-3 rounded-xl border ${inputBg}`}
+                  />
+                </div>
+
+                
+
                 <FormikListbox
                   label="Status"
                   name="status"
@@ -345,7 +402,7 @@ export default function ReleaseForm() {
                 />
 
                 {/* Confirm */}
-                <div className="flex items-center gap-3 mt-2">
+                <div className="flex items-center gap-3">
                   <Field type="checkbox" name="confirm" />
                   <label>I confirm the information is accurate</label>
                 </div>
@@ -354,8 +411,8 @@ export default function ReleaseForm() {
                 )}
               </div>
 
-              {/* FOOTER BUTTONS ------------------------------------------- */}
-              <div className="md:col-span-2 flex justify-end gap-3 mt-4">
+              {/* FOOTER BUTTONS */}
+              <div className="md:col-span-2 flex justify-end mt-6 gap-4">
                 <button
                   type="button"
                   onClick={() => navigate("/releases")}
@@ -372,6 +429,7 @@ export default function ReleaseForm() {
                   {isEdit ? "Save Changes" : "Submit Release"}
                 </button>
               </div>
+
             </Form>
           )}
         </Formik>
