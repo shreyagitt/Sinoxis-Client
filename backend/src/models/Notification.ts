@@ -1,26 +1,40 @@
-import mongoose, { Document, Schema } from "mongoose";
+import { Schema, model, Types } from "mongoose";
 
-export interface NotificationDocument extends Document {
-  userId?: string; // null if broadcast to all users
-  title: string;
-  desc: string;
-  time: string;
-  isRead: boolean;
-  createdAt: Date;
-}
-
-const NotificationSchema = new Schema<NotificationDocument>(
+const NotificationSchema = new Schema(
   {
-    userId: { type: String, default: null }, // for targeted or broadcast
-    title: { type: String, required: true },
-    desc: { type: String, required: true },
-    time: { type: String, required: true },
-    isRead: { type: Boolean, default: false },
+    userId: {
+      type: Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+
+    title: {
+      type: String,
+      required: true,
+    },
+
+    desc: {
+      type: String,
+      required: true,
+    },
+
+    time: {
+      type: String, // formatted time for UI
+      default: () => new Date().toLocaleString(),
+    },
+
+    isRead: {
+      type: Boolean,
+      default: false,
+    },
+
+    roleTarget: {
+      type: String,
+      enum: ["client", "admin"],
+      default: "client",
+    },
   },
   { timestamps: true }
 );
 
-export default mongoose.model<NotificationDocument>(
-  "Notification",
-  NotificationSchema
-);
+export default model("Notification", NotificationSchema);

@@ -21,6 +21,23 @@ export interface User {
   tenantId?: string | null;  // ⭐ FIX: added to match schema
   isActive: boolean;
   lastLogin?: Date | null;
+   balance: number;
+
+  bankDetails?: {
+  accountHolder?: string;
+  accountNumber?: string;
+  bankName?: string;
+  routingNumber?: string;
+};
+
+paypalDetails?: {
+  name?: string;
+  email?: string;
+  paypalId?: string;
+};
+
+
+
   createdAt?: Date;
   updatedAt?: Date;
 }

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { AdminPaymentController } from "../controllers/paymentController";
-import { authenticate, authorize } from "../middlewares/auth.js";
+import { authenticate, authorize } from "../middlewares/auth";
 
 const router = Router();
 
@@ -8,28 +8,28 @@ const router = Router();
    ADMIN PAYMENT ROUTES
 ============================================================ */
 
-// List all requests
+// ✅ List all payment requests
 router.get(
   "/",
   authenticate,
   authorize("admin"),
-  AdminPaymentController.list
+  AdminPaymentController.listAll
 );
 
-// Update withdraw status
-router.put(
-  "/:id/status",
+// ✅ Update request status (Paid / Failed)
+router.patch(
+  "/:id",
   authenticate,
   authorize("admin"),
   AdminPaymentController.updateStatus
 );
 
-// Delete request
+// ✅ Delete payment request
 router.delete(
   "/:id",
   authenticate,
   authorize("admin"),
-  AdminPaymentController.delete
+  AdminPaymentController.deleteRequest
 );
 
 export default router;

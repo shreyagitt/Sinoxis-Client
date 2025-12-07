@@ -1,57 +1,50 @@
-import mongoose, { Document, Schema } from "mongoose";
+import { Schema, model, Types } from "mongoose";
 
-export interface PlatformRevenue {
-  name: string;
-  category: string; // e.g. "Streaming", "Download"
-  streams: number;
-  revenue: number;
-  avgPerStream: number;
-  growth: number;
-  marketShare: number;
-}
+const platformSchema = new Schema({
+  icon: { type: String },
+  name: { type: String },
+  category: { type: String },
+  streams: { type: Number },
+  revenue: { type: Number },
+  avgPerStream: { type: Number },
+  growth: { type: Number },
+  marketShare: { type: Number },
+});
 
-export interface RevenueAnalyticsDocument extends Document {
-  totalRevenue: number;
-  streamingRevenue: number;
-  downloadsRevenue: number;
-  royaltiesRevenue: number;
-  trends: { month: string; revenue: number }[];
-  platforms: PlatformRevenue[];
-  lastUpdated: Date;
-}
-
-const PlatformSchema = new Schema<PlatformRevenue>(
+const revenueAnalyticsSchema = new Schema(
   {
-    name: String,
-    category: String,
-    streams: Number,
-    revenue: Number,
-    avgPerStream: Number,
-    growth: Number,
-    marketShare: Number,
-  },
-  { _id: false }
-);
+    userId: { type: Types.ObjectId, ref: "User", default: null  },
 
-const RevenueAnalyticsSchema = new Schema<RevenueAnalyticsDocument>(
-  {
-    totalRevenue: { type: Number, required: true },
-    streamingRevenue: { type: Number, required: true },
-    downloadsRevenue: { type: Number, required: true },
-    royaltiesRevenue: { type: Number, required: true },
-    trends: [
-      {
-        month: String,
-        revenue: Number,
-      },
-    ],
-    platforms: [PlatformSchema],
-    lastUpdated: { type: Date, default: Date.now },
+    totalRevenue: Number,
+    totalChange: String,
+    growthAmount: Number,
+
+    streamingRevenue: Number,
+    streamingChange: String,
+    streamingPercent: Number,
+    streamingGrowth: Number,
+
+    downloadsRevenue: Number,
+    downloadsChange: String,
+
+    royaltiesRevenue: Number,
+    royaltiesChange: String,
+
+    yearToDate: Number,
+    currentMonth: Number,
+    growthRate: String,
+    revenueSources: Number,
+
+    distribution: {
+      streaming: Number,
+      downloads: Number,
+      royalties: Number,
+    },
+
+    platforms: [platformSchema],
   },
   { timestamps: true }
 );
 
-export default mongoose.model<RevenueAnalyticsDocument>(
-  "RevenueAnalytics",
-  RevenueAnalyticsSchema
-);
+export default model("RevenueAnalytics", revenueAnalyticsSchema);
+

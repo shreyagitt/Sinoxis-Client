@@ -1,35 +1,20 @@
 import { Router } from "express";
-import { ClientNotificationController } from "../../controllers/client/NotificationController";
 import { authenticate, authorize } from "../../middlewares/auth";
+import {
+  getMyNotifications,
+  deleteNotification,
+  markAllAsRead,
+} from "../../controllers/client/NotificationController";
 
 const router = Router();
 
-/* ============================================================
-   CLIENT NOTIFICATION ROUTES (CLIENT ONLY)
-   ============================================================ */
+// ✅ GET NOTIFICATIONS
+router.get("/", authenticate, authorize("client"), getMyNotifications);
 
-// Get all notifications for the logged-in client
-router.get(
-  "/",
-  authenticate,
-  authorize("client"),
-  ClientNotificationController.getAll
-);
+// ✅ DELETE SINGLE
+router.delete("/:id", authenticate, authorize("client"), deleteNotification);
 
-// Mark all as read
-router.patch(
-  "/mark-all",
-  authenticate,
-  authorize("client"),
-  ClientNotificationController.markAllAsRead
-);
-
-// Delete a notification
-router.delete(
-  "/:id",
-  authenticate,
-  authorize("client"),
-  ClientNotificationController.deleteOne
-);
+// ✅ MARK ALL READ
+router.patch("/mark-all-read", authenticate, authorize("client"), markAllAsRead);
 
 export default router;

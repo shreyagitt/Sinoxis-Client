@@ -4,15 +4,18 @@ import { authenticate, authorize } from "../../middlewares/auth";
 
 const router = Router();
 
-/* ============================================================
-   CLIENT REVENUE OVERVIEW (CLIENT ONLY)
-   ============================================================ */
-
 router.get(
-  "/overview",
+  "/",
   authenticate,
   authorize("client"),
-  ClientRevenueController.getOverview
+  ClientRevenueController.getMyAnalytics
+);
+
+router.get(
+  "/export/csv",
+  authenticate,
+  authorize("client"),
+  ClientRevenueController.exportMyAnalyticsCSV
 );
 
 export default router;

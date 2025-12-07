@@ -1,54 +1,27 @@
 import { Router } from "express";
 import { authenticate, authorize } from "../middlewares/auth";
-import { releaseController } from "../controllers/releaseController";
-import upload from "../middlewares/upload";
+import {
+  getAllReleases,
+  updateReleaseStatus,
+} from "../controllers/releaseController";
 
 const router = Router();
 
-/* ============================================================
-   ADMIN RELEASE MANAGEMENT ROUTES
-   ============================================================ */
-
-// Create a release (admin optional)
-router.post(
-  "/",
-  authenticate,
-  authorize("admin"),
-  upload.single("coverImage"),   // Only cover upload supported
-  releaseController.create
-);
-
-// Update a release (admin full access)
-router.put(
-  "/:id",
-  authenticate,
-  authorize("admin"),
-  upload.single("coverImage"),   // Only cover upload supported
-  releaseController.update
-);
-
-// List all releases
+// ✅ GET ALL RELEASES (ADMIN ONLY)
 router.get(
   "/",
   authenticate,
   authorize("admin"),
-  releaseController.list
+  getAllReleases
 );
 
-// Update release status
-router.put(
+// ✅ UPDATE RELEASE STATUS (ADMIN ONLY)
+router.patch(
   "/:id/status",
   authenticate,
   authorize("admin"),
-  releaseController.updateStatus
-);
-
-// Delete release
-router.delete(
-  "/:id",
-  authenticate,
-  authorize("admin"),
-  releaseController.delete
+  updateReleaseStatus
 );
 
 export default router;
+

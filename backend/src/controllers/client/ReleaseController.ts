@@ -1,163 +1,113 @@
 import { Request, Response } from "express";
 import Release from "../../models/Release";
-import { asyncHandler } from "../../middlewares/errorHandler";
-import { HTTP_STATUS } from "../../config/constants";
 import cloudinary from "../../config/cloudinary";
+import { asyncHandler } from "../../middlewares/errorHandler";
 
-export const ClientReleaseController = {
+/* ✅ CREATE */
+export const createRelease = asyncHandler(async (req: Request, res: Response) => {
+  if (!req.user || !req.user.userId) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
 
-  /* =========================================================
-     GET MY RELEASES
-  ========================================================== */
-  mine: asyncHandler(async (req: any, res: Response) => {
-    const releases = await Release.find({
-      userId: req.user.userId,
-    }).sort({ createdAt: -1 });
+  let coverUrl = "";
+  let publicId = "";
 
-    res.status(HTTP_STATUS.OK).json({
-      success: true,
-      data: releases,
-    });
-  }),
+  if (req.file) {
+    const upload = await cloudinary.uploader.upload(
+      `data:image/png;base64,${req.file.buffer.toString("base64")}`,
+      { folder: "releases" }
+    );
 
-  /* =========================================================
-     CREATE RELEASE
-  ========================================================== */
-  create: asyncHandler(async (req: any, res: Response) => {
-    const data: any = {
-      userId: req.user.userId,
+    coverUrl = upload.secure_url;
+    publicId = upload.public_id;
+  }
 
-      title: req.body.title,
-      artist: req.body.artist,
-      label: req.body.label,
-      isrc: req.body.isrc,
-      upc: req.body.upc,
+  const release = await Release.create({
+    ...req.body,
+    userId: req.user.userId, // ✅ FIXED
+    cover: coverUrl,
+    coverImageId: publicId,
+  });
 
-      status: req.body.status || "Pending",
-    };
+  res.status(201).json({ success: true, data: release });
+});
 
-    /* ============= COVER IMAGE HANDLING ============= */
+/* ✅ GET MY RELEASES */
+export const getMyReleases = asyncHandler(async (req: Request, res: Response) => {
+  if (!req.user || !req.user.userId) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
 
-    // Base64 upload
-    if (req.body.cover && !req.files?.coverImage?.[0]) {
-      const uploaded = await cloudinary.uploader.upload(req.body.cover, {
-        folder: "sinoxis/releases",
-        resource_type: "image"
-      });
+  const releases = await Release.find({
+    userId: req.user.userId, // ✅ FIXED
+  }).sort({ createdAt: -1 });
 
-      data.cover = uploaded.secure_url;
-      data.coverImageId = uploaded.public_id;
+  res.json({ success: true, data: releases });
+});
+
+/* ✅ UPDATE */
+export const updateMyRelease = asyncHandler(async (req: Request, res: Response) => {
+  if (!req.user || !req.user.userId) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+
+  const old = await Release.findById(req.params.id);
+  if (!old) {
+    return res.status(404).json({ success: false, message: "Release not found" });
+  }
+
+  // ✅ OWNER CHECK (FIXED)
+  if (old.userId.toString() !== req.user.userId.toString()) {
+    return res.status(403).json({ success: false, message: "Forbidden" });
+  }
+
+  let cover = old.cover;
+  let coverId = old.coverImageId;
+
+  if (req.file) {
+    if (coverId) {
+      await cloudinary.uploader.destroy(coverId);
     }
 
-    // File upload (multer)
-    if (req.files?.coverImage?.[0]) {
-      const uploaded = await cloudinary.uploader.upload(
-        req.files.coverImage[0].path,
-        {
-          folder: "sinoxis/releases",
-          resource_type: "image"
-        }
-      );
+    const upload = await cloudinary.uploader.upload(
+      `data:image/png;base64,${req.file.buffer.toString("base64")}`,
+      { folder: "releases" }
+    );
 
-      data.cover = uploaded.secure_url;
-      data.coverImageId = uploaded.public_id;
-    }
+    cover = upload.secure_url;
+    coverId = upload.public_id;
+  }
 
-    const release = await Release.create(data);
+  const updated = await Release.findByIdAndUpdate(
+    req.params.id,
+    { ...req.body, cover, coverImageId: coverId },
+    { new: true }
+  );
 
-    res.status(HTTP_STATUS.CREATED).json({
-      success: true,
-      data: release,
-      message: "Release created successfully",
-    });
-  }),
+  res.json({ success: true, data: updated });
+});
 
-  /* =========================================================
-     GET ONE RELEASE
-  ========================================================== */
-  getOne: asyncHandler(async (req: any, res: Response) => {
-    const release = await Release.findOne({
-      _id: req.params.id,
-      userId: req.user.userId,
-    });
+/* ✅ DELETE */
+export const deleteMyRelease = asyncHandler(async (req: Request, res: Response) => {
+  if (!req.user || !req.user.userId) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
 
-    if (!release) {
-      return res
-        .status(HTTP_STATUS.NOT_FOUND)
-        .json({ success: false, message: "Release not found" });
-    }
+  const doc = await Release.findById(req.params.id);
+  if (!doc) {
+    return res.status(404).json({ success: false, message: "Release not found" });
+  }
 
-    res.status(HTTP_STATUS.OK).json({ success: true, data: release });
-  }),
+  // ✅ OWNER CHECK (FIXED)
+  if (doc.userId.toString() !== req.user.userId.toString()) {
+    return res.status(403).json({ success: false, message: "Forbidden" });
+  }
 
-  /* =========================================================
-     UPDATE RELEASE
-  ========================================================== */
-  update: asyncHandler(async (req: any, res: Response) => {
-    const release = await Release.findOne({
-      _id: req.params.id,
-      userId: req.user.userId,
-    });
+  if (doc.coverImageId) {
+    await cloudinary.uploader.destroy(doc.coverImageId);
+  }
 
-    if (!release) {
-      return res
-        .status(HTTP_STATUS.NOT_FOUND)
-        .json({ success: false, message: "Release not found" });
-    }
+  await doc.deleteOne();
 
-    if (release.status === "Approved") {
-      return res
-        .status(HTTP_STATUS.FORBIDDEN)
-        .json({ success: false, message: "Cannot edit an approved release" });
-    }
-
-    /* ============= UPDATE SIMPLE FIELDS ============= */
-    release.title = req.body.title ?? release.title;
-    release.artist = req.body.artist ?? release.artist;
-    release.label = req.body.label ?? release.label;
-    release.isrc = req.body.isrc ?? release.isrc;
-    release.upc = req.body.upc ?? release.upc;
-    release.status = req.body.status ?? release.status;
-
-    /* ============= COVER UPDATE ============= */
-
-    const incomingBase64 = req.body.cover && !req.files?.coverImage?.[0];
-    const incomingFile = req.files?.coverImage?.[0];
-
-    if (incomingBase64 || incomingFile) {
-      // Delete old Cloudinary image
-      if (release.coverImageId) {
-        try {
-          await cloudinary.uploader.destroy(release.coverImageId);
-        } catch (err) {
-          console.warn("Cloudinary delete error:", err);
-        }
-      }
-
-      let uploaded;
-
-      if (incomingBase64) {
-        uploaded = await cloudinary.uploader.upload(req.body.cover, {
-          folder: "sinoxis/releases",
-          resource_type: "image"
-        });
-      } else {
-        uploaded = await cloudinary.uploader.upload(incomingFile.path, {
-          folder: "sinoxis/releases",
-          resource_type: "image"
-        });
-      }
-
-      release.cover = uploaded.secure_url;
-      release.coverImageId = uploaded.public_id;
-    }
-
-    await release.save();
-
-    res.status(HTTP_STATUS.OK).json({
-      success: true,
-      data: release,
-      message: "Release updated",
-    });
-  }),
-};
+  res.json({ success: true, message: "Release deleted" });
+});

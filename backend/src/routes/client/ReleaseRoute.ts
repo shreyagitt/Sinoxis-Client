@@ -1,46 +1,47 @@
 import { Router } from "express";
 import { authenticate, authorize } from "../../middlewares/auth";
 import upload from "../../middlewares/upload";
-import { ClientReleaseController } from "../../controllers/client/ReleaseController";
+import {
+  createRelease,
+  getMyReleases,
+  updateMyRelease,
+  deleteMyRelease,
+} from "../../controllers/client/ReleaseController";
 
 const router = Router();
 
-/* ============================================================
-   CLIENT RELEASE ROUTES (CLIENT ONLY)
-   ============================================================ */
-
-// Get all releases of logged-in client
-router.get(
-  "/",
-  authenticate,
-  authorize("client"),
-  ClientReleaseController.mine
-);
-
-// Get a single release owned by the client
-router.get(
-  "/:id",
-  authenticate,
-  authorize("client"),
-  ClientReleaseController.getOne
-);
-
-// Create a new release
+// ✅ CREATE RELEASE (CLIENT)
 router.post(
   "/",
   authenticate,
   authorize("client"),
-  upload.single("coverImage"),   // File upload for cover
-  ClientReleaseController.create
+  upload.single("cover"),
+  createRelease
 );
 
-// Update release
+// ✅ GET MY RELEASES (CLIENT)
+router.get(
+  "/",
+  authenticate,
+  authorize("client"),
+  getMyReleases
+);
+
+// ✅ UPDATE MY RELEASE (CLIENT)
 router.put(
   "/:id",
   authenticate,
   authorize("client"),
-  upload.single("coverImage"),   // File upload for updated cover
-  ClientReleaseController.update
+  upload.single("cover"),
+  updateMyRelease
+);
+
+// ✅ DELETE MY RELEASE (CLIENT)
+router.delete(
+  "/:id",
+  authenticate,
+  authorize("client"),
+  deleteMyRelease
 );
 
 export default router;

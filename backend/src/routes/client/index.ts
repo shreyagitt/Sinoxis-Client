@@ -16,6 +16,7 @@ import paymentRoutes from './PaymentRoutes';
 import LabelRoutes from './LabelRoutes';
 import CopyClaimRoutes from './CopyClaimRoutes';
 import OACRequest from './oac.routes';
+import NotificationRoutes from './NotificationRoutes';
 
 
 
@@ -39,6 +40,7 @@ clientRouter.use(CLIENT_API_ENDPOINTS.PAYMENT, paymentRoutes);
 clientRouter.use(CLIENT_API_ENDPOINTS.LABEL, LabelRoutes);
 clientRouter.use(CLIENT_API_ENDPOINTS.COPYRIGHTCLAIM, CopyClaimRoutes);
 clientRouter.use(CLIENT_API_ENDPOINTS.OFFICIALARTIST, OACRequest);
+clientRouter.use(CLIENT_API_ENDPOINTS.NOTIFICATION, NotificationRoutes);
 
 
 export default clientRouter;

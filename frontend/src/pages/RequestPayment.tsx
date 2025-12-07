@@ -4,6 +4,9 @@ import { Eye, Search, CheckCircle, XCircle, Trash2 } from "lucide-react";
 import { useAppSelector } from "../store/hook";
 import toast from "react-hot-toast";
 
+/* ============================
+   TYPES (MATCH BACKEND MODEL)
+============================ */
 interface BankDetails {
   accountHolder?: string;
   accountNumber?: string;
@@ -45,17 +48,18 @@ const AdminPaymentRequests: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [active, setActive] = useState<PaymentRequest | null>(null);
 
-  /* ============================================================
-     FETCH PAYMENT REQUESTS
-  ============================================================ */
+  /* ============================
+        ✅ FETCH ALL REQUESTS
+  ============================ */
   const fetchRequests = async () => {
     try {
       const res = await axios.get(`${baseUrl}/payment`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
       setData(res.data.data);
     } catch {
-      toast.error("Failed to load requests");
+      toast.error("Failed to load payment requests");
     }
   };
 
@@ -63,27 +67,28 @@ const AdminPaymentRequests: React.FC = () => {
     if (token) fetchRequests();
   }, [token]);
 
-  /* ============================================================
-     UPDATE STATUS
-  ============================================================ */
+  /* ============================
+        ✅ UPDATE STATUS
+  ============================ */
   const updateStatus = async (id: string, status: "Paid" | "Failed") => {
     try {
-      await axios.put(
-        `${baseUrl}/payment/${id}/status`,
+      await axios.patch(
+        `${baseUrl}/payment/${id}`,
         { status },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      toast.success(`Status updated`);
+
+      toast.success("Status updated");
       fetchRequests();
       setShowModal(false);
     } catch {
-      toast.error("Failed to update");
+      toast.error("Failed to update status");
     }
   };
 
-  /* ============================================================
-     DELETE REQUEST
-  ============================================================ */
+  /* ============================
+        ✅ DELETE REQUEST
+  ============================ */
   const deleteReq = async (id: string) => {
     if (!confirm("Delete this request?")) return;
 
@@ -99,16 +104,16 @@ const AdminPaymentRequests: React.FC = () => {
     }
   };
 
-  /* ============================================================
-     SEARCH FILTER
-  ============================================================ */
+  /* ============================
+        ✅ SEARCH FILTER
+  ============================ */
   const filtered = data.filter((r) =>
     (r.userId?.email || "").toLowerCase().includes(search.toLowerCase())
   );
 
-  /* ============================================================
-     UI
-  ============================================================ */
+  /* ============================
+        ✅ UI
+  ============================ */
   return (
     <div className="p-6">
 
@@ -131,7 +136,7 @@ const AdminPaymentRequests: React.FC = () => {
       {/* TABLE */}
       <div className="bg-white rounded-xl shadow border overflow-x-auto">
         <table className="min-w-full text-sm">
-          <thead className="bg-blue-600 text-white">
+          <thead className="bg-green-600 text-white">
             <tr>
               <th className="p-3 text-left">User</th>
               <th className="p-3 text-left">Amount</th>
@@ -145,19 +150,15 @@ const AdminPaymentRequests: React.FC = () => {
           <tbody>
             {filtered.map((req) => (
               <tr key={req._id} className="border-b hover:bg-gray-100">
-                {/* USER */}
                 <td className="p-3">
                   {req.userId?.fullName} <br />
                   <span className="text-xs text-gray-500">{req.userId?.email}</span>
                 </td>
 
-                {/* AMOUNT */}
                 <td className="p-3 font-semibold text-green-700">${req.amount}</td>
 
-                {/* METHOD */}
                 <td className="p-3 capitalize">{req.method}</td>
 
-                {/* STATUS */}
                 <td className="p-3">
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-semibold ${
@@ -172,12 +173,10 @@ const AdminPaymentRequests: React.FC = () => {
                   </span>
                 </td>
 
-                {/* DATE */}
                 <td className="p-3">
                   {new Date(req.createdAt).toLocaleDateString()}
                 </td>
 
-                {/* ACTIONS */}
                 <td className="p-3 flex justify-center gap-4">
                   <button
                     className="text-blue-600 hover:text-blue-800"
@@ -210,9 +209,12 @@ const AdminPaymentRequests: React.FC = () => {
         </table>
       </div>
 
-      {/* MODAL */}
+      {/* ============================
+              ✅ MODAL
+      ============================ */}
       {showModal && active && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[99999]">
+
           <div className="bg-white rounded-xl p-6 w-full max-w-lg shadow-xl border">
 
             <h2 className="text-xl font-semibold mb-4">Payment Details</h2>
@@ -227,19 +229,20 @@ const AdminPaymentRequests: React.FC = () => {
               <h3 className="font-semibold mt-3">Account Details</h3>
 
               {active.method === "bank" ? (
-                <>
-                  <p><strong>Bank:</strong> {active.paymentDetails.bank?.bankName}</p>
-                  <p><strong>Holder:</strong> {active.paymentDetails.bank?.accountHolder}</p>
-                  <p><strong>Account No:</strong> {active.paymentDetails.bank?.accountNumber}</p>
-                  <p><strong>Routing:</strong> {active.paymentDetails.bank?.routingNumber}</p>
-                </>
-              ) : (
-                <>
-                  <p><strong>Name:</strong> {active.paymentDetails.paypal?.name}</p>
-                  <p><strong>Email:</strong> {active.paymentDetails.paypal?.email}</p>
-                  <p><strong>PayPal ID:</strong> {active.paymentDetails.paypal?.paypalId}</p>
-                </>
-              )}
+  <>
+    <p><strong>Bank:</strong> {active.paymentDetails?.bank?.bankName || "—"}</p>
+    <p><strong>Holder:</strong> {active.paymentDetails?.bank?.accountHolder || "—"}</p>
+    <p><strong>Account No:</strong> {active.paymentDetails?.bank?.accountNumber || "—"}</p>
+    <p><strong>Routing:</strong> {active.paymentDetails?.bank?.routingNumber || "—"}</p>
+  </>
+) : (
+  <>
+    <p><strong>Name:</strong> {active.paymentDetails?.paypal?.name || "—"}</p>
+    <p><strong>Email:</strong> {active.paymentDetails?.paypal?.email || "—"}</p>
+    <p><strong>PayPal ID:</strong> {active.paymentDetails?.paypal?.paypalId || "—"}</p>
+  </>
+)}
+
             </div>
 
             {/* BUTTONS */}
@@ -255,14 +258,14 @@ const AdminPaymentRequests: React.FC = () => {
               {active.status === "Pending" && (
                 <>
                   <button
-                    className="px-4 py-2 bg-green-600 text-white rounded-lg"
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg flex items-center gap-2"
                     onClick={() => updateStatus(active._id, "Paid")}
                   >
                     <CheckCircle size={18} /> Approve
                   </button>
 
                   <button
-                    className="px-4 py-2 bg-red-600 text-white rounded-lg"
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg flex items-center gap-2"
                     onClick={() => updateStatus(active._id, "Failed")}
                   >
                     <XCircle size={18} /> Reject

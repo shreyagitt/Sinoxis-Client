@@ -1,16 +1,39 @@
-import mongoose from "mongoose";
+import mongoose, { Schema, Document, Types } from "mongoose";
 
-const PaymentRequestSchema = new mongoose.Schema(
+export interface PaymentRequestDocument extends Document {
+  userId: Types.ObjectId;
+  amount: number;
+  processingFee: number;
+  totalReceive: number;
+  method: "bank" | "paypal";
+  notes?: string;
+  status: "Pending" | "Paid" | "Failed";
+  paymentDetails?: {
+    bank?: {
+      accountHolder?: string;
+      accountNumber?: string;
+      bankName?: string;
+      routingNumber?: string;
+    };
+    paypal?: {
+      name?: string;
+      email?: string;
+      paypalId?: string;
+    };
+  };
+}
+
+const PaymentRequestSchema = new Schema<PaymentRequestDocument>(
   {
     userId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
 
     amount: { type: Number, required: true },
     processingFee: { type: Number, default: 0 },
-    totalReceive: { type: Number },
+    totalReceive: { type: Number, required: true },
 
     method: {
       type: String,
@@ -43,4 +66,9 @@ const PaymentRequestSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("PaymentRequest", PaymentRequestSchema);
+const PaymentRequest = mongoose.model<PaymentRequestDocument>(
+  "PaymentRequest",
+  PaymentRequestSchema
+);
+
+export default PaymentRequest;

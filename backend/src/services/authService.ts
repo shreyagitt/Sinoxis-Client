@@ -87,20 +87,22 @@ export class AuthService {
   const { token, refreshToken } = this.generateTokens(user);
 
   return {
-    user: {
-      _id: user._id!,
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      role: user.role,
-      isActive: user.isActive,
-      lastLogin: user.lastLogin,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    },
-    token,
-    refreshToken,
-  };
+  user: {
+    _id: user._id!,
+    email: user.email,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    role: user.role,
+    isActive: user.isActive,
+    lastLogin: user.lastLogin,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
+    balance: user.balance ?? 0, // ✅ REQUIRED FIX
+  },
+  token,
+  refreshToken,
+};
+
 }
 
 
@@ -130,20 +132,22 @@ export class AuthService {
     const { token, refreshToken } = this.generateTokens(newUser);
 
     return {
-      user: {
-        _id: newUser._id,
-        email: newUser.email,
-        firstName: newUser.firstName,
-        lastName: newUser.lastName,
-        role: newUser.role,
-        isActive: newUser.isActive,
-        lastLogin: newUser.lastLogin,
-        createdAt: newUser.createdAt,
-        updatedAt: newUser.updatedAt,
-      },
-      token,
-      refreshToken,
-    };
+  user: {
+    _id: newUser._id,
+    email: newUser.email,
+    firstName: newUser.firstName,
+    lastName: newUser.lastName,
+    role: newUser.role,
+    isActive: newUser.isActive,
+    lastLogin: newUser.lastLogin,
+    createdAt: newUser.createdAt,
+    updatedAt: newUser.updatedAt,
+    balance: newUser.balance ?? 0, // ✅ REQUIRED FIX
+  },
+  token,
+  refreshToken,
+};
+
   }
 
   /**

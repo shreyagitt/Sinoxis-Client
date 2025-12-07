@@ -43,7 +43,8 @@ export const API_ENDPOINTS = {
   PAYMENT:'/api/v1/payment',
   LABEL:'/api/v1/labels',
   COPYRIGHTCLAIM:'/api/v1/copyright-claim',
-  OFFICIALARTIST:'/api/v1/official-artist'
+  OFFICIALARTIST:'/api/v1/official-artist',
+  NOTIFICATION:'/api/v1/notifications',
 
 } as const;
 
@@ -62,7 +63,8 @@ export const CLIENT_API_ENDPOINTS = {
   PAYMENT:'/payment',
   LABEL:'/labels',
   COPYRIGHTCLAIM:'/copyright-claim',
-  OFFICIALARTIST:'/official-artist'
+  OFFICIALARTIST:'/official-artist',
+  NOTIFICATION:'/notifications',
 } as const;
 
 export const HTTP_STATUS = {

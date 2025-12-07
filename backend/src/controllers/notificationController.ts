@@ -3,59 +3,57 @@ import Notification from "../models/Notification";
 import { asyncHandler } from "../middlewares/errorHandler";
 import { HTTP_STATUS } from "../config/constants";
 
-export const AdminNotificationController = {
-  /**
-   * 🧾 Create Notification
-   * POST /api/v1/notifications
-   */
-  create: asyncHandler(async (req: Request, res: Response) => {
-    const { userId, title, desc, time } = req.body;
-
-    if (!title || !desc || !time) {
-      return res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        error: "Title, description, and time are required.",
-      });
-    }
+// ✅ SEND NOTIFICATION TO CLIENT
+export const sendNotification = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { userId, title, desc } = req.body;
 
     const notification = await Notification.create({
-      userId: userId || null, // if null → broadcast to all
+      userId,
       title,
       desc,
-      time,
+      roleTarget: "client",
     });
 
     res.status(HTTP_STATUS.CREATED).json({
       success: true,
-      message: "Notification created successfully.",
+      message: "Notification sent",
       data: notification,
     });
-  }),
+  }
+);
 
-  /**
-   * 📋 View All Notifications (for dashboard)
-   * GET /api/v1/notifications
-   */
-  list: asyncHandler(async (_req: Request, res: Response) => {
-    const notifications = await Notification.find().sort({ createdAt: -1 });
-    res.status(HTTP_STATUS.OK).json({ success: true, data: notifications });
-  }),
+// ✅ GET ALL NOTIFICATIONS (ADMIN)
+export const getAllNotifications = asyncHandler(
+  async (_req: Request, res: Response) => {
+    const notifications = await Notification.find()
+      .populate("userId", "fullName email")
+      .sort({ createdAt: -1 });
 
-  /**
-   * ❌ Delete Notification
-   * DELETE /api/v1/notifications/:id
-   */
-  delete: asyncHandler(async (req: Request, res: Response) => {
-    const deleted = await Notification.findByIdAndDelete(req.params.id);
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: notifications,
+    });
+  }
+);
+
+// ✅ DELETE ONE NOTIFICATION (ADMIN)
+export const deleteNotification = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    const deleted = await Notification.findByIdAndDelete(id);
+
     if (!deleted) {
       return res.status(HTTP_STATUS.NOT_FOUND).json({
         success: false,
-        error: "Notification not found.",
+        message: "Notification not found",
       });
     }
+
     res.status(HTTP_STATUS.OK).json({
       success: true,
-      message: "Notification deleted successfully.",
+      message: "Notification deleted successfully",
     });
-  }),
-};
+  }
+);

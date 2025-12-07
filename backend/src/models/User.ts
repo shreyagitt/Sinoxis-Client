@@ -59,6 +59,25 @@ const userSchema = new Schema<UserDocument>(
       type: Date,
       default: null,
     },
+    balance: {
+  type: Number,
+  default: 0,
+},
+
+bankDetails: {
+  accountHolder: String,
+  accountNumber: String,
+  bankName: String,
+  routingNumber: String,
+},
+
+paypalDetails: {
+  name: String,
+  email: String,
+  paypalId: String,
+},
+
+
   },
   {
     timestamps: true,

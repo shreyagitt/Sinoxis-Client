@@ -1,28 +1,32 @@
-import PaymentRequest from "../../models/PaymentRequest.js";
-import User from "../../models/User";
-import { asyncHandler } from "../../middlewares/errorHandler.js";
-import { HTTP_STATUS } from "../../config/constants.js";
+import { Request, Response } from "express";
+import PaymentRequest from "../../models/PaymentRequest";
+import { User } from "../../models/User";
+import { asyncHandler } from "../../middlewares/errorHandler";
+import { HTTP_STATUS } from "../../config/constants";
 
 export const ClientPaymentController = {
 
-  /* ----------------------------------------
-     CREATE PAYMENT REQUEST
-  ---------------------------------------- */
-  create: asyncHandler(async (req, res) => {
-    const userId = req.user.userId;
-    const { amount, method, notes } = req.body;
+  /* ✅ CREATE REQUEST */
+  create: asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user?.userId;
+    const { amount, method, notes, bankData, paypalData } = req.body;
+
+
+    if (!userId) {
+      return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+        message: "Unauthorized",
+      });
+    }
 
     const user = await User.findById(userId);
     if (!user) {
       return res.status(HTTP_STATUS.NOT_FOUND).json({
-        success: false,
         message: "User not found",
       });
     }
 
     if (amount > user.balance) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
         message: "Insufficient balance",
       });
     }
@@ -38,35 +42,37 @@ export const ClientPaymentController = {
       processingFee,
       totalReceive,
       paymentDetails: {
-        bank: user.bankDetails,
-        paypal: user.paypalDetails,
-      },
+  bank: method === "bank" ? bankData : undefined,
+  paypal: method === "paypal" ? paypalData : undefined,
+},
+
     });
 
-    // Deduct immediately
+    // ✅ ATOMIC BALANCE DEDUCTION
     user.balance -= amount;
     await user.save();
 
-    return res.status(HTTP_STATUS.CREATED).json({
+    res.status(HTTP_STATUS.CREATED).json({
       success: true,
-      message: "Payment request submitted",
       data: request,
     });
   }),
 
-  /* ----------------------------------------
-     LIST USER REQUESTS
-  ---------------------------------------- */
-  list: asyncHandler(async (req, res) => {
-    const userId = req.user.userId;
+  /* ✅ LIST MY REQUESTS */
+  listMyRequests: asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user?.userId;
 
-    const requests = await PaymentRequest.find({ userId }).sort({ createdAt: -1 });
+    const requests = await PaymentRequest.find({ userId }).sort({
+      createdAt: -1,
+    });
+
     const user = await User.findById(userId);
 
-    return res.status(HTTP_STATUS.OK).json({
+    res.status(HTTP_STATUS.OK).json({
       success: true,
-      balance: user.balance,
+      balance: user?.balance ?? 0,
       data: requests,
     });
   }),
 };
+

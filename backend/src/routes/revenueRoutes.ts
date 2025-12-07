@@ -4,33 +4,39 @@ import { authenticate, authorize } from "../middlewares/auth";
 
 const router = Router();
 
-/* ============================================================
-   REVENUE ROUTES (ADMIN ONLY)
-   ============================================================ */
-
-// Create or update revenue
 router.post(
   "/",
   authenticate,
   authorize("admin"),
-  AdminRevenueController.upsert
+  AdminRevenueController.createAnalytics
 );
 
-// List revenue
 router.get(
   "/",
   authenticate,
   authorize("admin"),
-  AdminRevenueController.list
+  AdminRevenueController.getAllAnalytics
 );
 
-// Delete all revenue
-router.delete(
-  "/",
+router.get(
+  "/:id",
   authenticate,
   authorize("admin"),
-  AdminRevenueController.deleteAll
+  AdminRevenueController.getSingleAnalytics
+);
+
+router.put(
+  "/:id",
+  authenticate,
+  authorize("admin"),
+  AdminRevenueController.updateAnalytics
+);
+
+router.delete(
+  "/:id",
+  authenticate,
+  authorize("admin"),
+  AdminRevenueController.deleteAnalytics
 );
 
 export default router;
-
