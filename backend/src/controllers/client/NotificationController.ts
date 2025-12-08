@@ -8,7 +8,13 @@ export const getMyNotifications = asyncHandler(
   async (req: Request, res: Response) => {
     const userId = req.user?.userId; // ✅ safe access
 
-    const notifications = await Notification.find({ userId })
+    const notifications = await Notification.find({
+      roleTarget: "client", // ✅ ensure client-only notifications
+      $or: [
+        { userId: userId },  // ✅ personal notifications
+        { userId: null },    // ✅ global admin notifications
+      ],
+    })
       .sort({ createdAt: -1 })
       .limit(30);
 
@@ -18,6 +24,7 @@ export const getMyNotifications = asyncHandler(
     });
   }
 );
+
 
 // ✅ DELETE ONE NOTIFICATION
 export const deleteNotification = asyncHandler(

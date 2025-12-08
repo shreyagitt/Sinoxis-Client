@@ -65,7 +65,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
     { to: "/notifications", label: "Notifications", icon: <Bell className="w-5 h-5" /> },
     { to: "/banksettings", label: "Bank Settings", icon: <FolderCog className="w-5 h-5" /> },
     { to: "/form", label: "Apply Form Management", icon: <FileText className="w-5 h-5" /> },
-    { to: "/settings", label: "Settings", icon: <Settings className="w-5 h-5" /> },
+    
   ];
 
   return (
@@ -78,10 +78,10 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
       {/* Logo */}
       <div className="flex items-center justify-center h-16 border-b">
         {collapsed ? (
-          <img src="/image/logo.webp" alt="Sinoxis Logo" className="w-10 h-10" />
+          <img src="/image/logo.webp" alt="Sinoxis Logo" className="w-12 h-10" />
         ) : (
           <NavLink to="/" className="flex items-center gap-3">
-            <img src="/image/logo.webp" alt="Sinoxis Logo" className="w-12 h-12" />
+            <img src="/image/logo.webp" alt="Sinoxis Logo" className="w-18 h-12" />
           </NavLink>
         )}
       </div>

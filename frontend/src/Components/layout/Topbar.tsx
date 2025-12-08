@@ -87,15 +87,6 @@ const Topbar: React.FC<TopbarProps> = ({ onToggleSidebar }) => {
           />
 
           <div className="flex items-center space-x-4 text-green-600">
-            {darkMode ? (
-              <Sun onClick={toggleTheme} className="w-5 h-5 cursor-pointer hover:text-black" />
-            ) : (
-              <Moon onClick={toggleTheme} className="w-5 h-5 cursor-pointer hover:text-black" />
-            )}
-            <ShoppingCart className="w-5 h-5 cursor-pointer hover:text-black" />
-            <Bell className="w-5 h-5 cursor-pointer hover:text-black" />
-            <MessageCircle className="w-5 h-5 cursor-pointer hover:text-black" />
-            <Settings className="w-5 h-5 cursor-pointer hover:text-black" />
             <Maximize onClick={handleFullscreenClick} className="w-5 h-5 cursor-pointer hover:text-black" />
           </div>
 
@@ -124,20 +115,6 @@ const Topbar: React.FC<TopbarProps> = ({ onToggleSidebar }) => {
 
             {open && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 py-2 z-50 animate-fadeIn">
-                <Link
-                  to="/profile"
-                  className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  onClick={() => setOpen(false)}
-                >
-                  <User className="h-4 w-4 mr-2 text-gray-600" /> Profile
-                </Link>
-                <Link
-                  to="/settings"
-                  className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  onClick={() => setOpen(false)}
-                >
-                  <Settings className="h-4 w-4 mr-2 text-gray-600" /> Settings
-                </Link>
                 <button
                   onClick={handleLogout}
                   className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"

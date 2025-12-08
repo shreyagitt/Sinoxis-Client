@@ -8,12 +8,18 @@ export const sendNotification = asyncHandler(
   async (req: Request, res: Response) => {
     const { userId, title, desc } = req.body;
 
-    const notification = await Notification.create({
-      userId,
+    const data: any = {
       title,
       desc,
       roleTarget: "client",
-    });
+    };
+
+    // ✅ ONLY ADD userId IF IT EXISTS
+    if (userId && userId.trim() !== "") {
+      data.userId = userId;
+    }
+
+    const notification = await Notification.create(data);
 
     res.status(HTTP_STATUS.CREATED).json({
       success: true,
@@ -22,6 +28,8 @@ export const sendNotification = asyncHandler(
     });
   }
 );
+
+
 
 // ✅ GET ALL NOTIFICATIONS (ADMIN)
 export const getAllNotifications = asyncHandler(

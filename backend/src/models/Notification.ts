@@ -5,7 +5,8 @@ const NotificationSchema = new Schema(
     userId: {
       type: Types.ObjectId,
       ref: "User",
-      required: true,
+      required: false,   // ✅ MUST BE FALSE
+  default: null,
     },
 
     title: {

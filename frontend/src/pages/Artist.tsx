@@ -185,7 +185,7 @@ export default function ArtistsPage() {
 
           <button
             onClick={openAdd}
-            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
           >
             <Plus size={16} /> Add Artist
           </button>

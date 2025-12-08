@@ -61,7 +61,7 @@ const Login = () => {
 
           <div className="text-center mb-6">
             <img
-              src="/logo.png"
+              src="/image/logo.webp"
               alt="Admin"
               className="mx-auto w-24 h-24 object-contain"
             />
