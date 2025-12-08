@@ -33,7 +33,7 @@ const Sidebar = ({ collapsed, isMobile, toggleSidebar }) => {
       icon: <FaHome />,
       subItems: [
         { label: "Dashboard", path: "/dashboard" },
-        { label: "Pending", path: "/pending" }
+        
       ],
     },
     {

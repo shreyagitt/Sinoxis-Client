@@ -32,6 +32,7 @@ import RequestPayment from "./components/RequestPayment";
 
 
 
+
 function App() {
   useEffect(() => {
     AOS.init({
@@ -243,11 +244,7 @@ function App() {
   element={
     <Register />
   }
-/>
-      
-
-      
-     
+/>   
     </Routes>
   );
 }

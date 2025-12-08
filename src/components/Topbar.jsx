@@ -213,16 +213,6 @@ const Topbar = ({ isCollapsed, toggleSidebar }) => {
             <div
               className={`absolute right-0 mt-3 w-44 rounded-lg shadow-xl p-3 animate-fadeIn ${dropdownBg}`}
             >
-              <Link className="flex items-center gap-2 py-2" to="/profile">
-                <UserCircle size={16} className={iconColor} />
-                <span className={textColor}>Profile</span>
-              </Link>
-
-              <Link className="flex items-center gap-2 py-2" to="/settings">
-                <Settings size={16} className={iconColor} />
-                <span className={textColor}>Settings</span>
-              </Link>
-
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-2 py-2 w-full"
