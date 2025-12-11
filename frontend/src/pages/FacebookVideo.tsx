@@ -1,5 +1,4 @@
 // src/pages/AdminFacebookVideo.tsx
-// src/pages/AdminFacebookVideo.tsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
@@ -119,10 +118,10 @@ const AdminFacebookVideo: React.FC = () => {
   ------------------------ */
   const badge = (s: FacebookVideo["status"]) =>
     ({
-      Pending: "bg-yellow-50 text-yellow-700",
-      Reviewed: "bg-blue-50 text-blue-700",
-      Resolved: "bg-emerald-50 text-emerald-700",
-      Rejected: "bg-red-50 text-red-700",
+      Pending: "bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300",
+      Reviewed: "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+      Resolved: "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
+      Rejected: "bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300",
     }[s]);
 
   /* ------------------------
@@ -135,15 +134,13 @@ const AdminFacebookVideo: React.FC = () => {
   );
 
   return (
-    <div className="p-8 bg-[#f7f9fc] min-h-screen space-y-8">
+    <div className="p-8 min-h-screen bg-white dark:bg-[#020726] text-[#020726] dark:text-white transition-colors space-y-8">
 
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-800">
-            Facebook Video Claims
-          </h1>
-          <p className="text-sm text-gray-500">
+          <h1 className="text-2xl font-semibold">Facebook Video Claims</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-300">
             Review copyright/monetization claims
           </p>
         </div>
@@ -151,7 +148,7 @@ const AdminFacebookVideo: React.FC = () => {
         <button
           onClick={handleRefresh}
           disabled={refreshing}
-          className="px-4 py-2 border rounded-lg text-sm flex items-center gap-2 hover:bg-gray-50"
+          className="px-4 py-2 border border-gray-300 dark:border-[#1A2347] bg-white dark:bg-[#0B1029] rounded-lg text-sm flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-[#111A3A]"
         >
           <RotateCw size={16} />
           {refreshing ? "Refreshing..." : "Refresh"}
@@ -159,10 +156,10 @@ const AdminFacebookVideo: React.FC = () => {
       </div>
 
       {/* Search */}
-      <div className="flex items-center border bg-white rounded-lg px-3 py-2 w-80">
-        <Search size={18} className="text-gray-500" />
+      <div className="flex items-center border border-gray-300 dark:border-[#1A2347] bg-white dark:bg-[#0B1029] rounded-lg px-3 py-2 w-80">
+        <Search size={18} className="text-gray-500 dark:text-gray-300" />
         <input
-          className="ml-2 text-sm w-full outline-none"
+          className="ml-2 text-sm w-full bg-transparent text-[#020726] dark:text-white outline-none"
           placeholder="Search by Artist or ISRC"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -170,9 +167,9 @@ const AdminFacebookVideo: React.FC = () => {
       </div>
 
       {/* TABLE */}
-      <div className="bg-white border rounded-xl shadow-sm overflow-hidden">
-        <table className="w-full text-sm text-gray-700">
-          <thead className="bg-gray-50 text-gray-600">
+      <div className="bg-white dark:bg-[#0B1029] border border-gray-300 dark:border-[#1A2347] rounded-xl shadow-sm overflow-hidden">
+        <table className="w-full text-sm text-[#020726] dark:text-gray-300">
+          <thead className="bg-gray-50 dark:bg-[#111A3A] text-gray-600 dark:text-gray-200">
             <tr>
               <th className="p-4 text-left">Artist</th>
               <th className="p-4 text-left">Label</th>
@@ -183,9 +180,9 @@ const AdminFacebookVideo: React.FC = () => {
             </tr>
           </thead>
 
-          <tbody className="divide-y">
+          <tbody className="divide-y divide-gray-200 dark:divide-[#1A2347]">
             {filtered.map((row) => (
-              <tr key={row._id} className="hover:bg-gray-50">
+              <tr key={row._id} className="hover:bg-gray-50 dark:hover:bg-[#111A3A]">
 
                 <td className="p-4">{row.artistNameFb}</td>
                 <td className="p-4">{row.labelNameFb || "-"}</td>
@@ -197,7 +194,7 @@ const AdminFacebookVideo: React.FC = () => {
                   </span>
                 </td>
 
-                <td className="p-4 text-right text-xs text-gray-500">
+                <td className="p-4 text-right text-xs text-gray-500 dark:text-gray-400">
                   {row.createdAt ? new Date(row.createdAt).toLocaleString() : "-"}
                 </td>
 
@@ -207,14 +204,14 @@ const AdminFacebookVideo: React.FC = () => {
                       setActive(row);
                       setShowModal(true);
                     }}
-                    className="text-emerald-600 hover:text-emerald-800"
+                    className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300"
                   >
                     <Eye size={18} />
                   </button>
 
                   <button
                     onClick={() => deleteItem(row._id)}
-                    className="text-red-600 hover:text-red-800"
+                    className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
                   >
                     <Trash2 size={18} />
                   </button>
@@ -225,7 +222,7 @@ const AdminFacebookVideo: React.FC = () => {
 
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={6} className="text-center py-8 text-gray-500 italic">
+                <td colSpan={6} className="text-center py-8 text-gray-500 dark:text-gray-400 italic">
                   {loading ? "Loading..." : "No Facebook video claims found"}
                 </td>
               </tr>
@@ -250,7 +247,7 @@ const AdminFacebookVideo: React.FC = () => {
 export default AdminFacebookVideo;
 
 /* ======================================
-          MODAL COMPONENT (UPDATED)
+          MODAL COMPONENT (DARK MODE)
 ====================================== */
 const FacebookVideoModal = ({
   item,
@@ -261,23 +258,23 @@ const FacebookVideoModal = ({
   onClose: () => void;
   onStatus: (id: string, status: FacebookVideo["status"]) => void;
 }) => (
-  <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-    <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full flex flex-col max-h-[90vh]">
+  <div className="fixed inset-0 bg-black/50 dark:bg-black/70 z-50 flex items-center justify-center p-4">
+    <div className="bg-white dark:bg-[#0B1029] text-[#020726] dark:text-white rounded-xl shadow-2xl max-w-3xl w-full flex flex-col border border-gray-300 dark:border-[#1A2347] max-h-[90vh]">
 
       {/* Header */}
-      <div className="p-5 border-b flex justify-between items-center">
+      <div className="p-5 border-b border-gray-300 dark:border-[#1A2347] flex justify-between items-center">
         <div>
-          <h3 className="text-lg font-semibold text-gray-800">
+          <h3 className="text-lg font-semibold">
             {item.artistNameFb} — ISRC: {item.isrcCodeFb}
           </h3>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
             Submitted: {item.createdAt ? new Date(item.createdAt).toLocaleString() : "-"}
           </p>
         </div>
 
         <button
           onClick={onClose}
-          className="px-3 py-1 border rounded-md text-sm hover:bg-gray-50"
+          className="px-3 py-1 border border-gray-300 dark:border-[#1A2347] rounded-md text-sm hover:bg-gray-50 dark:hover:bg-[#111A3A]"
         >
           Close
         </button>
@@ -295,11 +292,11 @@ const FacebookVideoModal = ({
         {/* Screenshot */}
         {item.screenshotFb && (
           <div className="space-y-2">
-            <h4 className="font-semibold text-gray-700">Screenshot</h4>
+            <h4 className="font-semibold text-gray-700 dark:text-gray-300">Screenshot</h4>
             <img
               src={item.screenshotFb}
               alt="Claim Screenshot"
-              className="rounded-lg w-full md:w-64 border"
+              className="rounded-lg w-full md:w-64 border border-gray-300 dark:border-[#1A2347]"
             />
           </div>
         )}
@@ -307,13 +304,13 @@ const FacebookVideoModal = ({
         <Detail label="Confirm" value={item.confirmFb ? "Yes" : "No"} />
       </div>
 
-      {/* Status Update Footer (Fixed) */}
-      <div className="p-5 border-t space-y-2 bg-white">
+      {/* Status Update Footer */}
+      <div className="p-5 border-t border-gray-300 dark:border-[#1A2347] bg-white dark:bg-[#0B1029] space-y-2">
         {["Pending", "Reviewed", "Resolved", "Rejected"].map((s) => (
           <button
             key={s}
             onClick={() => onStatus(item._id, s as FacebookVideo["status"])}
-            className="w-full px-4 py-2 border rounded-md hover:bg-gray-50 text-left"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-[#1A2347] rounded-md hover:bg-gray-50 dark:hover:bg-[#111A3A] text-left"
           >
             {s}
           </button>
@@ -327,7 +324,7 @@ const FacebookVideoModal = ({
 /* ========================= */
 const Detail = ({ label, value }) => (
   <div>
-    <h4 className="font-semibold text-gray-700">{label}</h4>
-    <p className="text-gray-600">{value}</p>
+    <h4 className="font-semibold text-gray-700 dark:text-gray-300">{label}</h4>
+    <p className="text-gray-600 dark:text-gray-400">{value}</p>
   </div>
 );

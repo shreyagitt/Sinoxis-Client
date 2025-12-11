@@ -27,9 +27,6 @@ const ApplyFormManagement: React.FC = () => {
   const { token } = useAppSelector((state) => state.auth);
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
-  // =======================================================
-  // FETCH APPLICATIONS
-  // =======================================================
   useEffect(() => {
     if (!token) return;
 
@@ -48,9 +45,6 @@ const ApplyFormManagement: React.FC = () => {
     fetchApplications();
   }, [token]);
 
-  // =======================================================
-  // SEARCH FILTER
-  // =======================================================
   const filtered = applications.filter((a) =>
     a.fullName?.toLowerCase().includes(search.toLowerCase())
   );
@@ -58,9 +52,6 @@ const ApplyFormManagement: React.FC = () => {
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
   const visible = filtered.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
-  // =======================================================
-  // UPDATE STATUS
-  // =======================================================
   const updateStatus = async (id: string, status: ClientApplication["status"]) => {
     try {
       await axios.patch(
@@ -79,9 +70,6 @@ const ApplyFormManagement: React.FC = () => {
     }
   };
 
-  // =======================================================
-  // DELETE APPLICATION
-  // =======================================================
   const handleDelete = async (id: string) => {
     Swal.fire({
       title: "Delete this application?",
@@ -106,9 +94,6 @@ const ApplyFormManagement: React.FC = () => {
     });
   };
 
-  // =======================================================
-  // VIEW DETAILS
-  // =======================================================
   const handleView = (app: ClientApplication) => {
     Swal.fire({
       title: `<strong>${app.fullName}</strong>`,
@@ -123,31 +108,39 @@ const ApplyFormManagement: React.FC = () => {
         <p><b>Heard About:</b> ${app.heardAbout}</p>
         <p><b>Status:</b> ${app.status}</p>
       `,
-      confirmButtonColor: "#16a34a",
+      confirmButtonColor: "#29B6F6",
+      background: "#020726",
+      color: "#FFFFFF",
     });
   };
 
   return (
-    <div className="p-6 bg-white min-h-screen">
+    <div className="p-6 min-h-screen bg-white dark:bg-[#020726] text-[#020726] dark:text-white transition-colors duration-300">
+
       <h2 className="text-2xl font-semibold mb-6">Apply Form Submission</h2>
 
       {/* Search */}
       <div className="flex justify-between items-center mb-5">
         <div className="relative w-80">
-          <Search size={18} className="absolute left-3 top-2.5 text-gray-400" />
+          <Search size={18} className="absolute left-3 top-2.5 text-gray-400 dark:text-gray-300" />
           <input
             type="text"
             placeholder="Search by Full Name"
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10 pr-4 py-2 w-full rounded-xl border shadow-sm"
+            className="
+              pl-10 pr-4 py-2 w-full rounded-xl border shadow-sm 
+              bg-white dark:bg-[#0B1029] 
+              text-[#020726] dark:text-white 
+              border-gray-300 dark:border-gray-700
+            "
           />
         </div>
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-xl border shadow-md">
-        <table className="w-full text-sm text-gray-700 table-auto">
-          <thead className="bg-green-600 text-white">
+      <div className="overflow-x-auto rounded-xl border shadow-md border-gray-300 dark:border-gray-700">
+        <table className="w-full text-sm table-auto">
+          <thead className="bg-[#0288D1] dark:bg-[#29B6F6] text-white">
             <tr>
               <th className="py-3 px-4 text-left">Full Name</th>
               <th className="py-3 px-4 text-left">Artist Name</th>
@@ -162,8 +155,10 @@ const ApplyFormManagement: React.FC = () => {
             {visible.map((app, index) => (
               <tr
                 key={app._id}
-                className={`border-t ${
-                  index % 2 === 0 ? "bg-white" : "bg-green-50"
+                className={`border-t border-gray-300 dark:border-gray-700 ${
+                  index % 2 === 0
+                    ? "bg-white dark:bg-[#0B1029]"
+                    : "bg-[#E3F2FD] dark:bg-[#06102A]"
                 }`}
               >
                 <td className="py-3 px-4">{app.fullName}</td>
@@ -173,13 +168,16 @@ const ApplyFormManagement: React.FC = () => {
 
                 <td className="py-3 px-4">
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      app.status === "Approved"
-                        ? "bg-green-200 text-green-800"
-                        : app.status === "Rejected"
-                        ? "bg-red-200 text-red-800"
-                        : "bg-yellow-200 text-yellow-800"
-                    }`}
+                    className={`
+                      px-3 py-1 rounded-full text-xs font-medium
+                      ${
+                        app.status === "Approved"
+                          ? "bg-green-200 text-green-900 dark:bg-green-700 dark:text-white"
+                          : app.status === "Rejected"
+                          ? "bg-red-200 text-red-900 dark:bg-red-700 dark:text-white"
+                          : "bg-yellow-200 text-yellow-900 dark:bg-yellow-600 dark:text-white"
+                      }
+                    `}
                   >
                     {app.status}
                   </span>
@@ -187,31 +185,34 @@ const ApplyFormManagement: React.FC = () => {
 
                 <td className="py-3 px-4">
                   <div className="flex justify-center items-center gap-4">
+
                     <Eye
                       size={18}
-                      className="text-blue-600 cursor-pointer hover:scale-110"
+                      className="text-[#0288D1] dark:text-[#29B6F6] cursor-pointer hover:scale-110 transition"
                       onClick={() => handleView(app)}
                     />
 
                     <CheckCircle
                       size={18}
-                      className="text-green-600 cursor-pointer hover:scale-110"
+                      className="text-green-600 dark:text-green-400 cursor-pointer hover:scale-110 transition"
                       onClick={() => updateStatus(app._id, "Approved")}
                     />
 
                     <XCircle
                       size={18}
-                      className="text-yellow-600 cursor-pointer hover:scale-110"
+                      className="text-yellow-600 dark:text-yellow-400 cursor-pointer hover:scale-110 transition"
                       onClick={() => updateStatus(app._id, "Rejected")}
                     />
 
                     <Trash2
                       size={18}
-                      className="text-red-600 cursor-pointer hover:scale-110"
+                      className="text-red-600 dark:text-red-400 cursor-pointer hover:scale-110 transition"
                       onClick={() => handleDelete(app._id)}
                     />
+
                   </div>
                 </td>
+
               </tr>
             ))}
           </tbody>
@@ -219,18 +220,23 @@ const ApplyFormManagement: React.FC = () => {
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-between items-center mt-4">
+      <div className="flex justify-between items-center mt-4 text-[#020726] dark:text-white">
         <p>
           Showing {(page - 1) * itemsPerPage + 1}–
-          {Math.min(page * itemsPerPage, filtered.length)} of{" "}
-          {filtered.length}
+          {Math.min(page * itemsPerPage, filtered.length)} of {filtered.length}
         </p>
 
         <div className="flex gap-2">
           <button
             disabled={page === 1}
             onClick={() => setPage(page - 1)}
-            className="px-4 py-1 rounded-lg border shadow-sm bg-white disabled:opacity-50"
+            className="
+              px-4 py-1 rounded-lg border shadow-sm
+              bg-white dark:bg-[#0B1029]
+              text-[#020726] dark:text-white
+              border-gray-300 dark:border-gray-700
+              disabled:opacity-50
+            "
           >
             Previous
           </button>
@@ -238,15 +244,21 @@ const ApplyFormManagement: React.FC = () => {
           <button
             disabled={page === totalPages}
             onClick={() => setPage(page + 1)}
-            className="px-4 py-1 rounded-lg border shadow-sm bg-white disabled:opacity-50"
+            className="
+              px-4 py-1 rounded-lg border shadow-sm
+              bg-white dark:bg-[#0B1029]
+              text-[#020726] dark:text-white
+              border-gray-300 dark:border-gray-700
+              disabled:opacity-50
+            "
           >
             Next
           </button>
         </div>
       </div>
+
     </div>
   );
 };
 
 export default ApplyFormManagement;
-

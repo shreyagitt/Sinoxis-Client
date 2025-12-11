@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useAppSelector } from "../store/hook";
 import toast from "react-hot-toast";
-import { Search, Eye, Trash2, CheckCircle, Clock, AlertTriangle } from "lucide-react";
+import { Search, Eye, Trash2 } from "lucide-react";
 
 // TYPE (matches your backend schema)
 export interface YouTubeOAC {
@@ -33,9 +33,8 @@ const AdminYouTubeOACRequests: React.FC = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       setData(res.data.data || []);
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to fetch requests");
+    } catch {
+      toast.error("Failed to load OAC requests");
     }
   };
 
@@ -53,12 +52,11 @@ const AdminYouTubeOACRequests: React.FC = () => {
         { status },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
       toast.success("Status updated");
       fetchRequests();
       setShowModal(false);
     } catch {
-      toast.error("Update failed");
+      toast.error("Failed to update");
     }
   };
 
@@ -66,13 +64,12 @@ const AdminYouTubeOACRequests: React.FC = () => {
        Delete Request
   ============================ */
   const deleteReq = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this request?")) return;
+    if (!confirm("Delete this request?")) return;
 
     try {
       await axios.delete(`${baseUrl}/youTube-oac/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       toast.success("Deleted successfully");
       fetchRequests();
     } catch {
@@ -81,45 +78,76 @@ const AdminYouTubeOACRequests: React.FC = () => {
   };
 
   /* ============================
-       Status Badge
+       Status Badge (Dark Mode Ready)
   ============================ */
-  const badge = (s: string) => {
-    switch (s) {
+  const badge = (status: YouTubeOAC["status"]) => {
+    const base =
+      "px-3 py-1 text-xs rounded-full border border-gray-300 dark:border-[#1A2347]";
+
+    switch (status) {
       case "Pending":
-        return <span className="px-3 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700">Pending</span>;
+        return (
+          <span className={`${base} bg-yellow-50 text-yellow-700 dark:bg-[#111A3A]`}>
+            Pending
+          </span>
+        );
       case "Under Review":
-        return <span className="px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700">Under Review</span>;
+        return (
+          <span className={`${base} bg-blue-50 text-blue-700 dark:bg-[#111A3A]`}>
+            Under Review
+          </span>
+        );
       case "Approved":
-        return <span className="px-3 py-1 text-xs rounded-full bg-green-100 text-green-700">Approved</span>;
+        return (
+          <span className={`${base} bg-green-50 text-green-700 dark:bg-[#111A3A]`}>
+            Approved
+          </span>
+        );
       case "Rejected":
-        return <span className="px-3 py-1 text-xs rounded-full bg-red-100 text-red-700">Rejected</span>;
+        return (
+          <span className={`${base} bg-red-50 text-red-700 dark:bg-[#111A3A]`}>
+            Rejected
+          </span>
+        );
     }
   };
 
-  /* ============================
-       Filtered Data
-  ============================ */
   const filtered = data.filter((req) =>
     req.channelName.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
-    <div className="p-8 bg-[#f7f9fc] min-h-screen">
+    <div
+      className="
+      p-8 min-h-screen
+      bg-white dark:bg-[#020726] 
+      text-[#020726] dark:text-white
+      transition-colors"
+    >
       {/* HEADER */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-800">YouTube OAC Requests</h1>
-          <p className="text-gray-500 text-sm">Manage artist channel approval requests</p>
+          <h1 className="text-2xl font-semibold">YouTube OAC Requests</h1>
+          <p className="text-gray-600 dark:text-gray-300 text-sm">
+            Manage artist channel approval requests
+          </p>
         </div>
       </div>
 
       {/* SEARCH BAR */}
       <div className="flex items-center mb-5">
-        <div className="flex items-center border bg-white rounded-md px-3 py-2 w-80">
+        <div className="
+          flex items-center px-3 py-2 w-80 rounded-md
+          bg-white dark:bg-[#0B1029]
+          border border-gray-300 dark:border-[#1A2347]
+        ">
           <Search size={18} className="text-gray-500" />
           <input
             placeholder="Search channels..."
-            className="ml-2 w-full text-sm outline-none"
+            className="
+              ml-2 w-full text-sm outline-none bg-transparent 
+              text-[#020726] dark:text-white
+            "
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -127,9 +155,13 @@ const AdminYouTubeOACRequests: React.FC = () => {
       </div>
 
       {/* TABLE */}
-      <div className="bg-white shadow-md border border-gray-100 rounded-xl overflow-hidden">
-        <table className="w-full text-sm text-gray-700">
-          <thead className="bg-gray-50 text-gray-600">
+      <div className="
+        rounded-xl shadow overflow-hidden
+        bg-white dark:bg-[#0B1029]
+        border border-gray-300 dark:border-[#1A2347]
+      ">
+        <table className="w-full text-sm">
+          <thead className="bg-gray-50 dark:bg-[#111A3A] text-gray-700 dark:text-gray-300">
             <tr>
               <th className="p-4 text-left">Channel</th>
               <th className="p-4 text-left">Channel URL</th>
@@ -140,38 +172,51 @@ const AdminYouTubeOACRequests: React.FC = () => {
             </tr>
           </thead>
 
-          <tbody className="divide-y">
+          <tbody className="divide-y dark:divide-[#1A2347]">
             {filtered.map((req) => (
-              <tr key={req._id} className="hover:bg-gray-50">
+              <tr
+                key={req._id}
+                className="
+                  hover:bg-gray-100 dark:hover:bg-[#111A3A]
+                  transition-colors
+                "
+              >
                 <td className="p-4">{req.channelName}</td>
-                <td className="p-4 text-blue-600 underline">
-                  <a href={req.channelUrl} target="_blank">Visit</a>
+
+                <td className="p-4 text-[#0288D1] underline">
+                  <a href={req.channelUrl} target="_blank">
+                    Visit
+                  </a>
                 </td>
-                <td className="p-4 text-blue-600 underline">
-                  <a href={req.topicUrl} target="_blank">Visit</a>
+
+                <td className="p-4 text-[#0288D1] underline">
+                  {req.topicUrl ? (
+                    <a href={req.topicUrl} target="_blank">Visit</a>
+                  ) : (
+                    "-"
+                  )}
                 </td>
-                <td className="p-4 text-red-600 underline">
+
+                <td className="p-4 text-red-500 underline">
                   <a href={req.officialVideoUrl} target="_blank">Video Link</a>
                 </td>
 
                 <td className="p-4 text-center">{badge(req.status)}</td>
 
                 <td className="p-4 flex justify-center gap-3">
-                  {/* View / Change Status */}
                   <button
                     onClick={() => {
                       setActive(req);
                       setShowModal(true);
                     }}
-                    className="text-green-600 hover:text-green-800"
+                    className="text-green-600 dark:text-green-400 hover:opacity-80"
                   >
                     <Eye size={18} />
                   </button>
 
-                  {/* Delete */}
                   <button
                     onClick={() => deleteReq(req._id)}
-                    className="text-red-600 hover:text-red-800"
+                    className="text-red-600 dark:text-red-400 hover:opacity-80"
                   >
                     <Trash2 size={18} />
                   </button>
@@ -181,7 +226,10 @@ const AdminYouTubeOACRequests: React.FC = () => {
 
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={5} className="py-6 text-center text-gray-500">
+                <td
+                  colSpan={6}
+                  className="py-6 text-center text-gray-500 dark:text-gray-400"
+                >
                   No requests found.
                 </td>
               </tr>
@@ -190,36 +238,54 @@ const AdminYouTubeOACRequests: React.FC = () => {
         </table>
       </div>
 
-      {/* MODAL (STATUS UPDATE) */}
+      {/* ============================
+            MODAL
+      ============================ */}
       {showModal && active && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-xl border">
-
-            <h2 className="text-lg font-semibold mb-4 text-gray-800">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div
+            className="
+              w-full max-w-md rounded-xl shadow-2xl p-6
+              bg-white dark:bg-[#0B1029]
+              border border-gray-300 dark:border-[#1A2347]
+            "
+          >
+            <h2 className="text-lg font-semibold mb-4">
               Update Status – {active.channelName}
             </h2>
 
             <div className="space-y-3">
-              {["Pending", "Under Review", "Approved", "Rejected"].map((s) => (
-                <button
-                  key={s}
-                  onClick={() => updateStatus(active._id, s as any)}
-                  className={`w-full text-left px-4 py-2 rounded-md border hover:bg-gray-50 ${
-                    active.status === s ? "bg-green-100 border-green-400" : ""
-                  }`}
-                >
-                  {s}
-                </button>
-              ))}
+              {["Pending", "Under Review", "Approved", "Rejected"].map(
+                (s) => (
+                  <button
+                    key={s}
+                    onClick={() => updateStatus(active._id, s as any)}
+                    className={`
+                      w-full text-left px-4 py-2 rounded-md border
+                      border-gray-300 dark:border-[#1A2347]
+                      ${
+                        active.status === s
+                          ? "bg-green-100 dark:bg-[#111A3A]"
+                          : "hover:bg-gray-100 dark:hover:bg-[#111A3A]"
+                      }
+                    `}
+                  >
+                    {s}
+                  </button>
+                )
+              )}
             </div>
 
             <button
-              className="mt-5 w-full bg-gray-800 text-white py-2 rounded-md"
+              className="
+                mt-5 w-full py-2 rounded-md
+                bg-gray-800 text-white dark:bg-[#111A3A]
+                hover:bg-gray-900 dark:hover:bg-[#1A2347]
+              "
               onClick={() => setShowModal(false)}
             >
               Close
             </button>
-
           </div>
         </div>
       )}

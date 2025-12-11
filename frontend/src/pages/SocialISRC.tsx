@@ -1,4 +1,3 @@
-// src/pages/AdminSocialISRC.tsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
@@ -14,8 +13,8 @@ import { useAppSelector } from "../store/hook";
 import toast from "react-hot-toast";
 
 /* ============================
-   Types (match your schema)
-   ============================ */
+   Types
+============================ */
 interface SocialISRC {
   _id: string;
   artistNameSocial: string;
@@ -33,9 +32,6 @@ interface SocialISRC {
   updatedAt?: string;
 }
 
-/* ============================
-   Admin Component
-   ============================ */
 const AdminSocialISRC: React.FC = () => {
   const { token } = useAppSelector((s) => s.auth);
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
@@ -48,20 +44,20 @@ const AdminSocialISRC: React.FC = () => {
   const [active, setActive] = useState<SocialISRC | null>(null);
   const [showModal, setShowModal] = useState(false);
 
-  /* ---------------------------
-     Fetch items (GET /social)
-  --------------------------- */
+  /* ============================
+     Fetch Items
+  ============================ */
   const fetchItems = async () => {
     setLoading(true);
     try {
       const res = await axios.get(`${baseUrl}/social`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
       const data = res.data?.data || [];
       setItems(Array.isArray(data) ? data : [data]);
-    } catch (err) {
-      console.error("fetchItems:", err);
-      toast.error("Failed to fetch Social ISRC requests (showing empty list)");
+    } catch {
+      toast.error("Failed to load Social ISRC requests");
       setItems([]);
     } finally {
       setLoading(false);
@@ -70,25 +66,21 @@ const AdminSocialISRC: React.FC = () => {
 
   useEffect(() => {
     if (token) fetchItems();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
-  /* ---------------------------
-     Refresh helper
-  --------------------------- */
+  /* ============================
+     Refresh
+  ============================ */
   const handleRefresh = async () => {
     setRefreshing(true);
-    try {
-      await fetchItems();
-      toast.success("Refreshed");
-    } finally {
-      setRefreshing(false);
-    }
+    await fetchItems();
+    toast.success("Refreshed");
+    setRefreshing(false);
   };
 
-  /* ---------------------------
-     Update status (PATCH /social/:id/status)
-  --------------------------- */
+  /* ============================
+     Update Status
+  ============================ */
   const updateStatus = async (id: string, status: SocialISRC["status"]) => {
     try {
       await axios.patch(
@@ -99,17 +91,16 @@ const AdminSocialISRC: React.FC = () => {
       toast.success("Status updated");
       fetchItems();
       setShowModal(false);
-    } catch (err) {
-      console.error("updateStatus:", err);
+    } catch {
       toast.error("Failed to update status");
     }
   };
 
-  /* ---------------------------
-     Delete (DELETE /social/:id)
-  --------------------------- */
+  /* ============================
+     Delete Item
+  ============================ */
   const deleteItem = async (id: string) => {
-    if (!confirm("Delete this Social ISRC request?")) return;
+    if (!confirm("Delete this request?")) return;
     try {
       await axios.delete(`${baseUrl}/social/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -117,28 +108,27 @@ const AdminSocialISRC: React.FC = () => {
       toast.success("Deleted");
       setItems((prev) => prev.filter((i) => i._id !== id));
       if (active?._id === id) setShowModal(false);
-    } catch (err) {
-      console.error("deleteItem:", err);
+    } catch {
       toast.error("Delete failed");
     }
   };
 
-  /* ---------------------------
-     Small UI helpers
-  --------------------------- */
+  /* ============================
+     Badge Styles (Dark + Light)
+  ============================ */
   const statusBadge = (s: SocialISRC["status"]) => {
-    switch (s) {
-      case "Pending":
-        return <span className="px-3 py-1 text-xs rounded-full bg-yellow-50 text-yellow-700">Pending</span>;
-      case "Reviewed":
-        return <span className="px-3 py-1 text-xs rounded-full bg-blue-50 text-blue-700">Reviewed</span>;
-      case "Approved":
-        return <span className="px-3 py-1 text-xs rounded-full bg-emerald-50 text-emerald-700">Approved</span>;
-      case "Rejected":
-        return <span className="px-3 py-1 text-xs rounded-full bg-red-50 text-red-700">Rejected</span>;
-      default:
-        return <span className="px-3 py-1 text-xs rounded-full bg-gray-50 text-gray-700">{s}</span>;
-    }
+    const base = "px-3 py-1 text-xs rounded-full font-medium";
+    const styles = {
+      Pending:
+        "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300",
+      Reviewed:
+        "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300",
+      Approved:
+        "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300",
+      Rejected:
+        "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300",
+    };
+    return <span className={`${base} ${styles[s]}`}>{s}</span>;
   };
 
   const filtered = items.filter(
@@ -148,48 +138,59 @@ const AdminSocialISRC: React.FC = () => {
       it.isrcCode.toLowerCase().includes(search.toLowerCase())
   );
 
-  /* ---------------------------
-     Render
-  --------------------------- */
+  /* ============================
+     UI
+  ============================ */
   return (
-    <div className="p-8 bg-[#f7f9fc] min-h-screen space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4">
+    <div className="p-8 min-h-screen space-y-6 
+      bg-white dark:bg-[#020726] 
+      text-[#020726] dark:text-white transition-colors"
+    >
+
+      {/* HEADER */}
+      <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-800">Social ISRC Submissions</h1>
-          <p className="text-sm text-gray-500 mt-1">Review and manage social profile & ISRC submissions</p>
+          <h1 className="text-2xl font-semibold">Social ISRC Submissions</h1>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Review & manage artist social profiles + ISRC requests
+          </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="inline-flex items-center gap-2 px-4 py-2 border rounded-lg text-sm hover:bg-gray-50"
-          >
-            <RotateCw size={16} />
-            {refreshing ? "Refreshing..." : "Refresh"}
-          </button>
-        </div>
+        <button
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm
+            bg-white dark:bg-[#0B1029]
+            border border-gray-300 dark:border-[#1A2347]
+            hover:bg-gray-100 dark:hover:bg-[#111A3A] transition"
+        >
+          <RotateCw size={16} />
+          {refreshing ? "Refreshing..." : "Refresh"}
+        </button>
       </div>
 
-      {/* Search */}
-      <div className="flex items-center gap-3">
-        <div className="flex items-center border bg-white rounded-md px-3 py-2 w-96">
-          <Search size={18} className="text-gray-500" />
-          <input
-            placeholder="Search by artist, track or ISRC..."
-            className="ml-2 w-full text-sm outline-none bg-transparent"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
+      {/* SEARCH */}
+      <div className="flex items-center border rounded-lg px-3 py-2 w-96
+        bg-white dark:bg-[#0B1029]
+        border-gray-300 dark:border-[#1A2347]"
+      >
+        <Search size={18} className="text-gray-500 dark:text-gray-300" />
+        <input
+          placeholder="Search by artist, track, or ISRC..."
+          className="ml-2 w-full text-sm outline-none bg-transparent"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-        <table className="w-full text-sm text-gray-700">
-          <thead className="bg-gray-50 text-gray-600">
-            <tr>
+      {/* TABLE */}
+      <div className="rounded-xl overflow-hidden shadow 
+        bg-white dark:bg-[#0B1029]
+        border border-gray-300 dark:border-[#1A2347]"
+      >
+        <table className="w-full text-sm">
+          <thead className="bg-gray-100 dark:bg-[#111A3A]">
+            <tr className="text-gray-700 dark:text-white">
               <th className="p-4 text-left">Artist / Track</th>
               <th className="p-4 text-left">ISRC</th>
               <th className="p-4 text-left">Social Links</th>
@@ -199,56 +200,89 @@ const AdminSocialISRC: React.FC = () => {
             </tr>
           </thead>
 
-          <tbody className="divide-y">
+          <tbody className="divide-y divide-gray-300 dark:divide-[#1A2347]">
             {filtered.map((row) => (
-              <tr key={row._id} className="hover:bg-gray-50">
+              <tr
+                key={row._id}
+                className="hover:bg-gray-100 dark:hover:bg-[#111A3A] transition"
+              >
                 <td className="p-4">
-                  <div className="font-medium text-gray-800">{row.artistNameSocial}</div>
-                  <div className="text-xs text-gray-500 mt-1">{row.trackTitleSocial || "-"}</div>
+                  <div className="font-medium">{row.artistNameSocial}</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    {row.trackTitleSocial || "-"}
+                  </div>
                 </td>
 
                 <td className="p-4">{row.isrcCode}</td>
 
-                <td className="p-4">
-                  <div className="flex flex-col text-xs">
-                    {row.facebookLink && <a href={row.facebookLink} className="text-blue-600 underline" target="_blank" rel="noreferrer">Facebook</a>}
-                    {row.instagramLink && <a href={row.instagramLink} className="text-blue-600 underline" target="_blank" rel="noreferrer">Instagram</a>}
-                    {row.spotifyLink && <a href={row.spotifyLink} className="text-blue-600 underline" target="_blank" rel="noreferrer">Spotify</a>}
-                    {row.appleMusicLink && <a href={row.appleMusicLink} className="text-blue-600 underline" target="_blank" rel="noreferrer">Apple Music</a>}
-                    {!row.facebookLink && !row.instagramLink && !row.spotifyLink && !row.appleMusicLink && <span className="text-gray-400 italic">No links</span>}
+                <td className="p-4 text-xs">
+                  <div className="flex flex-col gap-1">
+                    {row.facebookLink && (
+                      <a className="text-blue-600 underline" href={row.facebookLink} target="_blank">
+                        Facebook
+                      </a>
+                    )}
+                    {row.instagramLink && (
+                      <a className="text-blue-600 underline" href={row.instagramLink} target="_blank">
+                        Instagram
+                      </a>
+                    )}
+                    {row.spotifyLink && (
+                      <a className="text-blue-600 underline" href={row.spotifyLink} target="_blank">
+                        Spotify
+                      </a>
+                    )}
+                    {row.appleMusicLink && (
+                      <a className="text-blue-600 underline" href={row.appleMusicLink} target="_blank">
+                        Apple Music
+                      </a>
+                    )}
+
+                    {!row.facebookLink &&
+                      !row.instagramLink &&
+                      !row.spotifyLink &&
+                      !row.appleMusicLink && (
+                        <span className="text-gray-400 italic">No links</span>
+                      )}
                   </div>
                 </td>
 
                 <td className="p-4 text-center">{statusBadge(row.status)}</td>
 
-                <td className="p-4 text-right text-xs text-gray-500">
+                <td className="p-4 text-right text-xs text-gray-600 dark:text-gray-400">
                   {row.createdAt ? new Date(row.createdAt).toLocaleString() : "-"}
                 </td>
 
-                <td className="p-4 text-center flex items-center justify-center gap-3">
-                  <button
-                    onClick={() => { setActive(row); setShowModal(true); }}
-                    className="text-green-600 hover:text-green-800"
-                    title="View / Update"
-                  >
-                    <Eye size={18} />
-                  </button>
+                <td className="p-4">
+                  <div className="flex items-center justify-center gap-4">
+                    <button
+                      onClick={() => {
+                        setActive(row);
+                        setShowModal(true);
+                      }}
+                      className="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300"
+                    >
+                      <Eye size={18} />
+                    </button>
 
-                  <button
-                    onClick={() => deleteItem(row._id)}
-                    className="text-red-600 hover:text-red-800"
-                    title="Delete"
-                  >
-                    <Trash2 size={18} />
-                  </button>
+                    <button
+                      onClick={() => deleteItem(row._id)}
+                      className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
 
-            {filtered.length === 0 && (
+            {!loading && filtered.length === 0 && (
               <tr>
-                <td colSpan={6} className="py-8 text-center text-gray-500 italic">
-                  {loading ? "Loading..." : "No submissions found."}
+                <td
+                  colSpan={6}
+                  className="text-center py-8 italic text-gray-600 dark:text-gray-400"
+                >
+                  No submissions found
                 </td>
               </tr>
             )}
@@ -256,116 +290,142 @@ const AdminSocialISRC: React.FC = () => {
         </table>
       </div>
 
-      {/* Modal: Details & Status Update */}
+      {/* MODAL */}
       {showModal && active && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full overflow-auto">
-            <div className="p-5 border-b flex justify-between items-start gap-3">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800">{active.artistNameSocial} — {active.trackTitleSocial || "—"}</h3>
-                <p className="text-xs text-gray-500 mt-1">Submitted: {active.createdAt ? new Date(active.createdAt).toLocaleString() : "-"}</p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="px-3 py-1 rounded-md border text-sm hover:bg-gray-50"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-
-            <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Left: Info */}
-              <div className="md:col-span-2 space-y-4">
-                <div>
-                  <h4 className="text-sm font-semibold text-gray-700">ISRC Code</h4>
-                  <div className="text-sm text-gray-600">{active.isrcCode}</div>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-semibold text-gray-700">Label</h4>
-                  <div className="text-sm text-gray-600">{active.labelName || <span className="italic text-gray-400">No label</span>}</div>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-semibold text-gray-700">Social Links</h4>
-                  <div className="text-sm space-y-1">
-                    {active.facebookLink && <a href={active.facebookLink} className="text-red-600 underline" target="_blank" rel="noreferrer">Facebook</a>}
-                    {active.instagramLink && <a href={active.instagramLink} className="text-red-600 underline" target="_blank" rel="noreferrer">Instagram</a>}
-                    {active.spotifyLink && <a href={active.spotifyLink} className="text-red-600 underline" target="_blank" rel="noreferrer">Spotify</a>}
-                    {active.appleMusicLink && <a href={active.appleMusicLink} className="text-red-600 underline" target="_blank" rel="noreferrer">Apple Music</a>}
-                    {!active.facebookLink && !active.instagramLink && !active.spotifyLink && !active.appleMusicLink && <div className="text-gray-400 italic">No links provided</div>}
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-semibold text-gray-700">Official Video</h4>
-                  {active.officialVideoUrlSocial ? (
-                    <a href={active.officialVideoUrlSocial} className="text-red-600 underline" target="_blank" rel="noreferrer">Open Video</a>
-                  ) : (
-                    <div className="text-gray-400 italic">No official video provided</div>
-                  )}
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-semibold text-gray-700">Confirmed by User</h4>
-                  <div className="text-sm">
-                    {active.confirmSocial ? (
-                      <span className="px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs">Yes</span>
-                    ) : (
-                      <span className="px-2 py-1 rounded-full bg-red-50 text-red-700 text-xs">No</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Right: Status & Actions */}
-              <div className="space-y-4">
-                <div>
-                  <h4 className="text-sm font-semibold text-gray-700 mb-2">Status</h4>
-
-                  <div className="space-y-2">
-                    {(["Pending", "Reviewed", "Approved", "Rejected"] as SocialISRC["status"][]).map((s) => (
-                      <button
-                        key={s}
-                        onClick={() => updateStatus(active._id, s)}
-                        className={`w-full text-left px-4 py-2 rounded-md border ${active.status === s ? "bg-green-50 border-green-400" : "hover:bg-gray-50"}`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            {s === "Pending" && <Clock size={16} className="text-yellow-600" />}
-                            {s === "Reviewed" && <RotateCw size={16} className="text-blue-600" />}
-                            {s === "Approved" && <CheckCircle size={16} className="text-emerald-600" />}
-                            {s === "Rejected" && <XCircle size={16} className="text-red-600" />}
-                            <span className="ml-1">{s}</span>
-                          </div>
-
-                          <div className="text-xs text-gray-500">{active.status === s ? "Current" : `Set as ${s}`}</div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <button
-                    onClick={() => deleteItem(active._id)}
-                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700"
-                  >
-                    <Trash2 size={16} /> Delete Submission
-                  </button>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
+        <Modal
+          item={active}
+          onClose={() => setShowModal(false)}
+          onStatus={updateStatus}
+          onDelete={deleteItem}
+        />
       )}
-
     </div>
   );
 };
 
 export default AdminSocialISRC;
+
+/* ============================
+   MODAL COMPONENT
+============================ */
+const Modal = ({
+  item,
+  onClose,
+  onStatus,
+  onDelete,
+}: {
+  item: SocialISRC;
+  onClose: () => void;
+  onStatus: (id: string, status: SocialISRC["status"]) => void;
+  onDelete: (id: string) => void;
+}) => {
+  return (
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+      <div className="max-w-3xl w-full rounded-xl shadow-2xl overflow-hidden
+        bg-white dark:bg-[#0B1029] 
+        text-[#020726] dark:text-white
+        border border-gray-300 dark:border-[#1A2347]"
+      >
+        {/* HEADER */}
+        <div className="p-5 border-b border-gray-300 dark:border-[#1A2347] 
+          bg-white dark:bg-[#111A3A] flex justify-between"
+        >
+          <div>
+            <h3 className="text-lg font-semibold">
+              {item.artistNameSocial} — {item.trackTitleSocial || "—"}
+            </h3>
+            <p className="text-xs text-gray-600 dark:text-gray-400">
+              Submitted: {item.createdAt ? new Date(item.createdAt).toLocaleString() : "-"}
+            </p>
+          </div>
+
+          <button
+            onClick={onClose}
+            className="px-3 py-1 text-sm rounded-md
+              bg-white dark:bg-[#0B1029]
+              border border-gray-300 dark:border-[#1A2347]
+              hover:bg-gray-100 dark:hover:bg-[#111A3A]"
+          >
+            Close
+          </button>
+        </div>
+
+        {/* BODY */}
+        <div className="p-6 space-y-4 overflow-y-auto max-h-[65vh]">
+
+          <Detail label="ISRC Code" value={item.isrcCode} />
+          <Detail label="Label" value={item.labelName || "-"} />
+          <Detail label="Confirmed" value={item.confirmSocial ? "Yes" : "No"} />
+
+          {/* SOCIAL LINKS */}
+          <div>
+            <h4 className="font-semibold mb-1 text-gray-700 dark:text-gray-300">Social Links</h4>
+            <div className="text-sm space-y-1">
+              {item.facebookLink && (
+                <a href={item.facebookLink} className="text-blue-400 underline" target="_blank">
+                  Facebook
+                </a>
+              )}
+              {item.instagramLink && (
+                <a href={item.instagramLink} className="text-blue-400 underline" target="_blank">
+                  Instagram
+                </a>
+              )}
+              {item.spotifyLink && (
+                <a href={item.spotifyLink} className="text-blue-400 underline" target="_blank">
+                  Spotify
+                </a>
+              )}
+              {item.appleMusicLink && (
+                <a href={item.appleMusicLink} className="text-blue-400 underline" target="_blank">
+                  Apple Music
+                </a>
+              )}
+              {!item.facebookLink &&
+                !item.instagramLink &&
+                !item.spotifyLink &&
+                !item.appleMusicLink && (
+                  <p className="italic text-gray-500 dark:text-gray-400">No links provided</p>
+                )}
+            </div>
+          </div>
+        </div>
+
+        {/* FOOTER */}
+        <div
+          className="p-5 space-y-2 border-t 
+          border-gray-300 dark:border-[#1A2347]
+          bg-white dark:bg-[#111A3A]"
+        >
+          {(["Pending", "Reviewed", "Approved", "Rejected"] as SocialISRC["status"][]).map((s) => (
+            <button
+              key={s}
+              onClick={() => onStatus(item._id, s)}
+              className="w-full text-left px-4 py-2 rounded-md
+                bg-white dark:bg-[#0B1029]
+                border border-gray-300 dark:border-[#1A2347]
+                hover:bg-gray-100 dark:hover:bg-[#111A3A] transition"
+            >
+              {s}
+            </button>
+          ))}
+
+          <button
+            onClick={() => onDelete(item._id)}
+            className="w-full mt-2 px-4 py-2 rounded-md
+              bg-red-600 text-white hover:bg-red-700"
+          >
+            Delete Submission
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const Detail = ({ label, value }: { label: string; value: any }) => (
+  <div>
+    <h4 className="font-semibold text-gray-700 dark:text-gray-300">{label}</h4>
+    <p className="text-gray-600 dark:text-gray-400">{value}</p>
+  </div>
+);

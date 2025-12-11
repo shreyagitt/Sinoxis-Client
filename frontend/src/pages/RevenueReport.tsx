@@ -25,9 +25,9 @@ export default function AdminRevenue() {
   const [transactions, setTransactions] = useState<RevenueItem[]>([]);
   const [withdrawals, setWithdrawals] = useState<RevenueItem[]>([]);
 
-  // ===================================================================
-  // FETCH ALL REVENUES
-  // ===================================================================
+  /* ===========================================
+        FETCH REVENUE
+  ============================================ */
   const fetchRevenue = async () => {
     try {
       setLoading(true);
@@ -41,17 +41,15 @@ export default function AdminRevenue() {
         return;
       }
 
-      const items: RevenueItem[] = res.data.data;
+      const items = res.data.data;
 
-      // Sort newest first
       const sorted = items.sort(
         (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
       );
 
       setTransactions(sorted);
       setWithdrawals(sorted.filter((t) => t.type === "withdraw"));
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error("Error loading revenue report");
     } finally {
       setLoading(false);
@@ -62,9 +60,10 @@ export default function AdminRevenue() {
     if (token) fetchRevenue();
   }, [token]);
 
-  // ===================================================================
-  // UPDATE STATUS (Paid / Failed)
-  // ===================================================================
+
+  /* ===========================================
+        UPDATE STATUS
+  ============================================ */
   const updateStatus = async (id: string, status: "Paid" | "Failed") => {
     try {
       await axios.put(
@@ -75,15 +74,15 @@ export default function AdminRevenue() {
 
       toast.success(`Updated to ${status}`);
       fetchRevenue();
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error("Failed to update status");
     }
   };
 
-  // ===================================================================
-  // DELETE TRANSACTION
-  // ===================================================================
+
+  /* ===========================================
+        DELETE TRANSACTION
+  ============================================ */
   const deleteTransaction = async (id: string) => {
     if (!confirm("Are you sure you want to delete this transaction?")) return;
 
@@ -94,16 +93,27 @@ export default function AdminRevenue() {
 
       toast.success("Deleted successfully");
       fetchRevenue();
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error("Delete failed");
     }
   };
 
-  if (loading) return <p className="p-8">Loading...</p>;
 
+  if (loading)
+    return (
+      <p className="p-8 text-[#020726] dark:text-white">
+        Loading...
+      </p>
+    );
+
+
+  /* ===========================================
+        UI (SINOSIS THEME)
+  ============================================ */
   return (
-    <div className="p-8 space-y-10">
+    <div className="p-8 space-y-10 min-h-screen 
+                    bg-white dark:bg-[#020726] 
+                    text-[#020726] dark:text-white transition-colors">
 
       {/* HEADER */}
       <div className="flex justify-between items-center mb-4">
@@ -111,62 +121,82 @@ export default function AdminRevenue() {
 
         <button
           onClick={fetchRevenue}
-          className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-gray-100"
+          className="flex items-center gap-2 px-4 py-2 
+                     bg-white dark:bg-[#0B1029]
+                     border border-gray-300 dark:border-[#1A2347]
+                     rounded-lg hover:bg-gray-100 dark:hover:bg-[#111A3A]
+                     transition-colors"
         >
           <RefreshCcw size={16} /> Refresh
         </button>
       </div>
 
-      {/* ========================================================== */}
-      {/* WITHDRAW REQUESTS */}
-      {/* ========================================================== */}
-      <div className="bg-white p-6 rounded-xl shadow border">
+      {/* =============================================
+            WITHDRAW REQUESTS
+      ============================================== */}
+      <div className="p-6 rounded-xl shadow 
+                      bg-white dark:bg-[#0B1029]
+                      border border-gray-300 dark:border-[#1A2347]">
+
         <h2 className="font-bold mb-4 text-lg">Withdrawal Requests</h2>
 
         {withdrawals.length === 0 ? (
-          <p className="text-gray-500">No withdrawal requests</p>
+          <p className="text-gray-600 dark:text-gray-400">
+            No withdrawal requests
+          </p>
         ) : (
           withdrawals.map((w) => (
             <div
               key={w._id}
-              className="flex justify-between items-center border-b py-4"
+              className="flex justify-between items-center 
+                         border-b border-gray-300 dark:border-[#1A2347]
+                         py-4"
             >
               <div>
                 <p className="font-semibold">
                   ₹ {w.amount} ({w.userId?.email || "Unknown User"})
                 </p>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
                   {new Date(w.date).toLocaleString()}
                 </p>
               </div>
 
-              {/* Pending → Admin can approve/reject */}
               {w.status === "Pending" ? (
                 <div className="flex gap-3">
+
                   <button
-                    className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 flex items-center gap-1"
                     onClick={() => updateStatus(w._id, "Paid")}
+                    className="px-3 py-1 bg-green-600 hover:bg-green-700 
+                               text-white rounded flex items-center gap-1"
                   >
                     <Check size={16} /> Approve
                   </button>
 
                   <button
-                    className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 flex items-center gap-1"
                     onClick={() => updateStatus(w._id, "Failed")}
+                    className="px-3 py-1 bg-red-600 hover:bg-red-700 
+                               text-white rounded flex items-center gap-1"
                   >
                     <X size={16} /> Reject
                   </button>
+
                 </div>
               ) : (
                 <div className="flex items-center gap-3">
-                  <span className="px-3 py-1 bg-gray-200 rounded text-gray-700">
+                  <span
+                    className="px-3 py-1 rounded 
+                               bg-gray-200 dark:bg-[#111A3A]
+                               text-gray-700 dark:text-gray-300"
+                  >
                     {w.status}
                   </span>
 
-                  {/* Delete processed request */}
                   <button
                     onClick={() => deleteTransaction(w._id)}
-                    className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded"
+                    className="p-2 rounded 
+                               bg-red-100 dark:bg-red-900/40
+                               hover:bg-red-200 dark:hover:bg-red-900/60
+                               text-red-600 dark:text-red-300"
                   >
                     <Trash2 size={16} />
                   </button>
@@ -177,14 +207,18 @@ export default function AdminRevenue() {
         )}
       </div>
 
-      {/* ========================================================== */}
-      {/* ALL TRANSACTIONS */}
-      {/* ========================================================== */}
-      <div className="bg-white p-6 rounded-xl shadow border">
+      {/* =============================================
+            ALL TRANSACTIONS
+      ============================================== */}
+      <div className="p-6 rounded-xl shadow 
+                      bg-white dark:bg-[#0B1029]
+                      border border-gray-300 dark:border-[#1A2347]">
 
         <h2 className="font-bold mb-4 text-lg">All Transactions</h2>
 
-        <div className="grid grid-cols-6 font-semibold text-gray-600 border-b pb-3">
+        <div className="grid grid-cols-6 font-semibold 
+                        text-gray-700 dark:text-gray-300 
+                        border-b border-gray-300 dark:border-[#1A2347] pb-3">
           <span>Source</span>
           <span>Amount</span>
           <span>Period</span>
@@ -196,7 +230,9 @@ export default function AdminRevenue() {
         {transactions.map((t) => (
           <div
             key={t._id}
-            className="grid grid-cols-6 items-center border-b py-3 text-sm"
+            className="grid grid-cols-6 items-center 
+                       border-b border-gray-300 dark:border-[#1A2347]
+                       py-3 text-sm hover:bg-gray-100 dark:hover:bg-[#111A3A] transition"
           >
             <span>{t.source}</span>
             <span>₹ {t.amount}</span>
@@ -206,12 +242,16 @@ export default function AdminRevenue() {
 
             <button
               onClick={() => deleteTransaction(t._id)}
-              className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded w-fit"
+              className="p-2 text-red-600 dark:text-red-400 
+                         bg-red-100 dark:bg-red-900/40 
+                         hover:bg-red-200 dark:hover:bg-red-900/60
+                         rounded w-fit"
             >
               <Trash2 size={16} />
             </button>
           </div>
         ))}
+
       </div>
     </div>
   );

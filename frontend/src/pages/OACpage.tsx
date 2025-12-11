@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Search, Trash2, RefreshCcw, Eye } from "lucide-react";
+import { Search, Trash2, RefreshCcw } from "lucide-react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useAppSelector } from "../store/hook";
@@ -27,9 +27,9 @@ export default function AdminOACPage() {
   const [search, setSearch] = useState("");
   const [songModal, setSongModal] = useState<Song[] | null>(null);
 
-  // ==========================================================
-  // FETCH REQUESTS
-  // ==========================================================
+  /* ===============================
+      FETCH REQUESTS
+  =============================== */
   useEffect(() => {
     if (token) fetchRequests();
   }, [token]);
@@ -41,14 +41,14 @@ export default function AdminOACPage() {
       });
 
       if (res.data.success) setRequests(res.data.data);
-    } catch (error) {
+    } catch {
       toast.error("Failed to load OAC requests");
     }
   };
 
-  // ==========================================================
-  // UPDATE STATUS
-  // ==========================================================
+  /* ===============================
+      UPDATE STATUS
+  =============================== */
   const updateStatus = async (item: OACRequest, newStatus: string) => {
     try {
       await axios.put(
@@ -64,14 +64,14 @@ export default function AdminOACPage() {
       );
 
       toast.success("Status updated");
-    } catch (err) {
+    } catch {
       toast.error("Failed to update status");
     }
   };
 
-  // ==========================================================
-  // DELETE REQUEST
-  // ==========================================================
+  /* ===============================
+      DELETE REQUEST
+  =============================== */
   const deleteRequest = async (id: string) => {
     if (!confirm("Delete this OAC request?")) return;
 
@@ -87,18 +87,18 @@ export default function AdminOACPage() {
     }
   };
 
-  // ==========================================================
-  // SEARCH FILTER
-  // ==========================================================
+  /* ===============================
+      SEARCH FILTER
+  =============================== */
   const filtered = requests.filter((r) =>
     r.artistName.toLowerCase().includes(search.toLowerCase())
   );
 
-  // ==========================================================
-  // UI START
-  // ==========================================================
+  /* ===============================
+      UI START
+  =============================== */
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen p-6 bg-white dark:bg-[#020726] text-[#020726] dark:text-white transition-colors">
       <div className="max-w-7xl mx-auto">
 
         {/* HEADER */}
@@ -107,23 +107,23 @@ export default function AdminOACPage() {
         </div>
 
         {/* CARD */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="rounded-lg shadow p-6 bg-white dark:bg-[#0B1029] border border-gray-300 dark:border-[#1A2347] transition-colors">
 
           {/* SEARCH BAR */}
-          <div className="flex items-center gap-2 mb-4">
-            <Search size={16} className="text-gray-400" />
+          <div className="flex items-center gap-2 mb-4 border border-gray-300 dark:border-[#1A2347] px-3 py-2 rounded-lg bg-white dark:bg-[#111A3A]">
+            <Search size={16} className="text-gray-500 dark:text-gray-300" />
             <input
               placeholder="Search by artist name..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="border rounded px-3 py-2 text-sm w-64"
+              className="text-sm bg-transparent w-full outline-none text-[#020726] dark:text-white"
             />
           </div>
 
           {/* TABLE */}
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="text-gray-600 border-b bg-gray-50">
+            <table className="w-full text-sm text-[#020726] dark:text-white">
+              <thead className="border-b border-gray-300 dark:border-[#1A2347] bg-gray-50 dark:bg-[#111A3A] text-gray-600 dark:text-gray-200">
                 <tr>
                   <th className="py-4 px-3 text-left">YouTube Channel</th>
                   <th className="py-4 px-3 text-left">Topic Channel</th>
@@ -138,14 +138,19 @@ export default function AdminOACPage() {
               <tbody>
                 {filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="text-center py-8 text-gray-400">
+                    <td
+                      colSpan={7}
+                      className="text-center py-8 text-gray-500 dark:text-gray-400"
+                    >
                       No requests found.
                     </td>
                   </tr>
                 ) : (
                   filtered.map((req) => (
-                    <tr key={req._id} className="border-b hover:bg-gray-50 transition">
-
+                    <tr
+                      key={req._id}
+                      className="border-b border-gray-300 dark:border-[#1A2347] hover:bg-gray-50 dark:hover:bg-[#111A3A]"
+                    >
                       <td className="py-4 px-3">{req.ytChannel}</td>
                       <td className="py-4 px-3">{req.topicChannel || "—"}</td>
                       <td className="py-4 px-3">{req.artistName}</td>
@@ -153,7 +158,7 @@ export default function AdminOACPage() {
                       <td className="py-4 px-3">
                         <button
                           onClick={() => setSongModal(req.songs)}
-                          className="text-blue-600 underline text-xs"
+                          className="text-blue-600 dark:text-blue-300 underline text-xs"
                         >
                           View Songs ({req.songs.length})
                         </button>
@@ -167,12 +172,12 @@ export default function AdminOACPage() {
                         <span
                           className={`px-3 py-1 text-xs rounded-full ${
                             req.status === "Approved"
-                              ? "bg-green-100 text-green-700"
+                              ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
                               : req.status === "Rejected"
-                              ? "bg-red-100 text-red-700"
+                              ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"
                               : req.status === "Released"
-                              ? "bg-blue-100 text-blue-700"
-                              : "bg-yellow-100 text-yellow-700"
+                              ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                              : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
                           }`}
                         >
                           {req.status}
@@ -185,7 +190,7 @@ export default function AdminOACPage() {
                           {/* Approve */}
                           <button
                             onClick={() => updateStatus(req, "Approved")}
-                            className="p-2 bg-green-50 rounded hover:bg-green-100 text-xs"
+                            className="p-2 bg-green-50 dark:bg-green-900/30 rounded hover:bg-green-100 dark:hover:bg-green-800/40 text-xs text-green-700 dark:text-green-300"
                           >
                             Approve
                           </button>
@@ -193,7 +198,7 @@ export default function AdminOACPage() {
                           {/* Release */}
                           <button
                             onClick={() => updateStatus(req, "Released")}
-                            className="p-2 bg-blue-50 rounded hover:bg-blue-100 text-xs"
+                            className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded hover:bg-blue-100 dark:hover:bg-blue-800/40 text-xs text-blue-600 dark:text-blue-300"
                           >
                             Release
                           </button>
@@ -201,7 +206,7 @@ export default function AdminOACPage() {
                           {/* Reject */}
                           <button
                             onClick={() => updateStatus(req, "Rejected")}
-                            className="p-2 bg-orange-50 rounded hover:bg-orange-100 text-xs"
+                            className="p-2 bg-orange-50 dark:bg-yellow-900/30 rounded hover:bg-orange-100 dark:hover:bg-yellow-800/40 text-xs text-orange-600 dark:text-yellow-300"
                           >
                             Reject
                           </button>
@@ -209,14 +214,13 @@ export default function AdminOACPage() {
                           {/* Delete */}
                           <button
                             onClick={() => deleteRequest(req._id)}
-                            className="p-2 bg-red-50 rounded hover:bg-red-100"
+                            className="p-2 bg-red-50 dark:bg-red-900/30 rounded hover:bg-red-100 dark:hover:bg-red-800/40"
                           >
-                            <Trash2 size={16} />
+                            <Trash2 size={16} className="text-red-600 dark:text-red-300" />
                           </button>
 
                         </div>
                       </td>
-
                     </tr>
                   ))
                 )}
@@ -228,27 +232,34 @@ export default function AdminOACPage() {
 
       {/* SONG MODAL */}
       {songModal && (
-        <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
+        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex justify-center items-center z-50">
+          <div className="bg-white dark:bg-[#0B1029] p-6 rounded-lg shadow-xl w-full max-w-md 
+                          border border-gray-300 dark:border-[#1A2347]">
             <h2 className="text-lg font-semibold mb-4">Songs</h2>
 
             {songModal.map((song, idx) => (
-              <div key={idx} className="border-b py-2">
-                <div className="font-medium">{song.title}</div>
-                <div className="text-gray-500 text-xs">ISRC: {song.isrc}</div>
+              <div
+                key={idx}
+                className="border-b border-gray-300 dark:border-[#1A2347] py-2"
+              >
+                <div className="font-medium text-[#020726] dark:text-white">{song.title}</div>
+                <div className="text-gray-500 dark:text-gray-400 text-xs">
+                  ISRC: {song.isrc}
+                </div>
               </div>
             ))}
 
             <button
               onClick={() => setSongModal(null)}
-              className="mt-4 px-4 py-2 bg-gray-200 rounded"
+              className="mt-4 px-4 py-2 bg-gray-200 dark:bg-[#111A3A] 
+                         rounded border border-gray-300 dark:border-[#1A2347]
+                         hover:bg-gray-300 dark:hover:bg-[#0B1029]"
             >
               Close
             </button>
           </div>
         </div>
       )}
-
     </div>
   );
 }

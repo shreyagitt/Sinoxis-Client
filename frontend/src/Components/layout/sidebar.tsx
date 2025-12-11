@@ -6,10 +6,9 @@ import {
   BarChart3,
   User,
   BadgeDollarSign,
-  Settings,
+  ShieldCheck,
   Bell,
   FolderCog,
-  ShieldCheck,
   FileText,
 } from "lucide-react";
 import clsx from "clsx";
@@ -54,29 +53,30 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
       ],
     },
     {
-  to: "/requests",
-  label: "Requests",
-  icon: <FileText className="w-5 h-5" />,
-  subItems: [
-    { label: "Copyright Claim", to: "/requests/copyright" },
-    { label: "Official Artist Channel", to: "/requests/channel" },
-  ],
-},
+      to: "/requests",
+      label: "Requests",
+      icon: <FileText className="w-5 h-5" />,
+      subItems: [
+        { label: "Copyright Claim", to: "/requests/copyright" },
+        { label: "Official Artist Channel", to: "/requests/channel" },
+      ],
+    },
     { to: "/notifications", label: "Notifications", icon: <Bell className="w-5 h-5" /> },
     { to: "/banksettings", label: "Bank Settings", icon: <FolderCog className="w-5 h-5" /> },
     { to: "/form", label: "Apply Form Management", icon: <FileText className="w-5 h-5" /> },
-    
   ];
 
   return (
     <aside
       className={clsx(
-        "fixed inset-y-0 left-0 z-40 bg-white border-r border-gray-200 shadow-sm overflow-y-auto transition-all duration-300 flex flex-col",
+        "fixed inset-y-0 left-0 z-40 overflow-y-auto shadow-sm transition-all duration-300 flex flex-col",
+        // background + border for both modes
+        "bg-white dark:bg-[#020726] border-r border-gray-200 dark:border-gray-700",
         collapsed ? "w-[5rem]" : "w-[16rem]"
       )}
     >
       {/* Logo */}
-      <div className="flex items-center justify-center h-16 border-b">
+      <div className="flex items-center justify-center h-16 border-b border-gray-200 dark:border-gray-700">
         {collapsed ? (
           <img src="/image/logo.webp" alt="Sinoxis Logo" className="w-12 h-10" />
         ) : (
@@ -89,7 +89,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
       {/* Menu */}
       <nav className="mt-6 px-2 pb-8">
         {!collapsed && (
-          <div className="px-4 pt-2 pb-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
+          <div className="px-4 pt-2 pb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">
             Main Menu
           </div>
         )}
@@ -97,65 +97,66 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
         <ul className="space-y-1 relative">
           {menuItems.map((item, index) => {
             const isActiveMain = location.pathname.startsWith(item.to);
-
             const hasSub = item.subItems && item.subItems.length > 0;
             const isOpen = openMenu === item.label || isActiveMain;
 
             return (
               <li key={index}>
-                {/* Main item */}
+                {/* MAIN ITEM */}
                 <div
                   onClick={() => hasSub && !collapsed && toggleMenu(item.label)}
                   className={clsx(
                     "flex items-center justify-between px-4 py-3 text-sm rounded-md cursor-pointer transition-colors group relative",
+
                     isActiveMain
-                      ? "bg-green-600 text-white font-semibold"
-                      : "text-gray-800 hover:bg-gray-100"
+                      ? "bg-[#0288D1] dark:bg-[#29B6F6] text-white font-semibold"
+                      : "text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#111A3A]"
                   )}
                 >
                   <NavLink
                     to={item.to}
                     className="flex items-center gap-3 flex-grow"
                   >
-                    {/* Icon */}
+                    {/* ICON */}
                     <span
                       className={clsx(
                         "transition-colors",
-                        "group-hover:text-green-600",
-                        isActiveMain ? "text-white" : "text-green-600"
+                        isActiveMain
+                          ? "text-white"
+                          : "text-[#0288D1] dark:text-[#29B6F6] group-hover:text-[#0288D1]"
                       )}
                     >
                       {item.icon}
                     </span>
 
-                    {/* Label */}
+                    {/* LABEL */}
                     {!collapsed && <span>{item.label}</span>}
                   </NavLink>
 
-                  {/* Arrow for submenus */}
+                  {/* Toggle arrow */}
                   {hasSub && !collapsed && (
                     <span
                       className={clsx(
-                        "transition-colors",
-                        "group-hover:text-green-600",
-                        isActiveMain ? "text-white" : "text-green-600"
+                        isActiveMain
+                          ? "text-white"
+                          : "text-[#0288D1] dark:text-[#29B6F6]"
                       )}
                     >
                       {isOpen ? "▲" : "▼"}
                     </span>
                   )}
 
-                  {/* Tooltip (when collapsed) */}
+                  {/* Tooltip when collapsed */}
                   {collapsed && (
-                    <span className="absolute left-20 bg-gray-800 text-white text-xs px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                    <span className="absolute left-20 bg-[#020726] text-white dark:bg-[#29B6F6] text-xs px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                       {item.label}
                     </span>
                   )}
                 </div>
 
-                {/* Submenu */}
+                {/* SUBMENU */}
                 {hasSub && isOpen && !collapsed && (
-                  <ul className="ml-10 mt-1 space-y-1 border-l border-gray-200 pl-3">
+                  <ul className="ml-10 mt-1 space-y-1 border-l border-gray-200 dark:border-gray-700 pl-3">
                     {item.subItems!.map((sub, idx) => {
                       const isActiveSub = location.pathname === sub.to;
 
@@ -164,10 +165,10 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
                           <NavLink
                             to={sub.to}
                             className={clsx(
-                              "block text-sm px-2 py-2 rounded-md",
+                              "block text-sm px-2 py-2 rounded-md transition-colors",
                               isActiveSub
-                                ? "text-green-600 font-semibold"
-                                : "text-gray-600 hover:text-green-600"
+                                ? "text-[#0288D1] dark:text-[#29B6F6] font-semibold"
+                                : "text-gray-600 dark:text-gray-300 hover:text-[#0288D1] dark:hover:text-[#29B6F6]"
                             )}
                           >
                             {sub.label}

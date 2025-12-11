@@ -1,336 +1,240 @@
-import React from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import Chart from "react-apexcharts";
-import Row2 from '../Components/Dashboard/row2';
-
+import Row2 from "../Components/Dashboard/row2";
 
 const Dashboard = () => {
-  // === Chart Config ===
-  const revenueOptions = {
-  chart: { 
-    type: "line", 
-    toolbar: { show: false }, 
-    height: 300,
-    zoom: { enabled: false }
-  },
-  stroke: { 
-    curve: "stepline", 
-    width: 2, // 🔥 thicker, more visible line
-    colors: ["#00c853", "#ff8f00"], // brighter & solid colors
-  },
-  colors: ["#00c853", "#ff8f00"],
-  markers: {
-    size: 5,
-    strokeColors: "#fff",
-    strokeWidth: 2,
-    hover: { size: 7 },
-  },
-  dataLabels: { enabled: false },
-  grid: { 
-    borderColor: "#e3e6f0",
-    strokeDashArray: 4 
-  },
-  fill: {
-    type: "gradient",
-    gradient: {
-      shade: "light",
-      type: "horizontal",
-      shadeIntensity: 0.2,
-      gradientToColors: ["#03351dfc", "#ffb300"], // subtle fade
-      opacityFrom: 0.8,
-      opacityTo: 0.9,
-      stops: [0, 100],
-    },
-  },
-  xaxis: {
-    categories: [
-      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-    ],
-    labels: { style: { colors: "#555" } },
-    axisBorder: { show: false },
-    axisTicks: { show: false },
-  },
-  yaxis: {
-    labels: { 
-      formatter: (val) => `$${val}`, 
-      style: { colors: "#555" } 
-    },
-  },
-  tooltip: { y: { formatter: (val) => `$${val}` } },
-  legend: { 
-    show: true,
-    position: "top",
-    markers: { width: 12, height: 12, radius: 12 }
-  },
-};
+  // Detect dark mode by checking <html>.dark presence; update live via MutationObserver
+  const [isDark, setIsDark] = useState(
+    typeof document !== "undefined" && document.documentElement.classList.contains("dark")
+  );
 
-const revenueSeries = [
-  { name: "Revenue", data: [100, 150, 160, 180, 200, 250, 120, 240, 180, 240, 200, 260] },
-  { name: "Expenses", data: [50, 80, 90, 60, 130, 120, 100, 80, 90, 70, 100, 120] },
-];
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const el = document.documentElement;
+    const obs = new MutationObserver(() => {
+      setIsDark(el.classList.contains("dark"));
+    });
+    obs.observe(el, { attributes: true, attributeFilter: ["class"] });
+    return () => obs.disconnect();
+  }, []);
 
-  // === Shared Styles ===
-  const cardStyle = {
-    border: "1px solid #eee",
-    borderRadius: "10px",
-    backgroundColor: "#fff",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-    padding: "16px",
-    marginBottom: "20px",
-  };
-  const titleStyle = { fontSize: "16px", marginBottom: "6px", color: "#555" };
-  const numberStyle = { fontSize: "24px", fontWeight: "600", margin: "0" };
-  const textMuted = { color: "#999", fontSize: "12px" };
+  // === Chart Config (Sinoxis colors + dynamic by theme) ===
+  const revenueOptions = useMemo(() => {
+    const textColor = isDark ? "#FFFFFF" : "#020726"; // Deep Navy in light, white in dark
+    const gridColor = isDark ? "#1F2937" : "#e3e6f0";
+    const axisLabelColor = isDark ? "#D1D5DB" : "#555";
 
+    return {
+      chart: {
+        type: "line",
+        toolbar: { show: false },
+        height: 300,
+        zoom: { enabled: false },
+        foreColor: textColor,
+        background: "transparent",
+      },
+      stroke: {
+        curve: "stepline",
+        width: 2,
+        colors: ["#0288D1", "#29B6F6"], // Sinoxis colors
+      },
+      colors: ["#0288D1", "#29B6F6"],
+      markers: {
+        size: 5,
+        strokeColors: "#fff",
+        strokeWidth: 2,
+        hover: { size: 7 },
+      },
+      dataLabels: { enabled: false },
+      grid: {
+        borderColor: gridColor,
+        strokeDashArray: 4,
+      },
+      fill: {
+        type: "gradient",
+        gradient: {
+          shade: "light",
+          type: "horizontal",
+          shadeIntensity: 0.2,
+          gradientToColors: ["#29B6F6", "#0288D1"],
+          opacityFrom: 0.8,
+          opacityTo: 0.9,
+          stops: [0, 100],
+        },
+      },
+      xaxis: {
+        categories: [
+          "Jan","Feb","Mar","Apr","May","Jun",
+          "Jul","Aug","Sep","Oct","Nov","Dec"
+        ],
+        labels: { style: { colors: axisLabelColor } },
+        axisBorder: { show: false },
+        axisTicks: { show: false },
+      },
+      yaxis: {
+        labels: {
+          formatter: (val) => `$${val}`,
+          style: { colors: axisLabelColor },
+        },
+      },
+      tooltip: {
+        theme: isDark ? "dark" : "light",
+        y: { formatter: (val) => `$${val}` },
+      },
+      legend: {
+        show: true,
+        position: "top",
+        labels: { colors: axisLabelColor },
+        markers: { width: 12, height: 12, radius: 12 },
+      },
+    };
+  }, [isDark]);
+
+  const revenueSeries = [
+    { name: "Revenue", data: [100,150,160,180,200,250,120,240,180,240,200,260] },
+    { name: "Expenses", data: [50,80,90,60,130,120,100,80,90,70,100,120] },
+  ];
+
+  // === All layout content preserved; inline styles replaced with Tailwind exact-px utilities ===
   return (
-    <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
+    <div className="p-[20px] font-sans bg-[#FFFFFF] dark:bg-[#020726] text-[#020726] dark:text-[#FFFFFF] min-h-screen">
       {/* ===== Header ===== */}
-     <div
-  style={{
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    borderBottom: "1px solid #ddd",
-    paddingBottom: "12px",
-    marginBottom: "20px",
-  }}
->
-  {/* Page Title */}
-  <h1
-    style={{
-      fontSize: "26px",
-      color: "#2d2f31",
-      margin: 0,
-      fontWeight: "600",
-    }}
-  >
-    Dashboard
-  </h1>
+      <div className="flex justify-between items-center border-b border-[#ddd] dark:border-[#1F2937] pb-[12px] mb-[20px]">
+        {/* Page Title */}
+        <h1 className="text-[26px] m-0 font-[600] text-[#2d2f31] dark:text-[#FFFFFF]">
+          Dashboard
+        </h1>
 
-  {/* Breadcrumb */}
-  <nav aria-label="breadcrumb">
-    <ol
-      style={{
-        listStyle: "none",
-        display: "flex",
-        alignItems: "center",
-        gap: "6px",
-        margin: 0,
-        padding: 0,
-        fontSize: "14px",
-        color: "#6c757d",
-      }}
-    >
-      <li>
-        <a
-          href="javascript:void(0)"
-          style={{
-            textDecoration: "none",
-            color: "#16a34a",
-            fontWeight: "500",
-          }}
-        >
-          Home
-        </a>
-      </li>
-      <li style={{ color: "#6c757d" }}>/</li>
-      <li
-        style={{
-          color: "#6c757d",
-          fontWeight: "500",
-        }}
-      >
-        Dashboard
-      </li>
-    </ol>
-  </nav>
-</div>
-
+        {/* Breadcrumb */}
+        <nav aria-label="breadcrumb">
+          <ol className="list-none flex items-center gap-[6px] m-0 p-0 text-[14px] text-[#6c757d] dark:text-[#D1D5DB]">
+            <li>
+              <a
+                href="javascript:void(0)"
+                className="no-underline text-[#29B6F6] dark:text-[#29B6F6] font-[500]"
+              >
+                Home
+              </a>
+            </li>
+            <li className="text-[#6c757d] dark:text-[#D1D5DB]">/</li>
+            <li className="text-[#6c757d] dark:text-[#D1D5DB] font-[500]">Dashboard</li>
+          </ol>
+        </nav>
+      </div>
 
       {/* ===== Top Stats Section ===== */}
-     <div> <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-          gap: "20px",
-        }}
-      >
-        {[
-          { title: "Total Users", value: "47", change: "5%", color: "#16a34a" },
-          { title: "Total Profit", value: "₹67,987", change: "5%", color: "#16a34a" },
-          { title: "Total Expenses", value: "₹76,965", change: "0.9%", color: "green" },
-          { title: "Total Cost", value: "₹59,765", change: "0.6%", color: "orange" },
-        ].map((item, i) => (
-          <div key={i} style={cardStyle}>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <div>
-                <h6 style={titleStyle}>{item.title}</h6>
-                <h2 style={numberStyle}>{item.value}</h2>
-              </div>
-              <div
-                style={{
-                  width: "96px",
-                  height: "64px",
-                  backgroundColor: "#f2f2f2",
-                  borderRadius: "5px",
-                }}
-              ></div>
-            </div>
-            <span style={textMuted}>
-              <span style={{ color: item.color, fontWeight: "500" }}>↑ {item.change}</span> Last
-              week
-            </span>
-          </div>
-        ))}
-      </div>
-
-      {/* ===== Revenue Growth Chart ===== */}
-      <div
-  style={{
-    backgroundColor: "#fff",
-    border: "1px solid #cfd4e2", // slightly darker for visible border
-    borderRadius: "10px",
-    boxShadow: "0 3px 10px rgba(0,0,0,0.08)",
-    padding: "20px",
-    marginTop: "20px",
-  }}
->
-  <h2
-    style={{
-      fontSize: "18px",
-      fontWeight: "600",
-      color: "#333",
-      marginBottom: "15px",
-    }}
-  >
-    Revenue Growth
-  </h2>
-  <Chart options={revenueOptions} series={revenueSeries} type="line" height={300} />
-</div>
-
-      {/* ===== SMS Widgets ===== */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-          gap: "20px",
-          marginTop: "20px",
-        }}
-      >
-        {[
-          { label: "Delivery", color: "green", value: "100%", icon: "📊" },
-          { label: "SMS Sent", color: "red", value: "1+", icon: "✉️" },
-          { label: "Promotional", color: "blue", value: "25+", icon: "📢" },
-          { label: "Transactional", color: "orange", value: "15+", icon: "🔁" },
-        ].map((item, idx) => (
-          <div key={idx} style={cardStyle}>
+      <div>
+        <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "20px" }}>
+          {[
+            { title: "Total Users", value: "47", change: "5%", color: "#16a34a" },
+            { title: "Total Profit", value: "₹67,987", change: "5%", color: "#16a34a" },
+            { title: "Total Expenses", value: "₹76,965", change: "0.9%", color: "green" },
+            { title: "Total Cost", value: "₹59,765", change: "0.6%", color: "orange" },
+          ].map((item, i) => (
             <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
+              key={i}
+              className="border border-[#eee] dark:border-[#1F2937] rounded-[10px] bg-[#FFFFFF] dark:bg-[#020726] shadow-[0_2px_8px_rgba(0,0,0,0.05)] p-[16px] mb-[20px]"
             >
-              <div>
-                <h6 style={titleStyle}>{item.label}</h6>
-                <span
-                  style={{
-                    backgroundColor: item.color,
-                    color: "#fff",
-                    padding: "2px 8px",
-                    borderRadius: "5px",
-                    fontSize: "13px",
-                  }}
-                >
-                  {item.value}
-                </span>
+              <div className="flex justify-between">
+                <div>
+                  <h6 className="text-[16px] mb-[6px] text-[#555] dark:text-[#D1D5DB]">
+                    {item.title}
+                  </h6>
+                  <h2 className="text-[24px] font-[600] m-0 text-current">{item.value}</h2>
+                </div>
+                <div className="w-[96px] h-[64px] rounded-[5px] bg-[#f2f2f2] dark:bg-[#111827]" />
               </div>
-              <div
-                style={{
-                  fontSize: "20px",
-                  backgroundColor: "#f0f0f0",
-                  borderRadius: "50%",
-                  width: "36px",
-                  height: "36px",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                {item.icon}
+
+              <span className="text-[12px] text-[#999] dark:text-[#9ca3af]">
+                <span style={{ color: item.color, fontWeight: 500 }}>↑ {item.change}</span> Last week
+              </span>
+            </div>
+          ))}
+        </div>
+
+        {/* ===== Revenue Growth Chart ===== */}
+        <div className="bg-[#FFFFFF] dark:bg-[#020726] border border-[#cfd4e2] dark:border-[#1F2937] rounded-[10px] shadow-[0_3px_10px_rgba(0,0,0,0.08)] p-[20px] mt-[20px]">
+          <h2 className="text-[18px] font-[600] text-[#333] dark:text-[#E5E7EB] mb-[15px]">Revenue Growth</h2>
+          <Chart options={revenueOptions} series={revenueSeries} type="line" height={300} />
+        </div>
+
+        {/* ===== SMS Widgets ===== */}
+        <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "20px", marginTop: "20px" }}>
+          {[
+            { label: "Delivery", color: "green", value: "100%", icon: "📊" },
+            { label: "SMS Sent", color: "red", value: "1+", icon: "✉️" },
+            { label: "Promotional", color: "blue", value: "25+", icon: "📢" },
+            { label: "Transactional", color: "orange", value: "15+", icon: "🔁" },
+          ].map((item, idx) => (
+            <div key={idx} className="border border-[#eee] dark:border-[#1F2937] rounded-[10px] bg-[#FFFFFF] dark:bg-[#0B1029] shadow-[0_2px_8px_rgba(0,0,0,0.05)] p-[16px] mb-[20px]">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h6 className="text-[16px] mb-[6px] text-[#555] dark:text-[#D1D5DB]">{item.label}</h6>
+                  <span className="text-[13px] rounded-[5px] px-[8px] py-[2px] text-white" style={{ backgroundColor: item.color }}>
+                    {item.value}
+                  </span>
+                </div>
+
+                <div className="text-[20px] bg-[#f0f0f0] dark:bg-[#111827] rounded-[50%] w-[36px] h-[36px] flex items-center justify-center">
+                  {item.icon}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
 
-      {/* ===== Deliveries Table ===== */}
-      <div style={{ marginTop: "20px" }}>
-        <div style={cardStyle}>
-          <div style={{ borderBottom: "1px solid #eee", paddingBottom: "10px" }}>
-            <h3 style={{ margin: 0, fontSize: "18px" }}>Deliveries</h3>
-          </div>
-          <div style={{ marginTop: "10px" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr style={{ textAlign: "left", fontSize: "13px", color: "#666" }}>
-                  <th>Particular</th>
-                  <th>Percentage</th>
-                  <th style={{ textAlign: "right" }}>Total Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style={{ color: "green" }}>On Time Delivery</td>
-                  <td>
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                      <div
-                        style={{
-                          flexGrow: 1,
-                          height: "6px",
-                          backgroundColor: "#eee",
-                          borderRadius: "3px",
-                          overflow: "hidden",
-                        }}
-                      >
-                        <div
-                          style={{ width: "80%", backgroundColor: "green", height: "100%" }}
-                        ></div>
+        {/* ===== Deliveries Table ===== */}
+        <div className="mt-[20px]">
+          <div className="border border-[#eee] dark:border-[#1F2937] rounded-[10px] bg-[#FFFFFF] dark:bg-[#020726] shadow-[0_2px_8px_rgba(0,0,0,0.05)] p-[16px]">
+            <div className="border-b border-[#eee] dark:border-[#1F2937] pb-[10px]">
+              <h3 className="m-0 text-[18px] text-current">Deliveries</h3>
+            </div>
+
+            <div className="mt-[10px]">
+              <table className="w-full border-collapse text-[13px]">
+                <thead>
+                  <tr style={{ color: "#666" }}>
+                    <th>Particular</th>
+                    <th>Percentage</th>
+                    <th style={{ textAlign: "right" }}>Total Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ color: "green" }}>On Time Delivery</td>
+                    <td>
+                      <div className="flex items-center gap-[10px]">
+                        <div className="flex-1 h-[6px] bg-[#eee] dark:bg-[#111827] rounded-[3px] overflow-hidden">
+                          <div className="h-full w-[80%] bg-green-600" />
+                        </div>
+                        <span>80%</span>
                       </div>
-                      <span>80%</span>
-                    </div>
-                  </td>
-                  <td style={{ textAlign: "right", color: "#333" }}>₹45,452.23</td>
-                </tr>
-                <tr>
-                  <td style={{ color: "orange" }}>Delayed Delivery</td>
-                  <td>
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                      <div
-                        style={{
-                          flexGrow: 1,
-                          height: "6px",
-                          backgroundColor: "#eee",
-                          borderRadius: "3px",
-                          overflow: "hidden",
-                        }}
-                      >
-                        <div
-                          style={{ width: "15%", backgroundColor: "orange", height: "100%" }}
-                        ></div>
+                    </td>
+                    <td style={{ textAlign: "right", color: "#333" }}>₹45,452.23</td>
+                  </tr>
+
+                  <tr>
+                    <td style={{ color: "orange" }}>Delayed Delivery</td>
+                    <td>
+                      <div className="flex items-center gap-[10px]">
+                        <div className="flex-1 h-[6px] bg-[#eee] dark:bg-[#111827] rounded-[3px] overflow-hidden">
+                          <div className="h-full w-[15%] bg-orange-500" />
+                        </div>
+                        <span>15%</span>
                       </div>
-                      <span>15%</span>
-                    </div>
-                  </td>
-                  <td style={{ textAlign: "right", color: "#333" }}>₹15,256.23</td>
-                </tr>
-              </tbody>
-            </table>
+                    </td>
+                    <td style={{ textAlign: "right", color: "#333" }}>₹15,256.23</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
+
+        {/* ROW2 */}
+        <div className="mt-[20px]">
+          <Row2 />
         </div>
-        <div><Row2 /></div>
-        
       </div>
     </div>
   );

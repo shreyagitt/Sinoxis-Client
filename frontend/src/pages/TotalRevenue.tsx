@@ -5,7 +5,7 @@ import { useAppSelector } from "../store/hook";
 import toast from "react-hot-toast";
 
 /* ============================
-   TYPES (MATCH YOUR BACKEND SCHEMA)
+   TYPES
 ============================ */
 interface Platform {
   icon?: string;
@@ -52,41 +52,33 @@ interface RevenueAnalytics {
   platforms?: Platform[];
 }
 
-/* ============================
-   EMPTY DEFAULT
-============================ */
+/* EMPTY DEFAULT */
 const EMPTY: RevenueAnalytics = {
   totalRevenue: 0,
   totalChange: "",
   growthAmount: 0,
-
   streamingRevenue: 0,
   streamingChange: "",
   streamingPercent: 0,
   streamingGrowth: 0,
-
   downloadsRevenue: 0,
   downloadsChange: "",
-
   royaltiesRevenue: 0,
   royaltiesChange: "",
-
   yearToDate: 0,
   currentMonth: 0,
   growthRate: "",
   revenueSources: 0,
-
   distribution: {
     streaming: 0,
     downloads: 0,
     royalties: 0,
   },
-
   platforms: [],
 };
 
 /* ============================
-   ADMIN COMPONENT
+    MAIN COMPONENT
 ============================ */
 export default function AdminTotalRevenueAnalytics() {
   const { token } = useAppSelector((s) => s.auth);
@@ -96,9 +88,7 @@ export default function AdminTotalRevenueAnalytics() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  /* ============================
-     ✅ FETCH ANALYTICS (ADMIN)
-  ============================ */
+  /* FETCH ANALYTICS */
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
@@ -119,9 +109,7 @@ export default function AdminTotalRevenueAnalytics() {
     if (token) fetchAnalytics();
   }, [token]);
 
-  /* ============================
-     ✅ SAVE / UPDATE
-  ============================ */
+  /* SAVE ANALYTICS */
   const saveAnalytics = async () => {
     try {
       setSaving(true);
@@ -145,9 +133,7 @@ export default function AdminTotalRevenueAnalytics() {
     }
   };
 
-  /* ============================
-     ✅ DELETE
-  ============================ */
+  /* DELETE */
   const deleteAnalytics = async () => {
     if (!form._id) return;
     if (!confirm("Delete analytics?")) return;
@@ -164,9 +150,7 @@ export default function AdminTotalRevenueAnalytics() {
     }
   };
 
-  /* ============================
-     ✅ PLATFORM HANDLERS
-  ============================ */
+  /* PLATFORM HANDLERS */
   const addPlatform = () =>
     setForm({
       ...form,
@@ -186,32 +170,47 @@ export default function AdminTotalRevenueAnalytics() {
     });
 
   /* ============================
-     ✅ UI
+      UI
   ============================ */
   return (
-    <div className="p-6 bg-gray-100 min-h-screen space-y-10">
+    <div className="p-6 min-h-screen space-y-10
+      bg-white dark:bg-[#020726]
+      text-[#020726] dark:text-white transition-colors">
 
-      {/* ✅ HEADER */}
+      {/* HEADER */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Total Revenue Analytics</h1>
 
         <div className="flex gap-3">
-          <button onClick={fetchAnalytics} className="px-4 py-2 border rounded">
+
+          {/* Refresh */}
+          <button
+            onClick={fetchAnalytics}
+            className="px-4 py-2 rounded-lg flex items-center gap-2
+            bg-white dark:bg-[#0B1029]
+            border border-gray-300 dark:border-[#1A2347]
+            hover:bg-gray-100 dark:hover:bg-[#111A3A]"
+          >
             <RefreshCcw size={16} />
           </button>
 
+          {/* Save */}
           <button
             onClick={saveAnalytics}
             disabled={saving}
-            className="px-4 py-2 bg-green-600 text-white rounded"
+            className="px-4 py-2 bg-[#0288D1] hover:bg-[#0275B5]
+            text-white rounded-lg flex items-center gap-2"
           >
             <Save size={16} />
+            Save
           </button>
 
+          {/* Delete */}
           {form._id && (
             <button
               onClick={deleteAnalytics}
-              className="px-4 py-2 bg-red-600 text-white rounded"
+              className="px-4 py-2 bg-red-600 hover:bg-red-700
+              text-white rounded-lg"
             >
               <Trash2 size={16} />
             </button>
@@ -219,8 +218,11 @@ export default function AdminTotalRevenueAnalytics() {
         </div>
       </div>
 
-      {/* ✅ SUMMARY GRID */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white p-6 rounded">
+      {/* SUMMARY GRID */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 rounded-xl 
+        bg-white dark:bg-[#0B1029]
+        border border-gray-300 dark:border-[#1A2347]"
+      >
         {[
           ["totalRevenue", "Total Revenue"],
           ["streamingRevenue", "Streaming"],
@@ -235,63 +237,90 @@ export default function AdminTotalRevenueAnalytics() {
               onChange={(e) =>
                 setForm({ ...form, [key]: Number(e.target.value) })
               }
-              className="w-full border p-2 rounded"
+              className="w-full border border-gray-300 dark:border-[#1A2347]
+                p-2 rounded bg-white dark:bg-[#111A3A]
+                text-[#020726] dark:text-white"
             />
           </div>
         ))}
       </div>
 
-      {/* ✅ DISTRIBUTION */}
-      <div className="bg-white p-6 rounded">
+      {/* DISTRIBUTION */}
+      <div className="p-6 rounded-xl 
+        bg-white dark:bg-[#0B1029]
+        border border-gray-300 dark:border-[#1A2347]">
+        
         <h2 className="font-semibold mb-4">Distribution</h2>
-        {["streaming", "downloads", "royalties"].map((k) => (
-          <input
-            key={k}
-            type="number"
-            placeholder={k}
-            value={(form.distribution as any)?.[k] || 0}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                distribution: {
-                  ...form.distribution,
-                  [k]: Number(e.target.value),
-                },
-              })
-            }
-            className="border p-2 mr-3"
-          />
-        ))}
+
+        <div className="flex flex-wrap gap-3">
+          {["streaming", "downloads", "royalties"].map((k) => (
+            <input
+              key={k}
+              type="number"
+              placeholder={k}
+              value={(form.distribution as any)?.[k] || 0}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  distribution: {
+                    ...form.distribution,
+                    [k]: Number(e.target.value),
+                  },
+                })
+              }
+              className="border border-gray-300 dark:border-[#1A2347]
+                p-2 rounded bg-white dark:bg-[#111A3A]
+                text-[#020726] dark:text-white"
+            />
+          ))}
+        </div>
       </div>
 
-      {/* ✅ PLATFORMS */}
-      <div className="bg-white p-6 rounded">
+      {/* PLATFORMS */}
+      <div className="p-6 rounded-xl 
+        bg-white dark:bg-[#0B1029]
+        border border-gray-300 dark:border-[#1A2347]">
+        
         <div className="flex justify-between mb-4">
           <h2 className="font-semibold">Platforms</h2>
-          <button onClick={addPlatform} className="text-blue-600 flex gap-1">
-            <Plus size={16} /> Add
+
+          <button
+            onClick={addPlatform}
+            className="text-[#0288D1] hover:underline flex items-center gap-1"
+          >
+            <Plus size={16} /> Add Platform
           </button>
         </div>
 
         {form.platforms?.map((p, i) => (
-          <div key={i} className="grid grid-cols-2 md:grid-cols-6 gap-2 mb-2">
-            {["name", "category", "streams", "revenue", "growth", "marketShare"].map(
-              (k) => (
-                <input
-                  key={k}
-                  placeholder={k}
-                  value={(p as any)[k] || ""}
-                  onChange={(e) =>
-                    updatePlatform(i, k as any, e.target.value)
-                  }
-                  className="border p-2"
-                />
-              )
-            )}
+          <div
+            key={i}
+            className="grid grid-cols-2 md:grid-cols-6 gap-2 mb-2"
+          >
+            {[
+              "name",
+              "category",
+              "streams",
+              "revenue",
+              "growth",
+              "marketShare",
+            ].map((k) => (
+              <input
+                key={k}
+                placeholder={k}
+                value={(p as any)[k] || ""}
+                onChange={(e) =>
+                  updatePlatform(i, k as any, e.target.value)
+                }
+                className="border border-gray-300 dark:border-[#1A2347]
+                p-2 rounded bg-white dark:bg-[#111A3A]
+                text-[#020726] dark:text-white"
+              />
+            ))}
 
             <button
               onClick={() => removePlatform(i)}
-              className="text-red-600"
+              className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
             >
               <Trash2 />
             </button>
@@ -301,4 +330,3 @@ export default function AdminTotalRevenueAnalytics() {
     </div>
   );
 }
-

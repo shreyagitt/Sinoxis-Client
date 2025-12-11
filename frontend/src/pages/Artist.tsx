@@ -176,36 +176,38 @@ export default function ArtistsPage() {
   // UI RENDER
   // ----------------------------------------------------
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-white dark:bg-[#020726] p-6 transition-colors duration-300">
       <div className="max-w-6xl mx-auto">
 
         {/* HEADER */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold">Artists</h1>
+          <h1 className="text-2xl font-semibold text-[#020726] dark:text-white">
+            Artists
+          </h1>
 
           <button
             onClick={openAdd}
-            className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            className="flex items-center gap-2 bg-[#0288D1] hover:bg-[#29B6F6] text-white px-4 py-2 rounded-md transition-colors"
           >
             <Plus size={16} /> Add Artist
           </button>
         </div>
 
         {/* SEARCH */}
-        <div className="bg-white rounded-lg p-4 shadow mb-4 flex items-center gap-2">
-          <Search size={16} className="text-gray-400" />
+        <div className="bg-white dark:bg-[#0B1029] rounded-lg p-4 shadow border border-gray-200 dark:border-[#1A2347] mb-4 flex items-center gap-2">
+          <Search size={16} className="text-gray-400 dark:text-gray-300" />
           <input
             placeholder="Search artist..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="border rounded px-3 py-2 text-sm w-64"
+            className="border dark:border-[#1A2347] rounded px-3 py-2 text-sm w-64 bg-white dark:bg-[#111A3A] text-[#020726] dark:text-white"
           />
         </div>
 
         {/* TABLE */}
-        <div className="bg-white rounded-lg shadow p-6 overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="border-b text-gray-600">
+        <div className="bg-white dark:bg-[#0B1029] rounded-lg shadow p-6 overflow-x-auto border border-gray-200 dark:border-[#1A2347]">
+          <table className="w-full text-sm text-[#020726] dark:text-gray-200">
+            <thead className="border-b border-gray-300 dark:border-[#1A2347] text-gray-600 dark:text-gray-300">
               <tr>
                 <th className="py-3 text-left">Image</th>
                 <th className="py-3 text-left">Name</th>
@@ -221,13 +223,19 @@ export default function ArtistsPage() {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="text-center py-8 text-gray-400">
+                  <td
+                    colSpan={8}
+                    className="text-center py-8 text-gray-400 dark:text-gray-500"
+                  >
                     No artists found
                   </td>
                 </tr>
               ) : (
                 filtered.map((artist) => (
-                  <tr key={artist._id} className="border-b hover:bg-gray-50">
+                  <tr
+                    key={artist._id}
+                    className="border-b border-gray-200 dark:border-[#1A2347] hover:bg-gray-50 dark:hover:bg-[#111A3A] transition-colors"
+                  >
                     <td className="py-3">
                       <img
                         src={artist.avatar || "https://via.placeholder.com/50"}
@@ -243,7 +251,7 @@ export default function ArtistsPage() {
                       {artist.spotify ? (
                         <a
                           href={artist.spotify}
-                          className="text-blue-600 underline"
+                          className="text-[#0288D1] dark:text-[#29B6F6] underline"
                           target="_blank"
                         >
                           Open
@@ -257,7 +265,7 @@ export default function ArtistsPage() {
                       {artist.apple ? (
                         <a
                           href={artist.apple}
-                          className="text-blue-600 underline"
+                          className="text-[#0288D1] dark:text-[#29B6F6] underline"
                           target="_blank"
                         >
                           Open
@@ -271,7 +279,7 @@ export default function ArtistsPage() {
                       {artist.youtube ? (
                         <a
                           href={artist.youtube}
-                          className="text-blue-600 underline"
+                          className="text-[#0288D1] dark:text-[#29B6F6] underline"
                           target="_blank"
                         >
                           Open
@@ -285,16 +293,16 @@ export default function ArtistsPage() {
                       <div className="flex gap-2">
                         <button
                           onClick={() => openEdit(artist)}
-                          className="p-2 bg-blue-50 rounded hover:bg-blue-100"
+                          className="p-2 bg-blue-50 dark:bg-[#111A3A] rounded hover:bg-blue-100 dark:hover:bg-[#1A2347] transition-colors"
                         >
-                          <Edit size={16} />
+                          <Edit size={16} className="text-[#0288D1] dark:text-[#29B6F6]" />
                         </button>
 
                         <button
                           onClick={() => deleteArtist(artist._id)}
-                          className="p-2 bg-red-50 rounded hover:bg-red-100"
+                          className="p-2 bg-red-50 dark:bg-[#111A3A] rounded hover:bg-red-100 dark:hover:bg-[#1A2347] transition-colors"
                         >
-                          <Trash2 size={16} />
+                          <Trash2 size={16} className="text-red-600" />
                         </button>
                       </div>
                     </td>
@@ -307,12 +315,12 @@ export default function ArtistsPage() {
 
         {/* ---------------- MODAL ---------------- */}
         {modalOpen && (
-          <div className="fixed inset-0 bg-black/40 flex justify-center items-center p-4 z-50">
+          <div className="fixed inset-0 bg-black/40 dark:bg-black/60 flex justify-center items-center p-4 z-50 transition-colors">
             <form
               onSubmit={saveArtist}
-              className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md"
+              className="bg-white dark:bg-[#0B1029] p-6 rounded-xl shadow-xl w-full max-w-md border border-gray-200 dark:border-[#1A2347]"
             >
-              <h2 className="text-lg font-semibold mb-4">
+              <h2 className="text-lg font-semibold mb-4 text-[#020726] dark:text-white">
                 {editing ? "Edit Artist" : "Add Artist"}
               </h2>
 
@@ -320,28 +328,28 @@ export default function ArtistsPage() {
                 <input
                   required
                   placeholder="Artist Name"
-                  className="border rounded px-3 py-2 w-full"
+                  className="border dark:border-[#1A2347] rounded px-3 py-2 w-full bg-white dark:bg-[#111A3A] text-[#020726] dark:text-white"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                 />
 
                 <input
                   placeholder="Mobile Number"
-                  className="border rounded px-3 py-2 w-full"
+                  className="border dark:border-[#1A2347] rounded px-3 py-2 w-full bg-white dark:bg-[#111A3A] text-[#020726] dark:text-white"
                   value={form.mobile}
                   onChange={(e) => setForm({ ...form, mobile: e.target.value })}
                 />
 
                 <input
                   placeholder="Email"
-                  className="border rounded px-3 py-2 w-full"
+                  className="border dark:border-[#1A2347] rounded px-3 py-2 w-full bg-white dark:bg-[#111A3A] text-[#020726] dark:text-white"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                 />
 
                 <input
                   placeholder="Spotify URL"
-                  className="border rounded px-3 py-2 w-full"
+                  className="border dark:border-[#1A2347] rounded px-3 py-2 w-full bg-white dark:bg-[#111A3A] text-[#020726] dark:text-white"
                   value={form.spotify}
                   onChange={(e) =>
                     setForm({ ...form, spotify: e.target.value })
@@ -350,14 +358,14 @@ export default function ArtistsPage() {
 
                 <input
                   placeholder="Apple Music URL"
-                  className="border rounded px-3 py-2 w-full"
+                  className="border dark:border-[#1A2347] rounded px-3 py-2 w-full bg-white dark:bg-[#111A3A] text-[#020726] dark:text-white"
                   value={form.apple}
                   onChange={(e) => setForm({ ...form, apple: e.target.value })}
                 />
 
                 <input
                   placeholder="YouTube URL"
-                  className="border rounded px-3 py-2 w-full"
+                  className="border dark:border-[#1A2347] rounded px-3 py-2 w-full bg-white dark:bg-[#111A3A] text-[#020726] dark:text-white"
                   value={form.youtube}
                   onChange={(e) =>
                     setForm({ ...form, youtube: e.target.value })
@@ -365,7 +373,7 @@ export default function ArtistsPage() {
                 />
 
                 {/* Image Upload */}
-                <label className="flex items-center gap-2 cursor-pointer">
+                <label className="flex items-center gap-2 cursor-pointer text-[#020726] dark:text-white">
                   <ImagePlus size={18} />
                   <span>Upload Artist Image</span>
                   <input
@@ -387,13 +395,13 @@ export default function ArtistsPage() {
               <div className="flex justify-end gap-3 mt-6">
                 <button
                   type="button"
-                  className="px-4 py-2 border rounded"
+                  className="px-4 py-2 border dark:border-[#1A2347] rounded text-[#020726] dark:text-white bg-white dark:bg-[#111A3A]"
                   onClick={() => setModalOpen(false)}
                 >
                   Cancel
                 </button>
 
-                <button className="px-4 py-2 bg-blue-600 text-white rounded">
+                <button className="px-4 py-2 bg-[#0288D1] hover:bg-[#29B6F6] text-white rounded transition-colors">
                   Save Artist
                 </button>
               </div>

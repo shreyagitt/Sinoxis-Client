@@ -133,13 +133,12 @@ const AdminSettingsPage: React.FC = () => {
     if (!editForm) return;
 
     try {
-      const res = await axios.put(
+      await axios.put(
         `${baseUrl}/bank/${editForm._id}/verify`,
         { verified: editForm.verified },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // Update entire record (except verified is updated separately)
       setRecords((prev) =>
         prev.map((r) =>
           r._id === editForm._id ? { ...editForm } : r
@@ -164,29 +163,31 @@ const AdminSettingsPage: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-white px-6 py-8">
+    <div className="min-h-screen bg-white dark:bg-[#020726] px-6 py-8 transition-colors">
       <div className="max-w-7xl mx-auto">
 
-        <h1 className="text-2xl font-semibold mb-6">Bank Details Management</h1>
+        <h1 className="text-2xl font-semibold mb-6 text-[#020726] dark:text-white">
+          Bank Details Management
+        </h1>
 
         {/* Search Bar */}
         <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center border border-green-400 rounded-lg p-2 w-72">
-            <Search className="text-green-600 mr-2" size={18} />
+          <div className="flex items-center border border-[#0288D1] dark:border-[#29B6F6] rounded-lg p-2 w-72 bg-white dark:bg-[#0B1029]">
+            <Search className="text-[#0288D1] dark:text-[#29B6F6] mr-2" size={18} />
             <input
               type="text"
               placeholder="Search by name or email..."
-              className="bg-transparent w-full outline-none"
+              className="bg-transparent w-full outline-none text-[#020726] dark:text-white placeholder-gray-500 dark:placeholder-gray-300"
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
         </div>
 
         {/* TABLE */}
-        <div className="overflow-x-auto rounded-xl shadow">
-          <table className="min-w-full text-sm text-gray-700">
+        <div className="overflow-x-auto rounded-xl shadow border border-gray-200 dark:border-[#1A2347]">
+          <table className="min-w-full text-sm text-[#020726] dark:text-gray-300 bg-white dark:bg-[#0B1029]">
 
-            <thead className="bg-green-600 text-white">
+            <thead className="bg-[#0288D1] dark:bg-[#29B6F6] text-white">
               <tr>
                 <th className="py-3 px-4 text-left">Account Holder</th>
                 <th className="py-3 px-4 text-left">Email</th>
@@ -202,7 +203,10 @@ const AdminSettingsPage: React.FC = () => {
 
             <tbody>
               {filtered.map((record) => (
-                <tr key={record._id} className="border-b hover:bg-green-100">
+                <tr
+                  key={record._id}
+                  className="border-b border-gray-200 dark:border-[#1A2347] hover:bg-gray-100 dark:hover:bg-[#111A3A] transition"
+                >
 
                   <td className="py-3 px-4">{record.accountName}</td>
                   <td className="py-3 px-4">{record.email}</td>
@@ -216,8 +220,8 @@ const AdminSettingsPage: React.FC = () => {
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-medium ${
                         record.verified
-                          ? "bg-green-200 text-green-800"
-                          : "bg-red-200 text-red-800"
+                          ? "bg-green-200 text-green-900"
+                          : "bg-red-300 text-red-900"
                       }`}
                     >
                       {record.verified ? "Verified" : "Not Verified"}
@@ -230,14 +234,14 @@ const AdminSettingsPage: React.FC = () => {
                     {!record.verified ? (
                       <button
                         onClick={() => verifyAccount(record._id)}
-                        className="text-green-600 hover:text-green-800"
+                        className="text-green-600 dark:text-green-400 hover:scale-110 transition"
                       >
                         <ShieldCheck size={18} />
                       </button>
                     ) : (
                       <button
                         onClick={() => unverifyAccount(record._id)}
-                        className="text-gray-600 hover:text-gray-800"
+                        className="text-gray-700 dark:text-gray-300 hover:scale-110 transition"
                       >
                         <ShieldOff size={18} />
                       </button>
@@ -246,7 +250,7 @@ const AdminSettingsPage: React.FC = () => {
                     {/* EDIT */}
                     <button
                       onClick={() => openEdit(record)}
-                      className="text-blue-600 hover:text-blue-800"
+                      className="text-[#0288D1] dark:text-[#29B6F6] hover:scale-110 transition"
                     >
                       <Edit size={18} />
                     </button>
@@ -254,7 +258,7 @@ const AdminSettingsPage: React.FC = () => {
                     {/* DELETE */}
                     <button
                       onClick={() => deleteRecord(record._id)}
-                      className="text-red-600 hover:text-red-800"
+                      className="text-red-600 hover:scale-110 transition"
                     >
                       <Trash2 size={18} />
                     </button>
@@ -265,7 +269,10 @@ const AdminSettingsPage: React.FC = () => {
 
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="text-center py-4 text-gray-500 italic">
+                  <td
+                    colSpan={9}
+                    className="text-center py-4 text-gray-500 dark:text-gray-400 italic"
+                  >
                     No records found.
                   </td>
                 </tr>
@@ -281,19 +288,19 @@ const AdminSettingsPage: React.FC = () => {
           EDIT MODAL — FULL DETAILS  
       ---------------------------------------------------- */}
       {editing && editForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-lg w-[450px] shadow-xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/40 dark:bg-black/60 flex justify-center items-center z-50 transition">
+          <div className="bg-white dark:bg-[#0B1029] p-6 rounded-lg w-[450px] shadow-xl max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-[#1A2347]">
 
-            <h3 className="text-xl font-semibold mb-4 text-gray-700">
+            <h3 className="text-xl font-semibold mb-4 text-[#020726] dark:text-white">
               Edit Bank Details
             </h3>
 
             {/* ACCOUNT HOLDER NAME */}
-            <label className="block text-sm font-medium text-gray-600 mt-2">
+            <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mt-2">
               Account Holder Name
             </label>
             <input
-              className="w-full border p-2 rounded"
+              className="w-full border dark:border-[#1A2347] p-2 rounded bg-white dark:bg-[#111A3A] text-[#020726] dark:text-white"
               value={editForm.accountName}
               onChange={(e) =>
                 setEditForm({ ...editForm, accountName: e.target.value })
@@ -301,21 +308,21 @@ const AdminSettingsPage: React.FC = () => {
             />
 
             {/* EMAIL (READ ONLY) */}
-            <label className="block text-sm font-medium text-gray-600 mt-3">
+            <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mt-3">
               Email (readonly)
             </label>
             <input
-              className="w-full border p-2 rounded bg-gray-100"
+              className="w-full border dark:border-[#1A2347] p-2 rounded bg-gray-100 dark:bg-[#1A2347] text-gray-700 dark:text-gray-300"
               value={editForm.email}
               readOnly
             />
 
             {/* BANK NAME */}
-            <label className="block text-sm font-medium text-gray-600 mt-3">
+            <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mt-3">
               Bank Name
             </label>
             <input
-              className="w-full border p-2 rounded"
+              className="w-full border dark:border-[#1A2347] p-2 rounded bg-white dark:bg-[#111A3A] text-[#020726] dark:text-white"
               value={editForm.bankName}
               onChange={(e) =>
                 setEditForm({ ...editForm, bankName: e.target.value })
@@ -323,11 +330,11 @@ const AdminSettingsPage: React.FC = () => {
             />
 
             {/* ACCOUNT NUMBER */}
-            <label className="block text-sm font-medium text-gray-600 mt-3">
+            <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mt-3">
               Account Number
             </label>
             <input
-              className="w-full border p-2 rounded"
+              className="w-full border dark:border-[#1A2347] p-2 rounded bg-white dark:bg-[#111A3A] text-[#020726] dark:text-white"
               value={editForm.accountNumber}
               onChange={(e) =>
                 setEditForm({ ...editForm, accountNumber: e.target.value })
@@ -335,11 +342,11 @@ const AdminSettingsPage: React.FC = () => {
             />
 
             {/* IFSC */}
-            <label className="block text-sm font-medium text-gray-600 mt-3">
+            <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mt-3">
               IFSC Code
             </label>
             <input
-              className="w-full border p-2 rounded"
+              className="w-full border dark:border-[#1A2347] p-2 rounded bg-white dark:bg-[#111A3A] text-[#020726] dark:text-white"
               value={editForm.ifscCode}
               onChange={(e) =>
                 setEditForm({ ...editForm, ifscCode: e.target.value })
@@ -347,11 +354,11 @@ const AdminSettingsPage: React.FC = () => {
             />
 
             {/* BRANCH */}
-            <label className="block text-sm font-medium text-gray-600 mt-3">
+            <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mt-3">
               Bank Branch
             </label>
             <input
-              className="w-full border p-2 rounded"
+              className="w-full border dark:border-[#1A2347] p-2 rounded bg-white dark:bg-[#111A3A] text-[#020726] dark:text-white"
               value={editForm.bankBranch}
               onChange={(e) =>
                 setEditForm({ ...editForm, bankBranch: e.target.value })
@@ -359,11 +366,11 @@ const AdminSettingsPage: React.FC = () => {
             />
 
             {/* PAN NUMBER */}
-            <label className="block text-sm font-medium text-gray-600 mt-3">
+            <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mt-3">
               PAN Number
             </label>
             <input
-              className="w-full border p-2 rounded"
+              className="w-full border dark:border-[#1A2347] p-2 rounded bg-white dark:bg-[#111A3A] text-[#020726] dark:text-white"
               value={editForm.panNumber}
               onChange={(e) =>
                 setEditForm({ ...editForm, panNumber: e.target.value })
@@ -380,20 +387,22 @@ const AdminSettingsPage: React.FC = () => {
                 }
                 className="w-5 h-5 accent-green-600"
               />
-              <span className="text-sm text-gray-700">Verified</span>
+              <span className="text-sm text-gray-700 dark:text-gray-300">
+                Verified
+              </span>
             </div>
 
             {/* BUTTONS */}
             <div className="flex justify-end gap-3 mt-6">
               <button
-                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                className="px-4 py-2 bg-gray-300 dark:bg-[#111A3A] text-[#020726] dark:text-white rounded hover:bg-gray-400 dark:hover:bg-[#1A2347]"
                 onClick={() => setEditing(null)}
               >
                 Cancel
               </button>
 
               <button
-                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                className="px-4 py-2 bg-[#0288D1] hover:bg-[#29B6F6] text-white rounded transition"
                 onClick={saveEdit}
               >
                 Save Changes
@@ -409,5 +418,3 @@ const AdminSettingsPage: React.FC = () => {
 };
 
 export default AdminSettingsPage;
-
-

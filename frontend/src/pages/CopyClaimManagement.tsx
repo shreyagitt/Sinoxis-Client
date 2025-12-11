@@ -176,18 +176,18 @@ const CopyClaimManagement: React.FC = () => {
     if (!viewOpen || !viewData) return null;
 
     return (
-      <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
-        <div className="bg-white w-full max-w-lg p-6 rounded-xl shadow-xl animate-fadeIn">
-          <h2 className="text-xl font-semibold mb-4 text-gray-900">Claim Details</h2>
+      <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex justify-center items-center z-50">
+        <div className="bg-white dark:bg-[#0B1029] w-full max-w-lg p-6 rounded-xl shadow-xl border border-gray-200 dark:border-[#1A2347]">
+          <h2 className="text-xl font-semibold mb-4 text-[#020726] dark:text-white">Claim Details</h2>
 
-          <div className="space-y-3 text-gray-700 text-sm">
+          <div className="space-y-3 text-gray-700 dark:text-gray-300 text-sm">
             <p><b>Platform:</b> {viewData.platform}</p>
             <p>
               <b>Video:</b>{" "}
               <a
                 href={viewData.videoLink}
                 target="_blank"
-                className="text-blue-600 underline"
+                className="text-[#0288D1] dark:text-[#29B6F6] underline"
               >
                 Open Video
               </a>
@@ -200,7 +200,7 @@ const CopyClaimManagement: React.FC = () => {
           <div className="flex justify-end mt-6">
             <button
               onClick={() => setViewOpen(false)}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg"
+              className="px-4 py-2 bg-[#0288D1] hover:bg-[#29B6F6] text-white rounded-lg"
             >
               Close
             </button>
@@ -217,45 +217,45 @@ const CopyClaimManagement: React.FC = () => {
     if (!editModalOpen || !editingClaim) return null;
 
     return (
-      <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
-        <div className="bg-white w-full max-w-lg p-6 rounded-xl shadow-xl animate-fadeIn">
-          <h2 className="text-xl font-semibold mb-4">Edit Claim</h2>
+      <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex justify-center items-center z-50">
+        <div className="bg-white dark:bg-[#0B1029] w-full max-w-lg p-6 rounded-xl shadow-xl border border-gray-200 dark:border-[#1A2347]">
+          <h2 className="text-xl font-semibold mb-4 text-[#020726] dark:text-white">Edit Claim</h2>
 
           <div className="space-y-4">
 
             <div>
-              <label className="text-gray-600 text-sm">Platform</label>
+              <label className="text-gray-600 dark:text-gray-300 text-sm">Platform</label>
               <input
                 disabled
                 value={editingClaim.platform}
-                className="w-full mt-1 px-3 py-2 bg-gray-100 rounded-lg"
+                className="w-full mt-1 px-3 py-2 bg-gray-100 dark:bg-[#1A2347] rounded-lg text-gray-800 dark:text-gray-200"
               />
             </div>
 
             <div>
-              <label className="text-gray-600 text-sm">Video Link</label>
+              <label className="text-gray-600 dark:text-gray-300 text-sm">Video Link</label>
               <input
                 value={editData.videoLink}
                 onChange={(e) =>
                   setEditData({ ...editData, videoLink: e.target.value })
                 }
-                className="w-full mt-1 px-3 py-2 border rounded-lg"
+                className="w-full mt-1 px-3 py-2 border dark:border-[#1A2347] bg-white dark:bg-[#111A3A] text-[#020726] dark:text-white rounded-lg"
               />
             </div>
 
             <div>
-              <label className="text-gray-600 text-sm">Notes</label>
+              <label className="text-gray-600 dark:text-gray-300 text-sm">Notes</label>
               <textarea
                 value={editData.notes}
                 onChange={(e) =>
                   setEditData({ ...editData, notes: e.target.value })
                 }
-                className="w-full mt-1 px-3 py-2 border rounded-lg min-h-[90px]"
+                className="w-full mt-1 px-3 py-2 border dark:border-[#1A2347] bg-white dark:bg-[#111A3A] text-[#020726] dark:text-white rounded-lg min-h-[90px]"
               />
             </div>
 
             <div>
-              <label className="text-gray-600 text-sm">Status</label>
+              <label className="text-gray-600 dark:text-gray-300 text-sm">Status</label>
               <select
                 value={editData.status}
                 onChange={(e) =>
@@ -264,7 +264,7 @@ const CopyClaimManagement: React.FC = () => {
                     status: e.target.value as Claim["status"],
                   })
                 }
-                className="w-full mt-1 px-3 py-2 border rounded-lg"
+                className="w-full mt-1 px-3 py-2 border dark:border-[#1A2347] bg-white dark:bg-[#111A3A] text-[#020726] dark:text-white rounded-lg"
               >
                 <option value="Pending">Pending</option>
                 <option value="Released">Released</option>
@@ -278,14 +278,14 @@ const CopyClaimManagement: React.FC = () => {
           <div className="flex justify-end gap-3 mt-6">
             <button
               onClick={() => setEditModalOpen(false)}
-              className="px-4 py-2 bg-gray-200 rounded-lg"
+              className="px-4 py-2 bg-gray-300 dark:bg-[#1A2347] text-[#020726] dark:text-white rounded-lg"
             >
               Cancel
             </button>
 
             <button
               onClick={() => handleEditSubmit(editData)}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg"
+              className="px-4 py-2 bg-[#0288D1] hover:bg-[#29B6F6] text-white rounded-lg"
             >
               Update
             </button>
@@ -299,24 +299,24 @@ const CopyClaimManagement: React.FC = () => {
   // MAIN UI
   // =======================================================
   return (
-    <div className="min-h-screen p-10 bg-[#F5F7FB]">
-      <h1 className="text-2xl font-semibold text-gray-900">Copyright Claims</h1>
-      <p className="text-gray-500 mb-6">Manage client copyright claim requests</p>
+    <div className="min-h-screen p-10 bg-white dark:bg-[#020726] transition-colors">
+      <h1 className="text-2xl font-semibold text-[#020726] dark:text-white">Copyright Claims</h1>
+      <p className="text-gray-600 dark:text-gray-300 mb-6">Manage client copyright claim requests</p>
 
       {/* Search */}
       <div className="relative w-80 mb-6">
-        <Search className="absolute left-3 top-3 text-gray-400" size={18} />
+        <Search className="absolute left-3 top-3 text-gray-400 dark:text-gray-300" size={18} />
         <input
           placeholder="Search..."
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-10 pr-4 py-2 w-full rounded-xl border bg-white shadow-sm"
+          className="pl-10 pr-4 py-2 w-full rounded-xl border bg-white dark:bg-[#0B1029] text-[#020726] dark:text-white shadow-sm border-gray-300 dark:border-[#1A2347]"
         />
       </div>
 
       {/* TABLE */}
-      <div className="rounded-2xl bg-white shadow-md border p-0 overflow-hidden">
-        <table className="w-full text-sm text-gray-700">
-          <thead className="bg-gray-50 text-gray-600">
+      <div className="rounded-2xl bg-white dark:bg-[#0B1029] shadow-md border border-gray-200 dark:border-[#1A2347] overflow-hidden">
+        <table className="w-full text-sm text-[#020726] dark:text-gray-300">
+          <thead className="bg-gray-50 dark:bg-[#111A3A] text-gray-700 dark:text-gray-200">
             <tr>
               <th className="py-3 px-4 text-left">Platform</th>
               <th className="py-3 px-4 text-left">Video Link</th>
@@ -328,14 +328,14 @@ const CopyClaimManagement: React.FC = () => {
 
           <tbody>
             {visible.map((c) => (
-              <tr key={c._id} className="border-t">
+              <tr key={c._id} className="border-t border-gray-200 dark:border-[#1A2347]">
                 <td className="py-3 px-4">{c.platform}</td>
 
                 <td className="py-3 px-4">
                   <a
                     href={c.videoLink}
                     target="_blank"
-                    className="text-blue-600 hover:underline"
+                    className="text-[#0288D1] dark:text-[#29B6F6] hover:underline"
                   >
                     Visit
                   </a>
@@ -360,26 +360,32 @@ const CopyClaimManagement: React.FC = () => {
                 </td>
 
                 <td className="py-3 px-4 flex justify-center gap-4">
+
                   <Eye
-                    className="text-green-600 cursor-pointer"
+                    className="text-[#0288D1] dark:text-[#29B6F6] cursor-pointer"
                     onClick={() => viewClaim(c)}
                   />
+
                   <Edit
-                    className="text-blue-600 cursor-pointer"
+                    className="text-blue-600 dark:text-blue-400 cursor-pointer"
                     onClick={() => editClaim(c)}
                   />
+
                   <CheckCircle
-                    className="text-green-500 cursor-pointer"
+                    className="text-green-600 cursor-pointer"
                     onClick={() => updateStatus(c._id, "Released")}
                   />
+
                   <XCircle
                     className="text-yellow-600 cursor-pointer"
                     onClick={() => updateStatus(c._id, "Rejected")}
                   />
+
                   <Trash2
                     className="text-red-600 cursor-pointer"
                     onClick={() => deleteClaim(c._id)}
                   />
+
                 </td>
               </tr>
             ))}
@@ -388,7 +394,7 @@ const CopyClaimManagement: React.FC = () => {
       </div>
 
       {/* PAGINATION */}
-      <div className="flex justify-between items-center mt-6 text-gray-600">
+      <div className="flex justify-between items-center mt-6 text-gray-600 dark:text-gray-300">
         <p>
           Showing {(page - 1) * itemsPerPage + 1}–
           {Math.min(page * itemsPerPage, filtered.length)} of {filtered.length}
@@ -398,7 +404,7 @@ const CopyClaimManagement: React.FC = () => {
           <button
             disabled={page === 1}
             onClick={() => setPage(page - 1)}
-            className="px-4 py-1 rounded-lg border bg-white disabled:opacity-50"
+            className="px-4 py-1 rounded-lg border bg-white dark:bg-[#111A3A] border-gray-300 dark:border-[#1A2347] text-[#020726] dark:text-white disabled:opacity-50"
           >
             Previous
           </button>
@@ -406,7 +412,7 @@ const CopyClaimManagement: React.FC = () => {
           <button
             disabled={page === totalPages}
             onClick={() => setPage(page + 1)}
-            className="px-4 py-1 rounded-lg border bg-white disabled:opacity-50"
+            className="px-4 py-1 rounded-lg border bg-white dark:bg-[#111A3A] border-gray-300 dark:border-[#1A2347] text-[#020726] dark:text-white disabled:opacity-50"
           >
             Next
           </button>
