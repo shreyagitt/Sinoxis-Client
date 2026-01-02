@@ -16,15 +16,14 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5173,
 
-    // ✅ REQUIRED to fix "Blocked request. This host is not allowed"
-    allowedHosts: ['cms.sinoxisdigital.com'],
-
+    // ✅ Allow ALL domains dynamically
+    allowedHosts: true,   // <-- Most important
     cors: true,
   },
 
   // ✅ REQUIRED for preview / production-like serving
   preview: {
-    allowedHosts: ['cms.sinoxisdigital.com'],
+    allowedHosts: true,
   },
 })
 
