@@ -19,6 +19,7 @@
     "bootstrap": "^5.3.8",
     "dotenv": "^17.2.3",
     "formik": "^2.4.6",
+    "jspdf": "^3.0.4",
     "lucide-react": "^0.552.0",
     "react": "^19.2.0",
     "react-apexcharts": "^1.8.0",
