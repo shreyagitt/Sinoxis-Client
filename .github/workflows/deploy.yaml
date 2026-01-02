@@ -1,0 +1,42 @@
+name: Deploy to Azure VM
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+
+    - name: Decrypt .env for client
+      env:
+        ENV_PASSPHRASE: ${{ secrets.ENV_PASSPHRASE }}
+      run: |
+        gpg --quiet --batch --yes --decrypt --passphrase="$ENV_PASSPHRASE" \
+          --output ./.env ./client_env.gpg
+
+    - name: Copy files to VM
+      uses: appleboy/scp-action@v0.1.4
+      with:
+        host: ${{ secrets.VM_HOST }}
+        username: ${{ secrets.VM_USER }}
+        key: ${{ secrets.VM_SSH_KEY }}
+        source: "."
+        target: "/root/client" 
+
+    - name: Run Docker Compose on Azure VM
+      uses: appleboy/ssh-action@v0.1.7
+      with:
+        host: ${{ secrets.VM_HOST }}
+        username: ${{ secrets.VM_USER }}
+        key: ${{ secrets.VM_SSH_KEY }}
+        script: |
+          cd /root/client
+          export BUILDKIT_TIMEOUT=3600
+          docker compose pull
+          docker compose build
+          docker compose up -d
