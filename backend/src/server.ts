@@ -32,7 +32,8 @@ app.use(
 );
 
 // ---------------- CORS ----------------
-const allowedOrigins = (process.env.CORS_ORIGIN || "").split(",");
+const allowedOrigins = (process.env.CORS_ORIGIN || "").split(",")
+.map(o=>o.trim().replace(/\/+$/,''));
 
 app.use(
   cors({
