@@ -29,6 +29,9 @@ import OfficialArtistChannel from "./components/OfficialArtistChannel";
 import ReleaseForm from "./components/ReleaseForm";
 import Pending from "./components/Pending";
 import RequestPayment from "./components/RequestPayment";
+import Tracks from "./components/Tracks";
+import Stores from "./components/Stores";
+import Submission from "./components/Submission";
 
 
 
@@ -85,6 +88,34 @@ function App() {
         element={
           <Layout>
             < ReleaseForm/>
+          </Layout>
+        }
+      />
+
+      <Route
+        path="/stores"
+        element={
+          <Layout>
+            < Stores/>
+          </Layout>
+        }
+      />
+
+<Route
+        path="/tracks"
+        element={
+          <Layout>
+            < Tracks/>
+          </Layout>
+        }
+      />
+
+
+<Route
+        path="/submission"
+        element={
+          <Layout>
+            < Submission/>
           </Layout>
         }
       />

@@ -1,439 +1,306 @@
-// src/pages/ReleaseForm.jsx
-import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { Formik, Form, Field } from "formik";
-import * as Yup from "yup";
-import axios from "axios";
-import { Listbox } from "@headlessui/react";
-import { ChevronDownIcon, CheckIcon } from "@heroicons/react/20/solid";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useTheme } from "../components/Topbar";
-import toast from "react-hot-toast";
 
-/* -------------------------------------------------------------------------- */
-/* PLACEHOLDER COVER                                                          */
-/* -------------------------------------------------------------------------- */
-const CoverPlaceholder =
-  "https://www.mixcloud.com/blog/wp-content/uploads/2023/11/Collage-1-2.png";
 
-/* -------------------------------------------------------------------------- */
-/* FORM VALIDATION                                                            */
-/* -------------------------------------------------------------------------- */
-const Schema = Yup.object().shape({
-  title: Yup.string().required("Required"),
-  artist: Yup.string().required("Required"),
-  contactEmail: Yup.string().email("Invalid email"),
-  confirm: Yup.boolean().oneOf([true], "You must confirm this information"),
-});
-
-/* -------------------------------------------------------------------------- */
-/* LISTBOX SELECT COMPONENT                                                   */
-/* -------------------------------------------------------------------------- */
-function FormikListbox({ label, name, options, values, setFieldValue, theme }) {
-  const currentVal = values[name];
-
-  return (
-    <div className="w-full">
-      <label
-        className={`text-sm mb-2 block ${
-          theme === "dark" ? "text-gray-300" : "text-[#020726]"
-        }`}
-      >
-        {label}
-      </label>
-
-      <Listbox value={currentVal} onChange={(val) => setFieldValue(name, val)}>
-        <div className="relative">
-          <Listbox.Button
-            className={`w-full px-4 py-3 rounded-xl flex items-center justify-between border text-left
-              ${
-                theme === "dark"
-                  ? "bg-[#0a1039] border-white/10 text-gray-100"
-                  : "bg-white border-gray-200 text-[#020726]"
-              }
-            `}
-          >
-            <span className="truncate">
-              {options.find((o) => o.value === currentVal)?.label || "Select"}
-            </span>
-            <ChevronDownIcon
-              className={`w-5 h-5 ${
-                theme === "dark" ? "text-gray-300" : "text-gray-500"
-              }`}
-            />
-          </Listbox.Button>
-
-          {/* DROPDOWN */}
-          <Listbox.Options
-            className={`absolute z-50 w-full mt-2 rounded-xl shadow-lg max-h-52 overflow-auto py-1
-              ${
-                theme === "dark"
-                  ? "bg-[#0a1039] border border-white/10"
-                  : "bg-white border border-gray-200"
-              }`}
-          >
-            {options.map((opt, idx) => (
-              <Listbox.Option
-                key={idx}
-                value={opt.value}
-                className={({ active }) =>
-                  `cursor-pointer px-4 py-2 flex items-center justify-between ${
-                    active
-                      ? theme === "dark"
-                        ? "bg-white/5"
-                        : "bg-gray-100"
-                      : ""
-                  }`
-                }
-              >
-                <span
-                  className={`truncate ${
-                    currentVal === opt.value ? "font-semibold" : ""
-                  }`}
-                >
-                  {opt.label}
-                </span>
-                {currentVal === opt.value && (
-                  <CheckIcon
-                    className={`w-5 h-5 ${
-                      theme === "dark" ? "text-[#29B6F6]" : "text-[#0288D1]"
-                    }`}
-                  />
-                )}
-              </Listbox.Option>
-            ))}
-          </Listbox.Options>
-        </div>
-      </Listbox>
-    </div>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/* MAIN FORM                                                                  */
-/* -------------------------------------------------------------------------- */
-export default function ReleaseForm() {
-  const { id } = useParams();
+export default function CreateRelease() {
+  const [step] = useState(1);
   const navigate = useNavigate();
+  const [coverPreview, setCoverPreview] = useState(null);
   const { theme } = useTheme();
 
-  const baseUrl = import.meta.env.VITE_API_BASE_URL;
-  const token = localStorage.getItem("token");
+const pageBg =
+  theme === "dark"
+    ? "bg-gradient-to-b from-[#020726] to-[#0a1039] text-white"
+    : "bg-gray-100 text-[#020726]";
 
-  const isEdit = Boolean(id);
+const cardBg =
+  theme === "dark"
+    ? "bg-[#060b2e] border border-white/10 shadow-[0_30px_80px_rgba(0,0,0,0.6)]"
+    : "bg-white border border-gray-200 shadow-lg";
 
-  const [initial, setInitial] = useState({
-    title: "",
-    artist: "",
-    tracksPreview: "",
-    contactEmail: "",
-    contactPhone: "",
-    notes: "",
-    releasedBefore: false,
-    cover: "",
-    status: "Pending",
-    releaseDate: "",
-    confirm: false,
-  });
+const inputBg =
+  theme === "dark"
+    ? "bg-[#2a2f4d] text-white placeholder-gray-300"
+    : "bg-white text-[#020726] placeholder-gray-500 border border-gray-300";
 
-  /* ---------------------------------------------------------------------- */
-  /* FETCH RELEASE FOR EDIT MODE                                            */
-  /* ---------------------------------------------------------------------- */
-  useEffect(() => {
-    if (!isEdit) return;
+const [formData, setFormData] = useState({
+  title: "",
+  subtitle: "",
+  label: "",
+  year: "",
+});
 
-    const fetchRelease = async () => {
-      try {
-        const res = await axios.get(`${baseUrl}/client/release/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
 
-        setInitial({
-          ...res.data.data,
-          confirm: false,
-        });
-      } catch (err) {
-        toast.error("Failed to load release");
-      }
-    };
+ const handleSave = () => {
+  const payload = {
+    ...formData,
+    coverPreview,
+    currentStep: "release",
+  };
 
-    fetchRelease();
-  }, [id]);
-
-  /* ---------------------------------------------------------------------- */
-  /* SUBMIT HANDLER: CREATE OR UPDATE                                       */
-  /* ---------------------------------------------------------------------- */
-  const handleSubmit = async (values) => {
-  try {
-    const fd = new FormData();
-
-    fd.append("title", values.title);
-    fd.append("artist", values.artist);
-    fd.append("label", values.label);      // ✅ ADDED
-    fd.append("isrc", values.isrc);        // ✅ ADDED
-    fd.append("upc", values.upc);          // ✅ ADDED
-    fd.append("tracksPreview", values.tracksPreview || "");
-    fd.append("contactEmail", values.contactEmail || "");
-    fd.append("contactPhone", values.contactPhone || "");
-    fd.append("notes", values.notes || "");
-    fd.append("releaseDate", values.releaseDate || "");
-    fd.append("status", values.status);
-    fd.append("releasedBefore", String(values.releasedBefore));
-    fd.append("confirm", String(values.confirm));
-
-    if (values.cover instanceof File) {
-      fd.append("cover", values.cover);
-    }
-
-    if (isEdit) {
-      await axios.put(`${baseUrl}/client/release/${id}`, fd, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      toast.success("Release updated!");
-    } else {
-      await axios.post(`${baseUrl}/client/release`, fd, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      toast.success("Release created!");
-    }
-
-    navigate("/releases/myRelease");
-  } catch (err) {
-    console.error(err);
-    toast.error("Submit failed");
-  }
+  localStorage.setItem("releaseDraft", JSON.stringify(payload));
+  alert("Draft saved");
 };
 
 
 
-  /* ---------------------------------------------------------------------- */
-  /* THEME STYLES                                                            */
-  /* ---------------------------------------------------------------------- */
-  const pageBg = theme === "dark" ? "bg-[#020726] text-white" : "bg-white text-[#020726]";
-  const cardBg =
-    theme === "dark"
-      ? "bg-[#0a1039] border-white/10"
-      : "bg-white border-gray-300 shadow-xl";
-  const inputBg =
-    theme === "dark"
-      ? "bg-[#111a3b] border-white/10 text-white"
-      : "bg-gray-100 border-gray-300 text-[#020726]";
-
-  /* LISTBOX OPTIONS */
-  const yesNoOptions = [
-    { label: "Yes", value: true },
-    { label: "No", value: false },
-  ];
-
-  const statusOptions = [
-    { label: "Pending", value: "Pending" },
-    { label: "Approved", value: "Approved" },
-    { label: "Rejected", value: "Rejected" },
-    { label: "Inactive", value: "Inactive" },
-    { label: "Unfinished", value: "Unfinished" },
-    { label: "Action Required", value: "Action Required" },
-  ];
-
-  /* ---------------------------------------------------------------------- */
-  /* UI                                                                      */
-  /* ---------------------------------------------------------------------- */
-
   return (
-    <div className={`min-h-screen p-6 md:p-8 ${pageBg}`}>
-      <div className="flex justify-between mb-6">
-        <h1 className="text-3xl font-semibold">
-          {isEdit ? "Edit Release" : "Create Release"}
+    <div className="min-h-screen bg-gradient-to-b from-[#020726] to-[#0a1039] text-white font-[Montserrat]">
+
+      {/* TOP HEADER */}
+      <div className="flex justify-between items-center px-10 py-6">
+        <h1 className="text-xl font-medium">
+          Release Application Form
         </h1>
+        <p className="text-sm ">
+          Home <span className="text-gray-400">/</span> <span className="text-sky-400">Dashboard </span>
+        </p>
       </div>
 
-      <div className={`rounded-2xl p-8 border ${cardBg}`}>
-        <Formik
-          initialValues={initial}
-          enableReinitialize
-          validationSchema={Schema}
-          onSubmit={handleSubmit}
-        >
-          {({ values, setFieldValue, errors }) => (
-            <Form className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* MAIN CARD */}
+      <div className="max-w-6xl mx-auto mt-6 bg-[#060b2e] rounded-[28px] px-12 py-10 shadow-[0_30px_80px_rgba(0,0,0,0.6)]">
 
-              {/* LEFT */}
-              <div className="space-y-4">
-                <div>
-                  <label>Release Title</label>
-                  <Field
-                    name="title"
-                    className={`w-full mt-2 p-3 rounded-xl border ${inputBg}`}
-                  />
-                </div>
+        {/* TITLE */}
+        <h2 className="text-center text-4xl font-medium text-sky-400">
+          Create Release
+        </h2>
+        <p className="text-center text-gray-300 mt-2">
+          Complete all steps to publish your release
+        </p>
+{/* PROGRESS WRAPPER */}
+<div className="relative mt-12">
 
-                <div>
-                  <label>Release Date</label>
-                  <Field
-                    type="date"
-                    name="releaseDate"
-                    className={`w-full mt-2 p-3 rounded-xl border ${inputBg}`}
-                  />
-                </div>
+  {/* LINE */}
+  <div className="mx-auto w-full h-[3px] bg-white/10 rounded-full" />
 
-                <FormikListbox
-                  label="Released Before?"
-                  name="releasedBefore"
-                  options={yesNoOptions}
-                  values={values}
-                  setFieldValue={setFieldValue}
-                  theme={theme}
-                />
+  {/* ACTIVE LINE (LEFT DOT → CURRENT STEP) */}
+  <div className="absolute top-0 left-0 h-[3px] w-[12%] bg-sky-400 rounded-full" />
 
-                <div>
-                  <label>Contact Phone</label>
-                  <Field
-                    name="contactPhone"
-                    className={`w-full mt-2 p-3 rounded-xl border ${inputBg}`}
-                  />
-                </div>
-
-                <div>
-                  <label>Short Notes / Bio</label>
-                  <Field
-                    as="textarea"
-                    rows="5"
-                    name="notes"
-                    className={`w-full mt-2 p-3 rounded-xl border ${inputBg}`}
-                  />
-                </div>
-
-{/* COVER UPLOAD */}
-                <div>
-                  <label>Cover Art</label>
-
-                  <div className="flex gap-4 mt-2 items-center">
-                    <div
-                      className={`w-[90px] h-[90px] rounded-xl overflow-hidden border
-                        ${
-                          theme === "dark"
-                            ? "bg-[#1b254b] border-white/10"
-                            : "bg-gray-200 border-gray-300"
-                        }`}
-                    >
-                      <img
-                        src={values.cover || CoverPlaceholder}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
-                        const reader = new FileReader();
-                        reader.onload = () => setFieldValue("cover", reader.result);
-                        reader.readAsDataURL(file);
-                      }}
-                    />
-                  </div>
-                </div>
-
-              </div>
-
-              {/* RIGHT */}
-              <div className="space-y-4">
-                <div>
-                  <label>Artist</label>
-                  <Field
-                    name="artist"
-                    className={`w-full mt-2 p-3 rounded-xl border ${inputBg}`}
-                  />
-                </div>
-
-                {/* LABEL */}
-<div>
-  <label>Label</label>
-  <Field
-    name="label"
-    className={`w-full mt-2 p-3 rounded-xl border ${inputBg}`}
-  />
-</div>
-
-{/* ISRC */}
-<div>
-  <label>ISRC</label>
-  <Field
-    name="isrc"
-    className={`w-full mt-2 p-3 rounded-xl border ${inputBg}`}
-  />
-</div>
-
-{/* UPC */}
-<div>
-  <label>UPC</label>
-  <Field
-    name="upc"
-    className={`w-full mt-2 p-3 rounded-xl border ${inputBg}`}
-  />
-</div>
-
-
-                <div>
-                  <label>Tracks / Preview Link</label>
-                  <Field
-                    name="tracksPreview"
-                    className={`w-full mt-2 p-3 rounded-xl border ${inputBg}`}
-                  />
-                </div>
-
-                <div>
-                  <label>Email</label>
-                  <Field
-                    name="contactEmail"
-                    className={`w-full mt-2 p-3 rounded-xl border ${inputBg}`}
-                  />
-                </div>
-
-                
-
-                <FormikListbox
-                  label="Status"
-                  name="status"
-                  options={statusOptions}
-                  values={values}
-                  setFieldValue={setFieldValue}
-                  theme={theme}
-                />
-
-                {/* Confirm */}
-                <div className="flex items-center gap-3">
-                  <Field type="checkbox" name="confirm" />
-                  <label>I confirm the information is accurate</label>
-                </div>
-                {errors.confirm && (
-                  <div className="text-xs text-red-400">{errors.confirm}</div>
-                )}
-              </div>
-
-              {/* FOOTER BUTTONS */}
-              <div className="md:col-span-2 flex justify-end mt-6 gap-4">
-                <button
-                  type="button"
-                  onClick={() => navigate("/releases")}
-                  className="px-6 py-2 rounded-full border border-gray-400"
-                >
-                  Cancel
-                </button>
-
-                <button
-                  type="submit"
-                  className="px-6 py-2 rounded-full text-white font-bold"
-                  style={{ background: "linear-gradient(90deg,#29B6F6,#0288D1)" }}
-                >
-                  {isEdit ? "Save Changes" : "Submit Release"}
-                </button>
-              </div>
-
-            </Form>
-          )}
-        </Formik>
+  {/* DOTS */}
+  <div className="absolute top-[-6px] left-0 w-full flex justify-between px-1">
+    {["Release", "Tracks", "Stores", "Submission"].map((label, i) => (
+      <div key={label} className="flex flex-col items-center">
+        <div
+          className={`w-4 h-4 rounded-full ${
+            i === 0
+              ? "bg-sky-400 shadow-[0_0_0_6px_rgba(56,189,248,0.15)]"
+              : "bg-sky-400/40"
+          }`}
+        />
       </div>
+    ))}
+  </div>
+
+  {/* LABELS */}
+  <div className="mt-6 flex justify-between text-sm">
+    <span className="text-sky-400">Release</span>
+    <span className="text-gray-400">Tracks</span>
+    <span className="text-gray-400">Stores</span>
+    <span className="text-gray-400">Submission</span>
+  </div>
+</div>
+
+{/* SECTION PILL */}
+<div className="flex justify-center mt-10">
+  <span className="px-7 py-2 rounded-full bg-sky-400 text-[#020726] font-medium shadow-md">
+    Release Details
+  </span>
+</div>
+
+
+        {/* FORM */}
+<div className="grid md:grid-cols-2 gap-x-10 gap-y-6 mt-12">
+
+ <Input placeholder="Title *" 
+  value={formData.title}
+  onChange={(e) =>
+    setFormData({ ...formData, title: e.target.value })
+  }
+ error />
+  <Input placeholder="Subtitle" />
+
+  <Select placeholder="Genre *" error />
+  <Select placeholder="Subgenre *" error />
+
+  <Input placeholder="Label *" error />
+  <DateInput placeholder="dd-mm-yyyy" error />
+
+  <DateInput placeholder="dd-mm-yyyy" error />
+  <Input placeholder="℗ 2026 Sinoxis Digital" error />
+
+  <Input placeholder="Production Year" error />
+
+</div>
+
+{/* COVER ART – FULL WIDTH */}
+<div className="col-span-full mt-12">
+  <label className="block text-sm mb-4 text-gray-200">
+    Cover Art <span className="text-red-400">*</span>
+  </label>
+
+  <div className="
+    relative w-full h-[190px]
+    rounded-2xl
+    border border-dashed border-white/30
+    flex flex-col items-center justify-center
+    bg-[#05092a]
+  ">
+{/* COVER PREVIEW OR UPLOAD */}
+{coverPreview ? (
+  <img
+    src={coverPreview}
+    alt="Cover Preview"
+    className="w-full h-full object-cover rounded-2xl"
+  />
+) : (
+  <>
+    {/* Upload Icon */}
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className="w-11 h-11 text-sky-400 mb-3"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M12 3v10m0 0l-4-4m4 4l4-4"
+      />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"
+      />
+    </svg>
+
+    <p className="text-gray-300 font-medium">
+      Drag & drop image
+    </p>
+    </>
+)}
+
+    <input
+  type="file"
+  accept="image/png,image/jpeg"
+  className="absolute inset-0 opacity-0 cursor-pointer"
+  onChange={(e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setCoverPreview(URL.createObjectURL(file));
+    }
+  }}
+/>
+  </div>
+</div>
+
+
+{/* ACTION BUTTONS */}
+<div className="flex justify-end gap-4 mt-12">
+  <button 
+   onClick={handleSave}
+  className="px-6 py-2 rounded-lg border border-white/40 text-white hover:bg-white/10 transition">
+    Save
+  </button>
+  <button
+  onClick={() => navigate("/tracks")}
+  className="px-7 py-2 rounded-lg bg-sky-500 text-[#020726] font-medium hover:bg-sky-400 transition">
+    Next
+  </button>
+</div>
+
+      </div>
+    </div>
+  );
+}
+
+/* ----------------- COMPONENTS ----------------- */
+
+function ErrorIcon() {
+  return (
+    <span className="absolute right-4 top-1/2 -translate-y-1/2
+      w-5 h-5 rounded-full border border-red-400
+      text-red-400 text-xs font-bold
+      flex items-center justify-center">
+      !
+    </span>
+  );
+}
+
+function Input({ placeholder, error, value, onChange  }) {
+  return (
+    <div className="relative">
+      <input
+      value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        className="w-full h-[46px] px-5 rounded-xl 
+        bg-[#2a2f4d] text-white placeholder-gray-300 
+        outline-none border border-white/10
+          focus:border-sky-400/60 transition
+        "
+      />
+
+      {error && <ErrorIcon />}
+    </div>
+  );
+}
+
+
+
+function Select({ placeholder, error }) {
+  return (
+    <div className="relative">
+      <select
+        className="w-full h-[46px] px-5 pr-10 rounded-xl 
+        bg-[#2a2f4d] text-white outline-none appearance-none border border-white/10
+          focus:border-sky-400/60 transition
+       "
+      >
+        <option value="">{placeholder}</option>
+        <option>Ambient / Instrumental</option>
+        <option>Carnatic Classical</option>
+        <option>Children's Music</option>
+        <option>Dance</option>
+        <option>Devotional</option>
+        <option>Electronic</option>
+        <option>Film</option>
+        <option>Folk</option>
+        <option>Hip-Hop / Rap</option>
+        <option>Indie</option>
+        <option>Jazz</option>
+        <option>Pop</option>
+        <option>Rock</option>
+        <option>Worldwide</option>
+      </select>
+
+      {/* Dropdown arrow */}
+      <span className="absolute right-10 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+        ▼
+      </span>
+
+      {error && <ErrorIcon />}
+    </div>
+  );
+}
+
+
+
+
+function DateInput({ placeholder, error }) {
+  return (
+    <div className="relative">
+      <input
+        type="date"
+        placeholder={placeholder}
+        className="w-full h-[46px] px-5 pr-10 rounded-xl 
+        bg-[#2a2f4d] text-white outline-none 
+        "
+      />
+
+      {error && <ErrorIcon />}
     </div>
   );
 }
