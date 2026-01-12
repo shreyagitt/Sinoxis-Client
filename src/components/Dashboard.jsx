@@ -161,7 +161,12 @@ useEffect(() => {
 
             
               <img
-                src={r.cover || "https://www.mixcloud.com/blog/wp-content/uploads/2023/11/Collage-1-2.png"}
+                src={
+  r.coverKey
+    ? localStorage.getItem(r.coverKey) ||
+      "https://www.mixcloud.com/blog/wp-content/uploads/2023/11/Collage-1-2.png"
+    : "https://www.mixcloud.com/blog/wp-content/uploads/2023/11/Collage-1-2.png"
+}
 
                 className="w-full h-40 sm:h-48 object-cover"
               />

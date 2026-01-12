@@ -1,13 +1,54 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../components/Topbar";
+import { Formik, Form, Field } from "formik";
+import * as Yup from "yup";
+
+
+const releaseSchema = Yup.object({
+  title: Yup.string().required("Title is required"),
+  subtitle: Yup.string(),
+  genre: Yup.string().required("Genre is required"),
+  subgenre: Yup.string().required("Subgenre is required"),
+  label: Yup.string().required("Label is required"),
+  originalReleaseDate: Yup.date().required("Original release date required"),
+  digitalReleaseDate: Yup.date().required("Digital release date required"),
+  copyrightText: Yup.string().required("Copyright is required"),
+  productionYear: Yup.number()
+    .typeError("Enter valid year")
+    .min(1900)
+    .max(new Date().getFullYear()),
+});
+
+
+const initialValues = {
+  title: "",
+  subtitle: "",
+  genre: "",
+  subgenre: "",
+  label: "",
+  originalReleaseDate: "",
+  digitalReleaseDate: "",
+  copyrightText: "",
+  productionYear: "",
+};
+
 
 
 export default function CreateRelease() {
-  const [step] = useState(1);
+  const [step] = useState(0);
   const navigate = useNavigate();
+  const formikRef = useRef(null);
+
+  const [coverFile, setCoverFile] = useState(null);
   const [coverPreview, setCoverPreview] = useState(null);
   const { theme } = useTheme();
+  const [saved, setSaved] = useState(false);
+  const [initialFormValues, setInitialFormValues] = useState(initialValues);
+
+  const mode = localStorage.getItem("releaseMode") || "create";
+  const isView = mode === "view";
+  const isEdit = mode === "edit";
 
 const pageBg =
   theme === "dark"
@@ -24,29 +65,42 @@ const inputBg =
     ? "bg-[#2a2f4d] text-white placeholder-gray-300"
     : "bg-white text-[#020726] placeholder-gray-500 border border-gray-300";
 
-const [formData, setFormData] = useState({
-  title: "",
-  subtitle: "",
-  label: "",
-  year: "",
-});
+    const coverTextColor =
+  theme === "dark" ? "text-gray-300" : "text-black";
 
 
- const handleSave = () => {
-  const payload = {
-    ...formData,
-    coverPreview,
-    currentStep: "release",
-  };
 
-  localStorage.setItem("releaseDraft", JSON.stringify(payload));
-  alert("Draft saved");
-};
+
+
+useEffect(() => {
+  const saved = localStorage.getItem("releaseDraft");
+  if (saved) {
+    const parsed = JSON.parse(saved);
+    setInitialFormValues({
+      title: parsed.title || "",
+      subtitle: parsed.subtitle || "",
+      genre: parsed.genre || "",
+      subgenre: parsed.subgenre || "",
+      label: parsed.label || "",
+      originalReleaseDate: parsed.originalReleaseDate || "",
+      digitalReleaseDate: parsed.digitalReleaseDate || "",
+      copyrightText: parsed.copyrightText || "",
+      productionYear: parsed.productionYear || "",
+    });
+    if (parsed.coverKey) {
+  const img = localStorage.getItem(parsed.coverKey);
+  if (img) setCoverPreview(img);
+}
+
+  }
+}, []);
+
+
 
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#020726] to-[#0a1039] text-white font-[Montserrat]">
+    <div className={`min-h-screen ${pageBg} font-[Montserrat]`}>
 
       {/* TOP HEADER */}
       <div className="flex justify-between items-center px-10 py-6">
@@ -59,47 +113,74 @@ const [formData, setFormData] = useState({
       </div>
 
       {/* MAIN CARD */}
-      <div className="max-w-6xl mx-auto mt-6 bg-[#060b2e] rounded-[28px] px-12 py-10 shadow-[0_30px_80px_rgba(0,0,0,0.6)]">
+     <div className={`max-w-6xl mx-auto mt-6 rounded-[28px] px-6 sm:px-10 md:px-12 py-8 md:py-10 ${cardBg}`}>
 
         {/* TITLE */}
         <h2 className="text-center text-4xl font-medium text-sky-400">
-          Create Release
-        </h2>
+  {isView ? "View Release" : isEdit ? "Edit Release" : "Create Release"}
+</h2>
+
         <p className="text-center text-gray-300 mt-2">
           Complete all steps to publish your release
         </p>
 {/* PROGRESS WRAPPER */}
-<div className="relative mt-12">
+<div className="relative mt-10 sm:mt-12">
+  {/* BASE LINE */}
+  <div
+    className={`mx-auto w-full h-[3px] rounded-full transition-colors
+      ${theme === "dark" ? "bg-white/10" : "bg-gray-300"}
+    `}
+  />
 
-  {/* LINE */}
-  <div className="mx-auto w-full h-[3px] bg-white/10 rounded-full" />
-
-  {/* ACTIVE LINE (LEFT DOT → CURRENT STEP) */}
-  <div className="absolute top-0 left-0 h-[3px] w-[12%] bg-sky-400 rounded-full" />
+  {/* ACTIVE LINE */}
+  <div
+    className="absolute top-0 left-0 h-[3px] rounded-full bg-sky-400 transition-all duration-500"
+    style={{ width: `${((step + 1) / 4) * 100}%` }}
+  />
 
   {/* DOTS */}
-  <div className="absolute top-[-6px] left-0 w-full flex justify-between px-1">
-    {["Release", "Tracks", "Stores", "Submission"].map((label, i) => (
-      <div key={label} className="flex flex-col items-center">
-        <div
-          className={`w-4 h-4 rounded-full ${
-            i === 0
-              ? "bg-sky-400 shadow-[0_0_0_6px_rgba(56,189,248,0.15)]"
-              : "bg-sky-400/40"
-          }`}
-        />
-      </div>
-    ))}
+  <div className="absolute -top-[6px] left-0 w-full flex justify-between px-1 sm:px-2">
+    {["Release", "Tracks", "Stores", "Submission"].map((label, i) => {
+      const isActive = i <= step;
+
+      return (
+        <div key={label} className="flex flex-col items-center">
+          <div
+            className={`w-3 h-3 sm:w-4 sm:h-4 rounded-full transition
+              ${
+                isActive
+                  ? "bg-sky-400 shadow-[0_0_0_6px_rgba(56,189,248,0.18)]"
+                  : theme === "dark"
+                    ? "bg-sky-400/40"
+                    : "bg-gray-400"
+              }
+            `}
+          />
+        </div>
+      );
+    })}
   </div>
 
   {/* LABELS */}
-  <div className="mt-6 flex justify-between text-sm">
-    <span className="text-sky-400">Release</span>
-    <span className="text-gray-400">Tracks</span>
-    <span className="text-gray-400">Stores</span>
-    <span className="text-gray-400">Submission</span>
+  <div className="mt-5 sm:mt-6 grid grid-cols-4 text-xs sm:text-sm text-center">
+    {["Release", "Tracks", "Stores", "Submission"].map((label, i) => (
+      <span
+        key={label}
+        className={
+          i === step
+            ? "text-sky-400 font-medium"
+            : theme === "dark"
+              ? "text-gray-400"
+              : "text-gray-500"
+        }
+      >
+        {label}
+      </span>
+    ))}
   </div>
 </div>
+
+
 
 {/* SECTION PILL */}
 <div className="flex justify-center mt-10">
@@ -110,106 +191,291 @@ const [formData, setFormData] = useState({
 
 
         {/* FORM */}
-<div className="grid md:grid-cols-2 gap-x-10 gap-y-6 mt-12">
+<Formik
+innerRef={formikRef}
+  initialValues={initialFormValues}
+  validationSchema={releaseSchema}
+  enableReinitialize
+  onSubmit={(values) => {
+  const mode = localStorage.getItem("releaseMode") || "create";
+  const existingDraft =
+    JSON.parse(localStorage.getItem("releaseDraft")) || {};
 
- <Input placeholder="Title *" 
-  value={formData.title}
-  onChange={(e) =>
-    setFormData({ ...formData, title: e.target.value })
-  }
- error />
-  <Input placeholder="Subtitle" />
+  // ✅ ALWAYS PRESERVE ID
+  const releaseId =
+    mode === "edit"
+      ? existingDraft._id
+      : crypto.randomUUID();
 
-  <Select placeholder="Genre *" error />
-  <Select placeholder="Subgenre *" error />
+  // ✅ SAVE DRAFT (single source of truth)
+  localStorage.setItem(
+  "releaseDraft",
+  JSON.stringify({
+    _id: releaseId,
+    ...values,
+    coverKey: existingDraft.coverKey, // ✅ ONLY REFERENCE
+    updatedAt: new Date().toISOString(),
+  })
+);
 
-  <Input placeholder="Label *" error />
-  <DateInput placeholder="dd-mm-yyyy" error />
 
-  <DateInput placeholder="dd-mm-yyyy" error />
-  <Input placeholder="℗ 2026 Sinoxis Digital" error />
+  navigate("/tracks");
+}}
 
-  <Input placeholder="Production Year" error />
 
-</div>
+>
+{({ errors, touched, values }) => (
+<Form className="grid md:grid-cols-2 gap-x-10 gap-y-6 mt-12">
 
-{/* COVER ART – FULL WIDTH */}
-<div className="col-span-full mt-12">
-  <label className="block text-sm mb-4 text-gray-200">
-    Cover Art <span className="text-red-400">*</span>
-  </label>
 
-  <div className="
-    relative w-full h-[190px]
-    rounded-2xl
-    border border-dashed border-white/30
-    flex flex-col items-center justify-center
-    bg-[#05092a]
-  ">
-{/* COVER PREVIEW OR UPLOAD */}
-{coverPreview ? (
-  <img
-    src={coverPreview}
-    alt="Cover Preview"
-    className="w-full h-full object-cover rounded-2xl"
+  {/* TEXT FIELDS */}
+  <FormField
+    theme={theme}
+    name="title"
+    placeholder="Title *"
+    disabled={isView}
+    error={touched.title && errors.title}
   />
-) : (
-  <>
-    {/* Upload Icon */}
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      className="w-11 h-11 text-sky-400 mb-3"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={2}
+
+  <FormField
+    theme={theme}
+    name="subtitle"
+    disabled={isView}
+    placeholder="Subtitle"
+  />
+
+  <SelectField
+    theme={theme}
+    name="genre"
+    placeholder="Genre *"
+    options={[
+      "Ambient / Instrumental",
+      "Carnatic Classical",
+      "Children's Music",
+      "Dance",
+      "Devotional",
+      "Electronic",
+      "Film",
+      "Folk",
+      "Hip-Hop / Rap",
+      "Indie",
+      "Jazz",
+      "Pop",
+      "Rock",
+      "Worldwide",
+    ]}
+    isView={isView}
+    error={touched.genre && errors.genre}
+  />
+
+  <SelectField
+    theme={theme}
+    name="subgenre"
+    placeholder="Subgenre *"
+    options={[
+      "Ambient",
+      "Classical",
+      "Electronic",
+      "Indie",
+      "Pop",
+      "Rock",
+    ]}
+    isView={isView}
+    error={touched.subgenre && errors.subgenre}
+  />
+
+  <FormField
+    theme={theme}
+    name="label"
+    placeholder="Label *"
+    disabled={isView}
+    error={touched.label && errors.label}
+  />
+
+  <DateField
+    theme={theme}
+    name="originalReleaseDate"
+    isView={isView}
+    error={touched.originalReleaseDate && errors.originalReleaseDate}
+  />
+
+  <DateField
+    theme={theme}
+    name="digitalReleaseDate"
+    isView={isView}
+    error={touched.digitalReleaseDate && errors.digitalReleaseDate}
+  />
+
+  <FormField
+    theme={theme}
+    name="copyrightText"
+    placeholder="℗ 2026 Sinoxis Digital"
+    disabled={isView}
+    error={touched.copyrightText && errors.copyrightText}
+  />
+
+  <FormField
+    theme={theme}
+    name="productionYear"
+    placeholder="Production Year"
+    disabled={isView}
+    error={touched.productionYear && errors.productionYear}
+  />
+
+  {/* ✅ COVER ART — FULL WIDTH (INSIDE FORM) */}
+  <div className="md:col-span-2 mt-6">
+    <label className={`block text-sm mb-3 ${coverTextColor}`}>
+      Cover Art <span className="text-red-400">*</span>
+    </label>
+
+    <div
+      className="
+        relative w-full h-[190px]
+        rounded-2xl
+        border border-dashed border-white/30
+        flex items-center justify-center
+        bg-[#05092a]
+      "
     >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M12 3v10m0 0l-4-4m4 4l4-4"
-      />
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"
-      />
-    </svg>
+      {coverPreview ? (
+        <img
+          src={coverPreview}
+          alt="Cover Preview"
+          className="w-full h-full object-cover rounded-2xl"
+        />
+      ) : (
+        <div className="text-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-11 h-11 text-sky-400 mx-auto mb-3"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v10m0 0l-4-4m4 4l4-4" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
+          </svg>
 
-    <p className="text-gray-300 font-medium">
-      Drag & drop image
-    </p>
-    </>
-)}
+          <p className={`text-sm ${coverTextColor}`}>Drag & drop image</p>
+        </div>
+      )}
 
-    <input
+     <input
   type="file"
   accept="image/png,image/jpeg"
   className="absolute inset-0 opacity-0 cursor-pointer"
   onChange={(e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setCoverPreview(URL.createObjectURL(file));
-    }
-  }}
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onloadend = () => {
+    const existingDraft =
+      JSON.parse(localStorage.getItem("releaseDraft")) || {};
+
+    const releaseId =
+      existingDraft._id || crypto.randomUUID();
+
+    const coverKey = `cover_${releaseId}`;
+
+    // store image ONCE
+    localStorage.setItem(coverKey, reader.result);
+
+    // show preview immediately
+    setCoverPreview(reader.result);
+
+    // persist reference
+    localStorage.setItem(
+      "releaseDraft",
+      JSON.stringify({
+        ...existingDraft,
+        _id: releaseId,
+        coverKey,
+        updatedAt: new Date().toISOString(),
+      })
+    );
+  };
+
+  reader.readAsDataURL(file);
+}}
+
+
 />
+
+    </div>
+
+    {/* ACTION BUTTONS */}
+    {saved && (
+  <div
+    className={`fixed bottom-6 right-6 px-5 py-3 rounded-xl shadow-lg
+      ${theme === "dark"
+        ? "bg-green-500 text-black"
+        : "bg-green-600 text-white"
+      }
+    `}
+  >
+    Saved successfully
   </div>
-</div>
+)}
 
-
-{/* ACTION BUTTONS */}
 <div className="flex justify-end gap-4 mt-12">
-  <button 
-   onClick={handleSave}
-  className="px-6 py-2 rounded-lg border border-white/40 text-white hover:bg-white/10 transition">
-    Save
-  </button>
   <button
-  onClick={() => navigate("/tracks")}
-  className="px-7 py-2 rounded-lg bg-sky-500 text-[#020726] font-medium hover:bg-sky-400 transition">
-    Next
-  </button>
+  type="button"
+  onClick={() => {
+    if (!formikRef.current) return;
+
+    const values = formikRef.current.values;
+
+    const existingDraft =
+  JSON.parse(localStorage.getItem("releaseDraft")) || {};
+
+localStorage.setItem(
+  "releaseDraft",
+  JSON.stringify({
+    ...existingDraft,
+    ...values,
+    currentStep: "release",
+    updatedAt: new Date().toISOString(),
+  })
+);
+
+
+
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000); // auto hide
+  }}
+    
+ className={`px-6 py-2 rounded-lg border transition
+  ${theme === "dark"
+    ? "border-white/40 text-white hover:bg-white/10"
+    : "border-gray-400 text-gray-800 hover:bg-gray-200"
+  }
+`}
+
+>
+  Save
+</button>
+
+
+  <button
+  type="submit"
+  className="px-7 py-2 rounded-lg bg-sky-500 text-[#020726] font-medium hover:bg-sky-400 transition"
+>
+  Next
+</button>
+
 </div>
+  </div>
+
+</Form>
+)}
+</Formik>
+
+
+
+
+
 
       </div>
     </div>
@@ -229,78 +495,117 @@ function ErrorIcon() {
   );
 }
 
-function Input({ placeholder, error, value, onChange  }) {
+export const FormField = ({ theme, error, disabled, ...props }) => {
+  const inputBg =
+    theme === "dark"
+      ? "bg-[#2a2f4d] text-white placeholder-gray-300"
+      : "bg-white text-[#020726] placeholder-gray-500 border border-gray-300";
+
   return (
-    <div className="relative">
-      <input
-      value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        className="w-full h-[46px] px-5 rounded-xl 
-        bg-[#2a2f4d] text-white placeholder-gray-300 
-        outline-none border border-white/10
-          focus:border-sky-400/60 transition
-        "
+    <div className="relative flex flex-col w-full">
+      <Field
+      disabled={disabled}
+        {...props}
+        aria-invalid={Boolean(error)}
+        className={`w-full h-[46px] px-5 pr-12 rounded-xl outline-none
+          focus:ring-1 focus:ring-sky-400 transition ${inputBg}`}
       />
 
-      {error && <ErrorIcon />}
+      {Boolean(error) && (
+        <>
+          <div className="absolute right-4 top-[14px] pointer-events-none">
+            <ErrorIcon />
+          </div>
+
+          <span className="text-red-400 text-xs mt-1 leading-tight">
+            {error}
+          </span>
+        </>
+      )}
     </div>
   );
-}
+};
 
 
 
-function Select({ placeholder, error }) {
+
+export const SelectField = ({
+  theme,
+  name,
+  placeholder,
+  options,
+  error,
+   disabled
+}) => {
+  const inputBg =
+    theme === "dark"
+      ? "bg-[#2a2f4d] text-white"
+      : "bg-white text-[#020726] border border-gray-300";
+
   return (
-    <div className="relative">
-      <select
-        className="w-full h-[46px] px-5 pr-10 rounded-xl 
-        bg-[#2a2f4d] text-white outline-none appearance-none border border-white/10
-          focus:border-sky-400/60 transition
-       "
+    <div className="relative flex flex-col w-full">
+      <Field
+      disabled={disabled}
+        as="select"
+        name={name}
+        aria-invalid={!!error}
+        className={`w-full h-[46px] px-5 pr-12 rounded-xl outline-none
+        focus:ring-1 focus:ring-sky-400 transition ${inputBg}`}
       >
         <option value="">{placeholder}</option>
-        <option>Ambient / Instrumental</option>
-        <option>Carnatic Classical</option>
-        <option>Children's Music</option>
-        <option>Dance</option>
-        <option>Devotional</option>
-        <option>Electronic</option>
-        <option>Film</option>
-        <option>Folk</option>
-        <option>Hip-Hop / Rap</option>
-        <option>Indie</option>
-        <option>Jazz</option>
-        <option>Pop</option>
-        <option>Rock</option>
-        <option>Worldwide</option>
-      </select>
+        {options.map((opt) => (
+          <option key={opt} value={opt}>
+            {opt}
+          </option>
+        ))}
+      </Field>
 
-      {/* Dropdown arrow */}
-      <span className="absolute right-10 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-        ▼
-      </span>
+      {error && (
+        <div className="absolute right-4 top-[14px]">
+          <ErrorIcon />
+        </div>
+      )}
 
-      {error && <ErrorIcon />}
+      {error && (
+        <span className="text-red-400 text-xs mt-1 leading-tight">
+          {error}
+        </span>
+      )}
     </div>
   );
-}
+};
 
 
 
+export const DateField = ({ theme, name, error , disabled }) => {
+  const inputBg =
+    theme === "dark"
+      ? "bg-[#2a2f4d] text-white"
+      : "bg-white text-[#020726] border border-gray-300";
 
-function DateInput({ placeholder, error }) {
   return (
-    <div className="relative">
-      <input
+    <div className="relative flex flex-col w-full">
+      <Field
         type="date"
-        placeholder={placeholder}
-        className="w-full h-[46px] px-5 pr-10 rounded-xl 
-        bg-[#2a2f4d] text-white outline-none 
-        "
+        name={name}
+        disabled={disabled}
+        aria-invalid={!!error}
+        className={`w-full h-[46px] px-5 pr-12 rounded-xl outline-none
+        focus:ring-1 focus:ring-sky-400 transition ${inputBg}`}
       />
 
-      {error && <ErrorIcon />}
+      {error && (
+        <div className="absolute right-4 top-[14px]">
+          <ErrorIcon />
+        </div>
+      )}
+
+      {error && (
+        <span className="text-red-400 text-xs mt-1 leading-tight">
+          {error}
+        </span>
+      )}
     </div>
   );
-}
+};
+

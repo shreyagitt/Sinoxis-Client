@@ -1,6 +1,6 @@
 // src/components/ViewReleaseModal.jsx
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+
 import { X, Edit3 } from "lucide-react";
 import { useTheme } from "../components/Topbar";
 
@@ -21,36 +21,17 @@ const FieldBlock = ({ label, value, theme }) => {
   );
 };
 
-export default function ViewReleaseModal({ release, onClose, onEdit }) {
+export default function ViewReleaseModal({
+  release,
+  track,
+  stores,
+  onClose,
+  onEdit,
+}) {
+const fullRelease = release;
+
   const { theme } = useTheme();
-  const baseUrl = import.meta.env.VITE_API_BASE_URL;
-  const token = localStorage.getItem("token");
 
-  const [fullRelease, setFullRelease] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  // ✅ FETCH FULL RELEASE DETAILS
-  const fetchRelease = async () => {
-    try {
-      const res = await axios.get(
-        `${baseUrl}/client/release/${release._id}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      setFullRelease(res.data.data);
-    } catch (err) {
-      console.error("Failed to fetch release details", err);
-      setFullRelease(release); // ✅ fallback
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (release?._id) fetchRelease();
-  }, [release]);
-
-  if (!release) return null;
 
   const overlayBg = theme === "dark" ? "bg-black/70" : "bg-black/40";
   const panelBg =
@@ -89,14 +70,9 @@ export default function ViewReleaseModal({ release, onClose, onEdit }) {
           <X size={22} />
         </button>
 
-        {/* LOADING */}
-        {loading && (
-          <div className="py-20 text-center text-sm opacity-70">
-            Loading release details...
-          </div>
-        )}
+        
 
-        {!loading && fullRelease && (
+        {fullRelease && (
           <>
             {/* HEADER */}
             <div
@@ -130,51 +106,45 @@ export default function ViewReleaseModal({ release, onClose, onEdit }) {
 
               {/* LEFT */}
               <div>
-                <FieldBlock label="Release Title" value={fullRelease.title} theme={theme} />
-                <FieldBlock label="Release Date" value={fullRelease.releaseDate} theme={theme} />
-                <FieldBlock label="Label" value={fullRelease.label} theme={theme} />
-                <FieldBlock label="ISRC" value={fullRelease.isrc} theme={theme} />
-                <FieldBlock label="UPC" value={fullRelease.upc} theme={theme} />
-                <FieldBlock
-                  label="Released Before?"
-                  value={fullRelease.releasedBefore ? "Yes" : "No"}
-                  theme={theme}
-                />
-                
+                <FieldBlock label="Track Title" value={track?.trackTitle} theme={theme} />
+<FieldBlock label="ISRC" value={track?.isrc} theme={theme} />
+<FieldBlock label="Language" value={track?.language} theme={theme} />
+<FieldBlock label="Publisher" value={track?.publisher} theme={theme} />
+
               </div>
 
               {/* RIGHT */}
               <div>
-                <FieldBlock label="Primary Artist" value={fullRelease.artist} theme={theme} />
                 <FieldBlock
-                  label="Tracks / Preview Link"
-                  value={fullRelease.tracksPreview}
-                  theme={theme}
-                />
-                <FieldBlock label="Contact Email" value={fullRelease.contactEmail} theme={theme} />
-                <FieldBlock label="Contact Phone" value={fullRelease.contactPhone} theme={theme} />
-                <FieldBlock label="Short Notes / Bio" value={fullRelease.notes} theme={theme} />
+  label="Writers"
+  value={track?.writers?.join(", ")}
+  theme={theme}
+/>
 
-                {/* ✅ COVER IMAGE */}
-                <div className="mt-4">
-                  <p className={`text-sm ${subText}`}>Cover Art</p>
-                  <div
-                    className={`mt-2 w-[120px] h-[120px] rounded-xl overflow-hidden border
-                      ${theme === "dark" ? "bg-[#111a3b] border-white/10" : "bg-gray-100 border-gray-300"}
-                    `}
-                  >
-                    <img
-                      src={coverSrc}
-                      alt="Cover"
-                      className="w-full h-full object-cover"
-                      onError={(e) =>
-                        (e.currentTarget.src = "/assets/cover-placeholder.png")
-                      }
-                    />
-                  </div>
-                </div>
+<FieldBlock
+  label="Composers"
+  value={track?.composers?.join(", ")}
+  theme={theme}
+/>
 
-                <FieldBlock label="Status" value={fullRelease.status} theme={theme} />
+<FieldBlock
+  label="Music Directors"
+  value={track?.musicDirectors?.join(", ")}
+  theme={theme}
+/>
+
+<FieldBlock
+  label="Producers"
+  value={track?.producers?.join(", ")}
+  theme={theme}
+/>
+
+<FieldBlock
+  label="Stores"
+  value={stores?.length ? stores.join(", ") : "-"}
+  theme={theme}
+/>
+
               </div>
             </div>
 

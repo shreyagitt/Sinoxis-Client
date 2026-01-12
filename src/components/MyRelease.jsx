@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Edit3, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useTheme } from "../components/Topbar";
@@ -29,8 +30,8 @@ function statusClasses(status, theme) {
 export default function Releases() {
   const navigate = useNavigate();
   const { theme } = useTheme();
-  const baseUrl = import.meta.env.VITE_API_BASE_URL;
-  const token = localStorage.getItem("token");
+  const location = useLocation();
+  
 
   const pageBg =
     theme === "dark" ? "bg-[#020726] text-white" : "bg-white text-[#020726]";
@@ -70,28 +71,111 @@ export default function Releases() {
   const [viewing, setViewing] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // ✅ FETCH FROM API
-  const fetchReleases = async () => {
-    try {
-      setLoading(true);
-      const res = await axios.get(`${baseUrl}/client/release`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setReleases(res.data.data || []);
-    } catch {
-      toast.error("Failed to load releases");
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  useEffect(() => {
-    fetchReleases();
-  }, []);
+  const openCreate = () => {
+  localStorage.removeItem("releaseDraft");
+  localStorage.removeItem("trackDraft");
+  localStorage.removeItem("storeDraft");
+  localStorage.removeItem("releaseMode");
+  navigate("/releases/create");
+};
 
-  const openCreate = () => navigate("/releases/create");
-  const openEdit = (id) => navigate(`/releases/edit/${id}`);
-  const openView = (r) => setViewing(r);
+const openEdit = (release) => {
+  localStorage.setItem(
+    "releaseDraft",
+    JSON.stringify({
+      _id: release._id,
+      title: release.title,
+      subtitle: release.subtitle || "",
+      genre: release.genre || "",
+      subgenre: release.subgenre || "",
+      label: release.label || "",
+      upc: release.upc || "",
+      originalReleaseDate: release.originalReleaseDate || "",
+      digitalReleaseDate: release.digitalReleaseDate || "",
+      productionYear: release.productionYear || "",
+      copyrightText: release.copyrightText || "",
+      coverKey: release.coverKey || null, // ✅ FIX
+    })
+  );
+
+  localStorage.setItem(
+    "trackDraft",
+    JSON.stringify({
+      trackTitle: release.trackTitle || "",
+      primaryArtist: release.artist || "",
+      isrc: release.isrc || "",
+      publisher: release.publisher || "",
+      language: release.language || "",
+      writers: release.writers || [],
+      composers: release.composers || [],
+      musicDirectors: release.musicDirectors || [],
+      producers: release.producers || [],
+    })
+  );
+
+  localStorage.setItem(
+    "storeDraft",
+    JSON.stringify({ stores: release.stores || [] })
+  );
+
+  localStorage.setItem("releaseMode", "edit");
+  navigate("/releases/create");
+};
+
+
+
+const openView = (release) => {
+  localStorage.setItem(
+    "releaseDraft",
+    JSON.stringify({
+      _id: release._id,
+      title: release.title,
+      subtitle: release.subtitle || "",
+      genre: release.genre || "",
+      subgenre: release.subgenre || "",
+      label: release.label || "",
+      upc: release.upc || "",
+      originalReleaseDate: release.originalReleaseDate || "",
+      digitalReleaseDate: release.digitalReleaseDate || "",
+      productionYear: release.productionYear || "",
+      copyrightText: release.copyrightText || "",
+      coverKey: release.coverKey || "",
+    })
+  );
+
+  localStorage.setItem(
+    "trackDraft",
+    JSON.stringify({
+      trackTitle: release.trackTitle || "",
+      primaryArtist: release.artist || "",
+      publisher: release.publisher || "",
+      language: release.language || "",
+      isrc: release.isrc || "",
+      writers: release.writers || [],
+      composers: release.composers || [],
+      musicDirectors: release.musicDirectors || [],
+      producers: release.producers || [],
+    })
+  );
+
+  localStorage.setItem(
+    "storeDraft",
+    JSON.stringify({
+      stores: release.stores || [],
+    })
+  );
+
+  localStorage.setItem("releaseMode", "view");
+
+  navigate("/releases/create");
+};
+
+
+
+
+
+
 
   const filtered = releases.filter((r) => {
     if (filter !== "All" && r.status !== filter) return false;
@@ -108,6 +192,13 @@ export default function Releases() {
   const totalPages = Math.ceil(totalCount / countPage.perPage) || 1;
   const currentPage = Math.min(countPage.page, totalPages);
   const countText = `${currentPage} / ${totalPages}`;
+
+useEffect(() => {
+  const stored = JSON.parse(localStorage.getItem("releases")) || [];
+  setReleases(stored);
+}, [location.pathname]);
+
+
 
   return (
     <div className={`min-h-screen px-6 py-8 ${pageBg}`}>
@@ -174,6 +265,54 @@ export default function Releases() {
           </div>
         </div>
 
+{/* MOBILE VIEW */}
+<div className="lg:hidden space-y-4">
+  {filtered.map((r) => (
+    <div
+      key={r._id}
+      className={`p-4 rounded-xl border ${
+        theme === "dark"
+          ? "bg-[#050a26] border-white/10"
+          : "bg-white border-gray-200 shadow-sm"
+      }`}
+    >
+      <div className="flex items-center gap-4">
+        <img
+          src={
+            r.coverKey
+              ? localStorage.getItem(r.coverKey) || COVER_PLACEHOLDER
+              : COVER_PLACEHOLDER
+          }
+          className="w-16 h-16 rounded-lg object-cover"
+        />
+
+        <div className="flex-1">
+          <p className="font-semibold">{r.title}</p>
+          <p className="text-sm text-gray-400">{r.artist}</p>
+          <span
+            className={`inline-block mt-2 px-3 py-1 rounded-full text-xs ${statusClasses(
+              r.status,
+              theme
+            )}`}
+          >
+            {r.status}
+          </span>
+        </div>
+      </div>
+
+      <div className="flex justify-end gap-3 mt-4">
+        <button onClick={() => openEdit(r)} className="text-amber-400">
+          <Edit3 size={18} />
+        </button>
+        <button onClick={() => openView(r)} className="text-sky-400">
+          <Eye size={18} />
+        </button>
+      </div>
+    </div>
+  ))}
+</div>
+
+
         {/* ✅ DESKTOP TABLE — SAME UI AS YOUR SCREENSHOT */}
         <div className="hidden lg:block overflow-x-auto mt-2">
           <table className="min-w-[1100px] w-full text-left text-sm">
@@ -195,7 +334,11 @@ export default function Releases() {
                 <tr key={r._id} className={`${tableBorder} border-b`}>
                   <td className="px-4 py-3">
                     <img
-                      src={r.cover || COVER_PLACEHOLDER}
+                      src={
+    r.coverKey
+      ? localStorage.getItem(r.coverKey) || COVER_PLACEHOLDER
+      : COVER_PLACEHOLDER
+  }
                       className="w-14 h-14 rounded object-cover"
                     />
                   </td>
@@ -216,8 +359,7 @@ export default function Releases() {
   <div className="flex justify-center gap-3">
 
     {/* EDIT BUTTON */}
-    <button
-      onClick={() => openEdit(r._id)}
+    <button onClick={() => openEdit(r)}
       className={`
         w-10 h-10 flex items-center justify-center rounded-full border group transition
         ${
@@ -282,13 +424,16 @@ export default function Releases() {
       {/* VIEW MODAL */}
       {viewing && (
         <ViewReleaseModal
-          release={viewing}
-          onClose={() => setViewing(null)}
-          onEdit={() => {
-            setViewing(null);
-            navigate(`/releases/edit/${viewing._id}`);
-          }}
-        />
+  release={viewing.release}
+  track={viewing.track}
+  stores={viewing.stores}
+  onClose={() => setViewing(null)}
+  onEdit={() => {
+    setViewing(null);
+    navigate(`/releases/edit/${viewing.release._id}`);
+  }}
+/>
+
       )}
     </div>
   );
