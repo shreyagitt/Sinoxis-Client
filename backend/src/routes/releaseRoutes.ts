@@ -3,11 +3,13 @@ import { authenticate, authorize } from "../middlewares/auth";
 import {
   getAllReleases,
   updateReleaseStatus,
+  deleteReleaseByAdmin,
 } from "../controllers/releaseController";
 
 const router = Router();
 
-// ✅ GET ALL RELEASES (ADMIN ONLY)
+/* ================= ADMIN ROUTES ================= */
+
 router.get(
   "/",
   authenticate,
@@ -15,7 +17,6 @@ router.get(
   getAllReleases
 );
 
-// ✅ UPDATE RELEASE STATUS (ADMIN ONLY)
 router.patch(
   "/:id/status",
   authenticate,
@@ -23,5 +24,11 @@ router.patch(
   updateReleaseStatus
 );
 
-export default router;
+router.delete(
+  "/:id",
+  authenticate,
+  authorize("admin"),
+  deleteReleaseByAdmin
+);
 
+export default router;

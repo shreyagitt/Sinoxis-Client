@@ -1,23 +1,168 @@
 import { Schema, model } from "mongoose";
 
+/* ================= TRACK SUB-SCHEMA ================= */
+const TrackSchema = new Schema(
+  {
+    trackTitle: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    primaryArtist: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    publisher: {
+      type: String,
+      trim: true,
+    },
+
+    language: {
+      type: String,
+      trim: true,
+    },
+
+    isrc: {
+      type: String,
+      uppercase: true,
+      trim: true,
+    },
+
+    writers: {
+      type: [String],
+      default: [],
+    },
+
+    composers: {
+      type: [String],
+      default: [],
+    },
+
+    musicDirectors: {
+      type: [String],
+      default: [],
+    },
+
+    producers: {
+      type: [String],
+      default: [],
+    },
+
+    audioUrl: {
+      type: String,
+    },
+
+    lyrics: {
+      type: String,
+    },
+  },
+  { _id: true }
+);
+
+/* ================= RELEASE SCHEMA ================= */
 const ReleaseSchema = new Schema(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    /* ========== USER ========== */
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true,
+    },
 
-    /* ==== FRONTEND BASIC FIELDS ==== */
-    title: { type: String, required: true },
-    artist: { type: String, required: true },
+    /* ========== RELEASE DETAILS ========== */
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
-    /* ==== FRONTEND EXTRA FIELDS ==== */
-    label: { type: String },           // frontend uses label
-    isrc: { type: String },            // frontend uses ISRC
-    upc: { type: String },             // frontend uses UPC
+    subtitle: {
+      type: String,
+      trim: true,
+      default: "",
+    },
 
-    /* ==== COVER IMAGE ==== */
-    cover: { type: String },           // URL displayed in UI
-    coverImageId: { type: String },    // cloudinary public id
+    artist: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
-    /* ==== STATUS ==== */
+    genre: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    subgenre: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    label: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    copyrightText: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    productionYear: {
+      type: Number,
+      min: 1900,
+      max: new Date().getFullYear(),
+    },
+
+    originalReleaseDate: {
+      type: Date,
+    },
+
+    digitalReleaseDate: {
+      type: Date,
+    },
+
+    upc: {
+      type: String,
+      trim: true,
+    },
+
+    /* ========== COVER ========== */
+    cover: {
+      type: String, // image URL
+    },
+
+    coverImageId: {
+      type: String, // cloudinary public id
+    },
+
+    /* ========== TRACKS ========== */
+    tracks: {
+      type: [TrackSchema],
+      default: [],
+    },
+
+    /* ========== STORES ========== */
+    stores: {
+      type: [String], // ["spotify", "apple"]
+      default: [],
+    },
+
+    /* ========== FLOW CONTROL ========== */
+    currentStep: {
+      type: String,
+      enum: ["release", "tracks", "stores", "submission"],
+      default: "release",
+    },
+
     status: {
       type: String,
       enum: [
@@ -28,7 +173,7 @@ const ReleaseSchema = new Schema(
         "Unfinished",
         "Action Required",
       ],
-      default: "Pending",
+      default: "Unfinished",
     },
   },
   { timestamps: true }

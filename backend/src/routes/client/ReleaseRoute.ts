@@ -2,24 +2,39 @@ import { Router } from "express";
 import { authenticate, authorize } from "../../middlewares/auth";
 import upload from "../../middlewares/upload";
 import {
-  createRelease,
+  upsertRelease,
+  getMyReleaseById,
   getMyReleases,
-  updateMyRelease,
   deleteMyRelease,
 } from "../../controllers/client/ReleaseController";
 
 const router = Router();
 
-// ✅ CREATE RELEASE (CLIENT)
+/* =====================================================
+   CREATE OR UPDATE RELEASE (ONE API)
+   Used by: Release / Tracks / Stores / Submission pages
+   ===================================================== */
 router.post(
   "/",
   authenticate,
   authorize("client"),
   upload.single("cover"),
-  createRelease
+  upsertRelease
 );
 
-// ✅ GET MY RELEASES (CLIENT)
+/* =====================================================
+   GET SINGLE RELEASE (EDIT / VIEW / PREFILL)
+   ===================================================== */
+router.get(
+  "/:id",
+  authenticate,
+  authorize("client"),
+  getMyReleaseById
+);
+
+/* =====================================================
+   GET ALL MY RELEASES (DASHBOARD)
+   ===================================================== */
 router.get(
   "/",
   authenticate,
@@ -27,16 +42,9 @@ router.get(
   getMyReleases
 );
 
-// ✅ UPDATE MY RELEASE (CLIENT)
-router.put(
-  "/:id",
-  authenticate,
-  authorize("client"),
-  upload.single("cover"),
-  updateMyRelease
-);
-
-// ✅ DELETE MY RELEASE (CLIENT)
+/* =====================================================
+   DELETE RELEASE
+   ===================================================== */
 router.delete(
   "/:id",
   authenticate,
