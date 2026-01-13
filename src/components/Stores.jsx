@@ -41,12 +41,12 @@ const deselectAll = () => {
 
   const parsed = JSON.parse(stored);
 
-  if (Array.isArray(parsed)) {
-    // backward compatibility
-    setSelected(parsed);
-  } else if (parsed.stores) {
-    setSelected(parsed.stores);
-  }
+ if (Array.isArray(parsed)) {
+  setSelected(parsed);
+} else if (Array.isArray(parsed.stores)) {
+  setSelected(parsed.stores.map((s) => s.platform || s));
+}
+
 }, []);
 
 useEffect(() => {
@@ -65,7 +65,7 @@ useEffect(() => {
     JSON.stringify({
       ...existing,
       releaseId: releaseDraft._id, // ✅ CRITICAL
-      stores: selected,
+      stores: selected.map((id) => ({ platform: id })),
       step: "stores",
       savedAt: new Date().toISOString(),
     })
@@ -285,7 +285,7 @@ useEffect(() => {
     "storeDraft",
     JSON.stringify({
       releaseId: releaseDraft._id, // ✅ CRITICAL
-      stores: selected,
+      stores: selected.map((id) => ({ platform: id })),
       step: "stores",
       savedAt: new Date().toISOString(),
     })

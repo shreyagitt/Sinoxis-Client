@@ -29,18 +29,20 @@ const isEdit = mode === "edit";
     }
   }, []);
 
-  // ✅ NOW IT IS SAFE TO USE savedDraft
-  const initialValues = {
-    trackTitle: savedDraft?.trackTitle || "",
-    primaryArtist: savedDraft?.primaryArtist || "",
-    publisher: savedDraft?.publisher || "",
-    language: savedDraft?.language || "",
-    isrc: savedDraft?.isrc || "",
-    writers: savedDraft?.writers || [],
-    composers: savedDraft?.composers || [],
-    musicDirectors: savedDraft?.musicDirectors || [],
-    producers: savedDraft?.producers || [],
-  };
+ const firstTrack = savedDraft?.tracks?.[0] || {};
+
+const initialValues = {
+  trackTitle: firstTrack.trackTitle || "",
+  primaryArtist: firstTrack.primaryArtist || "",
+  publisher: firstTrack.publisher || "",
+  language: firstTrack.language || "",
+  isrc: firstTrack.isrc || "",
+  writers: firstTrack.writers || [],
+  composers: firstTrack.composers || [],
+  musicDirectors: firstTrack.musicDirectors || [],
+  producers: firstTrack.producers || [],
+};
+
 
 
 
@@ -178,17 +180,30 @@ const trackSchema = Yup.object({
     return;
   }
 
+  const trackPayload = {
+    trackTitle: values.trackTitle,
+    primaryArtist: values.primaryArtist,
+    publisher: values.publisher,
+    language: values.language,
+    isrc: values.isrc,
+    writers: values.writers,
+    composers: values.composers,
+    musicDirectors: values.musicDirectors,
+    producers: values.producers,
+  };
+
   localStorage.setItem(
     "trackDraft",
     JSON.stringify({
-      releaseId: releaseDraft._id, // ✅ CRITICAL
-      ...values,
+      releaseId: releaseDraft._id,
+      tracks: [trackPayload],   // ✅ API shape
       updatedAt: new Date().toISOString(),
     })
   );
 
   navigate("/stores");
 }}
+
 
 >
   {({ values, errors, touched, setFieldValue }) => (
@@ -309,17 +324,28 @@ const trackSchema = Yup.object({
     const existing =
   JSON.parse(localStorage.getItem("trackDraft")) || {};
 
+const trackPayload = {
+  trackTitle: values.trackTitle,
+  primaryArtist: values.primaryArtist,
+  publisher: values.publisher,
+  language: values.language,
+  isrc: values.isrc,
+  writers: values.writers,
+  composers: values.composers,
+  musicDirectors: values.musicDirectors,
+  producers: values.producers,
+};
+
 localStorage.setItem(
   "trackDraft",
   JSON.stringify({
-    ...existing,       // ✅ preserves releaseId
-    ...values,
-    step: "tracks",
-    savedAt: new Date().toISOString(),
+    ...existing,
+    tracks: [trackPayload],   // ✅ DO NOT FLATTEN
+    updatedAt: new Date().toISOString(),
   })
 );
 
-    alert("Draft saved successfully");
+alert("Draft saved successfully");
   }}
   className={`px-6 py-2 rounded-lg border transition
     ${

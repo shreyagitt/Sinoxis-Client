@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Edit3, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useLocation } from "react-router-dom";
+import { useLocation} from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useTheme } from "../components/Topbar";
@@ -31,7 +31,8 @@ export default function Releases() {
   const navigate = useNavigate();
   const { theme } = useTheme();
   const location = useLocation();
-  
+
+  const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
   const pageBg =
     theme === "dark" ? "bg-[#020726] text-white" : "bg-white text-[#020726]";
@@ -70,6 +71,30 @@ export default function Releases() {
   const [countPage, setCountPage] = useState({ page: 1, perPage: 10 });
   const [viewing, setViewing] = useState(null);
   const [loading, setLoading] = useState(false);
+ /* ================= FETCH MY RELEASES ================= */
+ const fetchReleases = async () => {
+  try {
+    setLoading(true);
+
+    const token = localStorage.getItem("token");
+
+    const res = await axios.get(`${baseUrl}/client/release`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    setReleases(res.data.data || []);
+  } catch (err) {
+    toast.error("Failed to load releases");
+  } finally {
+    setLoading(false);
+  }
+};
+
+useEffect(() => {
+  fetchReleases();
+}, [location.pathname]);
 
 
   const openCreate = () => {
@@ -80,100 +105,72 @@ export default function Releases() {
   navigate("/releases/create");
 };
 
-const openEdit = (release) => {
-  localStorage.setItem(
-    "releaseDraft",
-    JSON.stringify({
-      _id: release._id,
-      title: release.title,
-      subtitle: release.subtitle || "",
-      genre: release.genre || "",
-      subgenre: release.subgenre || "",
-      label: release.label || "",
-      upc: release.upc || "",
-      originalReleaseDate: release.originalReleaseDate || "",
-      digitalReleaseDate: release.digitalReleaseDate || "",
-      productionYear: release.productionYear || "",
-      copyrightText: release.copyrightText || "",
-      coverKey: release.coverKey || null, // ✅ FIX
-    })
-  );
+const openEdit = async (release) => {
+   try {
+    const token = localStorage.getItem("token");
 
-  localStorage.setItem(
-    "trackDraft",
-    JSON.stringify({
-      trackTitle: release.trackTitle || "",
-      primaryArtist: release.artist || "",
-      isrc: release.isrc || "",
-      publisher: release.publisher || "",
-      language: release.language || "",
-      writers: release.writers || [],
-      composers: release.composers || [],
-      musicDirectors: release.musicDirectors || [],
-      producers: release.producers || [],
-    })
-  );
+    const res = await axios.get(
+      `${baseUrl}/client/release/${release._id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-  localStorage.setItem(
-    "storeDraft",
-    JSON.stringify({ stores: release.stores || [] })
-  );
+    const fullRelease = res.data.data;
 
-  localStorage.setItem("releaseMode", "edit");
-  navigate("/releases/create");
-};
+    /* ================= RELEASE DRAFT ================= */
+    
+    localStorage.setItem("releaseDraft", JSON.stringify(fullRelease));
+    localStorage.setItem("trackDraft", JSON.stringify({
+      tracks: fullRelease.tracks || [],
+    }));
+    localStorage.setItem("storeDraft", JSON.stringify({
+      stores: fullRelease.stores || [],
+    }));
 
+    localStorage.setItem("releaseMode", "edit");
 
-
-const openView = (release) => {
-  localStorage.setItem(
-    "releaseDraft",
-    JSON.stringify({
-      _id: release._id,
-      title: release.title,
-      subtitle: release.subtitle || "",
-      genre: release.genre || "",
-      subgenre: release.subgenre || "",
-      label: release.label || "",
-      upc: release.upc || "",
-      originalReleaseDate: release.originalReleaseDate || "",
-      digitalReleaseDate: release.digitalReleaseDate || "",
-      productionYear: release.productionYear || "",
-      copyrightText: release.copyrightText || "",
-      coverKey: release.coverKey || "",
-    })
-  );
-
-  localStorage.setItem(
-    "trackDraft",
-    JSON.stringify({
-      trackTitle: release.trackTitle || "",
-      primaryArtist: release.artist || "",
-      publisher: release.publisher || "",
-      language: release.language || "",
-      isrc: release.isrc || "",
-      writers: release.writers || [],
-      composers: release.composers || [],
-      musicDirectors: release.musicDirectors || [],
-      producers: release.producers || [],
-    })
-  );
-
-  localStorage.setItem(
-    "storeDraft",
-    JSON.stringify({
-      stores: release.stores || [],
-    })
-  );
-
-  localStorage.setItem("releaseMode", "view");
-
-  navigate("/releases/create");
+    navigate("/releases/create");
+  } catch {
+    toast.error("Failed to load release for editing");
+  }
 };
 
 
 
 
+const openView = async (release) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await axios.get(
+      `${baseUrl}/client/release/${release._id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const fullRelease = res.data.data;
+
+    localStorage.setItem("releaseDraft", JSON.stringify(fullRelease));
+    localStorage.setItem("trackDraft", JSON.stringify({
+      tracks: fullRelease.tracks || [],
+    }));
+    localStorage.setItem("storeDraft", JSON.stringify({
+      stores: fullRelease.stores || [],
+    }));
+
+    localStorage.setItem("releaseMode", "view");
+
+    navigate("/releases/create");
+  } catch {
+    toast.error("Failed to load release details");
+  }
+};
 
 
 
@@ -193,10 +190,6 @@ const openView = (release) => {
   const currentPage = Math.min(countPage.page, totalPages);
   const countText = `${currentPage} / ${totalPages}`;
 
-useEffect(() => {
-  const stored = JSON.parse(localStorage.getItem("releases")) || [];
-  setReleases(stored);
-}, [location.pathname]);
 
 
 
@@ -278,11 +271,7 @@ useEffect(() => {
     >
       <div className="flex items-center gap-4">
         <img
-          src={
-            r.coverKey
-              ? localStorage.getItem(r.coverKey) || COVER_PLACEHOLDER
-              : COVER_PLACEHOLDER
-          }
+          src={r.cover || COVER_PLACEHOLDER}
           className="w-16 h-16 rounded-lg object-cover"
         />
 
@@ -334,11 +323,7 @@ useEffect(() => {
                 <tr key={r._id} className={`${tableBorder} border-b`}>
                   <td className="px-4 py-3">
                     <img
-                      src={
-    r.coverKey
-      ? localStorage.getItem(r.coverKey) || COVER_PLACEHOLDER
-      : COVER_PLACEHOLDER
-  }
+                      src={r.cover || COVER_PLACEHOLDER}
                       className="w-14 h-14 rounded object-cover"
                     />
                   </td>
@@ -346,7 +331,10 @@ useEffect(() => {
                   <td className="px-4 py-3">{r.title}</td>
                   <td className="px-4 py-3">{r.artist}</td>
                   <td className="px-4 py-3">{r.label || "—"}</td>
-                  <td className="px-4 py-3">{r.isrc || "—"}</td>
+                  <td className="px-4 py-3">
+  {r.tracks?.[0]?.isrc || "—"}
+</td>
+
                   <td className="px-4 py-3">{r.upc || "—"}</td>
 
                   <td className="px-4 py-3">
@@ -420,7 +408,7 @@ useEffect(() => {
           </table>
         </div>
       </div>
-
+{loading && <div className="py-6 text-center">Loading...</div>}
       {/* VIEW MODAL */}
       {viewing && (
         <ViewReleaseModal

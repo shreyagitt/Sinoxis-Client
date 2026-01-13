@@ -160,16 +160,15 @@ useEffect(() => {
   <div key={r._id || i} className={`rounded-xl overflow-hidden border ${boxDark}`}>
 
             
-              <img
-                src={
-  r.coverKey
-    ? localStorage.getItem(r.coverKey) ||
-      "https://www.mixcloud.com/blog/wp-content/uploads/2023/11/Collage-1-2.png"
-    : "https://www.mixcloud.com/blog/wp-content/uploads/2023/11/Collage-1-2.png"
-}
+             <img
+  src={
+    r.cover ||
+    "https://www.mixcloud.com/blog/wp-content/uploads/2023/11/Collage-1-2.png"
+  }
+  className="w-full h-40 sm:h-48 object-cover"
+  alt="Release cover"
+/>
 
-                className="w-full h-40 sm:h-48 object-cover"
-              />
               <div className="p-4">
                 <p className={textSecondary}>{r.artist}</p>
 <p className="text-lg font-semibold">{r.title}</p>

@@ -14,6 +14,7 @@ const releaseSchema = Yup.object({
   originalReleaseDate: Yup.date().required("Original release date required"),
   digitalReleaseDate: Yup.date().required("Digital release date required"),
   copyrightText: Yup.string().required("Copyright is required"),
+  upc: Yup.string(), // ✅ ADD THIS
   productionYear: Yup.number()
     .typeError("Enter valid year")
     .min(1900)
@@ -30,6 +31,7 @@ const initialValues = {
   originalReleaseDate: "",
   digitalReleaseDate: "",
   copyrightText: "",
+  upc: "", 
   productionYear: "",
 };
 
@@ -68,35 +70,41 @@ const inputBg =
     const coverTextColor =
   theme === "dark" ? "text-gray-300" : "text-black";
 
-
-
+const toDateInputValue = (value) => {
+  if (!value) return "";
+  return new Date(value).toISOString().split("T")[0];
+};
 
 
 useEffect(() => {
   const saved = localStorage.getItem("releaseDraft");
-  if (saved) {
-    const parsed = JSON.parse(saved);
-    setInitialFormValues({
-      title: parsed.title || "",
-      subtitle: parsed.subtitle || "",
-      genre: parsed.genre || "",
-      subgenre: parsed.subgenre || "",
-      label: parsed.label || "",
-      originalReleaseDate: parsed.originalReleaseDate || "",
-      digitalReleaseDate: parsed.digitalReleaseDate || "",
-      copyrightText: parsed.copyrightText || "",
-      productionYear: parsed.productionYear || "",
-    });
-    if (parsed.coverKey) {
-  const img = localStorage.getItem(parsed.coverKey);
-  if (img) setCoverPreview(img);
-}
+  if (!saved) return;
 
+  const parsed = JSON.parse(saved);
+
+  setInitialFormValues({
+    title: parsed.title || "",
+    subtitle: parsed.subtitle || "",
+    genre: parsed.genre || "",
+    subgenre: parsed.subgenre || "",
+    label: parsed.label || "",
+    originalReleaseDate: toDateInputValue(parsed.originalReleaseDate),
+digitalReleaseDate: toDateInputValue(parsed.digitalReleaseDate),
+    copyrightText: parsed.copyrightText || "",
+    upc: parsed.upc || "",
+    productionYear: parsed.productionYear || "",
+  });
+
+  // ✅ PRIORITY: API COVER URL
+  if (parsed.cover) {
+    setCoverPreview(parsed.cover);
+  }
+  // ✅ FALLBACK: draft coverKey
+  else if (parsed.coverKey) {
+    const img = localStorage.getItem(parsed.coverKey);
+    if (img) setCoverPreview(img);
   }
 }, []);
-
-
-
 
 
   return (
@@ -313,6 +321,15 @@ innerRef={formikRef}
     disabled={isView}
     error={touched.copyrightText && errors.copyrightText}
   />
+
+  {/* ✅ UPC FIELD (ADDED BELOW COPYRIGHT) */}
+<FormField
+  theme={theme}
+  name="upc"
+  placeholder="UPC (Optional)"
+  disabled={isView}
+  error={touched.upc && errors.upc}
+/>
 
   <FormField
     theme={theme}

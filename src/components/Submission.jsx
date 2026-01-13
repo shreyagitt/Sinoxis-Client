@@ -1,5 +1,7 @@
 import { useState,useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import toast from "react-hot-toast";
 import { useTheme } from "../components/Topbar";
 
 export default function SubmissionStep() {
@@ -29,25 +31,124 @@ useEffect(() => {
     return;
   }
 
-  if (isEdit && !r._id) {
-    alert("Invalid edit state. Please reopen the release.");
-    navigate("/releases/myRelease");
-    return;
-  }
-
   setRelease(r);
 
-  // ✅ LOAD COVER IMAGE AFTER RELEASE IS KNOWN
   if (r.coverKey) {
     const img = localStorage.getItem(r.coverKey);
     if (img) setCoverImage(img);
-  } else {
-    setCoverImage(null);
   }
 
-  if (t) setTrack(t);
-  if (s?.stores) setStores(s.stores);
-}, [navigate, isEdit]);
+  // ✅ TRACKS — always array
+  if (t?.tracks?.length) {
+    setTrack(t.tracks[0]);
+  } else {
+    setTrack(null);
+  }
+
+  // ✅ STORES — normalized
+  if (Array.isArray(s?.stores)) {
+    setStores(s.stores);
+  } else {
+    setStores([]);
+  }
+}, [navigate]);
+
+const baseUrl = import.meta.env.VITE_API_BASE_URL;
+
+const handlePublish = async () => {
+  if (isView) return;
+
+  if (!release || !track || !stores.length) {
+    toast.error("Submission incomplete");
+    return;
+  }
+
+  const token = localStorage.getItem("token");
+
+  try {
+    const formData = new FormData();
+
+    // ✅ REQUIRED FOR EDIT
+    if (isEdit && release._id) {
+      formData.append("_id", release._id);
+    }
+
+    // ───── RELEASE ─────
+    formData.append("title", release.title);
+    formData.append("subtitle", release.subtitle || "");
+    formData.append("artist", track.primaryArtist);
+    formData.append("genre", release.genre);
+    formData.append("subgenre", release.subgenre);
+    formData.append("label", release.label);
+    formData.append("upc", release.upc || "");
+    formData.append("originalReleaseDate", release.originalReleaseDate);
+    formData.append("digitalReleaseDate", release.digitalReleaseDate);
+    formData.append("productionYear", release.productionYear);
+    formData.append("copyrightText", release.copyrightText || "");
+
+    // ───── TRACKS ─────
+    formData.append(
+      "tracks",
+      JSON.stringify([
+        {
+          trackTitle: track.trackTitle,
+          primaryArtist: track.primaryArtist,
+          publisher: track.publisher,
+          language: track.language,
+          isrc: track.isrc,
+          writers: track.writers || [],
+          composers: track.composers || [],
+          musicDirectors: track.musicDirectors || [],
+          producers: track.producers || [],
+        },
+      ])
+    );
+
+    // ───── STORES ─────
+    formData.append(
+      "stores",
+      JSON.stringify(
+        stores.map((s) => (typeof s === "string" ? s : s.platform))
+      )
+    );
+
+    // ───── COVER IMAGE (🔥 CRITICAL FIX) ─────
+    if (release.coverKey) {
+      const base64 = localStorage.getItem(release.coverKey);
+
+      if (base64) {
+        const blob = await fetch(base64).then((res) => res.blob());
+        formData.append("cover", blob);
+      }
+    }
+
+    // ───── META ─────
+    formData.append("currentStep", "submission");
+    formData.append("status", "Pending");
+
+    // ✅ SINGLE API FOR CREATE + EDIT
+    await axios.post(`${baseUrl}/client/release`, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    toast.success(isEdit ? "Release updated successfully" : "Release submitted successfully");
+
+    // ✅ CLEANUP
+    localStorage.removeItem("releaseDraft");
+    localStorage.removeItem("trackDraft");
+    localStorage.removeItem("storeDraft");
+    localStorage.removeItem("releaseMode");
+
+    navigate("/releases/myRelease");
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to submit release");
+  }
+};
+
 
 
 
@@ -145,7 +246,9 @@ useEffect(() => {
     <li><b>Original Release Date:</b> {release.originalReleaseDate}</li>
     <li><b>Digital Release Date:</b> {release.digitalReleaseDate}</li>
     <li><b>Production Year:</b> {release.productionYear}</li>
-    <li><b>Copyright:</b> {release.copyrightText}</li>
+    <li><b>Copyright:</b> {release.copyrightText || "—"}</li>
+<li><b>UPC:</b> {release.upc || "—"}</li>
+
 
     {coverImage && (
   <img
@@ -208,9 +311,13 @@ useEffect(() => {
   >
     {stores.length > 0 ? (
       <ul className="list-disc pl-4 text-sm">
-        {stores.map((s) => (
-          <li key={s}>{s}</li>
-        ))}
+       {stores.map((s, i) => (
+  <li key={i}>
+    {typeof s === "string" ? s : s.platform}
+  </li>
+))}
+
+
       </ul>
     ) : (
       <p className="text-red-400 text-sm">No store selected</p>
@@ -264,89 +371,7 @@ useEffect(() => {
           : "bg-sky-400/40 cursor-not-allowed"
       }
     `}
-  onClick={() => {
-  if (isView) return;
-
-  if (!release || !track || !stores.length) {
-    alert("Submission incomplete");
-    return;
-  }
-
-  // 🔒 HARD GUARD — MUST EXIST FOR EDIT
-  if (isEdit && !release._id) {
-    alert("Release ID missing. Cannot publish.");
-    return;
-  }
-
-  const existing = JSON.parse(localStorage.getItem("releases")) || [];
-
-  // ✅ SINGLE SOURCE OF TRUTH
-  const fullRelease = {
-    _id: release._id || crypto.randomUUID(),
-
-    // ───── RELEASE ─────
-    title: release.title,
-    subtitle: release.subtitle,
-    genre: release.genre,
-    subgenre: release.subgenre,
-    label: release.label,
-    upc: release.upc,
-    originalReleaseDate: release.originalReleaseDate,
-    digitalReleaseDate: release.digitalReleaseDate,
-    productionYear: release.productionYear,
-    copyrightText: release.copyrightText,
-    coverKey: release.coverKey,
-
-    //coverPreview: release.coverPreview,
-
-    // ───── TRACK ─────
-    trackTitle: track.trackTitle,
-    artist: track.primaryArtist,
-    isrc: track.isrc,
-    publisher: track.publisher,
-    language: track.language,
-    writers: track.writers || [],
-    composers: track.composers || [],
-    musicDirectors: track.musicDirectors || [],
-    producers: track.producers || [],
-
-    // ───── STORES ─────
-    stores,
-
-    // ───── META ─────
-    status: "Pending",
-    updatedAt: new Date().toISOString(),
-  };
-
-  let updatedReleases;
-
-  if (isEdit) {
-    // 🔁 SAFE UPDATE (preserves dashboard fields)
-    updatedReleases = existing.map((r) =>
-      r._id === fullRelease._id
-        ? { ...r, ...fullRelease }
-        : r
-    );
-  } else {
-    // ➕ CREATE
-    updatedReleases = [fullRelease, ...existing];
-  }
-
-  // ✅ SAVE
-  localStorage.setItem("releases", JSON.stringify(updatedReleases));
-
-  // ✅ CLEANUP
-  localStorage.removeItem("releaseDraft");
-  localStorage.removeItem("trackDraft");
-  localStorage.removeItem("storeDraft");
-  localStorage.removeItem("releaseMode");
-
-  navigate("/releases/myRelease");
-}}
-
-
-
-
+  onClick={handlePublish}
 >
   Publish
 </button>
