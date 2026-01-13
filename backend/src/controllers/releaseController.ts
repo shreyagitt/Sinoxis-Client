@@ -68,9 +68,18 @@ export const deleteReleaseByAdmin = asyncHandler(
       });
     }
 
-    /* ===== DELETE COVER FROM CLOUDINARY ===== */
+    /* ===== DELETE COVER FROM CLOUDINARY (SAFE) ===== */
     if (release.coverImageId) {
-      await cloudinary.uploader.destroy(release.coverImageId);
+      try {
+        await cloudinary.uploader.destroy(release.coverImageId);
+      } catch (err) {
+        console.error(
+          "Cloudinary delete failed:",
+          release.coverImageId,
+          err
+        );
+        // DO NOT throw — continue deletion
+      }
     }
 
     await release.deleteOne();
