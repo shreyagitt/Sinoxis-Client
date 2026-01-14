@@ -272,7 +272,7 @@ innerRef={formikRef}
       "Rock",
       "Worldwide",
     ]}
-    isView={isView}
+      disabled={isView}   // ✅ FIX
     error={touched.genre && errors.genre}
   />
 
@@ -288,7 +288,7 @@ innerRef={formikRef}
       "Pop",
       "Rock",
     ]}
-    isView={isView}
+      disabled={isView}   // ✅ FIX
     error={touched.subgenre && errors.subgenre}
   />
 
@@ -303,14 +303,14 @@ innerRef={formikRef}
   <DateField
     theme={theme}
     name="originalReleaseDate"
-    isView={isView}
+      disabled={isView}   // ✅ FIX
     error={touched.originalReleaseDate && errors.originalReleaseDate}
   />
 
   <DateField
     theme={theme}
     name="digitalReleaseDate"
-    isView={isView}
+      disabled={isView}   // ✅ FIX
     error={touched.digitalReleaseDate && errors.digitalReleaseDate}
   />
 
