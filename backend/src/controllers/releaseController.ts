@@ -23,13 +23,15 @@ export const updateReleaseStatus = asyncHandler(
   async (req: Request, res: Response) => {
     const { status } = req.body;
 
-    const allowedStatuses = [
-      "Pending",
-      "Approved",
-      "Rejected",
-      "Inactive",
-      "Action Required",
-    ];
+  const allowedStatuses = [
+  "Pending",
+  "Approved",
+  "Rejected",
+  "Inactive",
+  "Unfinished",
+  "Action Required",
+];
+
 
     if (!allowedStatuses.includes(status)) {
       return res.status(400).json({
