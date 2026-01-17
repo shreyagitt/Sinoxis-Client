@@ -38,20 +38,38 @@ useEffect(() => {
     if (img) setCoverImage(img);
   }
 
-  // ✅ TRACKS — always array
+  // ✅ TRACK (SINGLE SOURCE OF TRUTH)
   if (t?.tracks?.length) {
-    setTrack(t.tracks[0]);
+    const first = { ...t.tracks[0] };
+
+    if (first.audioKey) {
+      const base64 = localStorage.getItem(first.audioKey);
+      if (base64) {
+        fetch(base64)
+          .then((res) => res.blob())
+          .then((blob) => {
+            setTrack({
+              ...first,
+              audioUrl: URL.createObjectURL(blob),
+            });
+          });
+        return;
+      }
+    }
+
+    setTrack(first);
   } else {
     setTrack(null);
   }
 
-  // ✅ STORES — normalized
+  // ✅ STORES
   if (Array.isArray(s?.stores)) {
     setStores(s.stores);
   } else {
     setStores([]);
   }
 }, [navigate]);
+
 
 const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
@@ -100,6 +118,9 @@ const handlePublish = async () => {
           composers: track.composers || [],
           musicDirectors: track.musicDirectors || [],
           producers: track.producers || [],
+          lyrics: track.lyrics || "",          // ✅ ADD
+      audioName: track.audioName || "",    // ✅ ADD
+      audioUrl: track.audioUrl || "", 
         },
       ])
     );
@@ -121,6 +142,16 @@ const handlePublish = async () => {
         formData.append("cover", blob);
       }
     }
+
+    // ───── AUDIO FILE ─────
+if (track.audioKey) {
+  const base64 = localStorage.getItem(track.audioKey);
+  if (base64) {
+    const audioBlob = await fetch(base64).then((r) => r.blob());
+    formData.append("audio", audioBlob, track.audioName);
+  }
+}
+
 
     // ───── META ─────
     formData.append("currentStep", "submission");
@@ -293,6 +324,16 @@ const handlePublish = async () => {
     <li>
       <b>Producers:</b> {track.producers?.join(", ") || "—"}
     </li>
+
+  {track.audioUrl ? (
+  <audio controls src={track.audioUrl} />
+) : track.audioName ? (
+  <p><b>Audio File:</b> {track.audioName}</p>
+) : (
+  <p>—</p>
+)}
+
+
   </ul>
 ) : (
   <p className="text-red-400 text-sm">Track details incomplete</p>

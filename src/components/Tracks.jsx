@@ -20,14 +20,37 @@ const isEdit = mode === "edit";
   // ✅ DECLARE STATE FIRST
   const [savedDraft, setSavedDraft] = useState(null);
   const [showLyrics, setShowLyrics] = useState(false);
+  const [audioFile, setAudioFile] = useState(null);
+const [lyrics, setLyrics] = useState("");
+
 
   // ✅ LOAD FROM localStorage
-  useEffect(() => {
+useEffect(() => {
+  const mode = localStorage.getItem("releaseMode") || "create";
+
+  if (mode === "view" || mode === "edit") {
     const stored = localStorage.getItem("trackDraft");
-    if (stored) {
-      setSavedDraft(JSON.parse(stored));
-    }
-  }, []);
+    if (!stored) return;
+
+    const parsed = JSON.parse(stored);
+    const first = parsed.tracks?.[0];
+    if (!first) return;
+
+    setSavedDraft(parsed);
+    setLyrics(first.lyrics || "");
+    setAudioFile(first.audioName ? { name: first.audioName } : null);
+  } else {
+    // ✅ CREATE MODE — RESET
+    setSavedDraft(null);
+    setLyrics("");
+    setAudioFile(null);
+  }
+}, []);
+
+
+
+
+
 
  const firstTrack = savedDraft?.tracks?.[0] || {};
 
@@ -155,13 +178,59 @@ const trackSchema = Yup.object({
 >
 
           <MusicIcon />
-          <p className="font-medium mt-2">Drag & drop audio</p>
+         <p className="font-medium mt-2">
+  {audioFile
+    ? isView
+      ? `Uploaded Audio: ${audioFile.name}`
+      : audioFile.name
+    : isView
+      ? "No audio uploaded"
+      : "Drag & drop audio"}
+</p>
+
+
           <p className="text-sm text-gray-400 opacity-70">MP3 / WAV only</p>
-          <input
-            type="file"
-            accept=".mp3,.wav"
-            className="absolute inset-0 opacity-0 cursor-pointer"
-          />
+         <input
+  type="file"
+  accept=".mp3,.wav"
+  disabled={isView}
+  className="absolute inset-0 opacity-0 cursor-pointer"
+  onChange={(e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  setAudioFile(file);
+
+  const audioKey = `audio_${Date.now()}`;
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    localStorage.setItem(audioKey, reader.result);
+    
+    const existing = JSON.parse(localStorage.getItem("trackDraft")) || {};
+    const tracks = existing.tracks || [{}];
+
+    tracks[0] = {
+      ...tracks[0],
+      audioName: file.name,
+      audioKey,            // ✅ IMPORTANT
+    };
+
+    localStorage.setItem(
+      "trackDraft",
+      JSON.stringify({
+        ...existing,
+        tracks,
+      })
+    );
+  };
+
+  reader.readAsDataURL(file);
+}}
+
+/>
+
+
         </div>
 
         {/* FORM */}
@@ -180,26 +249,26 @@ const trackSchema = Yup.object({
     return;
   }
 
-  const trackPayload = {
-    trackTitle: values.trackTitle,
-    primaryArtist: values.primaryArtist,
-    publisher: values.publisher,
-    language: values.language,
-    isrc: values.isrc,
-    writers: values.writers,
-    composers: values.composers,
-    musicDirectors: values.musicDirectors,
-    producers: values.producers,
-  };
+const stored = JSON.parse(localStorage.getItem("trackDraft")) || {};
+const storedTrack = stored.tracks?.[0] || {};
 
-  localStorage.setItem(
-    "trackDraft",
-    JSON.stringify({
-      releaseId: releaseDraft._id,
-      tracks: [trackPayload],   // ✅ API shape
-      updatedAt: new Date().toISOString(),
-    })
-  );
+const trackPayload = {
+  ...storedTrack,    // ✅ ALWAYS HAS audioKey
+  ...values,
+  lyrics,
+};
+
+
+localStorage.setItem(
+  "trackDraft",
+  JSON.stringify({
+    ...stored,
+    releaseId: releaseDraft._id,
+    tracks: [trackPayload],
+    updatedAt: new Date().toISOString(),
+  })
+);
+
 
   navigate("/stores");
 }}
@@ -282,7 +351,7 @@ const trackSchema = Yup.object({
 
         {/* ADD LYRICS */}
 <div className="mt-6 flex justify-start">
-  {!isView && (
+  
         <button
           type="button"
           onClick={() => setShowLyrics(true)}
@@ -294,9 +363,13 @@ const trackSchema = Yup.object({
             }
           `}
         >
-          Add Lyrics
+         {isView
+      ? "View Lyrics"
+      : lyrics
+      ? "Edit Lyrics"
+      : "Add Lyrics"}
         </button>
-        )}
+        
       </div>
 
 
@@ -324,23 +397,21 @@ const trackSchema = Yup.object({
     const existing =
   JSON.parse(localStorage.getItem("trackDraft")) || {};
 
+const stored = JSON.parse(localStorage.getItem("trackDraft")) || {};
+const storedTrack = stored.tracks?.[0] || {};
+
+
 const trackPayload = {
-  trackTitle: values.trackTitle,
-  primaryArtist: values.primaryArtist,
-  publisher: values.publisher,
-  language: values.language,
-  isrc: values.isrc,
-  writers: values.writers,
-  composers: values.composers,
-  musicDirectors: values.musicDirectors,
-  producers: values.producers,
+  ...storedTrack,   // ✅ preserves audioKey
+  ...values,
+  lyrics,
 };
 
 localStorage.setItem(
   "trackDraft",
   JSON.stringify({
-    ...existing,
-    tracks: [trackPayload],   // ✅ DO NOT FLATTEN
+    ...stored,
+    tracks: [trackPayload],
     updatedAt: new Date().toISOString(),
   })
 );
@@ -360,13 +431,19 @@ alert("Draft saved successfully");
 </>
 )}
 
-            <button
-     type="submit"       
-  onClick={() => navigate("/stores")}
-  className="px-7 py-2 rounded-lg bg-sky-500 text-[#020726] font-medium hover:bg-sky-400 transition"
+
+           <button
+  type="submit"
+  onSubmit={(values) => {
+  console.log("SUBMITTED", values);
+  navigate("/stores");
+}}
+
+  className="px-7 py-2 rounded-lg bg-sky-500 text-[#020726]"
 >
   Next
 </button>
+
 
           </div>
        
@@ -380,7 +457,7 @@ alert("Draft saved successfully");
 {showLyrics && (
   <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
     <div
-      className={`w-full max-w-lg rounded-2xl p-6 transition
+      className={`w-full max-w-lg rounded-2xl p-6
         ${
           theme === "dark"
             ? "bg-[#060b2e] text-white"
@@ -389,27 +466,29 @@ alert("Draft saved successfully");
       `}
     >
       <h3 className="text-lg font-medium text-sky-400 mb-4">
-        Add Lyrics
+        {isView ? "Lyrics" : lyrics ? "Edit Lyrics" : "Add Lyrics"}
       </h3>
 
-      {/* TEXTAREA */}
       <textarea
-        rows={6}
-        placeholder="Enter lyrics here..."
+        rows={8}
+        value={lyrics}
+        readOnly={isView}
+        onChange={(e) => !isView && setLyrics(e.target.value)}
+        placeholder={isView ? "" : "Enter lyrics here..."}
         className={`w-full rounded-xl p-4 outline-none resize-none
           ${
             theme === "dark"
-              ? "bg-[#2a2f4d] text-white placeholder-gray-300 border border-white/10"
-              : "bg-gray-100 text-[#020726] placeholder-gray-500 border border-gray-300"
+              ? "bg-[#2a2f4d] text-white border border-white/10"
+              : "bg-gray-100 text-[#020726] border border-gray-300"
           }
+          ${isView ? "opacity-80 cursor-not-allowed" : ""}
         `}
       />
 
-      {/* ACTIONS */}
       <div className="flex justify-end gap-3 mt-4">
         <button
           onClick={() => setShowLyrics(false)}
-          className={`px-4 py-2 rounded-lg transition
+          className={`px-4 py-2 rounded-lg
             ${
               theme === "dark"
                 ? "bg-white/20 hover:bg-white/30"
@@ -417,23 +496,45 @@ alert("Draft saved successfully");
             }
           `}
         >
-          Cancel
+          Close
         </button>
 
-        <button
-          onClick={() => {
-            setShowLyrics(false);
-            alert("Lyrics saved");
-          }}
-          className="px-4 py-2 rounded-lg bg-sky-500 text-[#020726] font-medium hover:bg-sky-400 transition"
-        >
-          Save
-        </button>
+        {!isView && (
+          <button
+            onClick={() => {
+              const existing =
+                JSON.parse(localStorage.getItem("trackDraft")) || {};
+
+              const stored = JSON.parse(localStorage.getItem("trackDraft")) || {};
+const tracks = stored.tracks || [{}];
+
+
+              tracks[0] = {
+                ...tracks[0],
+                lyrics,
+              };
+
+              localStorage.setItem(
+                "trackDraft",
+                JSON.stringify({
+                  ...existing,
+                  tracks,
+                  updatedAt: new Date().toISOString(),
+                })
+              );
+
+              setShowLyrics(false);
+            }}
+            className="px-4 py-2 rounded-lg bg-sky-500 text-[#020726] font-medium hover:bg-sky-400"
+          >
+            Save
+          </button>
+        )}
       </div>
-      
     </div>
   </div>
 )}
+
 
 
     </div>
