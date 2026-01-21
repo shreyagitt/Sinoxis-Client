@@ -178,115 +178,12 @@ useEffect(() => {
         </div>
       </div>
 
-      {/* STAT CARDS */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
-        <StatCard title="Total Users" value="44,278" percent="5% Last week" color="cyan" theme={theme} />
-        <StatCard title="Total Profit" value="67,987" percent="5% Last week" color="pink" theme={theme} />
-        <StatCard title="Total Expenses" value="$76,965" percent="0.9% Last 9 days" color="green" theme={theme} />
-        <StatCard title="Total Cost" value="$59,765" percent="0.6% Last year" color="yellow" theme={theme} />
-      </div>
+     
 
-      {/* DELIVERIES TABLE */}
-      <div className={`p-6 rounded-xl border mb-12 ${cardBg}`}>
-        <h3 className="text-xl font-semibold mb-6">Deliveries</h3>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[600px]">
-            <thead className={`${theme === "dark" ? "border-white/10" : "border-gray-200"} border-b`}>
-              <tr>
-                <th className="p-3 text-left">Particular</th>
-                <th className="p-3 text-left">Percentage</th>
-                <th className="p-3 text-right">Total Amount</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              <tr className={`border-b ${theme === "dark" ? "border-white/10" : "border-gray-200"}`}>
-                <td className="p-3 text-teal-400 font-medium">On Time Delivery</td>
-                <td className="p-3">
-                  <div className="flex items-center">
-                    <div className="h-2 bg-teal-400 w-4/5 rounded-full"></div>
-                    <span className="ml-2">80%</span>
-                  </div>
-                </td>
-                <td className="p-3 text-right">$45,452.23</td>
-              </tr>
-
-              <tr>
-                <td className="p-3 text-yellow-400 font-medium">Delayed Delivery</td>
-                <td className="p-3">
-                  <div className="flex items-center">
-                    <div className="h-2 bg-yellow-400 w-1/3 rounded-full"></div>
-                    <span className="ml-2">15%</span>
-                  </div>
-                </td>
-                <td className="p-3 text-right">$15,256.23</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* TOP STREAMING SONGS TABLE */}
-      <div className={`p-6 rounded-xl border ${cardBg}`}>
-        <h3 className="text-xl font-semibold mb-6">Top Streaming Songs</h3>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[800px]">
-            <thead className={`${theme === "dark" ? "border-white/10" : "border-gray-200"} border-b uppercase`}>
-              <tr>
-                <th className="p-3 text-left">Track</th>
-                <th className="p-3 text-left">Artist</th>
-                <th className="p-3 text-left">Streams</th>
-                <th className="p-3 text-left">Status</th>
-                <th className="p-3 text-center">Actions</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {songs.map((song, i) => (
-                <tr key={i} className={`${theme === "dark" ? "border-white/5" : "border-gray-200"} border-b`}>
-                  <td className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="bg-[#29B6F6] w-10 h-10 rounded-full flex items-center justify-center text-white font-bold">
-                        MG
-                      </div>
-                      <div>
-                        <p className="font-medium">{song.title}</p>
-                        <p className="text-xs">{`Released: ${song.release}`}</p>
-                      </div>
-                    </div>
-                  </td>
-
-                  <td className="p-4">
-                    <div className="flex items-center gap-2">
-                      <FaUser className="text-[#29B6F6]" />
-                      {song.artist}
-                    </div>
-                  </td>
-
-                  <td className="p-4 text-blue-400 font-medium">{song.streams}</td>
-
-                  <td className="p-4">
-                    <span className={`px-4 py-1 rounded-full text-xs ${statusBg[song.badge]}`}>
-                      {song.status}
-                    </span>
-                  </td>
-
-                  <td className="p-4 text-center flex justify-center gap-4">
-                    <button className="text-blue-400 hover:text-blue-300">
-                      <FaEdit />
-                    </button>
-                    <button className="text-red-400 hover:text-red-300">
-                      <FaTrash />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      
+          
+          
+        
 
     </div>
   );
