@@ -22,52 +22,62 @@ const [stores, setStores] = useState([]);
 const [coverImage, setCoverImage] = useState(null);
  
 useEffect(() => {
-  const r = JSON.parse(localStorage.getItem("releaseDraft"));
-  const t = JSON.parse(localStorage.getItem("trackDraft"));
-  const s = JSON.parse(localStorage.getItem("storeDraft"));
+  let audioUrl;
 
-  if (!r) {
-    navigate("/releases/myRelease");
-    return;
-  }
+  const hydrate = async () => {
+    const r = JSON.parse(localStorage.getItem("releaseDraft"));
+    const t = JSON.parse(localStorage.getItem("trackDraft"));
+    const s = JSON.parse(localStorage.getItem("storeDraft"));
 
-  setRelease(r);
-
-  if (r.coverKey) {
-    const img = localStorage.getItem(r.coverKey);
-    if (img) setCoverImage(img);
-  }
-
-  // ✅ TRACK (SINGLE SOURCE OF TRUTH)
-  if (t?.tracks?.length) {
-    const first = { ...t.tracks[0] };
-
-    if (first.audioKey) {
-      const base64 = localStorage.getItem(first.audioKey);
-      if (base64) {
-        fetch(base64)
-          .then((res) => res.blob())
-          .then((blob) => {
-            setTrack({
-              ...first,
-              audioUrl: URL.createObjectURL(blob),
-            });
-          });
-        return;
-      }
+    if (!r) {
+      navigate("/releases/myRelease");
+      return;
     }
 
-    setTrack(first);
-  } else {
-    setTrack(null);
-  }
+    setRelease(r);
 
-  // ✅ STORES
-  if (Array.isArray(s?.stores)) {
-    setStores(s.stores);
-  } else {
-    setStores([]);
+    // ───── COVER IMAGE ─────
+    if (r.coverKey) {
+      const img = localStorage.getItem(r.coverKey);
+      if (img) setCoverImage(img);
+    }
+
+    // ───── TRACK (SINGLE SOURCE OF TRUTH) ─────
+    if (t?.tracks?.length) {
+      const first = t.tracks[0];
+
+     const hydratedTrack = {
+  ...first,
+  audioUrl: first.audioUrl || null,   // ✅ KEEP CLOUDINARY URL
+};
+
+if (!hydratedTrack.audioUrl && first.audioKey) {
+  const blob = await loadAudio(first.audioKey);
+  if (blob) {
+    audioUrl = URL.createObjectURL(blob);
+    hydratedTrack.audioUrl = audioUrl;
   }
+}
+
+
+      setTrack(hydratedTrack);
+    } else {
+      setTrack(null);
+    }
+
+    // ───── STORES ─────
+    if (Array.isArray(s?.stores)) {
+      setStores(s.stores);
+    } else {
+      setStores([]);
+    }
+  };
+
+  hydrate();
+
+  return () => {
+    if (audioUrl) URL.revokeObjectURL(audioUrl);
+  };
 }, [navigate]);
 
 
@@ -120,10 +130,29 @@ const handlePublish = async () => {
           producers: track.producers || [],
           lyrics: track.lyrics || "",          // ✅ ADD
       audioName: track.audioName || "",    // ✅ ADD
-      audioUrl: track.audioUrl || "", 
+          audioKey: track.audioKey || "",
+          audioUrl: track.audioUrl || "",
+                // ✅ ADD
         },
       ])
     );
+
+    // ───── AUDIO FILE ─────
+// ───── AUDIO FILE ─────
+if (track.audioKey) {
+  const blob = await loadAudio(track.audioKey);
+  if (!blob) {
+    toast.error("Audio file missing. Please re-upload.");
+    return;
+  }
+  formData.append("audio", blob, track.audioName);
+}
+
+// ❌ BLOCK ONLY IF NEITHER EXISTS
+if (!track.audioKey && !track.audioUrl) {
+  toast.error("Please upload the audio file before publishing.");
+  return;
+}
 
     // ───── STORES ─────
     formData.append(
@@ -144,13 +173,9 @@ const handlePublish = async () => {
     }
 
     // ───── AUDIO FILE ─────
-if (track.audioKey) {
-  const base64 = localStorage.getItem(track.audioKey);
-  if (base64) {
-    const audioBlob = await fetch(base64).then((r) => r.blob());
-    formData.append("audio", audioBlob, track.audioName);
-  }
-}
+
+
+
 
 
     // ───── META ─────
@@ -494,4 +519,33 @@ function Section({ title, open, onClick, children }) {
       )}
     </div>
   );
+}
+
+
+function openAudioDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open("AudioDraftDB", 1);
+
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains("audios")) {
+        db.createObjectStore("audios");
+      }
+    };
+
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function loadAudio(key) {
+  const db = await openAudioDB();
+  const tx = db.transaction("audios", "readonly");
+  const store = tx.objectStore("audios");
+
+  return new Promise((resolve) => {
+    const req = store.get(key);
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = () => resolve(null);
+  });
 }

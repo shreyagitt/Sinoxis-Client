@@ -291,6 +291,20 @@ useEffect(() => {
     })
   );
 
+const trackDraft =
+  JSON.parse(localStorage.getItem("trackDraft")) || {};
+
+if (
+  !trackDraft?.tracks?.[0]?.audioKey &&
+  !trackDraft?.tracks?.[0]?.audioUrl
+) {
+
+  alert("Audio file missing. Please re-upload your track.");
+  return;
+}
+
+
+
   navigate("/submission");
 }}
 

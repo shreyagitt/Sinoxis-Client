@@ -26,26 +26,81 @@ const [lyrics, setLyrics] = useState("");
 
   // ✅ LOAD FROM localStorage
 useEffect(() => {
-  const mode = localStorage.getItem("releaseMode") || "create";
+  let objectUrl;
 
-  if (mode === "view" || mode === "edit") {
+  const hydrate = async () => {
     const stored = localStorage.getItem("trackDraft");
-    if (!stored) return;
+    if (!stored) {
+      setSavedDraft(null);
+      setLyrics("");
+      setAudioFile(null);
+      return;
+    }
 
     const parsed = JSON.parse(stored);
     const first = parsed.tracks?.[0];
-    if (!first) return;
 
     setSavedDraft(parsed);
-    setLyrics(first.lyrics || "");
-    setAudioFile(first.audioName ? { name: first.audioName } : null);
-  } else {
-    // ✅ CREATE MODE — RESET
-    setSavedDraft(null);
-    setLyrics("");
+    setLyrics(first?.lyrics || "");
+
+    // ✅ PRIORITY 1: Cloudinary audio (Edit/View)
+    if (first?.audioUrl) {
+  const displayName =
+    first.audioFileId
+      ?.split("/")
+      .pop()
+      ?.replace(/^\d+-/, "")
+      ?.replace(/%20/g, " ")
+    || first.audioUrl
+    || first.audioName
+    || "Uploaded Audio";
+
+  setAudioFile({
+    name: displayName,
+    dataUrl: first.audioUrl,
+  });
+  return;
+}
+
+
+    // ✅ PRIORITY 2: IndexedDB audio (Create flow)
+    if (first?.audioKey) {
+      const blob = await loadAudio(first.audioKey);
+      if (blob) {
+        objectUrl = URL.createObjectURL(blob);
+   const displayName =
+  first.audioName ||
+  first.audioFileId
+    ?.split("/")
+    .pop()
+    ?.replace(/^\d+-/, "")
+    ?.replace(/%20/g, " ")
+  || "Uploaded Audio";
+
+setAudioFile({
+  name: displayName,
+  dataUrl: objectUrl,
+});
+
+
+      } else {
+        setAudioFile(null);
+      }
+      return;
+    }
+
     setAudioFile(null);
-  }
+  };
+
+  hydrate();
+
+  return () => {
+    if (objectUrl) URL.revokeObjectURL(objectUrl);
+  };
 }, []);
+
+
+
 
 
 
@@ -178,15 +233,16 @@ const trackSchema = Yup.object({
 >
 
           <MusicIcon />
-         <p className="font-medium mt-2">
+     <p className="font-medium mt-2">
   {audioFile
     ? isView
-      ? `Uploaded Audio: ${audioFile.name}`
+      ? `${audioFile.name}`
       : audioFile.name
     : isView
-      ? "No audio uploaded"
-      : "Drag & drop audio"}
+    ? "No audio uploaded"
+    : "Drag & drop audio"}
 </p>
+
 
 
           <p className="text-sm text-gray-400 opacity-70">MP3 / WAV only</p>
@@ -195,163 +251,176 @@ const trackSchema = Yup.object({
   accept=".mp3,.wav"
   disabled={isView}
   className="absolute inset-0 opacity-0 cursor-pointer"
-  onChange={(e) => {
+  onChange={async (e) => {
   const file = e.target.files[0];
   if (!file) return;
 
-  setAudioFile(file);
-
   const audioKey = `audio_${Date.now()}`;
-  const reader = new FileReader();
+  await saveAudio(audioKey, file);
 
-  reader.onload = () => {
-    localStorage.setItem(audioKey, reader.result);
-    
-    const existing = JSON.parse(localStorage.getItem("trackDraft")) || {};
-    const tracks = existing.tracks || [{}];
+  const existing =
+    JSON.parse(localStorage.getItem("trackDraft")) || {};
+  const tracks = existing.tracks || [{}];
 
-    tracks[0] = {
-      ...tracks[0],
-      audioName: file.name,
-      audioKey,            // ✅ IMPORTANT
-    };
-
-    localStorage.setItem(
-      "trackDraft",
-      JSON.stringify({
-        ...existing,
-        tracks,
-      })
-    );
+  tracks[0] = {
+    ...tracks[0],
+    audioName: file.name,
+    audioKey,
+    audioUrl: null,
+    audioFileId: null,
   };
 
-  reader.readAsDataURL(file);
+  localStorage.setItem(
+    "trackDraft",
+    JSON.stringify({ ...existing, tracks })
+  );
+
+  const objectUrl = URL.createObjectURL(file);
+
+ setAudioFile({
+  name: file.name,   // still local name for draft
+  dataUrl: objectUrl,
+});
+
 }}
 
+
 />
+
 
 
         </div>
 
         {/* FORM */}
         <Formik
-        enableReinitialize
+  enableReinitialize
   initialValues={initialValues}
   validationSchema={trackSchema}
   onSubmit={(values) => {
-  if (isView) return;
-
-  const releaseDraft =
-    JSON.parse(localStorage.getItem("releaseDraft")) || {};
-
-  if (!releaseDraft._id) {
-    alert("Release context missing");
+    if (isView) {
+    navigate("/stores");   // ✅ allow forward navigation
     return;
   }
 
-const stored = JSON.parse(localStorage.getItem("trackDraft")) || {};
-const storedTrack = stored.tracks?.[0] || {};
+    const releaseDraft =
+      JSON.parse(localStorage.getItem("releaseDraft")) || {};
+
+    if (!releaseDraft._id) {
+      alert("Release context missing");
+      return;
+    }
+
+    const stored = JSON.parse(localStorage.getItem("trackDraft")) || {};
+    const storedTrack = stored.tracks?.[0] || {};
 
 const trackPayload = {
-  ...storedTrack,    // ✅ ALWAYS HAS audioKey
+  ...storedTrack,
   ...values,
   lyrics,
+  audioKey: storedTrack.audioKey || null,
+audioName: storedTrack.audioName || null,
+audioUrl: storedTrack.audioUrl || null,   // ✅ ADD
+audioFileId: storedTrack.audioFileId || null, // ✅ ADD
+
 };
 
 
-localStorage.setItem(
-  "trackDraft",
-  JSON.stringify({
-    ...stored,
-    releaseId: releaseDraft._id,
-    tracks: [trackPayload],
-    updatedAt: new Date().toISOString(),
-  })
-);
 
 
-  navigate("/stores");
-}}
+    localStorage.setItem(
+      "trackDraft",
+      JSON.stringify({
+        ...stored,
+        releaseId: releaseDraft._id,
+        tracks: [trackPayload],
+        updatedAt: new Date().toISOString(),
+      })
+    );
 
-
+    navigate("/stores");
+  }}
 >
   {({ values, errors, touched, setFieldValue }) => (
-    <>
     <Form className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mt-12">
 
+      {/* INPUTS */}
+      <Input
+        name="trackTitle"
+        placeholder="Track Title *"
+        disabled={isView}
+        error={touched.trackTitle && errors.trackTitle}
+      />
 
+      <Input
+        name="primaryArtist"
+        placeholder="Primary Artist *"
+        disabled={isView}
+        error={touched.primaryArtist && errors.primaryArtist}
+      />
 
-          <Input  name="trackTitle"
-  placeholder="Track Title *"
-  disabled={isView}
-  error={touched.trackTitle && errors.trackTitle}
-    />
-          <Input name="primaryArtist"
-  placeholder="Primary Artist *"
-  disabled={isView}
-  error={touched.primaryArtist && errors.primaryArtist}
-   />
+      <MultiInput
+        name="writers"
+        placeholder="Writers *"
+        values={values.writers}
+        setFieldValue={setFieldValue}
+        disabled={isView}
+        error={touched.writers && errors.writers}
+        options={["Lyrics 1", "Lyrics 2", "Composer Writer", "Traditional"]}
+      />
 
-         <MultiInput
-  name="writers"
-  placeholder="Writers *"
-  values={values.writers}
-  setFieldValue={setFieldValue}
-  disabled={isView}
-  error={touched.writers && errors.writers}
-  options={["Lyrics 1", "Lyrics 2", "Composer Writer", "Traditional"]}
-/>
+      <MultiInput
+        name="composers"
+        placeholder="Composers *"
+        values={values.composers}
+        setFieldValue={setFieldValue}
+        disabled={isView}
+        error={touched.composers && errors.composers}
+        options={["Composer 1", "Composer 2", "Traditional"]}
+      />
 
+      <MultiInput
+        name="musicDirectors"
+        placeholder="Music Directors *"
+        values={values.musicDirectors}
+        setFieldValue={setFieldValue}
+        disabled={isView}
+        error={touched.musicDirectors && errors.musicDirectors}
+        options={["Director 1", "Director 2"]}
+      />
 
-<MultiInput
-  name="composers"
-  placeholder="Composers *"
-  values={values.composers}
-  setFieldValue={setFieldValue}
-  disabled={isView}
-  error={touched.composers && errors.composers}
-  options={["Composer 1", "Composer 2", "Traditional"]}
-/>
+      <MultiInput
+        name="producers"
+        placeholder="Producers *"
+        values={values.producers}
+        setFieldValue={setFieldValue}
+        disabled={isView}
+        error={touched.producers && errors.producers}
+        options={["Producer 1", "Producer 2"]}
+      />
 
-<MultiInput
-  name="musicDirectors"
-  placeholder="Music Directors *"
-  values={values.musicDirectors}
-  setFieldValue={setFieldValue}
-  disabled={isView}
-  error={touched.musicDirectors && errors.musicDirectors}
-  options={["Director 1", "Director 2"]}
-/>
+      <Input
+        name="publisher"
+        placeholder="Publisher *"
+        disabled={isView}
+        error={touched.publisher && errors.publisher}
+      />
 
-<MultiInput
-  name="producers"
-  placeholder="Producers *"
-  values={values.producers}
-  setFieldValue={setFieldValue}
-  disabled={isView}
-  error={touched.producers && errors.producers}
-  options={["Producer 1", "Producer 2"]}
-/>
+      <Input
+        name="language"
+        placeholder="Language *"
+        disabled={isView}
+        error={touched.language && errors.language}
+      />
 
-          <Input name="publisher"
-  placeholder="Publisher *"
-  disabled={isView}
-  error={touched.publisher && errors.publisher} />
+      <Input
+        name="isrc"
+        placeholder="ISRC *"
+        disabled={isView}
+        error={touched.isrc && errors.isrc}
+      />
 
-          <Input name="language"
-  placeholder="Language *"
-  disabled={isView}
-  error={touched.language && errors.language} />
-          <Input 
-  name="isrc"
-  placeholder="ISRC *"
-  disabled={isView}
-  error={touched.isrc && errors.isrc}/>
-   </Form>
-
-        {/* ADD LYRICS */}
-<div className="mt-6 flex justify-start">
-  
+      {/* ADD LYRICS */}
+      <div className="md:col-span-2 mt-6">
         <button
           type="button"
           onClick={() => setShowLyrics(true)}
@@ -363,49 +432,52 @@ localStorage.setItem(
             }
           `}
         >
-         {isView
-      ? "View Lyrics"
-      : lyrics
-      ? "Edit Lyrics"
-      : "Add Lyrics"}
+          {isView
+            ? "View Lyrics"
+            : lyrics
+            ? "Edit Lyrics"
+            : "Add Lyrics"}
         </button>
-        
       </div>
 
+      {/* ACTION BUTTONS */}
+      <div className="md:col-span-2 relative flex items-center mt-12">
 
-        {/* ACTION BUTTONS */}
-<div className="flex flex-col sm:flex-row justify-between gap-4 mt-12">
-         <button
-         type="button"
-  onClick={() => navigate("/releases/create")}
-  className={`px-6 py-2 rounded-lg transition
-    ${
-      theme === "dark"
-        ? "bg-white/20 hover:bg-white/30"
-        : "bg-gray-200 hover:bg-gray-300"
-    }
-  `}
->
-  Back
-</button>
+        {/* BACK */}
+        <button
+          type="button"
+          onClick={() => navigate("/releases/create")}
+          className={`h-[46px] px-8 rounded-xl transition
+            ${
+              theme === "dark"
+                ? "bg-white/20 hover:bg-white/30"
+                : "bg-gray-200 hover:bg-gray-300"
+            }
+          `}
+        >
+          Back
+        </button>
 
-{!isView && (
-    <>
-         <button
-  type="button"
-  onClick={() => {
-    const existing =
-  JSON.parse(localStorage.getItem("trackDraft")) || {};
-
-const stored = JSON.parse(localStorage.getItem("trackDraft")) || {};
+        {/* SAVE */}
+        {!isView && (
+          <button
+            type="button"
+            onClick={() => {
+              const stored = JSON.parse(localStorage.getItem("trackDraft")) || {};
 const storedTrack = stored.tracks?.[0] || {};
 
-
 const trackPayload = {
-  ...storedTrack,   // ✅ preserves audioKey
+  ...storedTrack,
   ...values,
   lyrics,
+  audioKey: storedTrack.audioKey || null,
+audioName: storedTrack.audioName || null,
+audioUrl: storedTrack.audioUrl || null,   // ✅ ADD
+audioFileId: storedTrack.audioFileId || null, // ✅ ADD
+
 };
+
+
 
 localStorage.setItem(
   "trackDraft",
@@ -416,40 +488,36 @@ localStorage.setItem(
   })
 );
 
-alert("Draft saved successfully");
-  }}
-  className={`px-6 py-2 rounded-lg border transition
-    ${
-      theme === "dark"
-        ? "border-white/40 hover:bg-white/10"
-        : "border-gray-400 hover:bg-gray-200"
-    }
-  `}
->
-  Save
-</button>
-</>
-)}
+              alert("Draft saved successfully");
+            }}
+            className={`absolute left-1/2 -translate-x-1/2
+              h-[46px] px-10 rounded-xl border transition
+              ${
+                theme === "dark"
+                  ? "border-white/40 hover:bg-white/10"
+                  : "border-gray-400 hover:bg-gray-200"
+              }
+            `}
+          >
+            Save
+          </button>
+        )}
 
+        {/* NEXT */}
+        <button
+          type="submit"
+          
+          className="ml-auto h-[46px] px-10 rounded-xl bg-sky-500 text-[#020726] transition hover:bg-sky-400"
+        >
+          Next
+        </button>
 
-           <button
-  type="submit"
-  onSubmit={(values) => {
-  console.log("SUBMITTED", values);
-  navigate("/stores");
-}}
+      </div>
 
-  className="px-7 py-2 rounded-lg bg-sky-500 text-[#020726]"
->
-  Next
-</button>
-
-
-          </div>
-       
-      </>  
-      )}
+    </Form>
+  )}
 </Formik>
+
         </div>
       
       
@@ -578,6 +646,41 @@ function Input({ name, placeholder, error, disabled }) {
   );
 }
 
+
+function openAudioDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open("AudioDraftDB", 1);
+
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains("audios")) {
+        db.createObjectStore("audios");
+      }
+    };
+
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function saveAudio(key, blob) {
+  const db = await openAudioDB();
+  const tx = db.transaction("audios", "readwrite");
+  tx.objectStore("audios").put(blob, key);
+  return new Promise((resolve) => (tx.oncomplete = resolve));
+}
+
+async function loadAudio(key) {
+  const db = await openAudioDB();
+  const tx = db.transaction("audios", "readonly");
+  const store = tx.objectStore("audios");
+
+  return new Promise((resolve) => {
+    const req = store.get(key);
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = () => resolve(null);
+  });
+}
 
 
 

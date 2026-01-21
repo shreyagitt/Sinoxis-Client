@@ -216,15 +216,20 @@ innerRef={formikRef}
       : crypto.randomUUID();
 
   // ✅ SAVE DRAFT (single source of truth)
-  localStorage.setItem(
+ const trackDraft =
+  JSON.parse(localStorage.getItem("trackDraft")) || null;
+
+localStorage.setItem(
   "releaseDraft",
   JSON.stringify({
     _id: releaseId,
     ...values,
-    coverKey: existingDraft.coverKey, // ✅ ONLY REFERENCE
+    coverKey: existingDraft.coverKey,
+    trackDraftExists: Boolean(trackDraft), // debug flag
     updatedAt: new Date().toISOString(),
   })
 );
+
 
 
   navigate("/tracks");
