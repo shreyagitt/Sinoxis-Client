@@ -6,21 +6,20 @@ import cloudinary from "../config/cloudinary";
 const storage = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => {
-    // Detect file type automatically
-    const resourceType = file.mimetype.startsWith("video")
-      ? "video"
-      : file.mimetype.startsWith("image")
-      ? "image"
-      : "raw"; // for other files like pdf, zip, etc.
+    let resourceType: "image" | "raw" = "raw";
+
+    if (file.fieldname === "cover") {
+      resourceType = "image";
+    }
 
     return {
-      folder: "sinoxis_media", // Folder name in Cloudinary
-      resource_type: resourceType,
-      allowed_formats: ["jpg", "jpeg", "png", "webp", "mp4", "mov", "avi", "mkv", "pdf", "zip"],
-      public_id: `${Date.now()}-${file.originalname.split(".")[0]}`, // unique file name
+      folder: "sinoxis_media",
+      resource_type: resourceType,   // 🔥 THIS FIXES AUDIO UPLOAD
+      public_id: `${Date.now()}-${file.originalname.split(".")[0]}`,
     };
   },
 });
+
 
 // Multer setup
 const upload = multer({
@@ -36,14 +35,26 @@ const upload = multer({
       "video/mp4",
       "video/mov",
       "video/avi",
+      // 🔥 AUDIO
+    "audio/mpeg",
+    "audio/wav",
+    "audio/x-wav",
+    "audio/ogg",
+    "audio/flac",
       "application/pdf",
       "application/zip",
     ];
 
-    if (!allowedMimeTypes.includes(file.mimetype)) {
-      return cb(new Error("Invalid file type. Allowed: images, videos, pdf, zip."));
-    }
-    cb(null, true);
+   if (!allowedMimeTypes.includes(file.mimetype)) {
+    return cb(
+      Object.assign(new Error("Invalid file type"), {
+        code: "LIMIT_FILE_TYPE",
+      }) as any,
+      false
+    );
+  }
+
+  cb(null, true);
   },
 });
 

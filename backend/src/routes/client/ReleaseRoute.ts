@@ -18,7 +18,11 @@ router.post(
   "/",
   authenticate,
   authorize("client"),
-  upload.single("cover"),
+  upload.fields([
+  { name: "cover", maxCount: 1 },
+  { name: "audio", maxCount: 1 },
+]),
+
   upsertRelease
 );
 

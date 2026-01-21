@@ -61,19 +61,46 @@ export const upsertRelease = asyncHandler(
        COVER HANDLING (multer-storage-cloudinary)
        ===================================================== */
 
-    let cover = payload.cover;
-    let coverImageId = payload.coverImageId;
+    /* =====================================================
+   COVER + AUDIO HANDLING (multer-storage-cloudinary)
+   ===================================================== */
 
-    if (req.file) {
-      // delete old cover if exists
-      if (coverImageId) {
-        await cloudinary.uploader.destroy(coverImageId);
-      }
+let cover = payload.cover;
+let coverImageId = payload.coverImageId;
 
-      // multer-storage-cloudinary already uploaded it
-      cover = req.file.path;        // secure_url
-      coverImageId = req.file.filename; // public_id
-    }
+let audioUrl =
+  payload.tracks?.[0]?.audioUrl || null;
+
+let audioFileId =
+  payload.tracks?.[0]?.audioFileId || null;
+
+const files = req.files as {
+  cover?: Express.Multer.File[];
+  audio?: Express.Multer.File[];
+};
+
+const coverFile = files?.cover?.[0];
+const audioFile = files?.audio?.[0];
+
+/* ───── COVER ───── */
+if (coverFile) {
+  if (coverImageId) {
+    await cloudinary.uploader.destroy(coverImageId);
+  }
+
+  cover = coverFile.path;
+  coverImageId = coverFile.filename;
+}
+
+/* ───── AUDIO ───── */
+if (audioFile && payload.tracks?.length) {
+  audioUrl = audioFile.path;           // Cloudinary URL
+  audioFileId = audioFile.filename;    // Cloudinary public_id
+
+  payload.tracks[0].audioUrl = audioUrl;
+  payload.tracks[0].audioFileId = audioFileId;
+}
+
 
     let release;
 

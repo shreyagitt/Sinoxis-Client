@@ -18,6 +18,7 @@ import clientRouter from './client';   // ✅ Add this import
 import { API_ENDPOINTS } from '../config/constants';
 import OACRequest from './Oac.routes';
 import notificationRoutes from './notificationRoutes';
+import userRoutes from './userRoutes';
 
 const router = Router();
 
@@ -48,6 +49,7 @@ router.use(API_ENDPOINTS.LABEL, labelRoutes);
 router.use(API_ENDPOINTS.COPYRIGHTCLAIM, copyClaimRoutes);
 router.use(API_ENDPOINTS.OFFICIALARTIST, OACRequest);
 router.use(API_ENDPOINTS.NOTIFICATION, notificationRoutes);
+router.use(API_ENDPOINTS.USERS, userRoutes);
 
 
 
