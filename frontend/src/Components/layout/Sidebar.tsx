@@ -61,6 +61,8 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
         { label: "Official Artist Channel", to: "/requests/channel" },
       ],
     },
+
+    { to: "/user", label: "User Management", icon: <Bell className="w-5 h-5" /> },
     { to: "/notifications", label: "Notifications", icon: <Bell className="w-5 h-5" /> },
     { to: "/banksettings", label: "Bank Settings", icon: <FolderCog className="w-5 h-5" /> },
     { to: "/form", label: "Apply Form Management", icon: <FileText className="w-5 h-5" /> },
@@ -104,34 +106,53 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
               <li key={index}>
                 {/* MAIN ITEM */}
                 <div
-                  onClick={() => hasSub && !collapsed && toggleMenu(item.label)}
-                  className={clsx(
-                    "flex items-center justify-between px-4 py-3 text-sm rounded-md cursor-pointer transition-colors group relative",
+  onClick={(e) => {
+    if (hasSub) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!collapsed) toggleMenu(item.label);
+    }
+  }}
+  className={clsx(
+    "flex items-center justify-between px-4 py-3 text-sm rounded-md cursor-pointer transition-colors group relative",
+    isActiveMain
+      ? "bg-[#0288D1] dark:bg-[#29B6F6] text-white font-semibold"
+      : "text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#111A3A]"
+  )}
+>
+  {hasSub ? (
+    <div className="flex items-center gap-3 flex-grow">
+      {/* ICON */}
+      <span
+        className={clsx(
+          "transition-colors",
+          isActiveMain
+            ? "text-white"
+            : "text-[#0288D1] dark:text-[#29B6F6] group-hover:text-[#0288D1]"
+        )}
+      >
+        {item.icon}
+      </span>
 
-                    isActiveMain
-                      ? "bg-[#0288D1] dark:bg-[#29B6F6] text-white font-semibold"
-                      : "text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#111A3A]"
-                  )}
-                >
-                  <NavLink
-                    to={item.to}
-                    className="flex items-center gap-3 flex-grow"
-                  >
-                    {/* ICON */}
-                    <span
-                      className={clsx(
-                        "transition-colors",
-                        isActiveMain
-                          ? "text-white"
-                          : "text-[#0288D1] dark:text-[#29B6F6] group-hover:text-[#0288D1]"
-                      )}
-                    >
-                      {item.icon}
-                    </span>
+      {!collapsed && <span>{item.label}</span>}
+    </div>
+  ) : (
+    <NavLink to={item.to} className="flex items-center gap-3 flex-grow">
+      <span
+        className={clsx(
+          "transition-colors",
+          isActiveMain
+            ? "text-white"
+            : "text-[#0288D1] dark:text-[#29B6F6] group-hover:text-[#0288D1]"
+        )}
+      >
+        {item.icon}
+      </span>
 
-                    {/* LABEL */}
-                    {!collapsed && <span>{item.label}</span>}
-                  </NavLink>
+      {!collapsed && <span>{item.label}</span>}
+    </NavLink>
+  )}
+
 
                   {/* Toggle arrow */}
                   {hasSub && !collapsed && (

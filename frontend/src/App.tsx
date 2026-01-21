@@ -33,6 +33,7 @@ import FacebookClaim from './pages/FacebookVideo'
 import RegisterPage from "./pages/RegisterPage";
 import CopyClaimManagement from "./pages/CopyClaimManagement";
 import AdminOACPage from "./pages/OACpage";
+import UserManagement from "./pages/UserManagement";
 
 const AppRoutes: React.FC = () => {
   const dispatch = useDispatch();
@@ -112,6 +113,15 @@ const AppRoutes: React.FC = () => {
               element={
                 <ProtectedRoute>
                   <Layout><Label /></Layout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/user"
+              element={
+                <ProtectedRoute>
+                  <Layout><UserManagement /></Layout>
                 </ProtectedRoute>
               }
             />
