@@ -19,6 +19,7 @@ import { API_ENDPOINTS } from '../config/constants';
 import OACRequest from './Oac.routes';
 import notificationRoutes from './notificationRoutes';
 import userRoutes from './userRoutes';
+import storeRoutes from './storeRoutes';
 
 const router = Router();
 
@@ -50,6 +51,7 @@ router.use(API_ENDPOINTS.COPYRIGHTCLAIM, copyClaimRoutes);
 router.use(API_ENDPOINTS.OFFICIALARTIST, OACRequest);
 router.use(API_ENDPOINTS.NOTIFICATION, notificationRoutes);
 router.use(API_ENDPOINTS.USERS, userRoutes);
+router.use(API_ENDPOINTS.STORE, storeRoutes);
 
 
 

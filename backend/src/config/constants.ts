@@ -46,6 +46,7 @@ export const API_ENDPOINTS = {
   COPYRIGHTCLAIM:'/api/v1/copyright-claim',
   OFFICIALARTIST:'/api/v1/official-artist',
   NOTIFICATION:'/api/v1/notifications',
+  STORE:'/api/v1/store',
   
 
 } as const;
@@ -67,6 +68,7 @@ export const CLIENT_API_ENDPOINTS = {
   COPYRIGHTCLAIM:'/copyright-claim',
   OFFICIALARTIST:'/official-artist',
   NOTIFICATION:'/notifications',
+  STORE:'/store',
 } as const;
 
 export const HTTP_STATUS = {

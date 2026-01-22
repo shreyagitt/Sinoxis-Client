@@ -4,7 +4,7 @@ import cloudinary from "../../config/cloudinary";
 import { asyncHandler } from "../../middlewares/errorHandler";
 
 /* =====================================================
-   CREATE OR UPDATE (ONE API FOR ALL PAGES)
+   CREATE OR UPDATE RELEASE
    ===================================================== */
 export const upsertRelease = asyncHandler(
   async (req: Request, res: Response) => {
@@ -18,10 +18,10 @@ export const upsertRelease = asyncHandler(
     const { _id, ...payload } = req.body;
 
     /* =====================================================
-       🔒 NORMALIZATION (MANDATORY FOR multipart/form-data)
+       NORMALIZATION
        ===================================================== */
 
-    // 1️⃣ Parse tracks if sent as string
+    // Parse tracks JSON
     if (typeof payload.tracks === "string") {
       try {
         payload.tracks = JSON.parse(payload.tracks);
@@ -33,7 +33,29 @@ export const upsertRelease = asyncHandler(
       }
     }
 
-    // 2️⃣ Parse stores if sent as string
+    /* =====================================================
+   🔥 HARD FILTER: REMOVE INVALID TRACKS
+   ===================================================== */
+
+if (Array.isArray(payload.tracks)) {
+  payload.tracks = payload.tracks
+    .map((t: any) => ({
+      ...t,
+      trackTitle: typeof t.trackTitle === "string" ? t.trackTitle.trim() : "",
+      primaryArtist:
+        typeof t.primaryArtist === "string"
+          ? t.primaryArtist.trim()
+          : "",
+    }))
+    .filter(
+      (t: any) =>
+        t.trackTitle.length > 0 &&
+        t.primaryArtist.length > 0
+    );
+}
+
+
+    // Parse stores JSON
     if (typeof payload.stores === "string") {
       try {
         payload.stores = JSON.parse(payload.stores);
@@ -45,69 +67,83 @@ export const upsertRelease = asyncHandler(
       }
     }
 
-    // 3️⃣ Normalize stores → ["spotify", "apple"]
+    // Normalize stores → ["spotify", "apple"]
     if (Array.isArray(payload.stores)) {
       payload.stores = payload.stores.map((s: any) =>
         typeof s === "string" ? s : s.platform
       );
     }
 
-    // 4️⃣ Ensure root artist exists
+    // Ensure root artist exists
     if (!payload.artist && payload.tracks?.length > 0) {
       payload.artist = payload.tracks[0].primaryArtist;
     }
 
     /* =====================================================
-       COVER HANDLING (multer-storage-cloudinary)
+       COVER + AUDIO HANDLING
        ===================================================== */
 
+    let cover = payload.cover || null;
+    let coverImageId = payload.coverImageId || null;
+
+    const files = req.files as {
+      cover?: Express.Multer.File[];
+      audio?: Express.Multer.File[];
+    };
+
+    const coverFile = files?.cover?.[0];
+    const audioFiles = files?.audio || [];
+
+    /* ───── COVER ───── */
+    if (coverFile) {
+      if (coverImageId) {
+        await cloudinary.uploader.destroy(coverImageId);
+      }
+
+      cover = coverFile.path;
+      coverImageId = coverFile.filename;
+    }
+
+    /* ───── AUDIO (MULTI-TRACK SAFE + EDIT SAFE) ───── */
+
+if (Array.isArray(payload.tracks)) {
+  payload.tracks = await Promise.all(
+    payload.tracks.map(async (track: any, index: number) => {
+      const incomingAudio = audioFiles[index];
+
+      let audioUrl = track.audioUrl || null;
+      let audioFileId = track.audioFileId || null;
+
+      if (incomingAudio) {
+        if (audioFileId) {
+          await cloudinary.uploader.destroy(audioFileId, {
+            resource_type: "raw",
+          });
+        }
+
+        audioUrl = incomingAudio.path;
+        audioFileId = incomingAudio.filename;
+      }
+
+      return {
+        ...track,
+        audioUrl,
+        audioFileId,
+      };
+    })
+  );
+}
+
+
+
     /* =====================================================
-   COVER + AUDIO HANDLING (multer-storage-cloudinary)
-   ===================================================== */
-
-let cover = payload.cover;
-let coverImageId = payload.coverImageId;
-
-let audioUrl =
-  payload.tracks?.[0]?.audioUrl || null;
-
-let audioFileId =
-  payload.tracks?.[0]?.audioFileId || null;
-
-const files = req.files as {
-  cover?: Express.Multer.File[];
-  audio?: Express.Multer.File[];
-};
-
-const coverFile = files?.cover?.[0];
-const audioFile = files?.audio?.[0];
-
-/* ───── COVER ───── */
-if (coverFile) {
-  if (coverImageId) {
-    await cloudinary.uploader.destroy(coverImageId);
-  }
-
-  cover = coverFile.path;
-  coverImageId = coverFile.filename;
-}
-
-/* ───── AUDIO ───── */
-if (audioFile && payload.tracks?.length) {
-  audioUrl = audioFile.path;           // Cloudinary URL
-  audioFileId = audioFile.filename;    // Cloudinary public_id
-
-  payload.tracks[0].audioUrl = audioUrl;
-  payload.tracks[0].audioFileId = audioFileId;
-}
-
+       UPDATE OR CREATE
+       ===================================================== */
 
     let release;
 
-    /* =====================================================
-       UPDATE
-       ===================================================== */
     if (_id) {
+      // 🔄 UPDATE FLOW
       const existing = await Release.findOne({
         _id,
         userId: req.user.userId,
@@ -127,34 +163,31 @@ if (audioFile && payload.tracks?.length) {
           ...(cover && { cover }),
           ...(coverImageId && { coverImageId }),
 
-          // preserve lifecycle
+          // Preserve lifecycle fields
           currentStep: payload.currentStep || existing.currentStep,
           status: payload.status || existing.status,
         },
         { new: true }
       );
-    }
-
-    /* =====================================================
-       CREATE
-       ===================================================== */
-    else {
+    } else {
+      // 🆕 CREATE FLOW
       release = await Release.create({
         ...payload,
         userId: req.user.userId,
-        cover,
-        coverImageId,
-        status: "Unfinished",
-        currentStep: "release",
+        ...(cover && { cover }),
+        ...(coverImageId && { coverImageId }),
+        currentStep: payload.currentStep || "release",
+        status: payload.status || "Draft",
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: release,
     });
   }
 );
+
 
 
 /* =====================================================

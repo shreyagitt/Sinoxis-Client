@@ -6,7 +6,7 @@ import cloudinary from "../config/cloudinary";
 const storage = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => {
-    let resourceType: "image" | "raw" = "raw";
+    let resourceType: "image" | "video" = "video";
 
     if (file.fieldname === "cover") {
       resourceType = "image";
@@ -14,11 +14,12 @@ const storage = new CloudinaryStorage({
 
     return {
       folder: "sinoxis_media",
-      resource_type: resourceType,   // 🔥 THIS FIXES AUDIO UPLOAD
+      resource_type: resourceType,
       public_id: `${Date.now()}-${file.originalname.split(".")[0]}`,
     };
   },
 });
+
 
 
 // Multer setup

@@ -32,4 +32,11 @@ router.delete(
   userController.delete
 );
 
+router.patch(
+  "/:id/block",
+  authenticate,
+  authorize("admin"),
+  userController.block
+);
+
 export default router;
