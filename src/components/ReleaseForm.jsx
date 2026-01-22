@@ -351,13 +351,19 @@ localStorage.setItem(
     </label>
 
     <div
-      className="
+      className={`
         relative w-full h-[190px]
         rounded-2xl
         border border-dashed border-white/30
         flex items-center justify-center
-        bg-[#05092a]
-      "
+        transition
+      ${
+        theme === "dark"
+          ? "border-white/30 bg-[#05092a]"
+          : "border-gray-400 bg-gray-100"
+      }
+    `}
+      
     >
       {coverPreview ? (
         <img

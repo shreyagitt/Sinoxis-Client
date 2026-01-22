@@ -15,7 +15,7 @@ const isEdit = mode === "edit";
   const [openSection, setOpenSection] = useState(null);
 
 const [release, setRelease] = useState(null);
-const [track, setTrack] = useState(null);
+const [track, setTrack] = useState([]);
 const [stores, setStores] = useState([]);
 
 
@@ -42,28 +42,31 @@ useEffect(() => {
       if (img) setCoverImage(img);
     }
 
-    // ───── TRACK (SINGLE SOURCE OF TRUTH) ─────
-    if (t?.tracks?.length) {
-      const first = t.tracks[0];
+    // ───── TRACK (MULTI-TRACK SOURCE OF TRUTH) ─────
+if (t?.tracks?.length) {
+  const hydratedTracks = [];
 
-     const hydratedTrack = {
-  ...first,
-  audioUrl: first.audioUrl || null,   // ✅ KEEP CLOUDINARY URL
-};
+  for (const tr of t.tracks) {
+    const hydrated = {
+      ...tr,
+      audioUrl: tr.audioUrl || null,   // keep Cloudinary URL if exists
+    };
 
-if (!hydratedTrack.audioUrl && first.audioKey) {
-  const blob = await loadAudio(first.audioKey);
-  if (blob) {
-    audioUrl = URL.createObjectURL(blob);
-    hydratedTrack.audioUrl = audioUrl;
-  }
-}
-
-
-      setTrack(hydratedTrack);
-    } else {
-      setTrack(null);
+    // fallback to IndexedDB audio
+    if (!hydrated.audioUrl && tr.audioKey) {
+      const blob = await loadAudio(tr.audioKey);
+      if (blob) {
+        hydrated.audioUrl = URL.createObjectURL(blob);
+      }
     }
+
+    hydratedTracks.push(hydrated);
+  }
+
+  setTrack(hydratedTracks);   // <-- ARRAY, not single object
+} else {
+  setTrack([]);
+}
 
     // ───── STORES ─────
     if (Array.isArray(s?.stores)) {
@@ -104,7 +107,7 @@ const handlePublish = async () => {
     // ───── RELEASE ─────
     formData.append("title", release.title);
     formData.append("subtitle", release.subtitle || "");
-    formData.append("artist", track.primaryArtist);
+    formData.append("artist", track[0]?.primaryArtist || "");
     formData.append("genre", release.genre);
     formData.append("subgenre", release.subgenre);
     formData.append("label", release.label);
@@ -116,43 +119,49 @@ const handlePublish = async () => {
 
     // ───── TRACKS ─────
     formData.append(
-      "tracks",
-      JSON.stringify([
-        {
-          trackTitle: track.trackTitle,
-          primaryArtist: track.primaryArtist,
-          publisher: track.publisher,
-          language: track.language,
-          isrc: track.isrc,
-          writers: track.writers || [],
-          composers: track.composers || [],
-          musicDirectors: track.musicDirectors || [],
-          producers: track.producers || [],
-          lyrics: track.lyrics || "",          // ✅ ADD
-      audioName: track.audioName || "",    // ✅ ADD
-          audioKey: track.audioKey || "",
-          audioUrl: track.audioUrl || "",
-                // ✅ ADD
-        },
-      ])
-    );
+  "tracks",
+  JSON.stringify(
+    track.map((t) => ({
+      trackTitle: t.trackTitle,
+      primaryArtist: t.primaryArtist,
+      publisher: t.publisher,
+      language: t.language,
+      isrc: t.isrc,
+      writers: t.writers || [],
+      composers: t.composers || [],
+      musicDirectors: t.musicDirectors || [],
+      producers: t.producers || [],
+      lyrics: t.lyrics || "",
+      audioName: t.audioName || "",
+      audioKey: t.audioKey || "",
+      audioUrl: t.audioUrl || "",
+    }))
+  )
+);
+
 
     // ───── AUDIO FILE ─────
 // ───── AUDIO FILE ─────
-if (track.audioKey) {
-  const blob = await loadAudio(track.audioKey);
-  if (!blob) {
-    toast.error("Audio file missing. Please re-upload.");
-    return;
+for (const t of track) {
+ 
+  if (t.audioKey && !t.audioUrl) {
+     const blob = await loadAudio(t.audioKey);
+     if (!blob) {
+       toast.error(`Audio file missing for track: ${t.trackTitle}`);
+       return;
+     }
+     formData.append("audio", blob, t.audioName);
   }
-  formData.append("audio", blob, track.audioName);
 }
 
-// ❌ BLOCK ONLY IF NEITHER EXISTS
-if (!track.audioKey && !track.audioUrl) {
-  toast.error("Please upload the audio file before publishing.");
+
+if (!track.some((t) => t.audioKey || t.audioUrl)) {
+  toast.error("Please upload audio files before publishing.");
   return;
 }
+
+
+
 
     // ───── STORES ─────
     formData.append(
@@ -329,40 +338,51 @@ if (!track.audioKey && !track.audioUrl) {
       setOpenSection(openSection === "track" ? null : "track")
     }
   >
-    {track ? (
-  <ul className="text-sm space-y-1">
-    <li><b>Track Title:</b> {track.trackTitle}</li>
-    <li><b>Primary Artist:</b> {track.primaryArtist}</li>
-    <li><b>Publisher:</b> {track.publisher}</li>
-    <li><b>Language:</b> {track.language}</li>
-    <li><b>ISRC:</b> {track.isrc}</li>
+   {track && track.length > 0 ? (
+  <div className="space-y-6">
+    {track.map((t, idx) => (
+      <ul
+        key={idx}
+        className="text-sm space-y-1 border-b border-white/10 pb-4 last:border-none"
+      >
+        <li className="font-medium text-sky-400">
+          Track {idx + 1}
+        </li>
 
-    <li>
-      <b>Writers:</b> {track.writers?.join(", ") || "—"}
-    </li>
-    <li>
-      <b>Composers:</b> {track.composers?.join(", ") || "—"}
-    </li>
-    <li>
-      <b>Music Directors:</b> {track.musicDirectors?.join(", ") || "—"}
-    </li>
-    <li>
-      <b>Producers:</b> {track.producers?.join(", ") || "—"}
-    </li>
+        <li><b>Track Title:</b> {t.trackTitle || "—"}</li>
+        <li><b>Primary Artist:</b> {t.primaryArtist || "—"}</li>
+        <li><b>Publisher:</b> {t.publisher || "—"}</li>
+        <li><b>Language:</b> {t.language || "—"}</li>
+        <li><b>ISRC:</b> {t.isrc || "—"}</li>
 
-  {track.audioUrl ? (
-  <audio controls src={track.audioUrl} />
-) : track.audioName ? (
-  <p><b>Audio File:</b> {track.audioName}</p>
-) : (
-  <p>—</p>
-)}
+        <li>
+          <b>Writers:</b> {t.writers?.length ? t.writers.join(", ") : "—"}
+        </li>
+        <li>
+          <b>Composers:</b> {t.composers?.length ? t.composers.join(", ") : "—"}
+        </li>
+        <li>
+          <b>Music Directors:</b>{" "}
+          {t.musicDirectors?.length ? t.musicDirectors.join(", ") : "—"}
+        </li>
+        <li>
+          <b>Producers:</b> {t.producers?.length ? t.producers.join(", ") : "—"}
+        </li>
 
-
-  </ul>
+        {t.audioUrl ? (
+          <audio controls src={t.audioUrl} className="mt-2 w-full" />
+        ) : t.audioName ? (
+          <p><b>Audio File:</b> {t.audioName}</p>
+        ) : (
+          <p>—</p>
+        )}
+      </ul>
+    ))}
+  </div>
 ) : (
   <p className="text-red-400 text-sm">Track details incomplete</p>
 )}
+
 
   </Section>
 

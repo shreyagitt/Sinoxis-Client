@@ -1,6 +1,7 @@
 import { useState,useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../components/Topbar";
+import axios from "axios";
 
 export default function Stores() {
   const [step] = useState(2);
@@ -8,15 +9,27 @@ export default function Stores() {
     const { theme } = useTheme();
   const [selected, setSelected] = useState([]);
 
+  const baseUrl = import.meta.env.VITE_API_BASE_URL;
+const token = localStorage.getItem("token");
+
 const mode = localStorage.getItem("releaseMode") || "create";
 const isView = mode === "view";
 const isEdit = mode === "edit";
 
 
-  const stores = [
-    { id: "spotify", name: "Spotify", icon: <SpotifyIcon /> },
-    { id: "apple", name: "Apple Music", icon: <AppleMusicIcon /> },
-  ];
+  const [stores, setStores] = useState([]);
+
+useEffect(() => {
+  const fetchStores = async () => {
+    const res = await axios.get(`${baseUrl}/client/store`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setStores(res.data.data || []);
+  };
+
+  fetchStores();
+}, []);
+
 
   const toggleStore = (id) => {
   if (isView) return;
@@ -27,7 +40,7 @@ const isEdit = mode === "edit";
 
 const selectAll = () => {
   if (isView) return;
-  setSelected(stores.map((s) => s.id));
+  setSelected(stores.map((s) => s.platform));
 };
 
 const deselectAll = () => {
@@ -163,13 +176,13 @@ useEffect(() => {
   <div className="w-full flex flex-col sm:flex-row justify-center gap-6">
 
     {stores.map((store) => {
-      const active = selected.includes(store.id);
+      const active = selected.includes(store.platform);
 
       return (
         <button
-  key={store.id}
+  key={store._id}
   disabled={isView}
-  onClick={() => toggleStore(store.id)}
+  onClick={() => toggleStore(store.platform)}
   className={`
     relative
     w-full sm:w-[260px]
@@ -188,7 +201,11 @@ useEffect(() => {
 >
 
 
-          {store.icon}
+            <img
+                  src={store.icon}
+                  alt={store.name}
+                  className="w-6 h-6 object-contain"
+                />
           <span className="text-base">{store.name}</span>
 
           {/* CHECK MARK */}
@@ -328,20 +345,4 @@ if (
   );
 }
 
-/* ---------------- ICONS ---------------- */
 
-function SpotifyIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="#1ED760">
-      <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.6 0 12 0zm5.5 17.3c-.2.3-.6.4-.9.2-2.5-1.5-5.6-1.8-9.3-.9-.4.1-.7-.2-.8-.5-.1-.4.2-.7.5-.8 4.1-.9 7.5-.5 10.4 1.1.3.2.4.6.1.9zm1.3-3.1c-.3.4-.8.6-1.2.3-2.9-1.8-7.4-2.3-10.9-1.2-.5.1-1-.1-1.1-.6-.1-.5.1-1 .6-1.1 4-.9 8.9-.3 12.3 1.7.4.2.6.7.3 1.1zm.1-3.2C15.7 9 8.4 8.9 5 10c-.6.2-1.2-.1-1.4-.7-.2-.6.1-1.2.7-1.4 4-1.3 10-1.2 14.3 1.4.5.3.7.9.4 1.4-.3.5-.9.7-1.4.4z" />
-    </svg>
-  );
-}
-
-function AppleMusicIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
-      <path d="M16 3L8 5v10.6a2.5 2.5 0 1 0 1 2V9.2l6-1.5v6.9a2.5 2.5 0 1 0 1 2V3z" />
-    </svg>
-  );
-}

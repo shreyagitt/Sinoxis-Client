@@ -16,6 +16,8 @@ export default function TrackDetails() {
 const isView = mode === "view";
 const isEdit = mode === "edit";
 
+const [trackIndex, setTrackIndex] = useState(0);
+
 
   // ✅ DECLARE STATE FIRST
   const [savedDraft, setSavedDraft] = useState(null);
@@ -38,55 +40,46 @@ useEffect(() => {
     }
 
     const parsed = JSON.parse(stored);
-    const first = parsed.tracks?.[0];
+    const current = parsed.tracks?.[trackIndex] || {};
 
     setSavedDraft(parsed);
-    setLyrics(first?.lyrics || "");
+    setLyrics(current.lyrics || "");
 
-    // ✅ PRIORITY 1: Cloudinary audio (Edit/View)
-    if (first?.audioUrl) {
+    // Cloudinary audio (edit/view)
+   if (current.audioUrl) {
   const displayName =
-    first.audioFileId
-      ?.split("/")
-      .pop()
-      ?.replace(/^\d+-/, "")
-      ?.replace(/%20/g, " ")
-    || first.audioUrl
-    || first.audioName
-    || "Uploaded Audio";
+    current.audioName ||
+    current.audioUrl.split("/").pop()?.split("?")[0] ||
+    "Uploaded Audio";
 
   setAudioFile({
     name: displayName,
-    dataUrl: first.audioUrl,
+    dataUrl: current.audioUrl,
   });
   return;
 }
 
-
-    // ✅ PRIORITY 2: IndexedDB audio (Create flow)
-    if (first?.audioKey) {
-      const blob = await loadAudio(first.audioKey);
+    // IndexedDB audio (create)
+    if (current.audioKey) {
+      const blob = await loadAudio(current.audioKey);
       if (blob) {
         objectUrl = URL.createObjectURL(blob);
-   const displayName =
-  first.audioName ||
-  first.audioFileId
-    ?.split("/")
-    .pop()
-    ?.replace(/^\d+-/, "")
-    ?.replace(/%20/g, " ")
-  || "Uploaded Audio";
 
-setAudioFile({
-  name: displayName,
-  dataUrl: objectUrl,
-});
+        const displayName =
+          current.audioName ||
+          current.audioFileId
+            ?.split("/")
+            .pop()
+            ?.replace(/^\d+-/, "")
+            ?.replace(/%20/g, " ")
+          || "Uploaded Audio";
 
-
-      } else {
-        setAudioFile(null);
+        setAudioFile({
+          name: displayName,
+          dataUrl: objectUrl,
+        });
+        return;
       }
-      return;
     }
 
     setAudioFile(null);
@@ -97,7 +90,7 @@ setAudioFile({
   return () => {
     if (objectUrl) URL.revokeObjectURL(objectUrl);
   };
-}, []);
+}, [trackIndex]);   // 🔥 REQUIRED
 
 
 
@@ -107,18 +100,31 @@ setAudioFile({
 
 
 
- const firstTrack = savedDraft?.tracks?.[0] || {};
+
+ const currentTrack =
+  savedDraft?.tracks?.[trackIndex] ||
+  {
+    trackTitle: "",
+    primaryArtist: "",
+    publisher: "",
+    language: "",
+    isrc: "",
+    writers: [],
+    composers: [],
+    musicDirectors: [],
+    producers: [],
+  };
 
 const initialValues = {
-  trackTitle: firstTrack.trackTitle || "",
-  primaryArtist: firstTrack.primaryArtist || "",
-  publisher: firstTrack.publisher || "",
-  language: firstTrack.language || "",
-  isrc: firstTrack.isrc || "",
-  writers: firstTrack.writers || [],
-  composers: firstTrack.composers || [],
-  musicDirectors: firstTrack.musicDirectors || [],
-  producers: firstTrack.producers || [],
+  trackTitle: currentTrack.trackTitle || "",
+  primaryArtist: currentTrack.primaryArtist || "",
+  publisher: currentTrack.publisher || "",
+  language: currentTrack.language || "",
+  isrc: currentTrack.isrc || "",
+  writers: currentTrack.writers || [],
+  composers: currentTrack.composers || [],
+  musicDirectors: currentTrack.musicDirectors || [],
+  producers: currentTrack.producers || [],
 };
 
 
@@ -251,7 +257,8 @@ const trackSchema = Yup.object({
   accept=".mp3,.wav"
   disabled={isView}
   className="absolute inset-0 opacity-0 cursor-pointer"
-  onChange={async (e) => {
+
+ onChange={async (e) => {
   const file = e.target.files[0];
   if (!file) return;
 
@@ -260,10 +267,16 @@ const trackSchema = Yup.object({
 
   const existing =
     JSON.parse(localStorage.getItem("trackDraft")) || {};
-  const tracks = existing.tracks || [{}];
 
-  tracks[0] = {
-    ...tracks[0],
+  const tracks = existing.tracks || [];
+
+  // 🔥 Ensure slot exists
+  while (tracks.length <= trackIndex) {
+    tracks.push({});
+  }
+
+  tracks[trackIndex] = {
+    ...tracks[trackIndex],
     audioName: file.name,
     audioKey,
     audioUrl: null,
@@ -272,17 +285,23 @@ const trackSchema = Yup.object({
 
   localStorage.setItem(
     "trackDraft",
-    JSON.stringify({ ...existing, tracks })
+    JSON.stringify({
+      ...existing,
+      tracks,
+      updatedAt: new Date().toISOString(),
+    })
   );
 
   const objectUrl = URL.createObjectURL(file);
 
- setAudioFile({
-  name: file.name,   // still local name for draft
-  dataUrl: objectUrl,
-});
+  setAudioFile({
+    name: file.name,
+    dataUrl: objectUrl,
+  });
 
+  setSavedDraft({ ...existing, tracks });   // 🔥 force UI refresh
 }}
+
 
 
 />
@@ -293,14 +312,15 @@ const trackSchema = Yup.object({
 
         {/* FORM */}
         <Formik
+  key={trackIndex}                 // 🔥 FORCE RESET WHEN SWITCHING TRACKS
   enableReinitialize
   initialValues={initialValues}
   validationSchema={trackSchema}
   onSubmit={(values) => {
     if (isView) {
-    navigate("/stores");   // ✅ allow forward navigation
-    return;
-  }
+      navigate("/stores");        // ✅ allow forward navigation
+      return;
+    }
 
     const releaseDraft =
       JSON.parse(localStorage.getItem("releaseDraft")) || {};
@@ -310,29 +330,35 @@ const trackSchema = Yup.object({
       return;
     }
 
-    const stored = JSON.parse(localStorage.getItem("trackDraft")) || {};
-    const storedTrack = stored.tracks?.[0] || {};
+    const stored =
+      JSON.parse(localStorage.getItem("trackDraft")) || {};
 
-const trackPayload = {
-  ...storedTrack,
-  ...values,
-  lyrics,
-  audioKey: storedTrack.audioKey || null,
-audioName: storedTrack.audioName || null,
-audioUrl: storedTrack.audioUrl || null,   // ✅ ADD
-audioFileId: storedTrack.audioFileId || null, // ✅ ADD
+    const tracks = stored.tracks || [];
 
-};
+    // 🔥 Ensure array length is valid
+    while (tracks.length <= trackIndex) {
+      tracks.push({});
+    }
 
+    const trackPayload = {
+      ...tracks[trackIndex],
+      ...values,
+      lyrics,
+      audioKey: tracks[trackIndex]?.audioKey || null,
+      audioName: tracks[trackIndex]?.audioName || null,
+      audioUrl: tracks[trackIndex]?.audioUrl || null,
+      audioFileId: tracks[trackIndex]?.audioFileId || null,
+    };
 
-
+    // 🔥 Save ONLY current track, never overwrite others
+    tracks[trackIndex] = trackPayload;
 
     localStorage.setItem(
       "trackDraft",
       JSON.stringify({
         ...stored,
         releaseId: releaseDraft._id,
-        tracks: [trackPayload],
+        tracks,
         updatedAt: new Date().toISOString(),
       })
     );
@@ -340,6 +366,7 @@ audioFileId: storedTrack.audioFileId || null, // ✅ ADD
     navigate("/stores");
   }}
 >
+
   {({ values, errors, touched, setFieldValue }) => (
     <Form className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mt-12">
 
@@ -420,25 +447,113 @@ audioFileId: storedTrack.audioFileId || null, // ✅ ADD
       />
 
       {/* ADD LYRICS */}
-      <div className="md:col-span-2 mt-6">
-        <button
-          type="button"
-          onClick={() => setShowLyrics(true)}
-          className={`w-full sm:w-[260px] h-[46px] rounded-xl border transition
-            ${
-              theme === "dark"
-                ? "border-white/40 text-white hover:bg-white/10"
-                : "border-gray-400 text-[#020726] bg-white hover:bg-gray-100"
-            }
-          `}
-        >
-          {isView
-            ? "View Lyrics"
-            : lyrics
-            ? "Edit Lyrics"
-            : "Add Lyrics"}
-        </button>
-      </div>
+      {/* ADD LYRICS + ADD TRACK (SAME ROW) */}
+<div className="md:col-span-2 mt-6 flex items-center justify-between">
+
+  {/* LEFT: ADD LYRICS */}
+  <button
+    type="button"
+    onClick={() => setShowLyrics(true)}
+    className={`w-full sm:w-[260px] h-[46px] rounded-xl border transition
+      ${
+        theme === "dark"
+          ? "border-white/40 text-white hover:bg-white/10"
+          : "border-gray-400 text-[#020726] bg-white hover:bg-gray-100"
+      }
+    `}
+  >
+    {isView
+      ? "View Lyrics"
+      : lyrics
+      ? "Edit Lyrics"
+      : "Add Lyrics"}
+  </button>
+
+  {/* RIGHT: ADD ANOTHER TRACK */}
+  {/* RIGHT: TRACK SWITCHER (VIEW MODE) */}
+{isView && savedDraft?.tracks?.length > 1 && (
+  <div className="flex gap-2">
+    {savedDraft.tracks.map((_, i) => (
+      <button
+        key={i}
+        type="button"
+        onClick={() => setTrackIndex(i)}
+        className={`h-[46px] px-5 rounded-xl border transition
+          ${
+            i === trackIndex
+              ? "bg-sky-500 text-[#020726]"
+              : theme === "dark"
+              ? "border-white/40 text-white hover:bg-white/10"
+              : "border-gray-400 text-[#020726] bg-white hover:bg-gray-100"
+          }
+        `}
+      >
+        Track {i + 1}
+      </button>
+    ))}
+  </div>
+)}
+
+{/* RIGHT: ADD TRACK (EDIT / CREATE MODE) */}
+{!isView && (
+  <button
+    type="button"
+    onClick={() => {
+      const stored =
+        JSON.parse(localStorage.getItem("trackDraft")) || {};
+
+      const tracks = stored.tracks || [];
+
+      while (tracks.length <= trackIndex) {
+        tracks.push({});
+      }
+
+      tracks[trackIndex] = {
+        ...tracks[trackIndex],
+        ...values,
+        lyrics,
+        audioKey: tracks[trackIndex]?.audioKey || null,
+        audioName: tracks[trackIndex]?.audioName || null,
+        audioUrl: tracks[trackIndex]?.audioUrl || null,
+        audioFileId: tracks[trackIndex]?.audioFileId || null,
+      };
+
+        // 🔥 Create EMPTY next track slot
+  
+
+      localStorage.setItem(
+        "trackDraft",
+        JSON.stringify({
+          ...stored,
+          tracks,
+          updatedAt: new Date().toISOString(),
+        })
+      );
+
+     const nextIndex = tracks.length;
+
+setTrackIndex(nextIndex);
+  setLyrics("");
+  setAudioFile(null);
+  setSavedDraft({ ...stored, tracks });
+
+
+    }}
+    className={`w-full sm:w-[260px] h-[46px] rounded-xl border transition
+      ${
+        theme === "dark"
+          ? "border-white/40 text-white hover:bg-white/10"
+          : "border-gray-400 text-[#020726] bg-white hover:bg-gray-100"
+      }
+    `}
+  >
+    + Add Another Track
+  </button>
+)}
+
+
+</div>
+
 
       {/* ACTION BUTTONS */}
       <div className="md:col-span-2 relative flex items-center mt-12">
@@ -467,26 +582,40 @@ audioFileId: storedTrack.audioFileId || null, // ✅ ADD
 const storedTrack = stored.tracks?.[0] || {};
 
 const trackPayload = {
-  ...storedTrack,
+  ...stored.tracks?.[trackIndex],
   ...values,
   lyrics,
-  audioKey: storedTrack.audioKey || null,
-audioName: storedTrack.audioName || null,
-audioUrl: storedTrack.audioUrl || null,   // ✅ ADD
-audioFileId: storedTrack.audioFileId || null, // ✅ ADD
-
+  audioKey: stored.tracks?.[trackIndex]?.audioKey || null,
+  audioName: stored.tracks?.[trackIndex]?.audioName || null,
+  audioUrl: stored.tracks?.[trackIndex]?.audioUrl || null,
+  audioFileId: stored.tracks?.[trackIndex]?.audioFileId || null,
 };
 
 
+
+
+const tracks = stored.tracks || [];
+
+// Ensure array has enough slots
+while (tracks.length <= trackIndex) {
+  tracks.push({});
+}
+
+// Save only the current track
+tracks[trackIndex] = {
+  ...tracks[trackIndex],
+  ...trackPayload,
+};
 
 localStorage.setItem(
   "trackDraft",
   JSON.stringify({
     ...stored,
-    tracks: [trackPayload],
+    tracks,
     updatedAt: new Date().toISOString(),
   })
 );
+
 
               alert("Draft saved successfully");
             }}
@@ -569,34 +698,41 @@ localStorage.setItem(
 
         {!isView && (
           <button
-            onClick={() => {
-              const existing =
-                JSON.parse(localStorage.getItem("trackDraft")) || {};
+  onClick={() => {
+    const stored =
+      JSON.parse(localStorage.getItem("trackDraft")) || {};
 
-              const stored = JSON.parse(localStorage.getItem("trackDraft")) || {};
-const tracks = stored.tracks || [{}];
+    const tracks = stored.tracks || [];
 
+    // 🔥 Ensure slot exists
+    while (tracks.length <= trackIndex) {
+      tracks.push({});
+    }
 
-              tracks[0] = {
-                ...tracks[0],
-                lyrics,
-              };
+    const updatedTrack = {
+      ...tracks[trackIndex],
+      lyrics,
+    };
 
-              localStorage.setItem(
-                "trackDraft",
-                JSON.stringify({
-                  ...existing,
-                  tracks,
-                  updatedAt: new Date().toISOString(),
-                })
-              );
+    tracks[trackIndex] = updatedTrack;
 
-              setShowLyrics(false);
-            }}
-            className="px-4 py-2 rounded-lg bg-sky-500 text-[#020726] font-medium hover:bg-sky-400"
-          >
-            Save
-          </button>
+    localStorage.setItem(
+      "trackDraft",
+      JSON.stringify({
+        ...stored,
+        tracks,
+        updatedAt: new Date().toISOString(),
+      })
+    );
+
+    setSavedDraft({ ...stored, tracks });   // 🔥 refresh UI
+    setShowLyrics(false);
+  }}
+  className="px-4 py-2 rounded-lg bg-sky-500 text-[#020726] font-medium hover:bg-sky-400"
+>
+  Save
+</button>
+
         )}
       </div>
     </div>
