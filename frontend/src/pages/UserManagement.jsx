@@ -13,10 +13,17 @@ const Users = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
+
       const res = await axios.get(`${baseUrl}/users`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setUsers(res.data.data || []);
+
+      // 🔥 Only keep client users (defensive UI filter)
+      const clientUsers = (res.data.data || []).filter(
+        (u) => u.role === "client" || u.isAdmin === false
+      );
+
+      setUsers(clientUsers);
     } catch {
       toast.error("Failed to load users");
     } finally {
@@ -35,6 +42,7 @@ const Users = () => {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
+
       toast.success("User status updated");
       fetchUsers();
     } catch {
@@ -43,12 +51,13 @@ const Users = () => {
   };
 
   const deleteUser = async (id) => {
-    if (!confirm("Delete this user permanently?")) return;
+    if (!window.confirm("Delete this user permanently?")) return;
 
     try {
       await axios.delete(`${baseUrl}/users/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
       toast.success("User deleted");
       fetchUsers();
     } catch {
@@ -66,7 +75,7 @@ const Users = () => {
   return (
     <div className="p-6 min-h-screen bg-[#FFFFFF] dark:bg-[#020726] text-[#020726] dark:text-white">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold">User Management</h1>
+        <h1 className="text-2xl font-semibold">Client User Management</h1>
 
         {/* FILTER BUTTONS */}
         <div className="flex gap-2">
@@ -153,7 +162,7 @@ const Users = () => {
             {!loading && filteredUsers.length === 0 && (
               <tr>
                 <td colSpan="4" className="p-4 text-center text-gray-500">
-                  No users found
+                  No client users found
                 </td>
               </tr>
             )}

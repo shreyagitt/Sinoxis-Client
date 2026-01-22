@@ -10,6 +10,8 @@ import {
   Bell,
   FolderCog,
   FileText,
+  Users,
+  Store,
 } from "lucide-react";
 import clsx from "clsx";
 
@@ -62,10 +64,11 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
       ],
     },
 
-    { to: "/user", label: "User Management", icon: <Bell className="w-5 h-5" /> },
+    { to: "/user", label: "User Management", icon: <Users className="w-5 h-5" /> },
     { to: "/notifications", label: "Notifications", icon: <Bell className="w-5 h-5" /> },
     { to: "/banksettings", label: "Bank Settings", icon: <FolderCog className="w-5 h-5" /> },
     { to: "/form", label: "Apply Form Management", icon: <FileText className="w-5 h-5" /> },
+    { to: "/store", label: "Store Management", icon: <Store className="w-5 h-5" /> },
   ];
 
   return (

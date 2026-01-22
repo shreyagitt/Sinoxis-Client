@@ -1,5 +1,5 @@
 // src/pages/admin/Dashboard.jsx
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Chart from "react-apexcharts";
 import axios from "axios";
@@ -10,7 +10,6 @@ const Dashboard = () => {
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
   const token = localStorage.getItem("token");
 
-  // Dark mode detection (same as your code)
   const [isDark, setIsDark] = useState(
     typeof document !== "undefined" &&
       document.documentElement.classList.contains("dark")
@@ -32,54 +31,52 @@ const Dashboard = () => {
   const [recentReleases, setRecentReleases] = useState([]);
 
   useEffect(() => {
-  const fetchDashboardData = async () => {
-    try {
-      const headers = { Authorization: `Bearer ${token}` };
+    const fetchDashboardData = async () => {
+      try {
+        const headers = { Authorization: `Bearer ${token}` };
 
-      // ───── RELEASES ─────
-      const releasesRes = await axios.get(`${baseUrl}/release`, { headers });
-      const releases =
-        releasesRes.data?.data ||
-        releasesRes.data?.releases ||
-        [];
+        // ───── RELEASES ─────
+        const releasesRes = await axios.get(`${baseUrl}/release`, { headers });
+        const releases =
+          releasesRes.data?.data ||
+          releasesRes.data?.releases ||
+          [];
 
-      setTotalReleases(releases.length);
-      setRecentReleases(releases.slice(0, 4));
+        setTotalReleases(releases.length);
+        setRecentReleases(releases.slice(0, 4));
 
-      // ───── USERS ─────
-      const usersRes = await axios.get(`${baseUrl}/users`, { headers });
-      console.log("USERS API RESPONSE:", usersRes.data);
+        // ───── USERS (ONLY CLIENTS) ─────
+        const usersRes = await axios.get(`${baseUrl}/users`, { headers });
 
-      const users =
-        usersRes.data?.data ||
-        usersRes.data?.users ||
-        [];
+        const allUsers =
+          usersRes.data?.data ||
+          usersRes.data?.users ||
+          [];
 
-      setTotalUsers(users.length);
+        // 🔥 Filter only client users
+        const clientUsers = allUsers.filter(
+          (u) => u.role === "client" || u.isAdmin === false
+        );
 
-      // ───── ARTISTS ─────
-      const artistsRes = await axios.get(`${baseUrl}/artist`, { headers });
-      console.log("ARTISTS API RESPONSE:", artistsRes.data);
+        setTotalUsers(clientUsers.length);
 
-      const artists =
-        artistsRes.data?.data ||
-        artistsRes.data?.artists ||
-        [];
+        // ───── ARTISTS ─────
+        const artistsRes = await axios.get(`${baseUrl}/artist`, { headers });
+        const artists =
+          artistsRes.data?.data ||
+          artistsRes.data?.artists ||
+          [];
 
-      setTotalArtists(artists.length);
+        setTotalArtists(artists.length);
 
-    } catch (err) {
-      console.error("Admin dashboard load failed:", err);
-      toast.error("Admin dashboard load failed");
-    }
-  };
+      } catch (err) {
+        console.error("Admin dashboard load failed:", err);
+        toast.error("Admin dashboard load failed");
+      }
+    };
 
-  fetchDashboardData();
-}, []);
-
-
-
-  
+    fetchDashboardData();
+  }, []);
 
   return (
     <div className="p-[20px] font-sans bg-[#FFFFFF] dark:bg-[#020726] text-[#020726] dark:text-[#FFFFFF] min-h-screen">
@@ -106,7 +103,7 @@ const Dashboard = () => {
       >
         {[
           { title: "Total Releases", value: totalReleases, color: "#29B6F6" },
-          { title: "Total Users", value: totalUsers, color: "#16a34a" },
+          { title: "Total Users", value: totalUsers, color: "#16a34a" }, // 🔥 now only clients
           { title: "Total Artists", value: totalArtists, color: "#f59e0b" },
         ].map((item, i) => (
           <div
@@ -121,7 +118,6 @@ const Dashboard = () => {
         ))}
       </div>
 
-
       {/* Recent Releases */}
       <div className="bg-[#FFFFFF] dark:bg-[#020726] border border-[#cfd4e2] dark:border-[#1F2937] rounded-[10px] shadow-[0_3px_10px_rgba(0,0,0,0.08)] p-[20px] mt-[20px]">
         <div className="flex justify-between items-center mb-[15px]">
@@ -134,39 +130,35 @@ const Dashboard = () => {
           </button>
         </div>
 
-        
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
-  {recentReleases.map((r, i) => (
-    <div
-      key={r._id || i}
-      className="border border-[#eee] dark:border-[#1F2937] rounded-[10px] overflow-hidden bg-[#fff] dark:bg-[#0B1029] hover:scale-[1.02] transition-transform cursor-pointer"
-      onClick={() => navigate(`/releases/${r._id}`)}
-    >
-      {/* Square Image */}
-      <div className="w-full aspect-square bg-[#111827]">
-        <img
-          src={
-            r.cover ||
-            "https://www.mixcloud.com/blog/wp-content/uploads/2023/11/Collage-1-2.png"
-          }
-          alt="Release cover"
-          className="w-full h-full object-cover"
-        />
-      </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+          {recentReleases.map((r, i) => (
+            <div
+              key={r._id || i}
+              className="border border-[#eee] dark:border-[#1F2937] rounded-[10px] overflow-hidden bg-[#fff] dark:bg-[#0B1029] hover:scale-[1.02] transition-transform cursor-pointer"
+              onClick={() => navigate(`/releases/${r._id}`)}
+            >
+              <div className="w-full aspect-square bg-[#111827]">
+                <img
+                  src={
+                    r.cover ||
+                    "https://www.mixcloud.com/blog/wp-content/uploads/2023/11/Collage-1-2.png"
+                  }
+                  alt="Release cover"
+                  className="w-full h-full object-cover"
+                />
+              </div>
 
-      {/* Text */}
-      <div className="p-[12px]">
-        <p className="text-[13px] text-[#999] dark:text-[#9ca3af] truncate">
-          {r.artist || "—"}
-        </p>
-        <p className="text-[16px] font-[600] truncate">
-          {r.title || "Untitled"}
-        </p>
-      </div>
-    </div>
-  ))}
-</div>
-
+              <div className="p-[12px]">
+                <p className="text-[13px] text-[#999] dark:text-[#9ca3af] truncate">
+                  {r.artist || "—"}
+                </p>
+                <p className="text-[16px] font-[600] truncate">
+                  {r.title || "Untitled"}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
     </div>
