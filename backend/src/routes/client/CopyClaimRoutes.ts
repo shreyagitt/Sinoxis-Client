@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { authenticate, authorize } from "../../middlewares/auth";
 import { ClientCopyrightClaimController } from "../../controllers/client/CopyrightClaimController";
+import { checkPermission } from "../../middlewares/checkPermission";
 
 const router = Router();
 
@@ -9,6 +10,7 @@ router.post(
   "/",
   authenticate,
   authorize("client"), 
+  checkPermission("copyrightClaim"),
   ClientCopyrightClaimController.submit
 );
 

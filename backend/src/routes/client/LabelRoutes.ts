@@ -1,7 +1,9 @@
 import { Router } from "express";
 import { ClientLabelController } from "../../controllers/client/LabelController";
 import { authenticate, authorize } from "../../middlewares/auth";
-import upload from "../../middlewares/upload";
+//import upload from "../../middlewares/upload";
+import uploadLabel from "../../middlewares/uploadLabel";
+import { checkPermission } from "../../middlewares/checkPermission";
 
 const router = Router();
 
@@ -12,7 +14,8 @@ router.post(
   "/",
   authenticate,
   authorize("client"),
-  upload.fields([
+  checkPermission("labels"),
+  uploadLabel.fields([
     { name: "aadharFront", maxCount: 1 },
     { name: "aadharBack", maxCount: 1 },
   ]),
@@ -23,7 +26,8 @@ router.put(
   "/:id",
   authenticate,
   authorize("client"),
-  upload.fields([
+  checkPermission("labels"),
+  uploadLabel.fields([
     { name: "aadharFront", maxCount: 1 },
     { name: "aadharBack", maxCount: 1 },
   ]),
@@ -34,6 +38,7 @@ router.delete(
   "/:id",
   authenticate,
   authorize("client"),
+  checkPermission("labels"),
   ClientLabelController.delete
 );
 

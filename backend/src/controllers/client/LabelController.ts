@@ -2,168 +2,195 @@ import { Request, Response } from "express";
 import Label from "../../models/Label";
 import { asyncHandler } from "../../middlewares/errorHandler";
 import cloudinary from "../../config/cloudinary";
+import fs from "fs";
 
 /* ----------------------------------------------------------
-   Types to avoid TS errors
+   Helpers
 ---------------------------------------------------------- */
 
-// Extend Express Request to allow user + files
-interface AuthRequest extends Request {
-  user?: any;
-  files?: {
-    aadharFront?: Express.Multer.File[];
-    aadharBack?: Express.Multer.File[];
+const ALLOWED_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+];
+
+const uploadToCloudinary = async (file: Express.Multer.File) => {
+  if (!ALLOWED_TYPES.includes(file.mimetype)) {
+    //fs.unlinkSync(file.path);
+    throw new Error(`Unsupported file type: ${file.mimetype}`);
+  }
+
+  const result = await cloudinary.uploader.upload(file.path, {
+    folder: "labels/aadhar",
+    resource_type: "image",
+  });
+
+  //fs.unlinkSync(file.path);
+
+  return {
+    url: result.secure_url,
+    publicId: result.public_id,
   };
-}
+};
+
+/* ----------------------------------------------------------
+   Controller
+---------------------------------------------------------- */
 
 export const ClientLabelController = {
-
   /* ============================================================
-     LIST LABELS (CLIENT-SPECIFIC)
+     LIST LABELS
   ============================================================ */
-  list: asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
-    const labels = await Label.find({ createdBy: req.user?.id })
+  list: asyncHandler(async (req: Request, res: Response) => {
+    const labels = await Label.find({
+      createdBy: req.user!.userId,
+    })
       .sort({ createdAt: -1 })
       .select("-__v");
 
-    res.status(200).json({
-      success: true,
-      data: labels,
-    });
+    res.json({ success: true, data: labels });
   }),
 
   /* ============================================================
      GET ONE LABEL
   ============================================================ */
-  getOne: asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+  getOne: asyncHandler(async (req: Request, res: Response) => {
     const label = await Label.findOne({
       _id: req.params.id,
-      createdBy: req.user?.id,
+      createdBy: req.user!.userId,
     });
 
     if (!label) {
-      res.status(404).json({ success: false, message: "Label not found" });
-      return;
+      return res.status(404).json({
+        success: false,
+        message: "Label not found",
+      });
     }
 
     res.json({ success: true, data: label });
   }),
 
   /* ============================================================
-     CREATE LABEL (WITH CLOUDINARY IMAGE UPLOADS)
+     CREATE LABEL
   ============================================================ */
-  create: asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+  create: asyncHandler(async (req: Request, res: Response) => {
     const body = req.body;
 
-    let aadharFront: string | null = null;
-    let aadharFrontId: string | null = null;
-    let aadharBack: string | null = null;
-    let aadharBackId: string | null = null;
+    const files = req.files as {
+      aadharFront?: Express.Multer.File[];
+      aadharBack?: Express.Multer.File[];
+    };
 
-    // Upload front image
-    if (req.files?.aadharFront?.[0]) {
-      const upload = await cloudinary.uploader.upload(req.files.aadharFront[0].path);
-      aadharFront = upload.secure_url;
-      aadharFrontId = upload.public_id;
+    let aadharFront, aadharFrontId;
+    let aadharBack, aadharBackId;
+
+    if (files?.aadharFront?.[0]) {
+      const upload = await uploadToCloudinary(files.aadharFront[0]);
+      aadharFront = upload.url;
+      aadharFrontId = upload.publicId;
     }
 
-    // Upload back image
-    if (req.files?.aadharBack?.[0]) {
-      const upload = await cloudinary.uploader.upload(req.files.aadharBack[0].path);
-      aadharBack = upload.secure_url;
-      aadharBackId = upload.public_id;
+    if (files?.aadharBack?.[0]) {
+      const upload = await uploadToCloudinary(files.aadharBack[0]);
+      aadharBack = upload.url;
+      aadharBackId = upload.publicId;
     }
 
-    // Set expiry = +5 years
     const expiry = new Date();
     expiry.setFullYear(expiry.getFullYear() + 5);
 
-    const newLabel = await Label.create({
+    const label = await Label.create({
       ...body,
       aadharFront,
       aadharFrontId,
       aadharBack,
       aadharBackId,
-      createdBy: req.user?.id,
+      createdBy: req.user!.userId,
       expiry,
     });
 
-    res.status(201).json({
-      success: true,
-      data: newLabel,
-    });
+    res.status(201).json({ success: true, data: label });
   }),
 
   /* ============================================================
-     UPDATE LABEL (WITH CLOUDINARY REPLACEMENT)
+     UPDATE LABEL
   ============================================================ */
-  update: asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+  update: asyncHandler(async (req: Request, res: Response) => {
     const label = await Label.findOne({
       _id: req.params.id,
-      createdBy: req.user?.id,
+      createdBy: req.user!.userId,
     });
 
     if (!label) {
-      res.status(404).json({ success: false, message: "Label not found" });
-      return;
+      return res.status(404).json({
+        success: false,
+        message: "Label not found",
+      });
     }
 
     const body: any = req.body;
 
-    // Replace Front image
-    if (req.files?.aadharFront?.[0]) {
+    const files = req.files as {
+      aadharFront?: Express.Multer.File[];
+      aadharBack?: Express.Multer.File[];
+    };
+
+    if (files?.aadharFront?.[0]) {
       if (label.aadharFrontId) {
         await cloudinary.uploader.destroy(label.aadharFrontId);
       }
 
-      const upload = await cloudinary.uploader.upload(req.files.aadharFront[0].path);
-      body.aadharFront = upload.secure_url;
-      body.aadharFrontId = upload.public_id;
+      const upload = await uploadToCloudinary(files.aadharFront[0]);
+      body.aadharFront = upload.url;
+      body.aadharFrontId = upload.publicId;
     }
 
-    // Replace Back image
-    if (req.files?.aadharBack?.[0]) {
+    if (files?.aadharBack?.[0]) {
       if (label.aadharBackId) {
         await cloudinary.uploader.destroy(label.aadharBackId);
       }
 
-      const upload = await cloudinary.uploader.upload(req.files.aadharBack[0].path);
-      body.aadharBack = upload.secure_url;
-      body.aadharBackId = upload.public_id;
+      const upload = await uploadToCloudinary(files.aadharBack[0]);
+      body.aadharBack = upload.url;
+      body.aadharBackId = upload.publicId;
     }
 
-    const updated = await Label.findByIdAndUpdate(label._id, body, { new: true });
-
-    res.json({
-      success: true,
-      data: updated,
+    const updated = await Label.findByIdAndUpdate(label._id, body, {
+      new: true,
     });
+
+    res.json({ success: true, data: updated });
   }),
 
   /* ============================================================
-     DELETE LABEL (ALSO DELETE CLOUDINARY IMAGES)
+     DELETE LABEL
   ============================================================ */
-  delete: asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+  delete: asyncHandler(async (req: Request, res: Response) => {
     const label = await Label.findOne({
       _id: req.params.id,
-      createdBy: req.user?.id,
+      createdBy: req.user!.userId,
     });
 
     if (!label) {
-      res.status(404).json({ success: false, message: "Label not found" });
-      return;
+      return res.status(404).json({
+        success: false,
+        message: "Label not found",
+      });
     }
 
-    // Delete Cloudinary images
-    if (label.aadharFrontId) await cloudinary.uploader.destroy(label.aadharFrontId);
-    if (label.aadharBackId) await cloudinary.uploader.destroy(label.aadharBackId);
+    if (label.aadharFrontId) {
+      await cloudinary.uploader.destroy(label.aadharFrontId);
+    }
+    if (label.aadharBackId) {
+      await cloudinary.uploader.destroy(label.aadharBackId);
+    }
 
-    await Label.findByIdAndDelete(label._id);
+    await label.deleteOne();
 
     res.json({
       success: true,
       message: "Label deleted successfully",
     });
   }),
-
 };

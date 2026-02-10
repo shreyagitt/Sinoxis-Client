@@ -35,6 +35,28 @@ paypalDetails?: {
   email?: string;
   paypalId?: string;
 };
+permissions: {
+  dashboard: Boolean,
+  release: Boolean,
+  artists: Boolean,
+  labels: Boolean,
+  revenueReports: Boolean,
+  revenueReportList: Boolean,
+  totalRevenue: Boolean,
+  requestPayment: Boolean,
+  services: Boolean,
+  youtubeOACRequest: Boolean,
+  youtubeClaimRelease: Boolean,
+  socialMediaLinks: Boolean,
+  facebookClaimRelease: Boolean,
+  metadataUpdateRequest: Boolean,
+  requests: Boolean,
+  copyrightClaim: Boolean,
+  officialArtistChannel: Boolean,
+  settings: Boolean,
+  passwordChange: Boolean,
+  bankDetails: Boolean,
+};
 
 
 

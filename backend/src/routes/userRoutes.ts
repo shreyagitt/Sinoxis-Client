@@ -7,6 +7,13 @@ const router = Router();
 /* ============================================================
    ADMIN USER ROUTES
    ============================================================ */
+// ✅ CREATE CLIENT USER (ADD USER)
+router.post(
+  "/",
+  authenticate,
+  authorize("admin"),
+  userController.create
+);
 
 // Get all users (for dashboard + table)
 router.get(
@@ -24,6 +31,21 @@ router.get(
   userController.getOne
 );
 
+router.put(
+  "/:id",
+  authenticate,
+  authorize("admin"),
+  userController.update
+);
+
+router.put(
+  "/:id/permissions",
+  authenticate,
+  authorize("admin"),
+  userController.updatePermissions
+);
+
+
 // Delete user
 router.delete(
   "/:id",
@@ -31,6 +53,7 @@ router.delete(
   authorize("admin"),
   userController.delete
 );
+
 
 router.patch(
   "/:id/block",

@@ -8,6 +8,7 @@ export interface AuthenticatedRequest extends Request {
     userId: string;
     email: string;
     role: string;
+    permissions?: Record<string, boolean>;
   };
 }
 
@@ -39,6 +40,7 @@ export const authenticate = async (
       userId: decoded.userId,
       email: decoded.email,
       role: decoded.role,
+      permissions: decoded.permissions,
     };
 
     return next();

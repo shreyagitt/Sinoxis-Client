@@ -1,12 +1,13 @@
 import jwt, { Secret, SignOptions } from "jsonwebtoken";
 import type * as ms from "ms";
 import { User } from "../models/User";
+import { UserDocument } from "../models/User";
 import { JWT_CONFIG, ERROR_MESSAGES } from "../config/constants";
 import {
   LoginRequest,
   RegisterRequest,
   LoginResponse,
-  User as UserType,
+  //User as UserType,
   UserRole,
 } from "../types/index";
 
@@ -32,7 +33,7 @@ export class AuthService {
   /**
    * 🔁 Generate access & refresh tokens
    */
-  private static generateTokens(user: UserType): {
+  private static generateTokens(user: UserDocument): {
     token: string;
     refreshToken: string;
   } {
@@ -40,6 +41,7 @@ export class AuthService {
       userId: user._id,
       email: user.email,
       role: user.role,
+      permissions: user.permissions,
  // ⭐ ROLE INCLUDED
     };
 
@@ -94,10 +96,12 @@ export class AuthService {
     lastName: user.lastName,
     role: user.role,
     isActive: user.isActive,
+    permissions: user.permissions, 
     lastLogin: user.lastLogin,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
-    balance: user.balance ?? 0, // ✅ REQUIRED FIX
+    balance: user.balance ?? 0,
+     // ✅ REQUIRED FIX
   },
   token,
   refreshToken,
@@ -139,6 +143,7 @@ export class AuthService {
     lastName: newUser.lastName,
     role: newUser.role,
     isActive: newUser.isActive,
+    permissions: newUser.permissions, 
     lastLogin: newUser.lastLogin,
     createdAt: newUser.createdAt,
     updatedAt: newUser.updatedAt,
@@ -162,7 +167,9 @@ export class AuthService {
 
       return {
         token: this.generateToken(
-          { userId: user._id, email: user.email, role: user.role },
+          { userId: user._id, email: user.email, role: user.role,
+            permissions: user.permissions, 
+           },
           JWT_CONFIG.EXPIRES_IN
         ),
       };

@@ -12,6 +12,7 @@ router.get(
   "/",
   authenticate,
   authorize("client"),
+  
   ClientApplicationController.list
 );
 

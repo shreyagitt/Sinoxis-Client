@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { ClientPaymentController } from "../../controllers/client/PaymentController";
 import { authenticate, authorize } from "../../middlewares/auth";
+import { checkPermission } from "../../middlewares/checkPermission";
 
 const router = Router();
 
@@ -13,6 +14,7 @@ router.post(
   "/",
   authenticate,
   authorize("client"),
+  checkPermission("requestPayment"),
   ClientPaymentController.create
 );
 

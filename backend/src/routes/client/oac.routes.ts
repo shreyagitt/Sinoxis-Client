@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { ClientOACController } from "../../controllers/client/OACController";
 import { authenticate, authorize } from "../../middlewares/auth";
+import { checkPermission } from "../../middlewares/checkPermission";
 
 const router = Router();
 
@@ -17,6 +18,7 @@ router.post(
   "/",
   authenticate,
   authorize("client"),
+  checkPermission("officialArtistChannel"),
   ClientOACController.create
 );
 

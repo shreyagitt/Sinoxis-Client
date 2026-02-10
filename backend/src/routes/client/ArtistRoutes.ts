@@ -2,6 +2,7 @@ import { Router } from "express";
 import { ClientArtistController } from "../../controllers/client/ArtistController";
 import { optionalAuth, authenticate, authorize } from "../../middlewares/auth";
 import upload from "../../middlewares/upload";
+import { checkPermission } from "../../middlewares/checkPermission";
 
 const router = Router();
 
@@ -25,6 +26,7 @@ router.post(
   "/",
   authenticate,
   authorize("client"),
+  checkPermission("artists"),
   upload.single("avatar"),   // UPDATED FIELD NAME
   ClientArtistController.create
 );
@@ -34,6 +36,7 @@ router.put(
   "/:id",
   authenticate,
   authorize("client"),
+  checkPermission("artists"),
   upload.single("avatar"),   // UPDATED FIELD NAME
   ClientArtistController.update
 );
@@ -43,6 +46,7 @@ router.delete(
   "/:id",
   authenticate,
   authorize("client"),
+  checkPermission("artists"),
   ClientArtistController.delete
 );
 

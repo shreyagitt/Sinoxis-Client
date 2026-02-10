@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { authenticate, authorize } from "../../middlewares/auth";
+import { checkPermission } from "../../middlewares/checkPermission";
 import upload from "../../middlewares/upload";
 import {
   upsertRelease,
@@ -18,6 +19,7 @@ router.post(
   "/",
   authenticate,
   authorize("client"),
+  checkPermission("createRelease"),
   upload.fields([
   { name: "cover", maxCount: 1 },
   { name: "audio", maxCount: 1 },
@@ -33,6 +35,7 @@ router.get(
   "/:id",
   authenticate,
   authorize("client"),
+
   getMyReleaseById
 );
 
@@ -43,6 +46,7 @@ router.get(
   "/",
   authenticate,
   authorize("client"),
+  
   getMyReleases
 );
 
@@ -53,6 +57,7 @@ router.delete(
   "/:id",
   authenticate,
   authorize("client"),
+  checkPermission("createRelease"),
   deleteMyRelease
 );
 
