@@ -17,6 +17,9 @@ const Sidebar = ({ collapsed, isMobile, toggleSidebar }) => {
   const { theme } = useTheme();
   const [openMenu, setOpenMenu] = useState(null);
 
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+const permissions = user?.permissions || {};
+
   /* -----------------------------
       FIXED COLLAPSE LOGIC
   ------------------------------ */
@@ -31,67 +34,77 @@ const Sidebar = ({ collapsed, isMobile, toggleSidebar }) => {
       path: "/",
       label: "Home",
       icon: <FaHome />,
+      permission: "dashboard",
       subItems: [
         { label: "Dashboard", path: "/dashboard" },
         
       ],
     },
-    {
-      path: "/releases",
-      label: "Releases",
-      icon: <FaMusic />,
-      subItems: [{ label: "My Release", path: "/releases/myRelease" }],
-    },
+   {
+  path: "/releases",
+  label: "Releases",
+  icon: <FaMusic />,
+  roles: ["client"],              // who can ever see it
+  permission: "release", // admin toggle
+  subItems: [{ label: "My Release", path: "/releases/myRelease" }],
+},
     {
       path: "/artists",
       label: "Artists",
       icon: <FaUsers />,
+      roles: ["client"],              // who can ever see it
+  permission: "artists",
       subItems: [{ label: "List Of Artists", path: "/artists/list" }],
     },
     {
       path: "/lables",
       label: "Lables",
       icon: <FaUsers />,
+      permission:"labels",
       subItems: [{ label: "List Of Lables", path: "/lables/list" }],
     },
     {
       path: "/revenue",
       label: "Revenue Reports",
       icon: <FaDollarSign />,
+      permission:"revenueReports",
       subItems: [
-        { label: "Revenue Reports List", path: "/revenue/reports" },
-        { label: "Total Revenue", path: "/revenue/total" },
-        { label: "Request Payment", path: "/revenue/request" },
+        { label: "Revenue Reports List",permission:"revenueReportList", path: "/revenue/reports" },
+        { label: "Total Revenue",permission:"totalRevenue", path: "/revenue/total" },
+        { label: "Request Payment",permission:"requestPayment", path: "/revenue/request" },
       ],
     },
     {
       path: "/services",
       label: "Services",
       icon: <FaChartBar />,
+      permission:"services",
       subItems: [
-        { label: "YouTube OAC Request", path: "/services/youtube-oac" },
-        { label: "Youtube Claim Release", path: "/services/claim" },
-        { label: "Social Media Links", path: "/services/facebook-insta-profile" },
-        { label: "Facebook Claim Release", path: "/services/facebook-claim" },
-        { label: "Metadata Update Request", path: "/services/metadata-update" },
+        { label: "YouTube OAC Request",permission:"youtubeOACRequest", path: "/services/youtube-oac" },
+        { label: "Youtube Claim Release",permission:"youtubeClaimRelease", path: "/services/claim" },
+        { label: "Social Media Links",permission:"socialMediaLinks", path: "/services/facebook-insta-profile" },
+        { label: "Facebook Claim Release",permission:"facebookClaimRelease", path: "/services/facebook-claim" },
+        { label: "Metadata Update Request",permission:"metadataUpdateRequest", path: "/services/metadata-update" },
       ],
     },
     {
       path: "/requests",
       label: "Request",
       icon: <FaPaperPlane />,
+      permission:"requests",
       subItems: [
-        { label: "Copyright Claim", path: "/requests/claim" },
-        { label: "Official Artist Channel", path: "/requests/artist" },
+        { label: "Copyright Claim",permission:"copyrightClaim", path: "/requests/claim" },
+        { label: "Official Artist Channel",permission:"officialArtistChannel", path: "/requests/artist" },
       ],
     },
     {
       path: "/settings",
       label: "Settings",
       icon: <FaCog />,
+      permission:"settings",
       subItems: [
-        { label: "Password Change", path: "/settings/password" },
-        { label: "Bank Details", path: "/settings/bank-details" },
+        { label: "Password Change",permission:"passwordChange", path: "/settings/password" },
+        { label: "Bank Details",permission:"bankDetails", path: "/settings/bank-details" },
       ],
     },
   ];
@@ -157,71 +170,99 @@ const Sidebar = ({ collapsed, isMobile, toggleSidebar }) => {
         </div>
 
         {/* MENU LIST */}
-        <ul className="mt-3 px-3 space-y-1">
-          {menuItems.map((item) => {
-            const isActive =
-              location.pathname === item.path ||
-              item.subItems?.some((s) => s.path === location.pathname);
+       <ul className="mt-3 px-3 space-y-1">
+  {menuItems
+    .filter((item) => {
+      // 1️⃣ Role-based visibility
+      if (item.roles && !item.roles.includes(user.role)) {
+        return false;
+      }
 
-            const isOpen = openMenu === item.path;
+      // 2️⃣ Parent permission
+      if (item.permission && permissions[item.permission] === false) {
+        return false;
+      }
 
-            return (
-              <li key={item.path}>
-                {/* MAIN MENU BUTTON */}
-                <div
-                  onClick={() => toggleMenu(item.path)}
-                  className={`flex items-center rounded-md cursor-pointer transition 
-                    ${isCollapsedState ? "justify-center py-3" : "px-4 py-3 gap-3"}
-                    ${
-                      isActive
-                        ? "bg-gradient-to-r from-[#29B6F6] to-[#0288D1] text-white"
-                        : `${hoverBg} ${menuText}`
-                    }
-                  `}
-                >
-                  <span className="text-[18px]">{item.icon}</span>
+      // 3️⃣ If has submenus → at least ONE must be visible
+      if (item.subItems?.length) {
+        const hasVisibleSub = item.subItems.some(
+          (sub) =>
+            !sub.permission || permissions[sub.permission] === true
+        );
+        return hasVisibleSub;
+      }
 
-                  {!isCollapsedState && (
-                    <>
-                      <span className="flex-1 text-[15px]">{item.label}</span>
-                      <FaChevronDown
-                        className={`transition-transform ${
-                          isOpen ? "rotate-180 text-white" : "text-gray-400"
-                        }`}
-                      />
-                    </>
-                  )}
-                </div>
+      return true;
+    })
+    .map((item) => {
+      const isActive =
+        location.pathname === item.path ||
+        item.subItems?.some((s) => s.path === location.pathname);
 
-                {/* SUBMENUS */}
-                {!isCollapsedState && isOpen && (
-                  <ul className="ml-8 mt-1 space-y-1">
-                    {item.subItems?.map((sub) => {
-                      const activeSub = location.pathname === sub.path;
+      const isOpen = openMenu === item.path;
 
-                      return (
-                        <li key={sub.path}>
-                          <Link
-                            to={sub.path}
-                            className={`block px-3 py-2 rounded-md text-[14px] transition
-                              ${
-                                activeSub
-                                  ? "bg-[#0288D1] text-white"
-                                  : `${subText} ${subHoverBg}`
-                              }
-                            `}
-                          >
-                            • {sub.label}
-                          </Link>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
-              </li>
-            );
-          })}
-        </ul>
+      return (
+        <li key={item.path}>
+          {/* MAIN MENU */}
+          <div
+            onClick={() => toggleMenu(item.path)}
+            className={`flex items-center rounded-md cursor-pointer transition 
+              ${isCollapsedState ? "justify-center py-3" : "px-4 py-3 gap-3"}
+              ${
+                isActive
+                  ? "bg-gradient-to-r from-[#29B6F6] to-[#0288D1] text-white"
+                  : `${hoverBg} ${menuText}`
+              }
+            `}
+          >
+            <span className="text-[18px]">{item.icon}</span>
+
+            {!isCollapsedState && (
+              <>
+                <span className="flex-1 text-[15px]">{item.label}</span>
+                <FaChevronDown
+                  className={`transition-transform ${
+                    isOpen ? "rotate-180 text-white" : "text-gray-400"
+                  }`}
+                />
+              </>
+            )}
+          </div>
+
+          {/* SUBMENUS */}
+          {!isCollapsedState && isOpen && (
+            <ul className="ml-8 mt-1 space-y-1">
+              {item.subItems
+                ?.filter(
+                  (sub) =>
+                    !sub.permission || permissions[sub.permission] === true
+                )
+                .map((sub) => {
+                  const activeSub = location.pathname === sub.path;
+
+                  return (
+                    <li key={sub.path}>
+                      <Link
+                        to={sub.path}
+                        className={`block px-3 py-2 rounded-md text-[14px] transition
+                          ${
+                            activeSub
+                              ? "bg-[#0288D1] text-white"
+                              : `${subText} ${subHoverBg}`
+                          }
+                        `}
+                      >
+                        • {sub.label}
+                      </Link>
+                    </li>
+                  );
+                })}
+            </ul>
+          )}
+        </li>
+      );
+    })}
+</ul>
 
         {/* FADE */}
         <div
