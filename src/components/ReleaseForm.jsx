@@ -42,6 +42,9 @@ export default function CreateRelease() {
   const navigate = useNavigate();
   const formikRef = useRef(null);
 
+const [activeLabels, setActiveLabels] = useState([]);
+const baseUrl = import.meta.env.VITE_API_BASE_URL;
+
   const [coverFile, setCoverFile] = useState(null);
   const [coverPreview, setCoverPreview] = useState(null);
   const { theme } = useTheme();
@@ -75,6 +78,33 @@ const toDateInputValue = (value) => {
   return new Date(value).toISOString().split("T")[0];
 };
 
+
+useEffect(() => {
+  const fetchActiveLabels = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(`${baseUrl}/client/labels`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      if (data?.success) {
+        const onlyActive = data.data.filter(
+          (label) => label.status === "Active"
+        );
+        setActiveLabels(onlyActive);
+      }
+    } catch (err) {
+      console.error("Failed to load labels", err);
+    }
+  };
+
+  fetchActiveLabels();
+}, []);
 
 useEffect(() => {
   const saved = localStorage.getItem("releaseDraft");
@@ -197,6 +227,12 @@ digitalReleaseDate: toDateInputValue(parsed.digitalReleaseDate),
   </span>
 </div>
 
+ {activeLabels.length === 0 && (
+  <div className="text-red-400 text-center mb-4">
+    No active label found. Please activate or create a label first.
+  </div>
+)}
+
 
         {/* FORM */}
 <Formik
@@ -237,6 +273,9 @@ localStorage.setItem(
 
 
 >
+
+
+
 {({ errors, touched, values }) => (
 <Form className="grid md:grid-cols-2 gap-x-10 gap-y-6 mt-12">
 
@@ -297,13 +336,17 @@ localStorage.setItem(
     error={touched.subgenre && errors.subgenre}
   />
 
-  <FormField
-    theme={theme}
-    name="label"
-    placeholder="Label *"
-    disabled={isView}
-    error={touched.label && errors.label}
-  />
+  <SelectField
+  theme={theme}
+  name="label"
+  placeholder="Select Active Label *"
+  disabled={isView || activeLabels.length === 0}
+  options={activeLabels.map((l) => ({
+    label: l.labelName,
+    value: l._id,
+  }))}
+  error={touched.label && errors.label}
+/>
 
   <DateField
     theme={theme}
@@ -488,6 +531,7 @@ localStorage.setItem(
 
   <button
   type="submit"
+  disabled={activeLabels.length === 0}
   className="px-7 py-2 rounded-lg bg-sky-500 text-[#020726] font-medium hover:bg-sky-400 transition"
 >
   Next
@@ -563,7 +607,7 @@ export const SelectField = ({
   placeholder,
   options,
   error,
-   disabled
+  disabled
 }) => {
   const inputBg =
     theme === "dark"
@@ -573,31 +617,42 @@ export const SelectField = ({
   return (
     <div className="relative flex flex-col w-full">
       <Field
-      disabled={disabled}
         as="select"
         name={name}
+        disabled={disabled}
         aria-invalid={!!error}
         className={`w-full h-[46px] px-5 pr-12 rounded-xl outline-none
         focus:ring-1 focus:ring-sky-400 transition ${inputBg}`}
       >
         <option value="">{placeholder}</option>
-        {options.map((opt) => (
-          <option key={opt} value={opt}>
-            {opt}
-          </option>
-        ))}
+
+        {options.map((opt) => {
+          // support both string + object options
+          if (typeof opt === "string") {
+            return (
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
+            );
+          }
+
+          return (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          );
+        })}
       </Field>
 
       {error && (
-        <div className="absolute right-4 top-[14px]">
-          <ErrorIcon />
-        </div>
-      )}
-
-      {error && (
-        <span className="text-red-400 text-xs mt-1 leading-tight">
-          {error}
-        </span>
+        <>
+          <div className="absolute right-4 top-[14px]">
+            <ErrorIcon />
+          </div>
+          <span className="text-red-400 text-xs mt-1">
+            {error}
+          </span>
+        </>
       )}
     </div>
   );

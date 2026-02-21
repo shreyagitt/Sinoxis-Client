@@ -323,8 +323,8 @@ export default function Labels() {
                   {/* MD+ grid row */}
                   <div className="hidden md:grid grid-cols-12 items-center py-4 px-3">
                     <div className="col-span-4">{l.labelName}</div>
-                    <div className="col-span-2">{formatDisplayDate(l.created)}</div>
-                    <div className="col-span-2">{formatDisplayDate(l.expiry)}</div>
+                    <div className="col-span-2">{formatDisplayDate(l.createdAt)}</div>
+                    <div className="col-span-2">{formatDisplayDate(l.expires)}</div>
                     <div className="col-span-2">
                       <span
                         className="px-4 py-1 rounded-full text-sm font-semibold"
@@ -337,7 +337,7 @@ export default function Labels() {
                       </span>
                     </div>
                     <div className="col-span-2 flex justify-center gap-3">
-                      <button
+                      {/*<button
                         onClick={() => openView(l)}
                         className={`w-10 h-10 rounded-full flex items-center justify-center border transition ${
                           theme === "dark" ? "border-sky-500 hover:bg-sky-500/10" : "border-sky-400 hover:bg-sky-100"
@@ -345,17 +345,24 @@ export default function Labels() {
                         title="View"
                       >
                         <Eye size={18} className={theme === "dark" ? "text-sky-400" : "text-sky-600"} />
-                      </button>
+                      </button>*/}
 
-                      <button
-                        onClick={() => openEdit(l)}
-                        className={`w-10 h-10 rounded-full flex items-center justify-center border transition ${
-                          theme === "dark" ? "border-amber-400 hover:bg-amber-400/10" : "border-amber-500 hover:bg-amber-100"
-                        }`}
-                        title="Edit"
-                      >
-                        <Edit3 size={16} className={theme === "dark" ? "text-amber-300" : "text-amber-700"} />
-                      </button>
+                      {l.status !== "Active" && (
+  <button
+    onClick={() => openEdit(l)}
+    className={`w-10 h-10 rounded-full flex items-center justify-center border transition ${
+      theme === "dark"
+        ? "border-amber-400 hover:bg-amber-400/10"
+        : "border-amber-500 hover:bg-amber-100"
+    }`}
+    title="Edit"
+  >
+    <Edit3
+      size={16}
+      className={theme === "dark" ? "text-amber-300" : "text-amber-700"}
+    />
+  </button>
+)}
                     </div>
                   </div>
 
@@ -381,7 +388,7 @@ export default function Labels() {
                         </span>
 
                         <div className="flex gap-2">
-                          <button
+                          {/*<button
                             onClick={() => openView(l)}
                             className={`w-9 h-9 rounded-full flex items-center justify-center border transition ${
                               theme === "dark" ? "border-sky-500 hover:bg-sky-500/10" : "border-sky-400 hover:bg-sky-100"
@@ -390,16 +397,23 @@ export default function Labels() {
                           >
                             <Eye size={16} className={theme === "dark" ? "text-sky-400" : "text-sky-600"} />
                           </button>
-
-                          <button
-                            onClick={() => openEdit(l)}
-                            className={`w-9 h-9 rounded-full flex items-center justify-center border transition ${
-                              theme === "dark" ? "border-amber-400 hover:bg-amber-400/10" : "border-amber-500 hover:bg-amber-100"
-                            }`}
-                            title="Edit"
-                          >
-                            <Edit3 size={14} className={theme === "dark" ? "text-amber-300" : "text-amber-700"} />
-                          </button>
+*/}
+                          {l.status !== "Active" && (
+  <button
+    onClick={() => openEdit(l)}
+    className={`w-9 h-9 rounded-full flex items-center justify-center border transition ${
+      theme === "dark"
+        ? "border-amber-400 hover:bg-amber-400/10"
+        : "border-amber-500 hover:bg-amber-100"
+    }`}
+    title="Edit"
+  >
+    <Edit3
+      size={14}
+      className={theme === "dark" ? "text-amber-300" : "text-amber-700"}
+    />
+  </button>
+)}
                         </div>
                       </div>
                     </div>
