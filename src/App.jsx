@@ -4,6 +4,7 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 
 // Pages
+import ProtectedRoute from "./components/Auth/ProtectedRoute";
 import Home from "./pages/Home";
 import Layout from './components/Layout'
 import Dashboard from "./components/Dashboard";
@@ -58,18 +59,22 @@ function App() {
       <Route
         path="/dashboard"
         element={
+          <ProtectedRoute>
           <Layout>
             < Dashboard/>
           </Layout>
+          </ProtectedRoute>
         }
       />
 
   <Route
         path="/pending"
         element={
+          <ProtectedRoute>
           <Layout>
             < Pending/>
           </Layout>
+          </ProtectedRoute>
         }
       />
 
@@ -77,36 +82,44 @@ function App() {
       <Route
         path="/releases/myRelease"
         element={
+          <ProtectedRoute>
           <Layout>
             < MyReleases/>
           </Layout>
+          </ProtectedRoute>
         }
       />
 
        <Route
         path="/releases/create"
         element={
+          <ProtectedRoute>
           <Layout>
             < ReleaseForm/>
           </Layout>
+          </ProtectedRoute>
         }
       />
 
       <Route
         path="/stores"
         element={
+          <ProtectedRoute>
           <Layout>
             < Stores/>
           </Layout>
+          </ProtectedRoute>
         }
       />
 
 <Route
         path="/tracks"
         element={
+          <ProtectedRoute>
           <Layout>
             < Tracks/>
           </Layout>
+          </ProtectedRoute>
         }
       />
 
@@ -114,18 +127,22 @@ function App() {
 <Route
         path="/submission"
         element={
+          <ProtectedRoute>
           <Layout>
             < Submission/>
           </Layout>
+          </ProtectedRoute>
         }
       />
 
              <Route
         path="/releases/edit/:id"
         element={
+          <ProtectedRoute>
           <Layout>
             < ReleaseForm/>
           </Layout>
+          </ProtectedRoute>
         }
       />
 
@@ -133,105 +150,129 @@ function App() {
       <Route
         path="/artists/list"
         element={
+          <ProtectedRoute>
           <Layout>
             < Artist/>
           </Layout>
+          </ProtectedRoute>
         }
       />
 
       <Route
         path="/lables/list"
         element={
+          <ProtectedRoute>
           <Layout>
             < Labels/>
           </Layout>
+          </ProtectedRoute>
         }
       />
 
 <Route
         path="/revenue/reports"
         element={
+          <ProtectedRoute>
           <Layout>
             < RevenueReport/>
           </Layout>
+          </ProtectedRoute>
         }
       />
       <Route
         path="/revenue/total"
         element={
+          <ProtectedRoute>
           <Layout>
             < TotalRevenueAnalytics/>
           </Layout>
+          </ProtectedRoute>
         }
       />
 
       <Route
         path="/revenue/request"
         element={
+          <ProtectedRoute>
           <Layout>
             < RequestPayment/>
           </Layout>
+          </ProtectedRoute>
         }
       />
        
        <Route
         path="/services/youtube-oac"
         element={
+          <ProtectedRoute>
           <Layout>
             < YouTubeOACRequestForm/>
           </Layout>
+          </ProtectedRoute>
         }
       />
       <Route
         path="/services/claim"
         element={
+          <ProtectedRoute>
           <Layout>
             < YouTubeClaimRelease/>
           </Layout>
+          </ProtectedRoute>
         }
       />
       <Route
         path="/services/facebook-insta-profile"
         element={
+          <ProtectedRoute>
           <Layout>
             < SocialIsrcSubmitForm/>
           </Layout>
+          </ProtectedRoute>
         }
       />
 
        <Route
         path="/services/facebook-claim"
         element={
+          <ProtectedRoute>
           <Layout>
             < FacebookVideoLinkSubmitForm />
           </Layout>
+          </ProtectedRoute>
         }
       />
 
 <Route
         path="/services/metadata-update"
         element={
+          <ProtectedRoute>
           <Layout>
             < MetadataUpdateForm />
           </Layout>
+          </ProtectedRoute>
         }
       />
 
       <Route
         path="/requests/claim"
         element={
+           <ProtectedRoute>
           <Layout>
             < CopyrightClaim />
           </Layout>
+           </ProtectedRoute>
         }
       />
 
        <Route
         path="/requests/artist"
         element={
+           <ProtectedRoute>
           <Layout>
             < OfficialArtistChannel />
           </Layout>
+           </ProtectedRoute>
         }
       />
       
@@ -241,18 +282,23 @@ function App() {
  <Route
   path="/settings/password"
   element={
+     <ProtectedRoute>
     <Layout>
       <ChangePass />
     </Layout>
-  }
+  </ProtectedRoute>
+}
 />
+
 
  <Route
   path="/settings/bank-details"
   element={
+     <ProtectedRoute>
     <Layout>
       <BankDetails />
     </Layout>
+     </ProtectedRoute>
   }
 />
 
