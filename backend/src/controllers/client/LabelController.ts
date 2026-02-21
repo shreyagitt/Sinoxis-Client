@@ -5,28 +5,18 @@ import cloudinary from "../../config/cloudinary";
 import fs from "fs";
 
 /* ----------------------------------------------------------
-   Helpers
+   Upload Helper (NO MIME VALIDATION HERE)
 ---------------------------------------------------------- */
-
-const ALLOWED_TYPES = [
-  "image/jpeg",
-  "image/jpg",
-  "image/png",
-  "image/webp",
-];
-
 const uploadToCloudinary = async (file: Express.Multer.File) => {
-  if (!ALLOWED_TYPES.includes(file.mimetype)) {
-    //fs.unlinkSync(file.path);
-    throw new Error(`Unsupported file type: ${file.mimetype}`);
-  }
-
   const result = await cloudinary.uploader.upload(file.path, {
     folder: "labels/aadhar",
     resource_type: "image",
   });
 
-  //fs.unlinkSync(file.path);
+  // safely delete temp file
+  if (fs.existsSync(file.path)) {
+    fs.unlinkSync(file.path);
+  }
 
   return {
     url: result.secure_url,
@@ -39,9 +29,8 @@ const uploadToCloudinary = async (file: Express.Multer.File) => {
 ---------------------------------------------------------- */
 
 export const ClientLabelController = {
-  /* ============================================================
-     LIST LABELS
-  ============================================================ */
+
+  /* LIST */
   list: asyncHandler(async (req: Request, res: Response) => {
     const labels = await Label.find({
       createdBy: req.user!.userId,
@@ -52,9 +41,7 @@ export const ClientLabelController = {
     res.json({ success: true, data: labels });
   }),
 
-  /* ============================================================
-     GET ONE LABEL
-  ============================================================ */
+  /* GET ONE */
   getOne: asyncHandler(async (req: Request, res: Response) => {
     const label = await Label.findOne({
       _id: req.params.id,
@@ -71,9 +58,7 @@ export const ClientLabelController = {
     res.json({ success: true, data: label });
   }),
 
-  /* ============================================================
-     CREATE LABEL
-  ============================================================ */
+  /* CREATE */
   create: asyncHandler(async (req: Request, res: Response) => {
     const body = req.body;
 
@@ -113,9 +98,7 @@ export const ClientLabelController = {
     res.status(201).json({ success: true, data: label });
   }),
 
-  /* ============================================================
-     UPDATE LABEL
-  ============================================================ */
+  /* UPDATE */
   update: asyncHandler(async (req: Request, res: Response) => {
     const label = await Label.findOne({
       _id: req.params.id,
@@ -163,9 +146,7 @@ export const ClientLabelController = {
     res.json({ success: true, data: updated });
   }),
 
-  /* ============================================================
-     DELETE LABEL
-  ============================================================ */
+  /* DELETE */
   delete: asyncHandler(async (req: Request, res: Response) => {
     const label = await Label.findOne({
       _id: req.params.id,
@@ -182,6 +163,7 @@ export const ClientLabelController = {
     if (label.aadharFrontId) {
       await cloudinary.uploader.destroy(label.aadharFrontId);
     }
+
     if (label.aadharBackId) {
       await cloudinary.uploader.destroy(label.aadharBackId);
     }
