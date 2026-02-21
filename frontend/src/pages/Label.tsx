@@ -5,6 +5,11 @@ import { Edit, Trash2, Search, ImagePlus } from "lucide-react";
 import { useAppSelector } from "../store/hook";
 import toast from "react-hot-toast";
 
+interface Client {
+  _id: string;
+  name: string;
+  email: string;
+}
 /* ================================
    LABEL INTERFACE
 ================================ */
@@ -30,7 +35,7 @@ const LabelPage: React.FC = () => {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Label | null>(null);
-
+const [clients, setClients] = useState<Client[]>([]);
   /* FORM DATA */
   const [formData, setFormData] = useState({
     fullName: "",
@@ -40,6 +45,7 @@ const LabelPage: React.FC = () => {
     youtube: "",
     language: "",
     status: "Pending",
+    createdBy: "",
     aadharFront: null as File | null,
     aadharBack: null as File | null,
   });
@@ -62,6 +68,20 @@ const LabelPage: React.FC = () => {
   useEffect(() => {
     if (token) fetchLabels();
   }, [token]);
+
+  const fetchClients = async () => {
+  try {
+    const res = await axios.get(`${baseUrl}/users?role=client`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (res.data.success) {
+      setClients(res.data.data);
+    }
+  } catch {
+    toast.error("Failed to load clients");
+  }
+};
 
   /* ============================
         SAVE LABEL
@@ -95,6 +115,7 @@ const LabelPage: React.FC = () => {
       }
 
       fetchLabels();
+      fetchClients();
       closeModal();
     } catch {
       toast.error("Failed to save label");
@@ -131,6 +152,7 @@ const LabelPage: React.FC = () => {
         youtube: label.youtube,
         language: label.language,
         status: label.status,
+        createdBy: label.createdBy || "",
         aadharFront: null,
         aadharBack: null,
       });
@@ -144,6 +166,7 @@ const LabelPage: React.FC = () => {
         youtube: "",
         language: "",
         status: "Pending",
+        createdBy: "",
         aadharFront: null,
         aadharBack: null,
       });
@@ -330,6 +353,24 @@ const LabelPage: React.FC = () => {
                   />
                 ))}
 
+                <select
+  className="w-full border border-[#1A2347] bg-white dark:bg-[#111A3A] rounded-md px-3 py-2"
+  value={formData.createdBy}
+  onChange={(e) =>
+    setFormData({
+      ...formData,
+      createdBy: e.target.value,
+    })
+  }
+>
+  <option value="">Select Client</option>
+  {clients.map((client) => (
+    <option key={client._id} value={client._id}>
+      {client.name} ({client.email})
+    </option>
+  ))}
+</select>
+
                 {/* STATUS */}
                 <select
                   className="w-full border border-[#1A2347] bg-white dark:bg-[#111A3A] rounded-md px-3 py-2"
@@ -349,38 +390,48 @@ const LabelPage: React.FC = () => {
 
                 {/* FILE UPLOADS */}
                 <div>
-                  <label className="flex gap-2 cursor-pointer items-center">
-                    <ImagePlus size={18} /> Upload Aadhar Front
-                  </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        aadharFront: e.target.files?.[0] || null,
-                      })
-                    }
-                  />
-                </div>
+  <label
+    htmlFor="aadharFrontInput"
+    className="flex gap-2 cursor-pointer items-center"
+  >
+    <ImagePlus size={18} /> Upload Aadhar Front
+  </label>
+
+  <input
+    id="aadharFrontInput"
+    type="file"
+    accept="image/*"
+    className="hidden"
+    onChange={(e) =>
+      setFormData({
+        ...formData,
+        aadharFront: e.target.files?.[0] || null,
+      })
+    }
+  />
+</div>
 
                 <div>
-                  <label className="flex gap-2 cursor-pointer items-center">
-                    <ImagePlus size={18} /> Upload Aadhar Back
-                  </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        aadharBack: e.target.files?.[0] || null,
-                      })
-                    }
-                  />
-                </div>
+  <label
+    htmlFor="aadharBackInput"
+    className="flex gap-2 cursor-pointer items-center"
+  >
+    <ImagePlus size={18} /> Upload Aadhar Back
+  </label>
+
+  <input
+    id="aadharBackInput"
+    type="file"
+    accept="image/*"
+    className="hidden"
+    onChange={(e) =>
+      setFormData({
+        ...formData,
+        aadharBack: e.target.files?.[0] || null,
+      })
+    }
+  />
+</div>
 
               </div>
 
