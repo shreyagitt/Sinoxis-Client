@@ -1,7 +1,7 @@
 // src/pages/LabelPage.tsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Edit, Trash2, Search, ImagePlus } from "lucide-react";
+import { Edit, Trash2, Search, ImagePlus , Eye, Download } from "lucide-react";
 import { useAppSelector } from "../store/hook";
 import toast from "react-hot-toast";
 
@@ -22,6 +22,11 @@ interface Label {
   youtube: string;
   language: string;
   status: "Active" | "Pending" | "Rejected" | "Inactive";
+
+  createdBy?: string;
+  createdAt?: string;
+  expires?: string;
+
   aadharFront?: string;
   aadharBack?: string;
 }
@@ -38,18 +43,39 @@ const LabelPage: React.FC = () => {
 const [clients, setClients] = useState<Client[]>([]);
   /* FORM DATA */
   const [formData, setFormData] = useState({
-    fullName: "",
-    labelName: "",
-    email: "",
-    phone: "",
-    youtube: "",
-    language: "",
-    status: "Pending",
-    createdBy: "",
-    aadharFront: null as File | null,
-    aadharBack: null as File | null,
-  });
+  fullName: "",
+  labelName: "",
+  email: "",
+  phone: "",
+  youtube: "",
+  language: "",
+  status: "Pending",
+  createdBy: "",
 
+  createdAt: new Date().toISOString().split("T")[0], // auto
+  expires: "",
+
+  aadharFront: null as File | null,
+  aadharBack: null as File | null,
+});
+
+
+const [viewing, setViewing] = useState<Label | null>(null);
+
+
+ /* ============================
+        DOWNLOAD FILE
+  ============================ */
+  const downloadFile = (url?: string, name?: string) => {
+    if (!url) return;
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = name || "file";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
   /* ============================
         FETCH LABELS
   ============================ */
@@ -142,37 +168,46 @@ const [clients, setClients] = useState<Client[]>([]);
 
   /* MODAL HANDLERS */
   const openModal = (label?: Label) => {
-    if (label) {
-      setEditing(label);
-      setFormData({
-        fullName: label.fullName,
-        labelName: label.labelName,
-        email: label.email,
-        phone: label.phone,
-        youtube: label.youtube,
-        language: label.language,
-        status: label.status,
-        createdBy: label.createdBy || "",
-        aadharFront: null,
-        aadharBack: null,
-      });
-    } else {
-      setEditing(null);
-      setFormData({
-        fullName: "",
-        labelName: "",
-        email: "",
-        phone: "",
-        youtube: "",
-        language: "",
-        status: "Pending",
-        createdBy: "",
-        aadharFront: null,
-        aadharBack: null,
-      });
-    }
-    setModalOpen(true);
-  };
+  fetchClients();   // ADD THIS
+const toDateInput = (date?: string) => {
+  if (!date) return "";
+  return new Date(date).toISOString().split("T")[0];
+};
+  if (label) {
+    setEditing(label);
+    setFormData({
+      fullName: label.fullName,
+      labelName: label.labelName,
+      email: label.email,
+      phone: label.phone,
+      youtube: label.youtube,
+      language: label.language,
+      status: label.status,
+      createdBy: label.createdBy || "",
+      createdAt: toDateInput(label.createdAt),
+expires: toDateInput(label.expires),
+      aadharFront: null,
+      aadharBack: null,
+    });
+  } else {
+    setEditing(null);
+    setFormData({
+      fullName: "",
+      labelName: "",
+      email: "",
+      phone: "",
+      youtube: "",
+      language: "",
+      status: "Pending",
+      createdBy: "",
+      createdAt: new Date().toISOString().split("T")[0],
+      expires: "",
+      aadharFront: null,
+      aadharBack: null,
+    });
+  }
+  setModalOpen(true);
+};
 
   const closeModal = () => {
     setModalOpen(false);
@@ -282,6 +317,8 @@ const [clients, setClients] = useState<Client[]>([]);
                     >
                       {label.status}
                     </span>
+
+                    
                   </td>
 
                   {/* ACTIONS */}
@@ -294,6 +331,13 @@ const [clients, setClients] = useState<Client[]>([]);
                         <Edit size={18} />
                       </button>
 
+
+<button
+  onClick={() => setViewing(label)}
+  className="text-green-500 hover:text-white hover:bg-green-500 p-2 rounded transition"
+>
+  <Eye size={18} />
+</button>
                       <button
                         onClick={() => deleteLabel(label._id)}
                         className="text-red-500 hover:text-white hover:bg-red-500 p-2 rounded transition"
@@ -324,8 +368,13 @@ const [clients, setClients] = useState<Client[]>([]);
                 MODAL FORM
         ============================ */}
         {modalOpen && (
-          <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex justify-center items-center z-50">
-            <div className="bg-white dark:bg-[#0B1029] text-[#020726] dark:text-white rounded-xl p-6 w-full max-w-md shadow-xl border border-[#1A2347]">
+          <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex justify-center items-center z-50 p-4">
+            <div className="
+  bg-white dark:bg-[#0B1029] text-[#020726] dark:text-white 
+  rounded-xl p-6 w-full max-w-md
+  shadow-xl border border-[#1A2347]
+  max-h-[90vh] overflow-y-auto
+">
 
               <h2 className="text-xl font-semibold mb-4">
                 {editing ? "Edit Label" : "Add Label"}
@@ -387,6 +436,26 @@ const [clients, setClients] = useState<Client[]>([]);
                   <option>Rejected</option>
                   <option>Inactive</option>
                 </select>
+
+                {/* CREATED DATE */}
+<input
+  type="date"
+  className="w-full border border-[#1A2347] rounded-md px-3 py-2"
+  value={formData.createdAt}
+  onChange={(e) =>
+    setFormData({ ...formData, createdAt: e.target.value })
+  }
+/>
+
+{/* EXPIRY DATE */}
+<input
+  type="date"
+  className="w-full border border-[#1A2347] rounded-md px-3 py-2"
+  value={formData.expires}
+  onChange={(e) =>
+    setFormData({ ...formData, expires: e.target.value })
+  }
+/>
 
                 {/* FILE UPLOADS */}
                 <div>
@@ -455,6 +524,70 @@ const [clients, setClients] = useState<Client[]>([]);
             </div>
           </div>
         )}
+
+        {viewing && (
+  <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50 p-4">
+    <div className="bg-white dark:bg-[#0B1029] p-6 rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+
+      <h2 className="text-xl font-semibold mb-4">Label Details</h2>
+
+      <div className="space-y-2 text-sm">
+
+        <p><b>Full Name:</b> {viewing.fullName}</p>
+        <p><b>Label Name:</b> {viewing.labelName}</p>
+        <p><b>Email:</b> {viewing.email}</p>
+        <p><b>Phone:</b> {viewing.phone}</p>
+        <p><b>Language:</b> {viewing.language}</p>
+        <p><b>YouTube:</b> {viewing.youtube}</p>
+
+        <p><b>Status:</b> {viewing.status}</p>
+        <p><b>Created Date:</b> {viewing.createdAt}</p>
+        <p><b>Expiry Date:</b> {viewing.expires}</p>
+
+      </div>
+
+      {/* AADHAR PREVIEW */}
+      <div className="mt-4 space-y-3">
+        <p className="font-medium">Documents</p>
+
+        <img
+          src={viewing.aadharFront}
+          className="w-full h-40 object-cover rounded"
+        />
+
+        <img
+          src={viewing.aadharBack}
+          className="w-full h-40 object-cover rounded"
+        />
+      </div>
+
+      {/* DOWNLOAD BUTTONS */}
+      <div className="flex gap-3 mt-4">
+        <button
+          onClick={() => downloadFile(viewing.aadharFront, "aadhar-front.jpg")}
+          className="bg-blue-500 text-white px-3 py-1 rounded flex items-center gap-1"
+        >
+          <Download size={16}/> Front
+        </button>
+
+        <button
+          onClick={() => downloadFile(viewing.aadharBack, "aadhar-back.jpg")}
+          className="bg-blue-500 text-white px-3 py-1 rounded flex items-center gap-1"
+        >
+          <Download size={16}/> Back
+        </button>
+      </div>
+
+      <button
+        onClick={() => setViewing(null)}
+        className="mt-5 w-full bg-gray-400 py-2 rounded"
+      >
+        Close
+      </button>
+
+    </div>
+  </div>
+)}
 
       </div>
     </div>
