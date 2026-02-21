@@ -25,8 +25,8 @@ const LabelSchema = new Schema(
     },
 
     // Created & expiry (5 years auto)
-    created: { type: Date, default: Date.now },
-    expiry: { type: Date },
+   createdAt: { type: Date, default: Date.now },
+expires: { type: Date },
 
     createdBy: { type: Schema.Types.ObjectId, ref: "User" }, // client id
   },
