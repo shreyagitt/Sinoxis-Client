@@ -543,9 +543,10 @@ function AddEditModal({
                       await handleAadharFrontChange(f, setFieldValue);
                     }}
                   />
-                  <div className="mt-2 w-full max-w-[240px] h-[140px] bg-gray-200 rounded-lg overflow-hidden border">
+                  {/*<div className="mt-2 w-full max-w-[240px] h-[140px] bg-gray-200 rounded-lg overflow-hidden border">
                     <img src={values.aadharFrontPreview || placeholderImage} className="w-full h-full object-cover" alt="front preview" />
-                  </div>
+                  </div>*/}
+
                 </div>
               </div>
 
@@ -581,9 +582,9 @@ function AddEditModal({
                       await handleAadharBackChange(f, setFieldValue);
                     }}
                   />
-                  <div className="mt-2 w-full max-w-[240px] h-[140px] bg-gray-200 rounded-lg overflow-hidden border">
+                  {/*<div className="mt-2 w-full max-w-[240px] h-[140px] bg-gray-200 rounded-lg overflow-hidden border">
                     <img src={values.aadharBackPreview || placeholderImage} className="w-full h-full object-cover" alt="back preview" />
-                  </div>
+                  </div>*/}
                 </div>
               </div>
             </div>
