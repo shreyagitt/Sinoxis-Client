@@ -4,6 +4,7 @@ import axios from "axios";
 import { Edit, Trash2, Search, ImagePlus , Eye, Download } from "lucide-react";
 import { useAppSelector } from "../store/hook";
 import toast from "react-hot-toast";
+import Select from "react-select";
 
 interface Client {
   _id: string;
@@ -226,6 +227,11 @@ expires: toDateInput(label.expires),
     );
   });
 
+  const clientOptions = clients.map((c) => ({
+  value: c._id,
+  label: `${c.firstName} ${c.lastName} (${c.email})`
+}));
+
   /* ============================
             UI START
   ============================ */
@@ -368,227 +374,165 @@ expires: toDateInput(label.expires),
                 MODAL FORM
         ============================ */}
         {modalOpen && (
-          <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex justify-center items-center z-50 p-4">
-            <div className="
-  bg-white dark:bg-[#0B1029] text-[#020726] dark:text-white 
-  rounded-xl p-6 w-full max-w-md
-  shadow-xl border border-[#1A2347]
-  max-h-[90vh] overflow-y-auto
-">
+  <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex justify-center items-center z-50 p-4">
+    
+    <div className="
+      bg-white dark:bg-[#0B1029] text-[#020726] dark:text-white
+      rounded-lg p-8 w-full max-w-4xl
+      shadow-2xl border border-[#1A2347]
+      max-h-[90vh] overflow-y-auto
+    ">
 
-              <h2 className="text-xl font-semibold mb-4">
-                {editing ? "Edit Label" : "Add Label"}
-              </h2>
+      <h2 className="text-xl font-semibold mb-6">
+        {editing ? "Edit Label" : "Add Label"}
+      </h2>
 
-              <div className="space-y-3">
-                {/* FIELDS */}
-                {[
-                  "fullName",
-                  "labelName",
-                  "email",
-                  "phone",
-                  "language",
-                  "youtube",
-                ].map((field) => (
-                  <input
-                    key={field}
-                    type="text"
-                    placeholder={field.replace(/^\w/, (x) => x.toUpperCase())}
-                    className="w-full border border-[#1A2347] bg-white dark:bg-[#111A3A] rounded-md px-3 py-2"
-                    value={formData[field]}
-                    onChange={(e) =>
-                      setFormData({ ...formData, [field]: e.target.value })
-                    }
-                  />
-                ))}
+      {/* ===== GRID FORM ===== */}
+      <div className="grid grid-cols-2 gap-4">
 
-                <select
-  className="w-full border border-[#1A2347] bg-white dark:bg-[#111A3A] rounded-md px-3 py-2"
-  value={formData.createdBy}
-  onChange={(e) =>
-    setFormData({
-      ...formData,
-      createdBy: e.target.value,
-    })
-  }
->
-  <option value="">Select Client</option>
-  {clients.map((client) => (
-    <option key={client._id} value={client._id}>
-      {client.name} ({client.email})
-    </option>
-  ))}
-</select>
+        {/* TEXT FIELDS */}
+        {[
+          "fullName",
+          "labelName",
+          "email",
+          "phone",
+          "language",
+          "youtube",
+        ].map((field) => (
+          <input
+            key={field}
+            type="text"
+            placeholder={field.replace(/^\w/, x => x.toUpperCase())}
+            className="border border-[#1A2347] bg-white dark:bg-[#111A3A] rounded-md px-3 py-2 w-full"
+            value={formData[field]}
+            onChange={(e) =>
+              setFormData({ ...formData, [field]: e.target.value })
+            }
+          />
+        ))}
 
-                {/* STATUS */}
-                <select
-                  className="w-full border border-[#1A2347] bg-white dark:bg-[#111A3A] rounded-md px-3 py-2"
-                  value={formData.status}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      status: e.target.value,
-                    })
-                  }
-                >
-                  <option>Pending</option>
-                  <option>Active</option>
-                  <option>Rejected</option>
-                  <option>Inactive</option>
-                </select>
+        {/* CLIENT SELECT FULL WIDTH */}
+        <div className="col-span-2">
+  <label className="block text-sm mb-1">Select Client</label>
 
-                {/* CREATED DATE */}
-<input
-  type="date"
-  className="w-full border border-[#1A2347] rounded-md px-3 py-2"
-  value={formData.createdAt}
-  onChange={(e) =>
-    setFormData({ ...formData, createdAt: e.target.value })
-  }
-/>
-
-{/* EXPIRY DATE */}
-<input
-  type="date"
-  className="w-full border border-[#1A2347] rounded-md px-3 py-2"
-  value={formData.expires}
-  onChange={(e) =>
-    setFormData({ ...formData, expires: e.target.value })
-  }
-/>
-
-                {/* FILE UPLOADS */}
-                <div>
-  <label
-    htmlFor="aadharFrontInput"
-    className="flex gap-2 cursor-pointer items-center"
-  >
-    <ImagePlus size={18} /> Upload Aadhar Front
-  </label>
-
-  <input
-    id="aadharFrontInput"
-    type="file"
-    accept="image/*"
-    className="hidden"
+  <select
+    className="w-full border border-[#1A2347] bg-white dark:bg-[#111A3A] rounded-md px-3 py-2"
+    value={formData.createdBy || ""}
     onChange={(e) =>
-      setFormData({
-        ...formData,
-        aadharFront: e.target.files?.[0] || null,
-      })
+      setFormData((prev) => ({
+        ...prev,
+        createdBy: e.target.value,
+      }))
     }
-  />
+  >
+    <option value="">Select Client</option>
+
+    {clients?.length > 0 ? (
+      clients.map((client) => (
+        <option key={client._id} value={client._id}>
+          {client.firstName} {client.lastName} ({client.email})
+        </option>
+      ))
+    ) : (
+      <option disabled>No clients available</option>
+    )}
+  </select>
 </div>
 
-                <div>
-  <label
-    htmlFor="aadharBackInput"
-    className="flex gap-2 cursor-pointer items-center"
-  >
-    <ImagePlus size={18} /> Upload Aadhar Back
-  </label>
-
-  <input
-    id="aadharBackInput"
-    type="file"
-    accept="image/*"
-    className="hidden"
-    onChange={(e) =>
-      setFormData({
-        ...formData,
-        aadharBack: e.target.files?.[0] || null,
-      })
-    }
-  />
-</div>
-
-              </div>
-
-              {/* BUTTONS */}
-              <div className="flex justify-end gap-3 mt-6">
-                <button
-                  onClick={closeModal}
-                  className="px-4 py-2 bg-gray-300 dark:bg-[#111A3A] rounded-lg"
-                >
-                  Cancel
-                </button>
-
-                <button
-                  onClick={saveLabel}
-                  className="px-4 py-2 text-white rounded-lg bg-gradient-to-r from-[#29B6F6] to-[#0288D1] hover:opacity-90"
-                >
-                  {editing ? "Update" : "Submit"}
-                </button>
-              </div>
-
-            </div>
-          </div>
-        )}
-
-        {viewing && (
-  <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50 p-4">
-    <div className="bg-white dark:bg-[#0B1029] p-6 rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-
-      <h2 className="text-xl font-semibold mb-4">Label Details</h2>
-
-      <div className="space-y-2 text-sm">
-
-        <p><b>Full Name:</b> {viewing.fullName}</p>
-        <p><b>Label Name:</b> {viewing.labelName}</p>
-        <p><b>Email:</b> {viewing.email}</p>
-        <p><b>Phone:</b> {viewing.phone}</p>
-        <p><b>Language:</b> {viewing.language}</p>
-        <p><b>YouTube:</b> {viewing.youtube}</p>
-
-        <p><b>Status:</b> {viewing.status}</p>
-        <p><b>Created Date:</b> {viewing.createdAt}</p>
-        <p><b>Expiry Date:</b> {viewing.expires}</p>
-
-      </div>
-
-      {/* AADHAR PREVIEW */}
-      <div className="mt-4 space-y-3">
-        <p className="font-medium">Documents</p>
-
-        <img
-          src={viewing.aadharFront}
-          className="w-full h-40 object-cover rounded"
-        />
-
-        <img
-          src={viewing.aadharBack}
-          className="w-full h-40 object-cover rounded"
-        />
-      </div>
-
-      {/* DOWNLOAD BUTTONS */}
-      <div className="flex gap-3 mt-4">
-        <button
-          onClick={() => downloadFile(viewing.aadharFront, "aadhar-front.jpg")}
-          className="bg-blue-500 text-white px-3 py-1 rounded flex items-center gap-1"
+        {/* STATUS */}
+        <select
+          className="border border-[#1A2347] bg-white dark:bg-[#111A3A] rounded-md px-3 py-2"
+          value={formData.status}
+          onChange={(e) =>
+            setFormData({ ...formData, status: e.target.value })
+          }
         >
-          <Download size={16}/> Front
+          <option>Pending</option>
+          <option>Active</option>
+          <option>Rejected</option>
+          <option>Inactive</option>
+        </select>
+
+        {/* CREATED DATE */}
+        <input
+          type="date"
+          className="border border-[#1A2347] rounded-md px-3 py-2"
+          value={formData.createdAt}
+          onChange={(e) =>
+            setFormData({ ...formData, createdAt: e.target.value })
+          }
+        />
+
+        {/* EXPIRY DATE */}
+        <input
+          type="date"
+          className="border border-[#1A2347] rounded-md px-3 py-2"
+          value={formData.expires}
+          onChange={(e) =>
+            setFormData({ ...formData, expires: e.target.value })
+          }
+        />
+
+        {/* ===== FILE UPLOAD FULL WIDTH ===== */}
+
+        <div className="col-span-2">
+          <label htmlFor="aadharFrontInput" className="flex gap-2 cursor-pointer items-center">
+            <ImagePlus size={18}/> Upload Aadhar Front
+          </label>
+          <input
+            id="aadharFrontInput"
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e)=>
+              setFormData({
+                ...formData,
+                aadharFront: e.target.files?.[0] || null
+              })
+            }
+          />
+        </div>
+
+        <div className="col-span-2">
+          <label htmlFor="aadharBackInput" className="flex gap-2 cursor-pointer items-center">
+            <ImagePlus size={18}/> Upload Aadhar Back
+          </label>
+          <input
+            id="aadharBackInput"
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e)=>
+              setFormData({
+                ...formData,
+                aadharBack: e.target.files?.[0] || null
+              })
+            }
+          />
+        </div>
+
+      </div>
+
+      {/* ===== BUTTONS ===== */}
+      <div className="flex justify-end gap-3 mt-8">
+        <button
+          onClick={closeModal}
+          className="px-4 py-2 bg-gray-300 dark:bg-[#111A3A] rounded-lg"
+        >
+          Cancel
         </button>
 
         <button
-          onClick={() => downloadFile(viewing.aadharBack, "aadhar-back.jpg")}
-          className="bg-blue-500 text-white px-3 py-1 rounded flex items-center gap-1"
+          onClick={saveLabel}
+          className="px-4 py-2 text-white rounded-lg bg-gradient-to-r from-[#29B6F6] to-[#0288D1]"
         >
-          <Download size={16}/> Back
+          {editing ? "Update" : "Submit"}
         </button>
       </div>
-
-      <button
-        onClick={() => setViewing(null)}
-        className="mt-5 w-full bg-gray-400 py-2 rounded"
-      >
-        Close
-      </button>
 
     </div>
   </div>
 )}
-
       </div>
     </div>
   );

@@ -175,7 +175,7 @@ const tracks: Track[] = selectedRelease
       {/* HEADER */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">
-          Admin Release Management
+          Admin Release 
         </h1>
 
         <button
