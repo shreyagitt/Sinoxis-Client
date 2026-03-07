@@ -4,7 +4,7 @@ import { Edit3, Eye, Trash2, X, Music, Disc, Play } from "lucide-react";
 import axios from "axios";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { useTheme } from "../components/Topbar";
+//import { useTheme } from "../components/Topbar";
 
 // Default avatar placeholder
 const defaultAvatar = "/mnt/data/c0a07c60-5433-4b57-8c23-032a981b2c43.png";
@@ -301,17 +301,11 @@ useEffect(() => {
                       {/* VIEW */}
                       <button
                         onClick={() => openView(artist)}
-                        className={`w-10 h-10 rounded-full flex items-center justify-center border ${
-                          theme === "dark" ? "border-sky-500" : "border-[#29B6F6]"
-                        } group`}
+                        className={`w-10 h-10 rounded-full flex items-center justify-center border border border-[#29B6F6] dark:border-sky-500 group`}
                       >
                         <Eye
                           size={16}
-                          className={`${
-                            theme === "dark"
-                              ? "text-sky-400 group-hover:text-white"
-                              : "text-[#0288D1] group-hover:text-white"
-                          }`}
+                          className="text-[#0288D1] dark:text-sky-400 group-hover:text-white"
                         />
                       </button>
 
@@ -322,11 +316,7 @@ useEffect(() => {
                       >
                         <Edit3
                           size={16}
-                          className={`${
-                            theme === "dark"
-                              ? "text-amber-300 group-hover:text-white"
-                              : "text-amber-500 group-hover:text-white"
-                          }`}
+                          className="text-amber-500 dark:text-amber-300 group-hover:text-white"
                         />
                       </button>
 
@@ -337,11 +327,7 @@ useEffect(() => {
                       >
                         <Trash2
                           size={16}
-                          className={`${
-                            theme === "dark"
-                              ? "text-red-400 group-hover:text-white"
-                              : "text-red-600 group-hover:text-white"
-                          }`}
+                          className="text-red-600 dark:text-red-400 group-hover:text-white"
                         />
                       </button>
                     </div>
@@ -388,11 +374,7 @@ useEffect(() => {
                     >
                       <Edit3
                         size={14}
-                        className={`${
-                          theme === "dark"
-                            ? "text-amber-300 group-hover:text-white"
-                            : "text-amber-500 group-hover:text-white"
-                        }`}
+                        className="text-amber-500 dark:text-amber-300 group-hover:text-white"
                       />
                     </button>
 
@@ -402,11 +384,7 @@ useEffect(() => {
                     >
                       <Trash2
                         size={14}
-                        className={`${
-                          theme === "dark"
-                            ? "text-red-400 group-hover:text-white"
-                            : "text-red-600 group-hover:text-white"
-                        }`}
+                        className="text-red-600 dark:text-red-400 group-hover:text-white"
                       />
                     </button>
                   </div>
@@ -486,10 +464,12 @@ function ModalWrapper({ children }) {
 
 /* ---------------- VIEW MODAL ---------------- */
 function ViewModal({ artist, onClose, onEdit }) {
-  const { theme } = useTheme();
+  //const { theme } = useTheme();
   const modalBg =
-    theme === "dark" ? "bg-[#0a1039] border border-white/10" : "bg-white border border-gray-200";
-  const labelColor = theme === "dark" ? "text-gray-300" : "text-[#020726]";
+  "bg-white dark:bg-[#0a1039] border border-gray-200 dark:border-white/10";
+
+const labelColor =
+  "text-[#020726] dark:text-gray-300";
 
   return (
     <div className={`${modalBg} w-full max-w-2xl rounded-xl p-4 sm:p-6 mx-auto`}>
@@ -534,11 +514,7 @@ function ViewModal({ artist, onClose, onEdit }) {
       <div className="flex justify-end gap-3 mt-4 pt-3 border-t border-gray-300/10">
         <button
           onClick={onClose}
-          className={`px-4 py-2 rounded-full border ${
-            theme === "dark"
-              ? "border-white/20 text-gray-300 hover:bg-white/5"
-              : "border-gray-200 text-[#020726] hover:bg-gray-50"
-          }`}
+          className="px-4 py-2 rounded-full border border-gray-200 dark:border-white/20 text-[#020726] dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5"
         >
           Close
         </button>
@@ -555,12 +531,11 @@ function ViewModal({ artist, onClose, onEdit }) {
 }
 
 function Detail({ label, value, icon }) {
-  const { theme } = useTheme();
-  const labelColor = theme === "dark" ? "text-sm text-gray-300" : "text-sm text-[#020726]";
-  const boxBg =
-    theme === "dark"
-      ? "mt-1 p-3 bg-[#111a3b] border border-white/10 rounded break-all"
-      : "mt-1 p-3 bg-gray-50 border border-gray-200 rounded break-all";
+  //const { theme } = useTheme();
+  const labelColor = "text-sm text-[#020726] dark:text-gray-300";
+
+const boxBg =
+  "mt-1 p-3 bg-gray-50 dark:bg-[#111a3b] border border-gray-200 dark:border-white/10 rounded break-all";
 
   return (
     <div>
@@ -582,11 +557,13 @@ function Detail({ label, value, icon }) {
 
 /* ---------------- ADD / EDIT MODAL ---------------- */
 function AddEditModal({ title, onClose, initialData, onSubmit }) {
-  const { theme } = useTheme();
+  //const { theme } = useTheme();
 
   const modalBg =
-    theme === "dark" ? "bg-[#0a1039] border border-white/10" : "bg-white border border-gray-200";
-  const labelColor = theme === "dark" ? "text-gray-300" : "text-[#020726]";
+  "bg-white dark:bg-[#0a1039] border border-gray-200 dark:border-white/10";
+
+const labelColor =
+  "text-[#020726] dark:text-gray-300";
 
   return (
     <div className={`${modalBg} w-full max-w-2xl rounded-xl p-4 sm:p-6 mx-auto`}>
@@ -607,11 +584,7 @@ function AddEditModal({ title, onClose, initialData, onSubmit }) {
                   <label className={`text-sm mb-2 ${labelColor}`}>Avatar</label>
 
                   <div
-                    className={`w-full max-w-[220px] h-[220px] rounded-lg overflow-hidden ${
-                      theme === "dark"
-                        ? "bg-gray-700 border border-white/5"
-                        : "bg-gray-100 border border-gray-200"
-                    }`}
+                    className="w-full max-w-[220px] h-[220px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-white/5"
                   >
                     <img
                       src={values.avatarPreview || defaultAvatar}
@@ -624,11 +597,7 @@ function AddEditModal({ title, onClose, initialData, onSubmit }) {
                   <input
                     type="file"
                     accept="image/*"
-                    className={`mt-3 file:px-3 file:py-2 file:rounded-lg ${
-                      theme === "dark"
-                        ? "file:bg-[#1c2b57] file:text-white"
-                        : "file:bg-gray-100 file:text-[#020726]"
-                    } w-full text-sm`}
+                    className="mt-3 file:px-3 file:py-2 file:rounded-lg file:bg-gray-100 dark:file:bg-[#1c2b57] file:text-[#020726] dark:file:text-white w-full text-sm"
                     onChange={async (e) => {
   const file = e.target.files?.[0];
   if (!file) return;
@@ -644,11 +613,7 @@ function AddEditModal({ title, onClose, initialData, onSubmit }) {
                   <button
                     type="button"
                     onClick={() => setFieldValue("avatar", null)}
-                    className={`mt-2 px-3 py-1 rounded-md ${
-                      theme === "dark"
-                        ? "border border-white/10 text-gray-300 hover:text-white"
-                        : "border border-gray-200 text-[#020726] hover:text-white"
-                    }`}
+                    className="mt-2 px-3 py-1 rounded-md border border-gray-200 dark:border-white/10 text-[#020726] dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10"
                   >
                     Remove
                   </button>
@@ -669,11 +634,7 @@ function AddEditModal({ title, onClose, initialData, onSubmit }) {
                     <button
                       type="button"
                       onClick={onClose}
-                      className={`px-4 py-2 rounded-full border ${
-                        theme === "dark"
-                          ? "border-white/20 text-gray-300 hover:bg-white/5"
-                          : "border-gray-200 text-[#020726] hover:bg-gray-50"
-                      }`}
+                      className="px-4 py-2 rounded-full border border-gray-200 dark:border-white/20 text-[#020726] dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5"
                     >
                       Cancel
                     </button>
@@ -698,13 +659,12 @@ function AddEditModal({ title, onClose, initialData, onSubmit }) {
 }
 
 function FormField({ name, label, placeholder }) {
-  const { theme } = useTheme();
+  //const { theme } = useTheme();
 
-  const labelCls = theme === "dark" ? "text-sm text-gray-300" : "text-sm text-[#020726]";
+  const labelCls = "text-sm text-[#020726] dark:text-gray-300";
+
   const inputCls =
-    theme === "dark"
-      ? "w-full mt-1 bg-[#111a3b] border border-white/10 px-3 py-2 rounded-lg text-white"
-      : "w-full mt-1 bg-white border border-gray-200 px-3 py-2 rounded-lg text-[#020726]";
+    "w-full mt-1 bg-white dark:bg-[#111a3b] border border-gray-200 dark:border-white/10 px-3 py-2 rounded-lg text-[#020726] dark:text-white";
 
   return (
     <div>
