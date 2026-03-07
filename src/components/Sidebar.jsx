@@ -160,13 +160,13 @@ const permissions = user?.permissions || {};
             ${theme === "dark" ? "border-white/10" : "border-gray-300"}
           `}
         >
-          <img
-            src="/image/logo.webp"
-            alt="Logo"
-            className={`object-contain transition-all ${
-              isCollapsedState ? "h-[50px]" : "h-[65px]"
-            }`}
-          />
+         <img
+  src={theme === "dark" ? "/image/logo.webp" : "/logo3.png"}
+  alt="Logo"
+  className={`object-contain transition-all ${
+    isCollapsedState ? "h-[50px]" : "h-[65px]"
+  }`}
+/>
         </div>
 
         {/* MENU LIST */}

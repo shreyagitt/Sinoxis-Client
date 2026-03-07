@@ -28,9 +28,14 @@ const Notifications = () => {
     }
   };
 
-  useEffect(() => {
-    fetchNotifications();
-  }, []);
+ useEffect(() => {
+  const loadNotifications = async () => {
+    await fetchNotifications();
+    await markAllAsRead();
+  };
+
+  loadNotifications();
+}, []);
 
   // ✅ DELETE SINGLE FROM API
   const removeNotification = async (id) => {
@@ -48,21 +53,24 @@ const Notifications = () => {
 
   // ✅ MARK ALL AS READ (API)
   const markAllAsRead = async () => {
-    try {
-      await axios.patch(
-        `${baseUrl}/client/notifications/mark-all-read`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+  try {
+    await axios.patch(
+      `${baseUrl}/client/notifications/mark-all-read`,
+      {},
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
 
-      toast.success("All marked as read");
-      fetchNotifications();
-    } catch {
-      toast.error("Action failed");
-    }
-  };
+    // update UI instantly
+    setNotificationsList((prev) =>
+      prev.map((n) => ({ ...n, isRead: true }))
+    );
+
+  } catch {
+    toast.error("Action failed");
+  }
+};
 
   // THEME COLORS
   const cardBg =
@@ -122,33 +130,43 @@ const Notifications = () => {
           <li className="p-4 text-center text-sm">Loading...</li>
         ) : notificationsList.length > 0 ? (
           notificationsList.map((item) => (
-            <li
-              key={item._id}
-              className={`px-4 py-3 flex justify-between gap-4 border-b text-sm transition ${itemBorder} ${hoverBg}`}
-            >
-              {/* LEFT SIDE */}
-              <div className="flex-1">
-                <h4 className="font-medium text-[14px] leading-tight">
-                  {item.title}
-                </h4>
-                <p className={`text-xs mt-1 leading-relaxed ${descText}`}>
-                  {item.desc}
-                </p>
-              </div>
+           <li
+  key={item._id}
+  className={`px-4 py-3 flex justify-between gap-4 border-b text-sm transition ${itemBorder} ${hoverBg}`}
+>
+  {/* LEFT SIDE */}
+  <div className="flex-1 flex gap-2">
 
-              {/* RIGHT SIDE */}
-              <div className="flex flex-col items-end justify-between gap-1">
-                <span className={`text-[10px] whitespace-nowrap ${timeText}`}>
-                  {new Date(item.createdAt).toLocaleString()}
-                </span>
+    {/* 🔴 UNREAD DOT */}
+    {!item.isRead && (
+      <span className="w-2 h-2 bg-red-500 rounded-full mt-2 shrink-0"></span>
+    )}
 
-                <X
-                  size={16}
-                  className={`cursor-pointer transition ${closeIconColor}`}
-                  onClick={() => removeNotification(item._id)}
-                />
-              </div>
-            </li>
+    <div>
+      <h4 className="font-medium text-[14px] leading-tight">
+        {item.title}
+      </h4>
+
+      <p className={`text-xs mt-1 leading-relaxed ${descText}`}>
+        {item.desc}
+      </p>
+    </div>
+
+  </div>
+
+  {/* RIGHT SIDE */}
+  <div className="flex flex-col items-end justify-between gap-1">
+    <span className={`text-[10px] whitespace-nowrap ${timeText}`}>
+      {new Date(item.createdAt).toLocaleString()}
+    </span>
+
+    <X
+      size={16}
+      className={`cursor-pointer transition ${closeIconColor}`}
+      onClick={() => removeNotification(item._id)}
+    />
+  </div>
+</li>
           ))
         ) : (
           <li
