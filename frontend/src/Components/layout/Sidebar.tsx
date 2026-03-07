@@ -82,13 +82,41 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
     >
       {/* Logo */}
       <div className="flex items-center justify-center h-16 border-b border-gray-200 dark:border-gray-700">
-        {collapsed ? (
-          <img src="/image/logo.webp" alt="Sinoxis Logo" className="w-12 h-10" />
-        ) : (
-          <NavLink to="/" className="flex items-center gap-3">
-            <img src="/image/logo.webp" alt="Sinoxis Logo" className="w-18 h-12" />
-          </NavLink>
-        )}
+        <div className="flex items-center justify-center h-16 border-b border-gray-200 dark:border-gray-700">
+  {collapsed ? (
+    <>
+      {/* Light Theme Logo */}
+      <img
+        src="/logo-light.png"
+        alt="Sinoxis Logo"
+        className="w-12 h-10 block dark:hidden"
+      />
+
+      {/* Dark Theme Logo */}
+      <img
+        src="/image/logo.webp"
+        alt="Sinoxis Logo"
+        className="w-12 h-10 hidden dark:block"
+      />
+    </>
+  ) : (
+    <NavLink to="/" className="flex items-center gap-3">
+      {/* Light Theme Logo */}
+      <img
+        src="/logo2.png"
+        alt="Sinoxis Logo"
+        className="w-18 h-12 block dark:hidden"
+      />
+
+      {/* Dark Theme Logo */}
+      <img
+        src="/image/logo.webp"
+        alt="Sinoxis Logo"
+        className="w-18 h-12 hidden dark:block"
+      />
+    </NavLink>
+  )}
+</div>
       </div>
 
       {/* Menu */}
