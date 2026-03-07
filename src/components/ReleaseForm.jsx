@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { useTheme } from "../components/Topbar";
+//import { useTheme } from "../components/Topbar";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 
@@ -47,7 +47,7 @@ const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
   const [coverFile, setCoverFile] = useState(null);
   const [coverPreview, setCoverPreview] = useState(null);
-  const { theme } = useTheme();
+  //const { theme } = useTheme();
   const [saved, setSaved] = useState(false);
   const [initialFormValues, setInitialFormValues] = useState(initialValues);
 
@@ -56,22 +56,15 @@ const baseUrl = import.meta.env.VITE_API_BASE_URL;
   const isEdit = mode === "edit";
 
 const pageBg =
-  theme === "dark"
-    ? "bg-gradient-to-b from-[#020726] to-[#0a1039] text-white"
-    : "bg-gray-100 text-[#020726]";
+  "bg-gray-100 dark:bg-gradient-to-b dark:from-[#020726] dark:to-[#0a1039] text-[#020726] dark:text-white";
 
 const cardBg =
-  theme === "dark"
-    ? "bg-[#060b2e] border border-white/10 shadow-[0_30px_80px_rgba(0,0,0,0.6)]"
-    : "bg-white border border-gray-200 shadow-lg";
+  "bg-white dark:bg-[#060b2e] border border-gray-200 dark:border-white/10 shadow-lg dark:shadow-[0_30px_80px_rgba(0,0,0,0.6)]";
 
 const inputBg =
-  theme === "dark"
-    ? "bg-[#2a2f4d] text-white placeholder-gray-300"
-    : "bg-white text-[#020726] placeholder-gray-500 border border-gray-300";
-
-    const coverTextColor =
-  theme === "dark" ? "text-gray-300" : "text-black";
+  "bg-white dark:bg-[#2a2f4d] text-[#020726] dark:text-white placeholder-gray-500 dark:placeholder-gray-300 border border-gray-300 dark:border-white/10";
+    
+  const coverTextColor = "text-black dark:text-gray-300";
 
 const toDateInputValue = (value) => {
   if (!value) return "";
@@ -166,7 +159,7 @@ digitalReleaseDate: toDateInputValue(parsed.digitalReleaseDate),
   {/* BASE LINE */}
   <div
     className={`mx-auto w-full h-[3px] rounded-full transition-colors
-      ${theme === "dark" ? "bg-white/10" : "bg-gray-300"}
+      bg-gray-300 dark:bg-white/10
     `}
   />
 
@@ -188,9 +181,7 @@ digitalReleaseDate: toDateInputValue(parsed.digitalReleaseDate),
               ${
                 isActive
                   ? "bg-sky-400 shadow-[0_0_0_6px_rgba(56,189,248,0.18)]"
-                  : theme === "dark"
-                    ? "bg-sky-400/40"
-                    : "bg-gray-400"
+                  : "bg-gray-400 dark:bg-sky-400/40"
               }
             `}
           />
@@ -207,9 +198,7 @@ digitalReleaseDate: toDateInputValue(parsed.digitalReleaseDate),
         className={
           i === step
             ? "text-sky-400 font-medium"
-            : theme === "dark"
-              ? "text-gray-400"
-              : "text-gray-500"
+            : "text-gray-500 dark:text-gray-400"
         }
       >
         {label}
@@ -282,7 +271,7 @@ localStorage.setItem(
 
   {/* TEXT FIELDS */}
   <FormField
-    theme={theme}
+    
     name="title"
     placeholder="Title *"
     disabled={isView}
@@ -290,14 +279,14 @@ localStorage.setItem(
   />
 
   <FormField
-    theme={theme}
+    
     name="subtitle"
     disabled={isView}
     placeholder="Subtitle"
   />
 
   <SelectField
-    theme={theme}
+    
     name="genre"
     placeholder="Genre *"
     options={[
@@ -321,7 +310,7 @@ localStorage.setItem(
   />
 
   <SelectField
-    theme={theme}
+    
     name="subgenre"
     placeholder="Subgenre *"
     options={[
@@ -337,7 +326,7 @@ localStorage.setItem(
   />
 
   <SelectField
-  theme={theme}
+  
   name="label"
   placeholder="Select Active Label *"
   disabled={isView || activeLabels.length === 0}
@@ -349,21 +338,21 @@ localStorage.setItem(
 />
 
   <DateField
-    theme={theme}
+    
     name="originalReleaseDate"
       disabled={isView}   // ✅ FIX
     error={touched.originalReleaseDate && errors.originalReleaseDate}
   />
 
   <DateField
-    theme={theme}
+    
     name="digitalReleaseDate"
       disabled={isView}   // ✅ FIX
     error={touched.digitalReleaseDate && errors.digitalReleaseDate}
   />
 
   <FormField
-    theme={theme}
+    
     name="copyrightText"
     placeholder="℗ 2026 Sinoxis Digital"
     disabled={isView}
@@ -372,7 +361,7 @@ localStorage.setItem(
 
   {/* ✅ UPC FIELD (ADDED BELOW COPYRIGHT) */}
 <FormField
-  theme={theme}
+  
   name="upc"
   placeholder="UPC (Optional)"
   disabled={isView}
@@ -380,7 +369,7 @@ localStorage.setItem(
 />
 
   <FormField
-    theme={theme}
+    
     name="productionYear"
     placeholder="Production Year"
     disabled={isView}
@@ -400,11 +389,7 @@ localStorage.setItem(
         border border-dashed border-white/30
         flex items-center justify-center
         transition
-      ${
-        theme === "dark"
-          ? "border-white/30 bg-[#05092a]"
-          : "border-gray-400 bg-gray-100"
-      }
+    border-gray-400 dark:border-white/30 bg-gray-100 dark:bg-[#05092a]
     `}
       
     >
@@ -480,10 +465,7 @@ localStorage.setItem(
     {saved && (
   <div
     className={`fixed bottom-6 right-6 px-5 py-3 rounded-xl shadow-lg
-      ${theme === "dark"
-        ? "bg-green-500 text-black"
-        : "bg-green-600 text-white"
-      }
+     bg-green-600 dark:bg-green-500 text-white dark:text-black
     `}
   >
     Saved successfully
@@ -518,10 +500,7 @@ localStorage.setItem(
   }}
     
  className={`px-6 py-2 rounded-lg border transition
-  ${theme === "dark"
-    ? "border-white/40 text-white hover:bg-white/10"
-    : "border-gray-400 text-gray-800 hover:bg-gray-200"
-  }
+ border-gray-400 dark:border-white/40 text-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-white/10
 `}
 
 >
@@ -567,11 +546,9 @@ function ErrorIcon() {
   );
 }
 
-export const FormField = ({ theme, error, disabled, ...props }) => {
+export const FormField = ({  error, disabled, ...props }) => {
   const inputBg =
-    theme === "dark"
-      ? "bg-[#2a2f4d] text-white placeholder-gray-300"
-      : "bg-white text-[#020726] placeholder-gray-500 border border-gray-300";
+  "bg-white dark:bg-[#2a2f4d] text-[#020726] dark:text-white placeholder-gray-500 dark:placeholder-gray-300 border border-gray-300 dark:border-white/10";
 
   return (
     <div className="relative flex flex-col w-full">
@@ -602,7 +579,7 @@ export const FormField = ({ theme, error, disabled, ...props }) => {
 
 
 export const SelectField = ({
-  theme,
+
   name,
   placeholder,
   options,
@@ -610,9 +587,7 @@ export const SelectField = ({
   disabled
 }) => {
   const inputBg =
-    theme === "dark"
-      ? "bg-[#2a2f4d] text-white"
-      : "bg-white text-[#020726] border border-gray-300";
+  "bg-white dark:bg-[#2a2f4d] text-[#020726] dark:text-white border border-gray-300 dark:border-white/10";
 
   return (
     <div className="relative flex flex-col w-full">
@@ -660,11 +635,9 @@ export const SelectField = ({
 
 
 
-export const DateField = ({ theme, name, error , disabled }) => {
+export const DateField = ({  name, error , disabled }) => {
   const inputBg =
-    theme === "dark"
-      ? "bg-[#2a2f4d] text-white"
-      : "bg-white text-[#020726] border border-gray-300";
+  "bg-white dark:bg-[#2a2f4d] text-[#020726] dark:text-white border border-gray-300 dark:border-white/10";
 
   return (
     <div className="relative flex flex-col w-full">

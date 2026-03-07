@@ -26,10 +26,12 @@ export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "dark");
 
   const toggleTheme = () => {
-    const newTheme = theme === "dark" ? "light" : "dark";
-    setTheme(newTheme);
-    localStorage.setItem("theme", newTheme);
-  };
+  const newTheme = theme === "dark" ? "light" : "dark";
+  setTheme(newTheme);
+  localStorage.setItem("theme", newTheme);
+
+  document.documentElement.classList.toggle("dark", newTheme === "dark");
+};
 
   useEffect(() => {
     if (theme === "dark") document.documentElement.classList.add("dark");
@@ -90,7 +92,7 @@ const Topbar = ({ isCollapsed, toggleSidebar }) => {
   };
 
   /* Tailwind theme-based classes */
-  const topbarBg =
+  /*const topbarBg =
     theme === "dark"
       ? "bg-[#020726] border-b border-white/10"
       : "bg-white border-b border-gray-200";
@@ -106,13 +108,15 @@ const Topbar = ({ isCollapsed, toggleSidebar }) => {
   const dropdownBg =
     theme === "dark"
       ? "bg-[#0a1039] border border-white/10"
-      : "bg-white border border-gray-300";
+      : "bg-white border border-gray-300";*/
 
   return (
     <div
       className={`fixed top-0 z-50 h-[70px] flex items-center justify-between px-4 transition-all duration-300 
       ${isCollapsed ? "md:left-[80px] md:w-[calc(100%-80px)]" : "md:left-[240px] md:w-[calc(100%-240px)]"} 
-      left-0 w-full ${topbarBg}`}
+      left-0 w-full 
+      bg-white dark:bg-[#020726]
+  border-b border-gray-200 dark:border-white/10`}
     >
 
       {/* LEFT SECTION */}
@@ -122,13 +126,17 @@ const Topbar = ({ isCollapsed, toggleSidebar }) => {
           onClick={toggleSidebar}
           className="p-2 border border-blue-400/30 rounded-md hover:bg-gray-200/30 dark:hover:bg-white/10"
         >
-          <FaBars size={20} className={iconColor} />
+          <FaBars size={20} className="text-[#020726] dark:text-white" />
         </button>
 
         {/* SEARCH BOX */}
         <div
           className={`flex items-center rounded-lg px-3 py-2 border gap-2 transition-all duration-300 
-          w-full max-w-[150px] sm:max-w-[200px] md:max-w-[260px] lg:max-w-[320px] ${searchStyles}`}
+          w-full max-w-[150px] sm:max-w-[200px] md:max-w-[260px] lg:max-w-[320px] 
+          bg-gray-100 dark:bg-[#1f233d]
+placeholder-black dark:placeholder-white
+text-black dark:text-white`
+          }
         >
           <input
             type="text"
@@ -144,11 +152,9 @@ const Topbar = ({ isCollapsed, toggleSidebar }) => {
        {/* Theme Toggle */}
 <button
   onClick={toggleTheme}
-  className={`p-2 rounded-full border transition ${
-    theme === "dark"
-      ? "border-white text-white hover:bg-white/10"  // ⭐ Match Home icon style
-      : "border-gray-300 text-[#020726] hover:bg-gray-100"
-  }`}
+  className="p-2 rounded-full border border-gray-300 dark:border-white 
+text-[#020726] dark:text-white
+hover:bg-gray-100 dark:hover:bg-white/10 transition"
 >
   {theme === "dark" ? <Sun size={22} /> : <Moon size={22} />}
 </button>
@@ -156,14 +162,14 @@ const Topbar = ({ isCollapsed, toggleSidebar }) => {
 
 {/* Home Icon */}
 <Link to="/">
-  <Home size={24} className={iconColor} />
+  <Home size={24} className="text-[#020726] dark:text-white" />
 </Link>
 
 
         {/* Notifications */}
 <div className="relative z-[9999]" ref={notifRef}>
   <button onClick={() => setShowNotifications(!showNotifications)}>
-    <FaBell size={22} className={iconColor} />
+    <FaBell size={22}  className="text-[#020726] dark:text-white" />
   </button>
 
   {/* Badge */}
@@ -198,27 +204,28 @@ const Topbar = ({ isCollapsed, toggleSidebar }) => {
             />
 
             {/* Username (hidden on mobile) */}
-            <span className={`font-medium hidden sm:inline ${textColor}`}>
+            <span className={`font-medium hidden sm:inline text-[#020726] dark:text-white`}>
               {userName}
             </span>
 
             <ChevronDown
               size={18}
-              className={`hidden sm:inline transition-transform ${open ? "rotate-180" : ""} ${iconColor}`}
+              className={`hidden sm:inline transition-transform ${open ? "rotate-180" : ""} text-[#020726] dark:text-white`}
             />
           </button>
 
           {/* Dropdown menu */}
           {open && (
             <div
-              className={`absolute right-0 mt-3 w-44 rounded-lg shadow-xl p-3 animate-fadeIn ${dropdownBg}`}
+              className={`absolute right-0 mt-3 w-44 rounded-lg shadow-xl p-3 animate-fadeIn bg-white dark:bg-[#0a1039]
+border border-gray-300 dark:border-white/10`}
             >
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-2 py-2 w-full"
               >
-                <LogOut size={16} className={iconColor} />
-                <span className={textColor}>Logout</span>
+                <LogOut size={16} className="text-[#020726] dark:text-white" />
+                <span className="text-[#020726] dark:text-white">Logout</span>
               </button>
             </div>
           )}

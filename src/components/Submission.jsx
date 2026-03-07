@@ -2,10 +2,10 @@ import { useState,useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { useTheme } from "../components/Topbar";
+//import { useTheme } from "../components/Topbar";
 
 export default function SubmissionStep() {
-  const { theme } = useTheme();
+ // const { theme } = useTheme();
     const navigate = useNavigate();
     const mode = localStorage.getItem("releaseMode") || "create";
 const isView = mode === "view";
@@ -218,13 +218,9 @@ if (!track.some((t) => t.audioKey || t.audioUrl)) {
 
 
   return (
-    <div className={`min-h-screen font-[Montserrat]
-    ${
-      theme === "dark"
-        ? "bg-gradient-to-b from-[#020726] to-[#0a1039] text-white"
-        : "bg-gray-100 text-[#020726]"
-    }
-  `}>
+    <div className="min-h-screen font-[Montserrat]
+bg-gray-100 dark:bg-gradient-to-b dark:from-[#020726] dark:to-[#0a1039]
+text-[#020726] dark:text-white">
 
       {/* HEADER */}
       <div className="flex justify-between items-center px-4 sm:px-10 py-6">
@@ -239,14 +235,11 @@ if (!track.some((t) => t.audioKey || t.audioUrl)) {
 
 
       {/* MAIN CARD */}
-      <div className={`max-w-6xl mx-auto mt-6 rounded-[28px]
-    px-4 sm:px-8 md:px-12 py-8 md:py-10
-    ${
-      theme === "dark"
-        ? "bg-[#060b2e] shadow-[0_30px_80px_rgba(0,0,0,0.6)]"
-        : "bg-white shadow-lg border border-gray-200"
-    }
-  `}>
+     <div className="max-w-6xl mx-auto mt-6 rounded-[28px]
+px-4 sm:px-8 md:px-12 py-8 md:py-10
+bg-white dark:bg-[#060b2e]
+shadow-lg dark:shadow-[0_30px_80px_rgba(0,0,0,0.6)]
+border border-gray-200 dark:border-white/10">
 
         {/* TITLE */}
         <h2 className="text-center text-4xl font-medium text-sky-400">
@@ -438,13 +431,9 @@ if (!track.some((t) => t.audioKey || t.audioUrl)) {
   }
 }}
 
-          className={`px-6 py-2 rounded-lg transition
-      ${
-        theme === "dark"
-          ? "bg-white/20 hover:bg-white/30"
-          : "bg-gray-200 hover:bg-gray-300"
-      }
-    `}>
+          className="px-6 py-2 rounded-lg transition
+bg-gray-200 hover:bg-gray-300
+dark:bg-white/20 dark:hover:bg-white/30">
             Back
           </button>
 {!isView && (
@@ -487,53 +476,35 @@ function StatusCard({ text }) {
 }
 
 function Section({ title, open, onClick, children }) {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-
   return (
-    <div
-      className={`
-        border
-        rounded-xl
-        overflow-hidden
-        ${isDark ? "border-white/20" : "border-gray-400"}
-        ${isDark ? "bg-transparent" : "bg-white"}
-      `}
-    >
-      {/* HEADER */}
+    <div className="
+      border rounded-xl overflow-hidden
+      border-gray-400 dark:border-white/20
+      bg-white dark:bg-transparent">
+
       <button
         onClick={onClick}
         className={`
           w-full px-4 sm:px-6 py-4
-          flex justify-between items-center
-          transition
+          flex justify-between items-center transition
           ${open ? "rounded-t-xl" : "rounded-xl"}
-          ${
-            isDark
-              ? open
-                ? "bg-sky-400/20"
-                : "bg-white/10 hover:bg-white/20"
-              : open
-                ? "bg-sky-100"
-                : "bg-gray-50 hover:bg-gray-100"
-          }
+          bg-gray-50 hover:bg-gray-100
+          dark:bg-white/10 dark:hover:bg-white/20
+          ${open ? "bg-sky-100 dark:bg-sky-400/20" : ""}
         `}
       >
         <span className="font-medium text-sm sm:text-base">
           {title}
         </span>
+
         <span className="text-lg">{open ? "−" : "+"}</span>
       </button>
 
-      {/* CONTENT */}
       {open && (
-        <div
-          className={`
-            px-4 sm:px-6 py-4 text-sm
-            rounded-b-xl
-            ${isDark ? "bg-white/5" : "bg-white"}
-          `}
-        >
+        <div className="
+          px-4 sm:px-6 py-4 text-sm
+          bg-white dark:bg-white/5
+          rounded-b-xl">
           {children}
         </div>
       )}

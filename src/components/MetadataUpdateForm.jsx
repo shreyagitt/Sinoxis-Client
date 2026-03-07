@@ -4,7 +4,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { useTheme } from "../components/Topbar";
+//import { useTheme } from "../components/Topbar";
 
 // VALIDATION SCHEMA
 const MetadataSchema = Yup.object({
@@ -26,16 +26,16 @@ const MetadataSchema = Yup.object({
 
 const MetadataUpdateForm = () => {
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
-  const { theme } = useTheme();
+  //const { theme } = useTheme();
 
   // THEME COLORS
-  const pageBg = theme === "dark" ? "bg-[#020726] text-white" : "bg-white";
+  /*const pageBg = theme === "dark" ? "bg-[#020726] text-white" : "bg-white";
   const cardBg =
     theme === "dark"
       ? "bg-[#0a1039] border-white/10"
       : "bg-white border-gray-200 shadow-md";
 
-  const subtleText = theme === "dark" ? "text-gray-300" : "text-gray-700";
+  const subtleText = theme === "dark" ? "text-gray-300" : "text-gray-700";*/
 
   const handleSubmit = async (values, { resetForm }) => {
   try {
@@ -85,21 +85,21 @@ const MetadataUpdateForm = () => {
 
 
   return (
-    <div className={`min-h-screen pb-20 transition-all ${pageBg}`}>
+   <div className="min-h-screen pb-20 transition-all bg-white dark:bg-[#020726] text-[#020726] dark:text-white">
       
       {/* HEADER */}
       <div className="px-4 sm:px-8 lg:px-10 py-4 flex flex-col md:flex-row justify-between gap-2 md:items-center">
         <h1 className="text-xl font-semibold">
           Metadata Update Form
         </h1>
-        <p className={`text-sm ${subtleText}`}>
+        <p className={`text-sm text-gray-700 dark:text-gray-300`}>
           Home <span className="text-[#29B6F6]">/ Metadata Update Form</span>
         </p>
       </div>
 
       {/* FORM CARD */}
       <div className="px-4 sm:px-8 lg:px-10 flex justify-center">
-        <div className={`w-full max-w-5xl rounded-xl p-6 sm:p-8 md:p-10 border ${cardBg}`}>
+        <div className={`w-full max-w-5xl rounded-xl p-6 sm:p-8 md:p-10 border bg-white dark:bg-[#0a1039] border-gray-200 dark:border-white/10 shadow-md`}>
 
           <Formik
             initialValues={{
@@ -128,33 +128,33 @@ const MetadataUpdateForm = () => {
 
                 {/* ROW 1 */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                  <FieldGroup theme={theme} label="Artist Name *" name="artistName" placeholder="Enter artist name" />
-                  <FieldGroup theme={theme} label="Track Title *" name="trackTitle" placeholder="Enter track title" />
+                  <FieldGroup  label="Artist Name *" name="artistName" placeholder="Enter artist name" />
+                  <FieldGroup  label="Track Title *" name="trackTitle" placeholder="Enter track title" />
                 </div>
 
                 {/* ROW 2 */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                  <FieldGroup theme={theme} label="Album / Release" name="album" placeholder="Album or release name" />
-                  <FieldGroup theme={theme} label="Label Name *" name="label" placeholder="Enter label name" />
+                  <FieldGroup  label="Album / Release" name="album" placeholder="Album or release name" />
+                  <FieldGroup  label="Label Name *" name="label" placeholder="Enter label name" />
                 </div>
 
                 {/* ROW 3 */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-                  <FieldGroup theme={theme} label="ISRC Code *" name="isrc" placeholder="Enter ISRC Code" />
-                  <FieldGroup theme={theme} label="UPC" name="upc" placeholder="Album/Release UPC" />
-                  <FieldGroup theme={theme} type="date" label="Release Date" name="releaseDate" />
+                  <FieldGroup  label="ISRC Code *" name="isrc" placeholder="Enter ISRC Code" />
+                  <FieldGroup  label="UPC" name="upc" placeholder="Album/Release UPC" />
+                  <FieldGroup  type="date" label="Release Date" name="releaseDate" />
                 </div>
 
                 {/* ROW 4 */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-                  <FieldGroup theme={theme} label="Genre" name="genre" placeholder="Pop, Hip-Hop, EDM" />
-                  <FieldGroup theme={theme} label="Composer(s)" name="composer" placeholder="Comma separated" />
-                  <FieldGroup theme={theme} label="Publisher" name="publisher" placeholder="Publisher name" />
+                  <FieldGroup  label="Genre" name="genre" placeholder="Pop, Hip-Hop, EDM" />
+                  <FieldGroup  label="Composer(s)" name="composer" placeholder="Comma separated" />
+                  <FieldGroup  label="Publisher" name="publisher" placeholder="Publisher name" />
                 </div>
 
                 {/* LANGUAGE */}
                 <FieldGroup
-                  theme={theme}
+                  
                   label="Primary Language"
                   name="language"
                   placeholder="English, Hindi, Spanish..."
@@ -162,7 +162,7 @@ const MetadataUpdateForm = () => {
 
                 {/* LYRICS */}
                 <TextAreaGroup
-                  theme={theme}
+                  
                   label="Lyrics (optional)"
                   name="lyrics"
                   rows={4}
@@ -171,7 +171,7 @@ const MetadataUpdateForm = () => {
 
                 {/* CONTACT + ARTWORK */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                  <FieldGroup theme={theme} label="Contact Email / Manager" name="contact" placeholder="contact@example.com" />
+                  <FieldGroup  label="Contact Email / Manager" name="contact" placeholder="contact@example.com" />
 
                   <div>
                     <label className="block text-sm font-semibold mb-1">Upload Artwork (optional)</label>
@@ -182,13 +182,10 @@ const MetadataUpdateForm = () => {
                       accept="image/*"
                       onChange={(e) => setFieldValue("artwork", e.target.files[0])}
                       className={`w-full rounded-md px-4 py-2 border cursor-pointer file:bg-[#29B6F6] file:text-white file:px-3 file:py-1 file:rounded-md 
-                        ${theme === "dark"
-                          ? "bg-[#2c2f4a] text-white border-transparent"
-                          : "bg-gray-100 text-[#020726] border-gray-300"
-                        }`}
+                       bg-gray-100 dark:bg-[#2c2f4a] text-[#020726] dark:text-white border-gray-300 dark:border-white/10`}
                     />
 
-                    <p className={`text-xs mt-1 ${subtleText}`}>
+                    <p className={`text-xs mt-1 text-gray-700 dark:text-gray-300`}>
                       Recommended size: 3000×3000 (JPG/PNG)
                     </p>
                   </div>
@@ -217,11 +214,8 @@ const MetadataUpdateForm = () => {
                       document.getElementById("artworkInput").value = "";
                       setFieldValue("artwork", null);
                     }}
-                    className={`px-5 py-2 rounded-md border text-sm ${
-                      theme === "dark"
-                        ? "border-white/20 text-white hover:bg-white/10"
-                        : "border-gray-400 text-[#020726] hover:bg-gray-100"
-                    }`}
+                    className={`px-5 py-2 rounded-md border text-sm 
+                      border-gray-400 dark:border-white/20 text-[#020726] dark:text-white hover:bg-gray-100 dark:hover:bg-white/10`}
                   >
                     Reset
                   </button>
@@ -251,11 +245,9 @@ export default MetadataUpdateForm;
 /* REUSABLE COMPONENTS */
 /* ================================================================================= */
 
-const FieldGroup = ({ theme, label, name, placeholder, type = "text" }) => {
+const FieldGroup = ({  label, name, placeholder, type = "text" }) => {
   const inputStyles =
-    theme === "dark"
-      ? "bg-[#2c2f4a] text-white border-transparent"
-      : "bg-gray-100 text-[#020726] border-gray-300";
+  "bg-gray-100 dark:bg-[#2c2f4a] text-[#020726] dark:text-white border-gray-300 dark:border-white/10";
 
   return (
     <div className="w-full">
@@ -273,11 +265,9 @@ const FieldGroup = ({ theme, label, name, placeholder, type = "text" }) => {
   );
 };
 
-const TextAreaGroup = ({ theme, label, name, rows, placeholder }) => {
+const TextAreaGroup = ({  label, name, rows, placeholder }) => {
   const inputStyles =
-    theme === "dark"
-      ? "bg-[#2c2f4a] text-white border-transparent"
-      : "bg-gray-100 text-[#020726] border-gray-300";
+  "bg-gray-100 dark:bg-[#2c2f4a] text-[#020726] dark:text-white border-gray-300 dark:border-white/10";
 
   return (
     <div className="w-full">

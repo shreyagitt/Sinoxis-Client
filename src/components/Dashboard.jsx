@@ -2,7 +2,7 @@
 import React , {useState,useEffect} from "react";
 import { useNavigate } from "react-router-dom";
 import { FaMusic, FaRupeeSign, FaUser, FaEdit, FaTrash } from "react-icons/fa";
-import { useTheme } from "../components/Topbar";
+//import { useTheme } from "../components/Topbar";
 import axios from "axios";
 import toast from "react-hot-toast";
 
@@ -17,7 +17,7 @@ const songs = [
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { theme } = useTheme();
+  //const { theme } = useTheme();
 
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
 const token = localStorage.getItem("token");
@@ -61,7 +61,7 @@ useEffect(() => {
 
 
   // THEME COLORS
-  const pageBg = theme === "dark" ? "bg-[#020726] text-white" : "bg-white text-[#020726]";
+  /*const pageBg = theme === "dark" ? "bg-[#020726] text-white" : "bg-white text-[#020726]";
   const cardBg = theme === "dark" ? "bg-[#0a1039] border-white/10" : "bg-white border-gray-200";
   const textSecondary = theme === "dark" ? "text-gray-300" : "text-gray-600";
   const searchBg =
@@ -78,16 +78,16 @@ useEffect(() => {
       theme === "dark"
         ? "bg-yellow-900/40 text-yellow-300"
         : "bg-yellow-100 text-yellow-700",
-  };
+  }; */
 
   return (
-    <div className={`min-h-screen px-4 md:px-8 py-6 md:py-8 transition-all duration-300 ${pageBg}`}>
+<div className="min-h-screen px-4 md:px-8 py-6 md:py-8 transition-all duration-300 bg-white dark:bg-[#020726] text-[#020726] dark:text-white">
 
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
         <h1 className="text-2xl md:text-3xl font-semibold">Dashboard</h1>
 
-        <div className={`text-sm ${textSecondary}`}>
+        <div className={`text-sm text-gray-600 dark:text-gray-300`}>
           Home / <span className="text-[#29B6F6]">Dashboard</span>
         </div>
       </div>
@@ -99,7 +99,7 @@ useEffect(() => {
         <input
           type="text"
           placeholder="Type & Enter to search"
-          className={`w-full px-5 py-3 rounded-full border ${searchBg}`}
+          className={`w-full px-5 py-3 rounded-full border bg-gray-100 dark:bg-[#0a1039] border-gray-300 dark:border-white/10 text-[#020726] dark:text-gray-300`}
         />
 
         {/* Buttons Group - Responsive but aligned correctly */}
@@ -122,29 +122,29 @@ useEffect(() => {
 
       {/* TOTAL CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mb-12">
-        <div className={`p-5 rounded-xl flex gap-3 w-full border ${cardBg}`}>
+        <div className={`p-5 rounded-xl flex gap-3 w-full border bg-white dark:bg-[#0a1039] border-gray-200 dark:border-white/10`}>
           <div className="bg-[#29B6F6] p-3 rounded-lg">
             <FaMusic className="text-white text-xl" />
           </div>
           <div>
-            <p className={textSecondary}>Total Releases</p>
+            <p className="text-gray-600 dark:text-gray-300">Total Releases</p>
             <p className="text-xl font-bold">{totalReleases}</p>
           </div>
         </div>
 
-        <div className={`p-5 rounded-xl flex gap-4 w-full border ${cardBg}`}>
+        <div className={`p-5 rounded-xl flex gap-4 w-full border bg-white dark:bg-[#0a1039] border-gray-200 dark:border-white/10`}>
           <div className="bg-[#29B6F6] p-3 rounded-lg">
             <FaRupeeSign className="text-white text-xl" />
           </div>
           <div>
-            <p className={textSecondary}>Account Balance</p>
+            <p className="text-gray-600 dark:text-gray-300">Account Balance</p>
             <p className="text-xl font-bold">₹ {walletBalance}</p>
           </div>
         </div>
       </div>
 
       {/* RECENT RELEASES */}
-      <div className={`p-6 rounded-xl border mb-12 ${cardBg}`}>
+      <div className={`p-6 rounded-xl border mb-12 bg-white dark:bg-[#0a1039] border-gray-200 dark:border-white/10`}>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
           <h2 className="text-lg font-semibold">Recent Releases</h2>
           <button
@@ -157,7 +157,7 @@ useEffect(() => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
           {recentReleases.map((r, i) => (
-  <div key={r._id || i} className={`rounded-xl overflow-hidden border ${boxDark}`}>
+  <div key={r._id || i} className={`rounded-xl overflow-hidden border bg-gray-100 dark:bg-[#0d123f] border-gray-200 dark:border-white/10`}>
 
             
              <img
@@ -170,7 +170,7 @@ useEffect(() => {
 />
 
               <div className="p-4">
-                <p className={textSecondary}>{r.artist}</p>
+                <p className="text-gray-600 dark:text-gray-300">{r.artist}</p>
 <p className="text-lg font-semibold">{r.title}</p>
               </div>
             </div>
@@ -202,9 +202,9 @@ function StatCard({ title, value, percent, color, theme }) {
   };
 
   return (
-    <div className={`p-6 rounded-xl border flex justify-between items-center ${cardBg}`}>
+    <div className={`p-6 rounded-xl border flex justify-between items-center bg-white dark:bg-[#0a1039] border-gray-200 dark:border-white/10`}>
       <div>
-        <p className={textSecondary}>{title}</p>
+        <p className="text-gray-600 dark:text-gray-300">{title}</p>
         <p className="text-2xl md:text-3xl font-bold">{value}</p>
         <p className={`mt-1 text-sm ${percentColor[color]}`}>{percent}</p>
       </div>

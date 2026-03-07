@@ -1,14 +1,14 @@
 // src/pages/HomePage.jsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { useTheme } from "../components/Topbar"; // ⭐ THEME ENABLED
+//import { useTheme } from "../components/Topbar"; // ⭐ THEME ENABLED
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const { theme } = useTheme(); // ⭐ GET THEME
+  //const { theme } = useTheme(); // ⭐ GET THEME
 
   // 🌗 THEME ADAPTIVE VALUES
-  const pageBg =
+  /*const pageBg =
     theme === "dark" ? "bg-[#020726] text-white" : "bg-white text-[#020726]";
 
   const cardBg =
@@ -16,26 +16,34 @@ const HomePage = () => {
       ? "bg-[#0a1039] border-white/10"
       : "bg-white border-gray-300 shadow-xl";
 
-  const subText = theme === "dark" ? "text-gray-400" : "text-gray-600";
+  const subText = theme === "dark" ? "text-gray-400" : "text-gray-600";*/
 
   return (
-    <div
-      className={`min-h-screen flex justify-center items-center p-8 transition-all duration-300 ${pageBg}`}
-    >
-      <div
-        className={`rounded-2xl max-w-md w-full text-center p-10 border transition-all duration-300 ${cardBg}`}
-      >
-        {/* LOGO */}
-        <img
-          src="/image/logo.webp"
-          alt="Sinoxis Logo"
-          className="mx-auto w-28 h-28 object-contain mb-5"
-        />
+    <div className="min-h-screen flex justify-center items-center p-8 transition-all duration-300 bg-white dark:bg-[#020726] text-[#020726] dark:text-white">
+      <div className="rounded-2xl max-w-md w-full text-center p-10 border transition-all duration-300 bg-white dark:bg-[#0a1039] border-gray-300 dark:border-white/10 shadow-xl">
+       {/* LOGO */}
+<div className="flex justify-center mb-6">
+
+  {/* Light Mode Logo */}
+  <img
+    src="/logo3.png"
+    alt="Sinoxis Logo"
+    className="w-24 sm:w-28 md:w-32 object-contain dark:hidden"
+  />
+
+  {/* Dark Mode Logo */}
+  <img
+    src="/image/logo.webp"
+    alt="Sinoxis Logo"
+    className="w-24 sm:w-28 md:w-32 object-contain hidden dark:block"
+  />
+
+</div>
 
         {/* TITLE */}
         <h2 className="text-3xl font-semibold mb-2">Sinoxis Digital</h2>
 
-        <p className={`mb-8 ${subText}`}>
+        <p className={`mb-8 text-gray-600 dark:text-gray-400`}>
           Welcome! Please select an option to continue.
         </p>
 

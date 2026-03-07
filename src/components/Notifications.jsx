@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { X } from "lucide-react";
-import { useTheme } from "./Topbar"; // THEME SUPPORT
+//import { useTheme } from "./Topbar"; // THEME SUPPORT
 import axios from "axios";
 import toast from "react-hot-toast";
 
 const Notifications = () => {
-  const { theme } = useTheme();
+  //const { theme } = useTheme();
 
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
   const token = localStorage.getItem("token");
@@ -73,7 +73,7 @@ const Notifications = () => {
 };
 
   // THEME COLORS
-  const cardBg =
+ /* const cardBg =
     theme === "dark"
       ? "bg-[#0d133e] border-white/10 text-white"
       : "bg-white border-gray-300 text-[#020726] shadow-lg";
@@ -91,7 +91,7 @@ const Notifications = () => {
   const closeIconColor =
     theme === "dark"
       ? "text-red-500 hover:text-red-300"
-      : "text-red-600 hover:text-red-500";
+      : "text-red-600 hover:text-red-500";*/
 
   return (
     <div
@@ -100,23 +100,20 @@ const Notifications = () => {
         w-72 sm:w-80 
         max-h-[70vh]
         rounded-xl z-50 overflow-hidden border transition-all duration-200 
-        ${cardBg}
+       bg-white dark:bg-[#0d133e] border-gray-300 dark:border-white/10 text-[#020726] dark:text-white shadow-lg
         animate-fadeIn
       `}
     >
       {/* HEADER */}
       <div
-        className={`px-4 py-3 flex justify-between items-center border-b ${headerBg}`}
+        className={`px-4 py-3 flex justify-between items-center border-b bg-gray-100 dark:bg-white/5 border-gray-300 dark:border-white/10`}
       >
         <h3 className="font-semibold text-sm sm:text-base">Notifications</h3>
 
         {notificationsList.length > 0 && (
           <button
-            className={`text-xs transition ${
-              theme === "dark"
-                ? "text-[#29B6F6] hover:text-[#0288D1]"
-                : "text-[#0288D1] hover:text-[#0269b0]"
-            }`}
+            className={`text-xs transition 
+              text-[#0288D1] hover:text-[#0269b0] dark:text-[#29B6F6] dark:hover:text-[#0288D1]`}
             onClick={markAllAsRead}
           >
             Mark all as read
@@ -132,7 +129,7 @@ const Notifications = () => {
           notificationsList.map((item) => (
            <li
   key={item._id}
-  className={`px-4 py-3 flex justify-between gap-4 border-b text-sm transition ${itemBorder} ${hoverBg}`}
+  className={`px-4 py-3 flex justify-between gap-4 border-b text-sm transition border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10`}
 >
   {/* LEFT SIDE */}
   <div className="flex-1 flex gap-2">
@@ -147,7 +144,7 @@ const Notifications = () => {
         {item.title}
       </h4>
 
-      <p className={`text-xs mt-1 leading-relaxed ${descText}`}>
+      <p className={`text-xs mt-1 leading-relaxed text-gray-600 dark:text-gray-300`}>
         {item.desc}
       </p>
     </div>
@@ -156,13 +153,13 @@ const Notifications = () => {
 
   {/* RIGHT SIDE */}
   <div className="flex flex-col items-end justify-between gap-1">
-    <span className={`text-[10px] whitespace-nowrap ${timeText}`}>
+    <span className={`text-[10px] whitespace-nowrap text-gray-500 dark:text-gray-400`}>
       {new Date(item.createdAt).toLocaleString()}
     </span>
 
     <X
       size={16}
-      className={`cursor-pointer transition ${closeIconColor}`}
+      className={`cursor-pointer transition text-red-600 hover:text-red-500 dark:text-red-500 dark:hover:text-red-300`}
       onClick={() => removeNotification(item._id)}
     />
   </div>
@@ -170,9 +167,9 @@ const Notifications = () => {
           ))
         ) : (
           <li
-            className={`p-4 text-center text-sm ${
-              theme === "dark" ? "text-gray-300" : "text-gray-600"
-            }`}
+            className={`p-4 text-center text-sm 
+              text-gray-600 dark:text-gray-300
+            `}
           >
             No new notifications
           </li>

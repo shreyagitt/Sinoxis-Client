@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useTheme } from "../components/Topbar";
+//import { useTheme } from "../components/Topbar";
 
 const CopyrightClaim = () => {
-  const { theme } = useTheme();
+  //const { theme } = useTheme();
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
   const [openModal, setOpenModal] = useState(false);
@@ -75,7 +75,7 @@ const CopyrightClaim = () => {
   };
 
   // THEME CLASSES
-  const pageBg = theme === "dark" ? "bg-[#020726] text-white" : "bg-white text-[#020726]";
+  /*const pageBg = theme === "dark" ? "bg-[#020726] text-white" : "bg-white text-[#020726]";
   const cardBg =
     theme === "dark"
       ? "bg-[#0a1039] border border-white/10"
@@ -87,7 +87,7 @@ const CopyrightClaim = () => {
   const inputBg =
     theme === "dark"
       ? "bg-[#1b214d] text-white border border-white/10"
-      : "bg-gray-50 text-[#020726] border border-gray-200";
+      : "bg-gray-50 text-[#020726] border border-gray-200";*/
 
   const statusClass = (status) => {
     switch (status) {
@@ -106,24 +106,24 @@ const CopyrightClaim = () => {
     return <div className="text-center p-10 text-xl">Loading…</div>;
 
   return (
-    <div className={`${pageBg} min-h-screen px-4 sm:px-8 lg:px-12 py-6`}>
+    <div className={`bg-white dark:bg-[#020726] text-[#020726] dark:text-white min-h-screen px-4 sm:px-8 lg:px-12 py-6`}>
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between mb-8">
-        <h1 className={`text-2xl font-semibold ${headerText}`}>
+        <h1 className={`text-2xl font-semibold text-[#020726] dark:text-white`}>
           Copyright Claim
         </h1>
-        <p className={`text-sm ${labelText}`}>
+        <p className={`text-sm text-gray-600 dark:text-gray-300`}>
           Home <span className="text-[#29B6F6]">/ Copyright Claim</span>
         </p>
       </div>
 
       {/* Card */}
-      <div className={`${cardBg} rounded-xl p-6 sm:p-10 shadow-xl w-full`}>
+      <div className={`bg-white dark:bg-[#0a1039] border border-gray-200 dark:border-white/10rounded-xl p-6 sm:p-10 shadow-xl w-full`}>
 
         {/* Card Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
-          <h2 className={`text-xl font-semibold ${headerText}`}>Requests</h2>
+          <h2 className={`text-xl font-semibold text-[#020726] dark:text-white`}>Requests</h2>
 
           <button
             onClick={() => setOpenModal(true)}
@@ -215,10 +215,10 @@ const CopyrightClaim = () => {
       {/* =================== MODAL =================== */}
       {openModal && (
         <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50 px-4">
-          <div className={`${cardBg} w-full max-w-lg rounded-xl shadow-xl p-6 max-h-[90vh] overflow-y-auto`}>
+          <div className={`bg-white dark:bg-[#0a1039] border border-gray-200 dark:border-white/10w-full max-w-lg rounded-xl shadow-xl p-6 max-h-[90vh] overflow-y-auto`}>
 
             <div className="flex justify-between items-center mb-4">
-              <h2 className={`text-lg font-semibold ${headerText}`}>
+              <h2 className={`text-lg font-semibold text-[#020726] dark:text-white`}>
                 Submit Copyright Claim
               </h2>
               <button
@@ -232,14 +232,14 @@ const CopyrightClaim = () => {
             <form className="space-y-4" onSubmit={handleSubmit}>
               {/* Platform */}
               <div>
-                <label className={`block text-sm mb-1 ${labelText}`}>
+                <label className={`block text-sm mb-1 text-gray-600 dark:text-gray-300`}>
                   Platform
                 </label>
                 <select
                   name="platform"
                   value={formData.platform}
                   onChange={handleChange}
-                  className={`w-full p-3 rounded-lg ${inputBg}`}
+                  className={`w-full p-3 rounded-lg bg-gray-50 dark:bg-[#1b214d] text-[#020726] dark:text-white border border-gray-200 dark:border-white/10`}
                 >
                   <option value="">Select platform</option>
                   <option value="YouTube">YouTube</option>
@@ -249,7 +249,7 @@ const CopyrightClaim = () => {
 
               {/* Video Link */}
               <div>
-                <label className={`block text-sm mb-1 ${labelText}`}>
+                <label className={`block text-sm mb-1 text-gray-600 dark:text-gray-300`}>
                   Video Link
                 </label>
                 <input
@@ -258,13 +258,13 @@ const CopyrightClaim = () => {
                   value={formData.videoLink}
                   onChange={handleChange}
                   placeholder="https://www.youtube.com/watch?v=..."
-                  className={`w-full p-3 rounded-lg ${inputBg}`}
+                  className={`w-full p-3 rounded-lg bg-gray-50 dark:bg-[#1b214d] text-[#020726] dark:text-white border border-gray-200 dark:border-white/10`}
                 />
               </div>
 
               {/* Notes */}
               <div>
-                <label className={`block text-sm mb-1 ${labelText}`}>
+                <label className={`block text-sm mb-1 text-gray-600 dark:text-gray-300`}>
                   Notes (optional)
                 </label>
                 <textarea
@@ -272,7 +272,7 @@ const CopyrightClaim = () => {
                   name="notes"
                   value={formData.notes}
                   onChange={handleChange}
-                  className={`w-full p-3 rounded-lg ${inputBg}`}
+                  className={`w-full p-3 rounded-lg bg-gray-50 dark:bg-[#1b214d] text-[#020726] dark:text-white border border-gray-200 dark:border-white/10`}
                 />
               </div>
 

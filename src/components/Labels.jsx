@@ -5,7 +5,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { useTheme } from "../components/Topbar";
+//import { useTheme } from "../components/Topbar";
 
 // Placeholder image for Aadhar previews
 const placeholderImage =
@@ -23,24 +23,24 @@ function formatDisplayDate(date) {
 }
 
 // Status styles (light + dark)
-const STATUS_STYLES = (theme) => ({
+const STATUS_STYLES = {
   Active: {
-    bg: theme === "dark" ? "#22e788" : "#d1fae5",
-    color: theme === "dark" ? "#073b1d" : "#065f46",
+    bg: "#22e788",
+    color: "#073b1d",
   },
   Pending: {
-    bg: theme === "dark" ? "#ffd626" : "#fef3c7",
-    color: theme === "dark" ? "#5b4600" : "#92400e",
+    bg: "#ffd626",
+    color: "#5b4600",
   },
   Rejected: {
-    bg: theme === "dark" ? "#ff2d2d" : "#fee2e2",
-    color: theme === "dark" ? "#4d0000" : "#b91c1c",
+    bg: "#ff2d2d",
+    color: "#4d0000",
   },
   Inactive: {
-    bg: theme === "dark" ? "#4c8df6" : "#dbeafe",
-    color: theme === "dark" ? "#001b4d" : "#1e40af",
+    bg: "#4c8df6",
+    color: "#001b4d",
   },
-});
+};
 
 // Validation schema
 const LabelSchema = Yup.object().shape({
@@ -64,11 +64,11 @@ const readFileAsDataURL = (file) =>
   });
 
 export default function Labels() {
-  const { theme } = useTheme();
+  //const { theme } = useTheme();
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
   // Theme adaptive vars
-  const pageBg = theme === "dark" ? "bg-[#020726] text-white" : "bg-white text-[#020726]";
+  /*const pageBg = theme === "dark" ? "bg-[#020726] text-white" : "bg-white text-[#020726]";
   const cardBg =
     theme === "dark"
       ? "bg-[#0a1039] border-white/10"
@@ -77,7 +77,7 @@ export default function Labels() {
   const inputBg =
     theme === "dark"
       ? "bg-[#111a3b] border-white/10 text-white placeholder-gray-400"
-      : "bg-gray-100 border-gray-300 text-[#020726] placeholder-gray-500";
+      : "bg-gray-100 border-gray-300 text-[#020726] placeholder-gray-500";*/
 
   // State
   const [labels, setLabels] = useState([]);
@@ -270,16 +270,16 @@ export default function Labels() {
 
   // JSX
   return (
-    <div className={`min-h-screen p-4 sm:p-6 lg:p-8 transition-all duration-300 ${pageBg}`}>
+    <div className="min-h-screen p-4 sm:p-6 lg:p-8 transition-all duration-300 bg-white dark:bg-[#020726] text-[#020726] dark:text-white">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-6">
         <h1 className="text-xl sm:text-2xl font-semibold">Labels</h1>
-        <p className={`text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
+        <p className={`text-sm ${"text-gray-600 dark:text-gray-300"}`}>
           Home / <span className="text-[#29B6F6]">Labels</span>
         </p>
       </div>
 
-      <div className={`rounded-2xl p-4 sm:p-6 border ${cardBg}`}>
+      <div className={`rounded-2xl p-4 sm:p-6 border bg-white dark:bg-[#0a1039] border-gray-200 dark:border-white/10 shadow-md`}>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
           <h2 className="text-lg sm:text-xl font-medium">Manage Labels</h2>
 
@@ -294,11 +294,7 @@ export default function Labels() {
         </div>
 
         {/* Table header for md+ */}
-        <div
-          className={`hidden md:grid grid-cols-12 py-3 px-2 font-semibold border-b ${
-            theme === "dark" ? "border-white/10 text-gray-300" : "border-gray-200 text-gray-700"
-          }`}
-        >
+        <div className="hidden md:grid grid-cols-12 py-3 px-2 font-semibold border-b border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300">
           <div className="col-span-4">Label Name</div>
           <div className="col-span-2">Created</div>
           <div className="col-span-2">Expires</div>
@@ -312,13 +308,11 @@ export default function Labels() {
 
           {!loading &&
             labels.map((l) => {
-              const st = STATUS_STYLES(theme)[l.status || "Pending"] || STATUS_STYLES(theme).Pending;
+              const st = STATUS_STYLES[l.status || "Pending"] || STATUS_STYLES.Pending
               return (
                 <div
                   key={l._id}
-                  className={`bg-transparent rounded-lg overflow-hidden ${
-                    theme === "dark" ? "hover:bg-white/4" : "hover:bg-gray-50"
-                  } border ${theme === "dark" ? "border-white/5" : "border-gray-200"}`}
+                 className="bg-transparent rounded-lg overflow-hidden hover:bg-gray-50 dark:hover:bg-white/5 border border-gray-200 dark:border-white/5"
                 >
                   {/* MD+ grid row */}
                   <div className="hidden md:grid grid-cols-12 items-center py-4 px-3">
@@ -350,16 +344,12 @@ export default function Labels() {
                       {l.status !== "Active" && (
   <button
     onClick={() => openEdit(l)}
-    className={`w-10 h-10 rounded-full flex items-center justify-center border transition ${
-      theme === "dark"
-        ? "border-amber-400 hover:bg-amber-400/10"
-        : "border-amber-500 hover:bg-amber-100"
-    }`}
+   className="w-10 h-10 rounded-full flex items-center justify-center border border-amber-500 dark:border-amber-400 hover:bg-amber-100 dark:hover:bg-amber-400/10 transition"
     title="Edit"
   >
     <Edit3
       size={16}
-      className={theme === "dark" ? "text-amber-300" : "text-amber-700"}
+     className="text-amber-700 dark:text-amber-300"
     />
   </button>
 )}
@@ -371,7 +361,7 @@ export default function Labels() {
                     <div className="flex justify-between items-start gap-3">
                       <div>
                         <p className="font-medium">{l.labelName}</p>
-                        <p className={`text-xs ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
+                        <p className={`text-xs ${"text-gray-600 dark:text-gray-300"}`}>
                           Created: {formatDisplayDate(l.created)}
                         </p>
                       </div>
@@ -401,16 +391,12 @@ export default function Labels() {
                           {l.status !== "Active" && (
   <button
     onClick={() => openEdit(l)}
-    className={`w-9 h-9 rounded-full flex items-center justify-center border transition ${
-      theme === "dark"
-        ? "border-amber-400 hover:bg-amber-400/10"
-        : "border-amber-500 hover:bg-amber-100"
-    }`}
+    className="w-9 h-9 rounded-full flex items-center justify-center border border-amber-500 dark:border-amber-400 hover:bg-amber-100 dark:hover:bg-amber-400/10 transition"
     title="Edit"
   >
     <Edit3
       size={14}
-      className={theme === "dark" ? "text-amber-300" : "text-amber-700"}
+      className="text-amber-700 dark:text-amber-300"
     />
   </button>
 )}
@@ -419,7 +405,7 @@ export default function Labels() {
                     </div>
 
                     <div className="flex justify-between items-center">
-                      <p className={`text-xs ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
+                      <p className={`text-xs ${"text-gray-600 dark:text-gray-300"}`}>
                         Expires: {formatDisplayDate(l.expiry)}
                       </p>
                       <div className="text-xs text-gray-400">{/* reserved for any extra info */}</div>
@@ -435,12 +421,12 @@ export default function Labels() {
       {showAddModal && (
         <ModalWrapper>
           <AddEditModal
-            theme={theme}
+            
             title={editMode ? "Edit Label" : "Add Label"}
             onClose={() => setShowAddModal(false)}
             onSubmit={handleCreateOrUpdate}
             initialFormValues={initialFormValues}
-            inputBg={inputBg}
+            inputBg="bg-gray-100 dark:bg-[#111a3b] border border-gray-300 dark:border-white/10 text-[#020726] dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             aadharFrontFile={aadharFrontFile}
             aadharBackFile={aadharBackFile}
             setAadharFrontFile={setAadharFrontFile}
@@ -455,7 +441,7 @@ export default function Labels() {
       {showViewModal && selectedLabel && (
         <ModalWrapper>
           <ViewModal
-            theme={theme}
+            
             selectedLabel={selectedLabel}
             viewTab={viewTab}
             setViewTab={setViewTab}
@@ -494,7 +480,7 @@ function AddEditModal({
   handleAadharBackChange,
 }) {
   return (
-    <div className={`w-full max-w-2xl rounded-xl p-4 sm:p-6 border ${theme === "dark" ? "bg-[#0a1039] border-white/10" : "bg-white border-gray-200 shadow-xl"} mx-auto`}>
+    <div className="w-full max-w-2xl rounded-xl p-4 sm:p-6 border bg-white dark:bg-[#0a1039] border-gray-200 dark:border-white/10 shadow-xl mx-auto">
       <div className="flex justify-between items-center border-b border-gray-300/10 pb-2">
         <h2 className="text-lg sm:text-xl font-semibold">{title}</h2>
         <button onClick={onClose} className="p-1">
@@ -514,30 +500,30 @@ function AddEditModal({
               {/* LEFT */}
               <div className="space-y-3">
                 <div>
-                  <label className={`text-sm font-semibold ${theme === "dark" ? "text-white" : "text-[#020726]"}`}>Full Name</label>
-                  <Field name="fullName" placeholder="Full Name" className={`w-full mt-1 rounded-lg px-4 py-2 outline-none focus:ring-1 focus:ring-[#29B6F6] ${inputBg}`} />
+                  <label className={`text-sm font-semibold text-[#020726] dark:text-white`}>Full Name</label>
+                  <Field name="fullName" placeholder="Full Name" className={`w-full mt-1 rounded-lg px-4 py-2 outline-none focus:ring-1 focus:ring-[#29B6F6] bg-gray-100 dark:bg-[#111a3b] border border-gray-300 dark:border-white/10 text-[#020726] dark:text-white placeholder-gray-500 dark:placeholder-gray-400`} />
                   <ErrorMessage name="fullName" component="div" className="text-xs text-red-500 mt-1" />
                 </div>
 
                 <div>
-                  <label className={`text-sm font-semibold ${theme === "dark" ? "text-white" : "text-[#020726]"}`}>Email</label>
-                  <Field name="email" placeholder="label@example.com" className={`w-full mt-1 rounded-lg px-4 py-2 outline-none focus:ring-1 focus:ring-[#29B6F6] ${inputBg}`} />
+                  <label className={`text-sm font-semibold text-[#020726] dark:text-white`}>Email</label>
+                  <Field name="email" placeholder="label@example.com" className={`w-full mt-1 rounded-lg px-4 py-2 outline-none focus:ring-1 focus:ring-[#29B6F6] bg-gray-100 dark:bg-[#111a3b] border border-gray-300 dark:border-white/10 text-[#020726] dark:text-white placeholder-gray-500 dark:placeholder-gray-400`} />
                   <ErrorMessage name="email" component="div" className="text-xs text-red-500 mt-1" />
                 </div>
 
                 <div>
-                  <label className={`text-sm font-semibold ${theme === "dark" ? "text-white" : "text-[#020726]"}`}>YouTube</label>
-                  <Field name="youtube" placeholder="YouTube link" className={`w-full mt-1 rounded-lg px-4 py-2 outline-none focus:ring-1 focus:ring-[#29B6F6] ${inputBg}`} />
+                  <label className={`text-sm font-semibold text-[#020726] dark:text-white`}>YouTube</label>
+                  <Field name="youtube" placeholder="YouTube link" className={`w-full mt-1 rounded-lg px-4 py-2 outline-none focus:ring-1 focus:ring-[#29B6F6] bg-gray-100 dark:bg-[#111a3b] border border-gray-300 dark:border-white/10 text-[#020726] dark:text-white placeholder-gray-500 dark:placeholder-gray-400`} />
                   <ErrorMessage name="youtube" component="div" className="text-xs text-red-500 mt-1" />
                 </div>
 
                 {/* Aadhar Front */}
                 <div className="mt-2">
-                  <label className={`text-sm font-semibold ${theme === "dark" ? "text-white" : "text-[#020726]"}`}>Aadhar - Front Photo</label>
+                  <label className={`text-sm font-semibold text-[#020726] dark:text-white`}>Aadhar - Front Photo</label>
                   <input
                     type="file"
                     accept="image/*"
-                    className={`mt-2 text-sm block w-full text-left ${theme === "dark" ? "text-gray-300 file:bg-[#1c2b57]" : "text-[#020726] file:bg-gray-300"} file:px-3 file:py-1 file:rounded-md`}
+                    className="mt-2 text-sm block w-full text-left text-[#020726] dark:text-gray-300 file:px-3 file:py-1 file:rounded-md file:bg-gray-300 dark:file:bg-[#1c2b57]"
                     onChange={async (e) => {
                       const f = e.target.files?.[0];
                       await handleAadharFrontChange(f, setFieldValue);
@@ -553,26 +539,26 @@ function AddEditModal({
               {/* RIGHT */}
               <div className="space-y-3">
                 <div>
-                  <label className={`text-sm font-semibold ${theme === "dark" ? "text-white" : "text-[#020726]"}`}>Label Name</label>
-                  <Field name="labelName" placeholder="Label Name" className={`w-full mt-1 rounded-lg px-4 py-2 outline-none focus:ring-1 focus:ring-[#29B6F6] ${inputBg}`} />
+                  <label className={`text-sm font-semibold text-[#020726] dark:text-white`}>Label Name</label>
+                  <Field name="labelName" placeholder="Label Name" className={`w-full mt-1 rounded-lg px-4 py-2 outline-none focus:ring-1 focus:ring-[#29B6F6] bg-gray-100 dark:bg-[#111a3b] border border-gray-300 dark:border-white/10 text-[#020726] dark:text-white placeholder-gray-500 dark:placeholder-gray-400`} />
                   <ErrorMessage name="labelName" component="div" className="text-xs text-red-500 mt-1" />
                 </div>
 
                 <div>
-                  <label className={`text-sm font-semibold ${theme === "dark" ? "text-white" : "text-[#020726]"}`}>Phone Number</label>
-                  <Field name="phone" placeholder="XXXXXXXXXX" className={`w-full mt-1 rounded-lg px-4 py-2 outline-none focus:ring-1 focus:ring-[#29B6F6] ${inputBg}`} />
+                  <label className={`text-sm font-semibold text-[#020726] dark:text-white`}>Phone Number</label>
+                  <Field name="phone" placeholder="XXXXXXXXXX" className={`w-full mt-1 rounded-lg px-4 py-2 outline-none focus:ring-1 focus:ring-[#29B6F6] bg-gray-100 dark:bg-[#111a3b] border border-gray-300 dark:border-white/10 text-[#020726] dark:text-white placeholder-gray-500 dark:placeholder-gray-400`} />
                   <ErrorMessage name="phone" component="div" className="text-xs text-red-500 mt-1" />
                 </div>
 
                 <div>
-                  <label className={`text-sm font-semibold ${theme === "dark" ? "text-white" : "text-[#020726]"}`}>Language</label>
-                  <Field name="language" placeholder="Hindi / English" className={`w-full mt-1 rounded-lg px-4 py-2 outline-none focus:ring-1 focus:ring-[#29B6F6] ${inputBg}`} />
+                  <label className={`text-sm font-semibold text-[#020726] dark:text-white`}>Language</label>
+                  <Field name="language" placeholder="Hindi / English" className={`w-full mt-1 rounded-lg px-4 py-2 outline-none focus:ring-1 focus:ring-[#29B6F6] bg-gray-100 dark:bg-[#111a3b] border border-gray-300 dark:border-white/10 text-[#020726] dark:text-white placeholder-gray-500 dark:placeholder-gray-400`} />
                   <ErrorMessage name="language" component="div" className="text-xs text-red-500 mt-1" />
                 </div>
 
                 {/* Aadhar Back */}
                 <div className="mt-2">
-                  <label className={`text-sm font-semibold ${theme === "dark" ? "text-white" : "text-[#020726]"}`}>Aadhar - Back Photo</label>
+                  <label className={`text-sm font-semibold text-[#020726] dark:text-white`}>Aadhar - Back Photo</label>
                   <input
                     type="file"
                     accept="image/*"
@@ -591,7 +577,7 @@ function AddEditModal({
 
             {/* Footer */}
             <div className="flex flex-col sm:flex-row justify-end gap-3 mt-6 pt-4 border-t border-gray-300/10">
-              <button type="button" onClick={onClose} className={`px-4 py-2 rounded-full ${theme === "dark" ? "border border-white/20 text-gray-300 hover:bg-white/10" : "border border-gray-300 text-[#020726] hover:bg-gray-100"}`}>
+              <button type="button" onClick={onClose} className="px-4 py-2 rounded-full border border-gray-300 dark:border-white/20 text-[#020726] dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10">
                 Cancel
               </button>
 
@@ -608,7 +594,8 @@ function AddEditModal({
 
 /* ========================= VIEW MODAL ========================= */
 function ViewModal({ theme, selectedLabel, viewTab, setViewTab, onClose, onEdit, onDelete }) {
-  const modalBg = theme === "dark" ? "bg-[#0a1039] border-white/10" : "bg-white border-gray-200 shadow-xl";
+  const modalBg =
+  "bg-white dark:bg-[#0a1039] border-gray-200 dark:border-white/10 shadow-xl";
 
   return (
     <div className={`w-full max-w-2xl rounded-xl p-4 sm:p-6 border ${modalBg} mx-auto`}>
@@ -616,7 +603,7 @@ function ViewModal({ theme, selectedLabel, viewTab, setViewTab, onClose, onEdit,
         <h2 className="text-lg sm:text-xl font-semibold">View Label</h2>
 
         <div className="flex items-center gap-2">
-          <Tabs theme={theme} viewTab={viewTab} setViewTab={setViewTab} />
+          <Tabs  viewTab={viewTab} setViewTab={setViewTab} />
           <button onClick={onClose} className="p-1">
             <X className="text-gray-400 hover:text-gray-600" />
           </button>
@@ -624,17 +611,17 @@ function ViewModal({ theme, selectedLabel, viewTab, setViewTab, onClose, onEdit,
       </div>
 
       {/* DETAILS */}
-      {viewTab === "details" && <DetailsTab selectedLabel={selectedLabel} theme={theme} />}
+      {viewTab === "details" && <DetailsTab selectedLabel={selectedLabel}  />}
 
       {/* FORM VIEW */}
-      {viewTab === "form" && <FormTab selectedLabel={selectedLabel} theme={theme} />}
+      {viewTab === "form" && <FormTab selectedLabel={selectedLabel}  />}
 
       {/* IMAGES */}
-      {viewTab === "images" && <ImagesTab selectedLabel={selectedLabel} theme={theme} />}
+      {viewTab === "images" && <ImagesTab selectedLabel={selectedLabel}  />}
 
       {/* Footer */}
       <div className="flex flex-col sm:flex-row justify-end gap-3 mt-6 pt-4 border-t border-gray-300/10">
-        <button onClick={onClose} className={`px-4 py-2 rounded-full ${theme === "dark" ? "border border-white/20 text-gray-300 hover:bg-white/10" : "border border-gray-300 text-[#020726] hover:bg-gray-100"}`}>
+        <button onClick={onClose} className="px-4 py-2 rounded-full border border-gray-300 dark:border-white/20 text-[#020726] dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10">
           Close
         </button>
 
@@ -654,9 +641,11 @@ function ViewModal({ theme, selectedLabel, viewTab, setViewTab, onClose, onEdit,
 
 function Tabs({ theme, viewTab, setViewTab }) {
   return (
-    <div className={`flex rounded-full p-1 ${theme === "dark" ? "bg-white/10" : "bg-gray-200"}`}>
+    <div className="flex rounded-full p-1 bg-gray-200 dark:bg-white/10">
       {["details", "form", "images"].map((t) => (
-        <button key={t} onClick={() => setViewTab(t)} className={`px-3 py-1 rounded-full capitalize text-xs ${viewTab === t ? (theme === "dark" ? "bg-[#111a3b] text-white" : "bg-white text-[#020726] shadow-sm") : (theme === "dark" ? "text-gray-300" : "text-gray-600")}`}>
+        <button key={t} onClick={() => setViewTab(t)} className={`px-3 py-1 rounded-full capitalize text-xs ${viewTab === t
+  ? "bg-white dark:bg-[#111a3b] text-[#020726] dark:text-white shadow-sm"
+  : "text-gray-600 dark:text-gray-300"}`}>
           {t}
         </button>
       ))}
@@ -669,72 +658,73 @@ function DetailsTab({ selectedLabel, theme }) {
   return (
     <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
 
-      <DetailBox theme={theme} label="Full Name" value={selectedLabel.fullName} />
-      <DetailBox theme={theme} label="Label Name" value={selectedLabel.labelName} />
+      <DetailBox  label="Full Name" value={selectedLabel.fullName} />
+      <DetailBox  label="Label Name" value={selectedLabel.labelName} />
 
-      <DetailBox theme={theme} label="Email" value={selectedLabel.email} />
-      <DetailBox theme={theme} label="Phone" value={selectedLabel.phone} />
+      <DetailBox  label="Email" value={selectedLabel.email} />
+      <DetailBox  label="Phone" value={selectedLabel.phone} />
 
-      <DetailBox theme={theme} label="Language" value={selectedLabel.language} />
+      <DetailBox  label="Language" value={selectedLabel.language} />
 
       {/* IMAGES */}
-      <DetailImage theme={theme} label="Aadhar Front" src={selectedLabel.aadharFront} />
-      <DetailImage theme={theme} label="Aadhar Back" src={selectedLabel.aadharBack} />
+      <DetailImage  label="Aadhar Front" src={selectedLabel.aadharFront} />
+      <DetailImage  label="Aadhar Back" src={selectedLabel.aadharBack} />
 
     </div>
   );
 }
 
 
-function FormTab({ selectedLabel, theme }) {
+function FormTab({ selectedLabel }) {
   return (
     <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
 
-      <DetailBox theme={theme} label="Full Name" value={selectedLabel.fullName} />
-      <DetailBox theme={theme} label="Label Name" value={selectedLabel.labelName} />
+      <DetailBox  label="Full Name" value={selectedLabel.fullName} />
+      <DetailBox  label="Label Name" value={selectedLabel.labelName} />
 
-      <DetailBox theme={theme} label="Email" value={selectedLabel.email} />
-      <DetailBox theme={theme} label="Phone" value={selectedLabel.phone} />
+      <DetailBox  label="Email" value={selectedLabel.email} />
+      <DetailBox  label="Phone" value={selectedLabel.phone} />
 
-      <DetailBox theme={theme} label="Language" value={selectedLabel.language} />
+      <DetailBox  label="Language" value={selectedLabel.language} />
 
       {/* IMAGES */}
-      <DetailImageLarge theme={theme} label="Aadhar Front" src={selectedLabel.aadharFront} />
-      <DetailImageLarge theme={theme} label="Aadhar Back" src={selectedLabel.aadharBack} />
+      <DetailImageLarge  label="Aadhar Front" src={selectedLabel.aadharFront} />
+      <DetailImageLarge  label="Aadhar Back" src={selectedLabel.aadharBack} />
 
     </div>
   );
 }
 
 
-function ImagesTab({ selectedLabel, theme }) {
+function ImagesTab({ selectedLabel,  }) {
   return (
     <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-      <DetailImageLarge theme={theme} label="Aadhar Front" src={selectedLabel.aadharFront} />
-      <DetailImageLarge theme={theme} label="Aadhar Back" src={selectedLabel.aadharBack} />
+      <DetailImageLarge  label="Aadhar Front" src={selectedLabel.aadharFront} />
+      <DetailImageLarge  label="Aadhar Back" src={selectedLabel.aadharBack} />
     </div>
   );
 }
 
 
 /* SMALL BOX */
-function DetailBox({ theme, label, value }) {
-  const card = theme === "dark" ? "bg-[#111a3b] border border-white/10 text-white" : "bg-gray-100 border border-gray-200 text-[#020726]";
+function DetailBox({  label, value }) {
+const card =
+  "bg-gray-100 dark:bg-[#111a3b] border border-gray-200 dark:border-white/10 text-[#020726] dark:text-white";
   return (
     <div>
-      <p className={`text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>{label}</p>
+      <p className={`text-sm ${"text-gray-600 dark:text-gray-300"}`}>{label}</p>
       <div className={`p-3 rounded mt-1 ${card}`}>{value || "-"}</div>
     </div>
   );
 }
 
 /* SMALL IMAGE */
-function DetailImage({ theme, label, src }) {
+function DetailImage({  label, src }) {
   return (
     <div className="flex flex-col">
       <p
         className={`text-sm ${
-          theme === "dark" ? "text-gray-300" : "text-gray-600"
+          "text-gray-600 dark:text-gray-300"
         }`}
       >
         {label}
@@ -765,12 +755,12 @@ function DetailImage({ theme, label, src }) {
 }
 
 /* LARGE IMAGE */
-function DetailImageLarge({ theme, label, src }) {
+function DetailImageLarge({  label, src }) {
   return (
     <div className="flex flex-col">
       <p
         className={`text-sm ${
-          theme === "dark" ? "text-gray-300" : "text-gray-600"
+          "text-gray-600 dark:text-gray-300"
         }`}
       >
         {label}

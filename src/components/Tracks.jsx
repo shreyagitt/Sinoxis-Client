@@ -1,6 +1,6 @@
 import { useState , useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { useTheme } from "../components/Topbar";
+//import { useTheme } from "../components/Topbar";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 
@@ -9,7 +9,7 @@ import * as Yup from "yup";
 
 export default function TrackDetails() {
   const [step] = useState(1);
-  const { theme } = useTheme();
+  //const { theme } = useTheme();
   const navigate = useNavigate();
 
   const mode = localStorage.getItem("releaseMode") || "create";
@@ -146,15 +146,7 @@ const trackSchema = Yup.object({
 
 
   return (
-    <div
-  className={`min-h-screen font-[Montserrat]
-    ${
-      theme === "dark"
-        ? "bg-gradient-to-b from-[#020726] to-[#0a1039] text-white"
-        : "bg-gray-100 text-[#020726]"
-    }
-  `}
->
+    <div className="min-h-screen font-[Montserrat] bg-gray-100 dark:bg-gradient-to-b dark:from-[#020726] dark:to-[#0a1039] text-[#020726] dark:text-white">
 
 
       {/* TOP HEADER */}
@@ -168,13 +160,7 @@ const trackSchema = Yup.object({
 
       {/* MAIN CARD */}
       <div
-  className={`max-w-6xl mx-auto mt-6 rounded-[28px] px-4 sm:px-8 md:px-12 py-8 md:py-10
-    ${
-      theme === "dark"
-        ? "bg-[#060b2e] shadow-[0_30px_80px_rgba(0,0,0,0.6)]"
-        : "bg-white shadow-lg border border-gray-200"
-    }
-  `}
+  className="max-w-6xl mx-auto mt-6 rounded-[28px] px-4 sm:px-8 md:px-12 py-8 md:py-10 bg-white dark:bg-[#060b2e] shadow-lg dark:shadow-[0_30px_80px_rgba(0,0,0,0.6)] border border-gray-200 dark:border-transparent"
 >
 
         {/* TITLE */}
@@ -230,11 +216,7 @@ const trackSchema = Yup.object({
   className={`mt-10 border border-dashed rounded-2xl
     h-[150px] sm:h-[170px]
     flex flex-col items-center justify-center
-    ${
-      theme === "dark"
-        ? "border-sky-400/60 bg-[#05092a]"
-        : "border-sky-500 bg-gray-50"
-    }
+    border-sky-500 dark:border-sky-400/60 bg-gray-50 dark:bg-[#05092a]
   `}
 >
 
@@ -455,11 +437,7 @@ const trackSchema = Yup.object({
     type="button"
     onClick={() => setShowLyrics(true)}
     className={`w-full sm:w-[260px] h-[46px] rounded-xl border transition
-      ${
-        theme === "dark"
-          ? "border-white/40 text-white hover:bg-white/10"
-          : "border-gray-400 text-[#020726] bg-white hover:bg-gray-100"
-      }
+      border-gray-400 dark:border-white/40 text-[#020726] dark:text-white bg-white dark:bg-transparent hover:bg-gray-100 dark:hover:bg-white/10
     `}
   >
     {isView
@@ -478,15 +456,11 @@ const trackSchema = Yup.object({
         key={i}
         type="button"
         onClick={() => setTrackIndex(i)}
-        className={`h-[46px] px-5 rounded-xl border transition
-          ${
-            i === trackIndex
-              ? "bg-sky-500 text-[#020726]"
-              : theme === "dark"
-              ? "border-white/40 text-white hover:bg-white/10"
-              : "border-gray-400 text-[#020726] bg-white hover:bg-gray-100"
-          }
-        `}
+       className={`h-[46px] px-5 rounded-xl border transition ${
+  i === trackIndex
+    ? "bg-sky-500 text-[#020726]"
+    : "border-gray-400 dark:border-white/40 text-[#020726] dark:text-white bg-white dark:bg-transparent hover:bg-gray-100 dark:hover:bg-white/10"
+}`}
       >
         Track {i + 1}
       </button>
@@ -540,11 +514,7 @@ setTrackIndex(nextIndex);
 
     }}
     className={`w-full sm:w-[260px] h-[46px] rounded-xl border transition
-      ${
-        theme === "dark"
-          ? "border-white/40 text-white hover:bg-white/10"
-          : "border-gray-400 text-[#020726] bg-white hover:bg-gray-100"
-      }
+      border-gray-400 dark:border-white/40 text-[#020726] dark:text-white bg-white dark:bg-transparent hover:bg-gray-100 dark:hover:bg-white/10
     `}
   >
     + Add Another Track
@@ -563,11 +533,7 @@ setTrackIndex(nextIndex);
           type="button"
           onClick={() => navigate("/releases/create")}
           className={`h-[46px] px-8 rounded-xl transition
-            ${
-              theme === "dark"
-                ? "bg-white/20 hover:bg-white/30"
-                : "bg-gray-200 hover:bg-gray-300"
-            }
+            bg-gray-200 dark:bg-white/20 hover:bg-gray-300 dark:hover:bg-white/30
           `}
         >
           Back
@@ -621,11 +587,7 @@ localStorage.setItem(
             }}
             className={`absolute left-1/2 -translate-x-1/2
               h-[46px] px-10 rounded-xl border transition
-              ${
-                theme === "dark"
-                  ? "border-white/40 hover:bg-white/10"
-                  : "border-gray-400 hover:bg-gray-200"
-              }
+             border-gray-400 dark:border-white/40 hover:bg-gray-200 dark:hover:bg-white/10
             `}
           >
             Save
@@ -655,11 +617,7 @@ localStorage.setItem(
   <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
     <div
       className={`w-full max-w-lg rounded-2xl p-6
-        ${
-          theme === "dark"
-            ? "bg-[#060b2e] text-white"
-            : "bg-white text-[#020726]"
-        }
+       bg-white dark:bg-[#060b2e] text-[#020726] dark:text-white
       `}
     >
       <h3 className="text-lg font-medium text-sky-400 mb-4">
@@ -673,11 +631,7 @@ localStorage.setItem(
         onChange={(e) => !isView && setLyrics(e.target.value)}
         placeholder={isView ? "" : "Enter lyrics here..."}
         className={`w-full rounded-xl p-4 outline-none resize-none
-          ${
-            theme === "dark"
-              ? "bg-[#2a2f4d] text-white border border-white/10"
-              : "bg-gray-100 text-[#020726] border border-gray-300"
-          }
+         bg-gray-100 dark:bg-[#2a2f4d] text-[#020726] dark:text-white border border-gray-300 dark:border-white/10
           ${isView ? "opacity-80 cursor-not-allowed" : ""}
         `}
       />
@@ -686,11 +640,7 @@ localStorage.setItem(
         <button
           onClick={() => setShowLyrics(false)}
           className={`px-4 py-2 rounded-lg
-            ${
-              theme === "dark"
-                ? "bg-white/20 hover:bg-white/30"
-                : "bg-gray-200 hover:bg-gray-300"
-            }
+           bg-gray-200 dark:bg-white/20 hover:bg-gray-300 dark:hover:bg-white/30
           `}
         >
           Close
@@ -750,7 +700,7 @@ localStorage.setItem(
 /* ---------------- COMPONENTS ---------------- */
 
 function Input({ name, placeholder, error, disabled }) {
-  const { theme } = useTheme();
+  //const { theme } = useTheme();
 
   return (
     <div className="w-full">
@@ -760,11 +710,7 @@ function Input({ name, placeholder, error, disabled }) {
           disabled={disabled}
           placeholder={placeholder}
           className={`w-full h-[46px] px-5 rounded-xl outline-none
-            ${
-              theme === "dark"
-                ? "bg-[#2a2f4d] text-white placeholder-gray-300"
-                : "bg-white text-[#020726] placeholder-gray-500 border border-gray-300"
-            }
+            bg-white dark:bg-[#2a2f4d] text-[#020726] dark:text-white placeholder-gray-500 dark:placeholder-gray-300 border border-gray-300 dark:border-white/10
           `}
         />
 
@@ -849,7 +795,7 @@ function MultiInput({
   error,
   disabled,
 }) {
-  const { theme } = useTheme();
+ // const { theme } = useTheme();
   const [value, setValue] = useState("");
   const [open, setOpen] = useState(false);
   const containerRef = useRef(null);
@@ -899,11 +845,7 @@ function MultiInput({
       <div
         className={`min-h-[46px] px-4 py-2 rounded-xl
           flex flex-wrap items-center gap-2 cursor-text
-          ${
-            theme === "dark"
-              ? "bg-[#2a2f4d] border border-white/10"
-              : "bg-white border border-gray-300"
-          }
+          bg-white dark:bg-[#2a2f4d] text-[#020726] dark:text-white placeholder-gray-500 dark:placeholder-gray-300 border border-gray-300 dark:border-white/10
         `}
         onClick={() => !disabled && setOpen(true)}
       >
@@ -943,11 +885,7 @@ function MultiInput({
           }}
           placeholder={values.length === 0 ? placeholder : ""}
           className={`flex-1 bg-transparent outline-none text-sm min-w-[120px]
-            ${
-              theme === "dark"
-                ? "text-white placeholder-gray-400"
-                : "text-[#020726] placeholder-gray-500"
-            }
+            bg-white dark:bg-[#2a2f4d] text-[#020726] dark:text-white placeholder-gray-500 dark:placeholder-gray-300 border border-gray-300 dark:border-white/10
           `}
         />
 
@@ -966,11 +904,7 @@ function MultiInput({
       {open && filteredOptions.length > 0 && (
         <div
           className={`absolute z-20 mt-2 w-full rounded-xl overflow-hidden shadow-lg
-            ${
-              theme === "dark"
-                ? "bg-[#1f2440] border border-white/10"
-                : "bg-white border border-gray-200"
-            }
+           bg-white dark:bg-[#1f2440] border border-gray-200 dark:border-white/10
           `}
         >
           {filteredOptions.map((opt) => (
@@ -980,11 +914,7 @@ function MultiInput({
               disabled={disabled}
               onClick={() => addItem(opt)}
               className={`w-full text-left px-4 py-2 text-sm transition
-                ${
-                  theme === "dark"
-                    ? "text-gray-200 hover:bg-sky-400/20"
-                    : "text-gray-800 hover:bg-sky-100"
-                }
+               text-gray-800 dark:text-gray-200 hover:bg-sky-100 dark:hover:bg-sky-400/20
               `}
             >
               {opt}

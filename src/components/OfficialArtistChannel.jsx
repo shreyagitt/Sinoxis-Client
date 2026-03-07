@@ -1,7 +1,7 @@
 // src/pages/OfficialArtistChannel.jsx
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useTheme } from "../components/Topbar";
+//import { useTheme } from "../components/Topbar";
 
 const StatusPill = ({ status }) => {
   const bg =
@@ -21,7 +21,7 @@ const StatusPill = ({ status }) => {
 };
 
 export default function OfficialArtistChannel() {
-  const { theme } = useTheme();
+  //const { theme } = useTheme();
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
   const [openOACModal, setOpenOACModal] = useState(false);
@@ -148,7 +148,7 @@ export default function OfficialArtistChannel() {
   // --------------------------
   // THEME STYLES
   // --------------------------
-  const pageBg =
+  /*const pageBg =
     theme === "dark"
       ? "bg-[#020726] text-white"
       : "bg-white text-[#020726]";
@@ -164,31 +164,27 @@ export default function OfficialArtistChannel() {
   const inputBg =
     theme === "dark"
       ? "bg-[#1b214d] text-white border-white/10"
-      : "bg-gray-100 text-[#020726] border-gray-300";
+      : "bg-gray-100 text-[#020726] border-gray-300";*/
 
   return (
-    <div className={`min-h-screen px-4 sm:px-10 py-8 ${pageBg}`}>
+    <div className="min-h-screen px-4 sm:px-10 py-8 bg-white dark:bg-[#020726] text-[#020726] dark:text-white">
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row justify-between mb-10">
         <h1 className="text-3xl font-semibold">Official Artist Channel</h1>
-        <p className={subtleText}>
+        <p className="text-gray-600 dark:text-gray-300">
           Home <span className="text-[#29B6F6]">/ Official Artist Channel</span>
         </p>
       </div>
 
       {/* MAIN CARD */}
-      <div className={`rounded-xl p-6 sm:p-10 border shadow-lg ${cardBg}`}>
+      <div className={`rounded-xl p-6 sm:p-10 border shadow-lgbg-white dark:bg-[#0a1039] border-gray-300 dark:border-white/10`}>
         {/* Header Row */}
         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6">
           <h2 className="text-xl font-semibold">Official Artist Channel</h2>
 
           <button
             onClick={() => setOpenOACModal(true)}
-            className={`px-5 py-2 rounded-full border ${
-              theme === "dark"
-                ? "border-[#29B6F6] text-[#29B6F6]"
-                : "border-[#0288D1] text-[#0288D1]"
-            }`}
+            className="px-5 py-2 rounded-full border border-[#0288D1] text-[#0288D1] dark:border-[#29B6F6] dark:text-[#29B6F6]"
           >
             Add Request
           </button>
@@ -196,7 +192,7 @@ export default function OfficialArtistChannel() {
 
         {/* Table Header */}
         <div
-          className={`hidden md:grid grid-cols-5 gap-6 font-semibold py-3 border-t ${subtleText}`}
+          className={`hidden md:grid grid-cols-5 gap-6 font-semibold py-3 border-t text-gray-600 dark:text-gray-300`}
         >
           <div>YouTube Channel</div>
           <div>Topic Channel</div>
@@ -215,9 +211,7 @@ export default function OfficialArtistChannel() {
             requests.map((row, i) => (
               <div
                 key={i}
-                className={`grid grid-cols-1 md:grid-cols-5 gap-4 p-4 rounded-lg border-b ${
-                  theme === "dark" ? "border-white/10" : "border-gray-300"
-                }`}
+                className={`grid grid-cols-1 md:grid-cols-5 gap-4 p-4 rounded-lg border-b border-gray-300 dark:border-white/10`}
               >
                 <a
                   href={row.ytChannel}
@@ -242,7 +236,7 @@ export default function OfficialArtistChannel() {
       {/* ================= ADD REQUEST MODAL ================= */}
       {openOACModal && (
         <div className="fixed inset-0 bg-black/60 flex justify-center items-center p-3 z-50">
-          <div className={`w-full max-w-3xl rounded-xl p-6 border shadow-xl ${cardBg}`}>
+          <div className={`w-full max-w-3xl rounded-xl p-6 border shadow-xlbg-white dark:bg-[#0a1039] border-gray-300 dark:border-white/10`}>
             <div className="flex justify-between mb-6">
               <h3 className="text-xl font-semibold">YouTube Official Artist Channel</h3>
               <button
@@ -261,7 +255,7 @@ export default function OfficialArtistChannel() {
                 placeholder="YouTube Channel Link *"
                 value={oacForm.ytChannel}
                 onChange={(e) => setOacForm({ ...oacForm, ytChannel: e.target.value })}
-                className={`w-full p-3 rounded-lg border ${inputBg}`}
+                className={`w-full p-3 rounded-lg border bg-gray-100 dark:bg-[#1b214d] text-[#020726] dark:text-white border-gray-300 dark:border-white/10`}
               />
 
               {/* Topic */}
@@ -272,7 +266,7 @@ export default function OfficialArtistChannel() {
                 onChange={(e) =>
                   setOacForm({ ...oacForm, topicChannel: e.target.value })
                 }
-                className={`w-full p-3 rounded-lg border ${inputBg}`}
+                className={`w-full p-3 rounded-lg border bg-gray-100 dark:bg-[#1b214d] text-[#020726] dark:text-white border-gray-300 dark:border-white/10`}
               />
 
               {/* Artist */}
@@ -284,7 +278,7 @@ export default function OfficialArtistChannel() {
                 onChange={(e) =>
                   setOacForm({ ...oacForm, artistName: e.target.value })
                 }
-                className={`w-full p-3 rounded-lg border ${inputBg}`}
+                className={`w-full p-3 rounded-lg border bg-gray-100 dark:bg-[#1b214d] text-[#020726] dark:text-white border-gray-300 dark:border-white/10`}
               />
 
               {/* Song Section */}
@@ -304,9 +298,7 @@ export default function OfficialArtistChannel() {
 
               {/* Songs List */}
               <div
-                className={`max-h-48 overflow-auto p-3 rounded-lg border ${
-                  theme === "dark" ? "bg-[#11152b] border-white/10" : "bg-gray-100"
-                }`}
+                className={`max-h-48 overflow-auto p-3 rounded-lg border bg-gray-100 dark:bg-[#11152b] border-gray-300 dark:border-white/10`}
               >
                 {songs.length === 0 ? (
                   <p className={subtleText}>No songs added</p>
@@ -314,9 +306,7 @@ export default function OfficialArtistChannel() {
                   songs.map((s, i) => (
                     <div
                       key={i}
-                      className={`flex justify-between p-3 mb-2 rounded-lg ${
-                        theme === "dark" ? "bg-[#0f1633]" : "bg-gray-200"
-                      }`}
+                      className={`flex justify-between p-3 mb-2 rounded-lg bg-gray-200 dark:bg-[#0f1633]`}
                     >
                       <div>
                         <div className="font-medium">{s.title}</div>
@@ -365,7 +355,7 @@ export default function OfficialArtistChannel() {
       {/* ================= ADD SONG MODAL ================= */}
       {openAddSongModal && (
         <div className="fixed inset-0 bg-black/60 flex justify-center items-center p-3 z-50">
-          <div className={`w-full max-w-md rounded-xl p-6 border shadow-xl ${cardBg}`}>
+          <div className={`w-full max-w-md rounded-xl p-6 border shadow-xlbg-white dark:bg-[#0a1039] border-gray-300 dark:border-white/10`}>
             <div className="flex justify-between mb-4">
               <h3 className="text-lg font-semibold">Add Song</h3>
               <button
@@ -385,7 +375,7 @@ export default function OfficialArtistChannel() {
                 onChange={(e) =>
                   setTempSong({ ...tempSong, title: e.target.value })
                 }
-                className={`w-full p-3 rounded-lg border ${inputBg}`}
+                className={`w-full p-3 rounded-lg border bg-gray-100 dark:bg-[#1b214d] text-[#020726] dark:text-white border-gray-300 dark:border-white/10`}
               />
 
               <input
@@ -396,7 +386,7 @@ export default function OfficialArtistChannel() {
                 onChange={(e) =>
                   setTempSong({ ...tempSong, isrc: e.target.value })
                 }
-                className={`w-full p-3 rounded-lg border ${inputBg}`}
+                className={`w-full p-3 rounded-lg border bg-gray-100 dark:bg-[#1b214d] text-[#020726] dark:text-white border-gray-300 dark:border-white/10`}
               />
 
               <div className="flex justify-end gap-3">

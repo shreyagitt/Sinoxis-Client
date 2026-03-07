@@ -4,7 +4,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import { useTheme } from "../components/Topbar";
+//import { useTheme } from "../components/Topbar";
 
 // ===============================
 // VALIDATION SCHEMA
@@ -23,7 +23,7 @@ const PasswordSchema = Yup.object().shape({
 const ChangePassword = () => {
   const navigate = useNavigate();
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
-  const { theme } = useTheme();
+  //const { theme } = useTheme();
 
   const handleSubmit = async (values, { resetForm, setSubmitting }) => {
     try {
@@ -68,7 +68,7 @@ const ChangePassword = () => {
     }
   };
 
-  /* THEME CLASSES */
+  /* THEME CLASSES 
   const pageBg = theme === "dark" ? "bg-[#020726] text-white" : "bg-white text-[#020726]";
   const cardBg = theme === "dark" ? "bg-[#0a1039]" : "bg-white";
   const cardBorder = theme === "dark" ? "border-white/10" : "border-gray-200";
@@ -76,18 +76,18 @@ const ChangePassword = () => {
   const subtitleColor = theme === "dark" ? "text-gray-300" : "text-gray-600";
   const inputBg = theme === "dark" ? "bg-[#2c2f4a] text-white" : "bg-gray-50 text-[#020726]";
   const inputBorder = theme === "dark" ? "border-transparent" : "border-gray-200";
-  const helperColor = theme === "dark" ? "text-gray-400" : "text-gray-500";
+  const helperColor = theme === "dark" ? "text-gray-400" : "text-gray-500";  */
 
   return (
-    <div className={`${pageBg} min-h-screen w-full`}>
+    <div className={`bg-white dark:bg-[#020726] text-[#020726] dark:text-white min-h-screen w-full`}>
 
       {/* Breadcrumb */}
       <div className="w-full px-4 sm:px-6 lg:px-10 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-        <h2 className={`text-xl sm:text-2xl font-semibold ${titleColor}`}>
+        <h2 className={`text-xl sm:text-2xl font-semibold text-[#020726] dark:text-white`}>
           Change Password
         </h2>
 
-        <div className={`text-sm ${subtitleColor}`}>
+        <div className={`text-sm text-gray-600 dark:text-gray-300`}>
           Home <span className="text-[#29B6F6]">/ Change Password</span>
         </div>
       </div>
@@ -95,7 +95,7 @@ const ChangePassword = () => {
       {/* Main Form Container */}
       <div className="w-full flex justify-center px-4 sm:px-6 lg:px-10 pb-16">
         <div
-          className={`${cardBg} ${cardBorder} rounded-xl shadow-xl p-6 sm:p-8 lg:p-10 w-full max-w-4xl mx-auto border`}
+          className={`border-gray-200 dark:border-white/10 bg-white dark:bg-[#0a1039] rounded-xl shadow-xl p-6 sm:p-8 lg:p-10 w-full max-w-4xl mx-auto border`}
         >
           <Formik
             initialValues={{
@@ -115,8 +115,7 @@ const ChangePassword = () => {
                   label="Current Password"
                   placeholder="Enter current password"
                   type="password"
-                  inputBg={inputBg}
-                  inputBorder={inputBorder}
+                  
                 />
 
                 {/* NEW PASSWORD */}
@@ -126,10 +125,9 @@ const ChangePassword = () => {
                     label="New Password"
                     placeholder="Enter new password"
                     type="password"
-                    inputBg={inputBg}
-                    inputBorder={inputBorder}
+                   
                   />
-                  <p className={`text-xs mt-1 ${helperColor}`}>
+                  <p className={`text-xs mt-1 text-gray-500 dark:text-gray-400`}>
                     Must be at least 8 characters and include a number or special character.
                   </p>
                 </div>
@@ -140,8 +138,7 @@ const ChangePassword = () => {
                   label="Confirm Password"
                   placeholder="Confirm new password"
                   type="password"
-                  inputBg={inputBg}
-                  inputBorder={inputBorder}
+                  
                 />
 
                 {/* SUBMIT BUTTON */}
@@ -167,8 +164,7 @@ const ChangePassword = () => {
 
 export default ChangePassword;
 
-/* Reusable Field Component */
-const FieldGroup = ({ label, name, placeholder, type, inputBg, inputBorder }) => (
+const FieldGroup = ({ label, name, placeholder, type }) => (
   <div>
     <label className="block text-sm font-semibold mb-1">{label}</label>
 
@@ -176,7 +172,7 @@ const FieldGroup = ({ label, name, placeholder, type, inputBg, inputBorder }) =>
       type={type}
       name={name}
       placeholder={placeholder}
-      className={`w-full ${inputBg} ${inputBorder} rounded-md px-4 py-2 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#29B6F6]`}
+     className="w-full bg-gray-50 dark:bg-[#2c2f4a] text-[#020726] dark:text-white border border-gray-200 dark:border-white/10 rounded-md px-4 py-2 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#29B6F6]"
     />
 
     <ErrorMessage

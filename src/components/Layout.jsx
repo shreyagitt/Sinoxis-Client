@@ -3,23 +3,23 @@ import React, { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import Footer from "./Footer";
-import { useTheme } from "./Topbar";
+//import { useTheme } from "./Topbar";
 
 const Layout = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const { theme } = useTheme();
+  //const { theme } = useTheme();
 
   /* -------------------------------------------
       APPLY DARK/LIGHT THEME TO <HTML>
   ------------------------------------------- */
-  useEffect(() => {
+  /*useEffect(() => {
     if (theme === "dark") {
       document.documentElement.classList.add("dark");
     } else {
       document.documentElement.classList.remove("dark");
     }
-  }, [theme]);
+  }, [theme]);*/
   // Now scrollbar CSS will work globally 🎉
 
   /* -------------------------------------------
@@ -39,14 +39,14 @@ const Layout = ({ children }) => {
 
   /* -------------------------------------------
       THEME COLORS
-  ------------------------------------------- */
+  ------------------------------------------- 
   const layoutBg = theme === "dark" ? "bg-[#020726]" : "bg-white";
 
   const separatorColor =
     theme === "dark" ? "rgba(255,255,255,0.10)" : "transparent";
 
   const topSeparatorColor =
-    theme === "dark" ? "rgba(255,255,255,0.08)" : "transparent";
+    theme === "dark" ? "rgba(255,255,255,0.08)" : "transparent";*/
 
   /* -------------------------------------------
       RESPONSIVE LAYOUT LOGIC
@@ -56,7 +56,7 @@ const Layout = ({ children }) => {
 
   return (
     <div
-      className={`min-h-screen flex flex-col transition-all duration-300 ${layoutBg}`}
+      className={`min-h-screen flex flex-col transition-all duration-300 bg-white dark:bg-[#020726]`}
     >
       <Sidebar collapsed={collapsed} isMobile={isMobile} />
       <Topbar
@@ -66,27 +66,19 @@ const Layout = ({ children }) => {
 
       {!isMobile && (
         <div
-          className="fixed top-0 bottom-0 pointer-events-none transition-all duration-300"
+          className="fixed top-0 bottom-0 pointer-events-none transition-all duration-300 bg-transparent dark:bg-white/10"
           style={{
             left: `${sidebarWidth}px`,
             width: "1px",
-            background: separatorColor,
-            boxShadow:
-              theme === "dark"
-                ? "2px 0 12px rgba(0,0,0,0.35)"
-                : "none",
+            background: "rgba(0,0,0,0.08)",
             zIndex: 25,
           }}
         />
       )}
 
       <div
-        className="fixed left-0 right-0 z-20"
-        style={{
-          top: "70px",
-          height: "1px",
-          background: topSeparatorColor,
-        }}
+        className="fixed left-0 right-0 z-20 h-[1px] bg-gray-200 dark:bg-white/10"
+        
       />
 
       <main

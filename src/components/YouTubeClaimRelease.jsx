@@ -7,7 +7,7 @@ import { Listbox } from "@headlessui/react";
 
 import axios from "axios";
 import toast from "react-hot-toast";
-import { useTheme } from "../components/Topbar";
+//import { useTheme } from "../components/Topbar";
 
 /* ---------------------- Yup Validation ---------------------- */
 const ClaimSchema = Yup.object({
@@ -27,9 +27,9 @@ const ClaimSchema = Yup.object({
 /* ======================================================================= */
 const YouTubeClaimRelease = () => {
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
-  const { theme } = useTheme();
+  //const { theme } = useTheme();
 
-  /* ---------------------- Theme-Based Styles ---------------------- */
+  /* ---------------------- Theme-Based Styles ---------------------- 
   const pageBg = theme === "dark" ? "bg-[#020726] text-white" : "bg-white text-[#020726]";
   const cardBg =
     theme === "dark"
@@ -42,7 +42,7 @@ const YouTubeClaimRelease = () => {
   const inputBase =
     theme === "dark"
       ? "bg-[#2c2f4a] text-white placeholder-gray-400 border border-white/10"
-      : "bg-gray-50 text-[#020726] placeholder-gray-500 border border-gray-300";
+      : "bg-gray-50 text-[#020726] placeholder-gray-500 border border-gray-300";*/
 
   /* ---------------------- Submit Handler ---------------------- */
   const handleSubmit = async (values, { resetForm }) => {
@@ -85,7 +85,7 @@ const YouTubeClaimRelease = () => {
 
   /* ---------------------- Render ---------------------- */
   return (
-    <div className={`min-h-screen pb-20 transition-all duration-300 ${pageBg}`}>
+    <div className="min-h-screen pb-20 transition-all duration-300 bg-white dark:bg-[#020726] text-[#020726] dark:text-white">
       {/* ---------------- File Button Scoped Styling ---------------- */}
       <style>{`
         .custom-file-input::file-selector-button,
@@ -114,16 +114,16 @@ const YouTubeClaimRelease = () => {
 
       {/* ---------------- Header ---------------- */}
       <div className="px-4 sm:px-8 lg:px-10 py-4 flex flex-col md:flex-row justify-between gap-2 md:items-center">
-        <h1 className={`text-xl font-semibold ${labelColor}`}>YouTube Claim Release</h1>
+        <h1 className={`text-xl font-semibold text-[#020726] dark:text-white`}>YouTube Claim Release</h1>
 
-        <p className={`text-sm ${hintColor}`}>
+        <p className={`text-sm text-gray-600 dark:text-gray-300`}>
           Home <span className="text-[#29B6F6]">/ YouTube Claim Release</span>
         </p>
       </div>
 
       {/* ---------------- Form Wrapper ---------------- */}
       <div className="px-4 sm:px-8 lg:px-10 w-full flex justify-center">
-        <div className={`rounded-xl p-6 sm:p-8 md:p-10 max-w-5xl w-full ${cardBg}`}>
+        <div className={`rounded-xl p-6 sm:p-8 md:p-10 max-w-5xl w-full bg-white dark:bg-[#0a1039] border border-gray-300 dark:border-white/10 shadow-md dark:shadow-xl`}>
           <Formik
             initialValues={{
               artistName: "",
@@ -147,16 +147,14 @@ const YouTubeClaimRelease = () => {
                     label="Artist Name *"
                     name="artistName"
                     placeholder="Enter artist name"
-                    inputBase={inputBase}
-                    labelColor={labelColor}
+                    
                   />
 
                   <FieldGroup
                     label="Track Title *"
                     name="trackTitle"
                     placeholder="Enter track title"
-                    inputBase={inputBase}
-                    labelColor={labelColor}
+                   
                   />
                 </div>
 
@@ -165,14 +163,13 @@ const YouTubeClaimRelease = () => {
                   label="YouTube Video Link *"
                   name="youtubeLink"
                   placeholder="https://www.youtube.com/watch?v=..."
-                  inputBase={inputBase}
-                  labelColor={labelColor}
+                 
                 />
 
            {/* ---------------- Claim Type (Fully Corrected Responsive + Heroicon) ---------------- */}
 {/* ---------------- Claim Type (Headless UI Version — Same as Facebook) ---------------- */}
 <div className="w-full">
-  <label className={`block text-sm font-semibold mb-1 ${labelColor}`}>
+  <label className={`block text-sm font-semibold mb-1 text-[#020726] dark:text-white`}>
     Claim Type *
   </label>
 
@@ -193,21 +190,19 @@ const YouTubeClaimRelease = () => {
         <Listbox value={value} onChange={setValue}>
           <div className="relative">
             <Listbox.Button
-              className={`w-full rounded-md px-4 py-2 text-left border focus:ring-1 focus:ring-[#29B6F6] ${inputBase}`}
+              className={`w-full rounded-md px-4 py-2 text-left border focus:ring-1 focus:ring-[#29B6F6] bg-gray-50 dark:bg-[#2c2f4a] text-[#020726] dark:text-white border-gray-300 dark:border-white/10`}
             >
               <span>{options.find((o) => o.value === value)?.label}</span>
 
               <ChevronDownIcon
-                className={`h-5 w-5 absolute right-2 top-1/2 -translate-y-1/2 ${
-                  theme === "dark" ? "text-gray-300" : "text-gray-600"
-                }`}
+                className={`h-5 w-5 absolute right-2 top-1/2 -translate-y-1/2 text-gray-600 dark:text-gray-300`}
               />
             </Listbox.Button>
 
             <Listbox.Options
               className={`
                 absolute mt-1 w-full max-h-60 overflow-auto rounded-md shadow-lg border z-50
-                ${theme === "dark" ? "bg-[#1e2347] text-white" : "bg-white text-black"}
+                bg-white dark:bg-[#1e2347] text-black dark:text-white
               `}
             >
               {options.map((option) => (
@@ -250,13 +245,13 @@ const YouTubeClaimRelease = () => {
                   label="Claim Details"
                   name="claimDetails"
                   placeholder="Explain timestamps, claim details, etc."
-                  inputBase={inputBase}
-                  labelColor={labelColor}
+                  
+                  
                 />
 
                 {/* ---------------- Screenshot Upload ---------------- */}
                 <div className="w-full">
-                  <label className={`block text-sm font-semibold mb-2 ${labelColor}`}>
+                  <label className={`block text-sm font-semibold mb-2 text-[#020726] dark:text-white`}>
                     Screenshot (optional)
                   </label>
 
@@ -264,10 +259,10 @@ const YouTubeClaimRelease = () => {
                     type="file"
                     accept="image/*"
                     onChange={(e) => setFieldValue("screenshot", e.target.files?.[0] || null)}
-                    className={`w-full rounded-md px-4 py-2 custom-file-input cursor-pointer ${inputBase}`}
+                    className={`w-full rounded-md px-4 py-2 custom-file-input cursor-pointer bg-gray-50 dark:bg-[#2c2f4a] text-[#020726] dark:text-white border-gray-300 dark:border-white/10`}
                   />
 
-                  <p className={`text-xs mt-1 ${hintColor}`}>
+                  <p className={`text-xs mt-1 text-gray-600 dark:text-gray-300`}>
                     Upload a screenshot of the claim (optional)
                   </p>
                 </div>
@@ -278,14 +273,13 @@ const YouTubeClaimRelease = () => {
                   name="additionalInfo"
                   rows={3}
                   placeholder="Add more details if required"
-                  inputBase={inputBase}
-                  labelColor={labelColor}
+                  
                 />
 
                 {/* ---------------- Confirm Checkbox ---------------- */}
                 <div className="flex items-start gap-3">
                   <Field type="checkbox" name="confirm" className="mt-1 accent-[#29B6F6]" />
-                  <span className={`text-sm ${labelColor}`}>
+                  <span className={`text-sm text-[#020726] dark:text-white`}>
                     I confirm all information provided is accurate
                   </span>
                 </div>
@@ -295,11 +289,7 @@ const YouTubeClaimRelease = () => {
                 <div className="flex flex-col sm:flex-row justify-end gap-3 pt-2">
                   <button
                     type="reset"
-                    className={`px-5 py-2 rounded-md text-sm font-medium border ${
-                      theme === "dark"
-                        ? "border-white/20 text-white hover:bg-white/10"
-                        : "border-gray-400 text-[#020726] hover:bg-gray-100"
-                    }`}
+                    className={`px-5 py-2 rounded-md text-sm font-medium border border-gray-400 dark:border-white/20 text-[#020726] dark:text-white hover:bg-gray-100 dark:hover:bg-white/10`}
                   >
                     Reset
                   </button>
@@ -327,30 +317,30 @@ export default YouTubeClaimRelease;
 /*                     REUSABLE INPUT COMPONENTS                           */
 /* ======================================================================= */
 
-const FieldGroup = ({ label, name, placeholder, inputBase, labelColor }) => (
+const FieldGroup = ({ label, name, placeholder, }) => (
   <div className="w-full">
-    <label className={`block text-sm font-semibold mb-1 ${labelColor}`}>{label}</label>
+    <label className={`block text-sm font-semibold mb-1 text-[#020726] dark:text-white`}>{label}</label>
 
     <Field
       name={name}
       placeholder={placeholder}
-      className={`w-full rounded-md px-4 py-2 focus:ring-1 focus:ring-[#29B6F6] ${inputBase}`}
+      className="w-full rounded-md px-4 py-2 focus:ring-1 focus:ring-[#29B6F6] bg-gray-50 dark:bg-[#2c2f4a] text-[#020726] dark:text-white placeholder-gray-500 dark:placeholder-gray-400 border border-gray-300 dark:border-white/10"
     />
 
     <ErrorMessage name={name} component="p" className="text-red-400 text-xs mt-1" />
   </div>
 );
 
-const TextAreaGroup = ({ label, name, placeholder, rows = 4, inputBase, labelColor }) => (
+const TextAreaGroup = ({ label, name, placeholder, rows = 4, }) => (
   <div className="w-full">
-    <label className={`block text-sm font-semibold mb-1 ${labelColor}`}>{label}</label>
+    <label className={`block text-sm font-semibold mb-1 text-[#020726] dark:text-white`}>{label}</label>
 
     <Field
       as="textarea"
       name={name}
       rows={rows}
       placeholder={placeholder}
-      className={`w-full rounded-md px-4 py-2 focus:ring-1 focus:ring-[#29B6F6] ${inputBase}`}
+      className="w-full rounded-md px-4 py-2 focus:ring-1 focus:ring-[#29B6F6] bg-gray-50 dark:bg-[#2c2f4a] text-[#020726] dark:text-white placeholder-gray-500 dark:placeholder-gray-400 border border-gray-300 dark:border-white/10"
     />
 
     <ErrorMessage name={name} component="p" className="text-red-400 text-xs mt-1" />

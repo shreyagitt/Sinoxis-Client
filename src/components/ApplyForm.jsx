@@ -3,7 +3,7 @@ import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
-import { useTheme } from "../components/Topbar";
+//import { useTheme } from "../components/Topbar";
 
 // VALIDATION SCHEMA
 const ApplyFormSchema = Yup.object().shape({
@@ -22,9 +22,9 @@ const ApplyFormSchema = Yup.object().shape({
 
 const ApplyForm = () => {
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
-  const { theme } = useTheme();
+  //const { theme } = useTheme();
 
-  // 🎨 THEME COLORS
+  /* 🎨 THEME COLORS
   const pageBg = theme === "dark" ? "bg-[#020726]" : "bg-white";
   const cardBg = theme === "dark" ? "bg-[#0a1039]" : "bg-[#F5F9FF]";
   const borderColor = theme === "dark" ? "border-white/10" : "border-gray-300";
@@ -32,7 +32,7 @@ const ApplyForm = () => {
   const inputBg = theme === "dark" ? "bg-[#1f233d] text-white" : "bg-white text-[#020726]";
   const placeholderColor = theme === "dark" ? "placeholder-gray-400" : "placeholder-gray-500";
   const titleColor = theme === "dark" ? "text-white" : "text-[#020726]";
-  const subtitleColor = theme === "dark" ? "text-gray-400" : "text-gray-600";
+  const subtitleColor = theme === "dark" ? "text-gray-400" : "text-gray-600"; */
 
   const handleSubmit = async (values, { resetForm, setSubmitting }) => {
     // Convert Yes/No string → boolean
@@ -51,24 +51,34 @@ const ApplyForm = () => {
   };
 
   return (
-    <div className={`min-h-screen w-full flex flex-col items-center p-4 sm:p-6 lg:p-10 ${pageBg}`}>
+    <div className={`min-h-screen w-full flex flex-col items-center p-4 sm:p-6 lg:p-10 bg-white dark:bg-[#020726]`}>
 
       {/* LOGO */}
-      <img
-        src="/image/logo.webp"
-        alt="Sinoxis Logo"
-        className="w-20 sm:w-24 md:w-28 h-auto object-contain mb-6"
-      />
+    <div className="mb-6">
+  {/* Light Logo */}
+  <img
+    src="/logo3.png"
+    alt="Sinoxis Logo"
+    className="w-20 sm:w-24 md:w-28 h-auto object-contain dark:hidden"
+  />
+
+  {/* Dark Logo */}
+  <img
+    src="/image/logo.webp"
+    alt="Sinoxis Logo"
+    className="w-20 sm:w-24 md:w-28 h-auto object-contain hidden dark:block"
+  />
+</div>
 
       {/* FORM CARD */}
       <div
-        className={`${cardBg} w-full max-w-4xl rounded-2xl p-6 sm:p-8 md:p-10 shadow-xl border ${borderColor}`}
+        className={`bg-[#F5F9FF] dark:bg-[#0a1039] w-full max-w-4xl rounded-2xl p-6 sm:p-8 md:p-10 shadow-xl border border-gray-300 dark:border-white/10`}
       >
-        <h1 className={`text-2xl sm:text-3xl font-semibold text-center ${titleColor}`}>
+        <h1 className={`text-2xl sm:text-3xl font-semibold text-center text-[#020726] dark:text-white`}>
           Apply Form
         </h1>
 
-        <p className={`text-center mt-2 mb-6 sm:mb-10 text-sm sm:text-base ${subtitleColor}`}>
+        <p className={`text-center mt-2 mb-6 sm:mb-10 text-sm sm:text-base text-gray-600 dark:text-gray-400`}>
           Fill out the details below to apply to Sinoxis Digital.
         </p>
 
@@ -91,33 +101,33 @@ const ApplyForm = () => {
             <Form className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
 
               {/* FULL NAME */}
-              <FormField label="Full Name" name="fullName" inputBg={inputBg} labelColor={labelColor} placeholderColor={placeholderColor} borderColor={borderColor} />
+              <FormField label="Full Name" name="fullName" />
 
               {/* ARTIST NAME */}
-              <FormField label="Artist Name" name="artistName" inputBg={inputBg} labelColor={labelColor} placeholderColor={placeholderColor} borderColor={borderColor} />
+              <FormField label="Artist Name" name="artistName" />
 
               {/* EMAIL */}
-              <FormField label="Email" name="email" type="email" inputBg={inputBg} labelColor={labelColor} placeholderColor={placeholderColor} borderColor={borderColor} />
+              <FormField label="Email" name="email" type="email" />
 
               {/* PHONE */}
-              <FormField label="Phone Number" name="phone" inputBg={inputBg} labelColor={labelColor} placeholderColor={placeholderColor} borderColor={borderColor} />
+              <FormField label="Phone Number" name="phone" />
 
               {/* INSTAGRAM */}
-              <FormField label="Instagram Profile Link" name="instagram" inputBg={inputBg} labelColor={labelColor} placeholderColor={placeholderColor} borderColor={borderColor} />
+              <FormField label="Instagram Profile Link" name="instagram" />
 
               {/* YOUTUBE */}
-              <FormField label="YouTube Channel Link" name="youtube" inputBg={inputBg} labelColor={labelColor} placeholderColor={placeholderColor} borderColor={borderColor} />
+              <FormField label="YouTube Channel Link" name="youtube" />
 
               {/* LABEL NAME (Full Width) */}
               <div className="sm:col-span-2">
-                <FormField label="Label/Studio Name" name="labelName" inputBg={inputBg} labelColor={labelColor} borderColor={borderColor} />
+                <FormField label="Label/Studio Name" name="labelName"  />
               </div>
 
               {/* RELEASED BEFORE — FIXED BOOLEAN HANDLING */}
               <div>
-                <label className={`text-sm ${labelColor}`}>Have you released music before?</label>
+                <label className={`text-sm text-[#020726] dark:text-gray-300`}>Have you released music before?</label>
 
-                <div className={`flex gap-4 mt-2 ${labelColor}`}>
+                <div className={`flex gap-4 mt-2 text-[#020726] dark:text-gray-300`}>
                   <label className="flex items-center gap-2">
                     <Field type="radio" value="true" name="releasedBefore" /> Yes
                   </label>
@@ -132,11 +142,13 @@ const ApplyForm = () => {
 
               {/* HEARD ABOUT US */}
               <div>
-                <label className={`text-sm ${labelColor}`}>How did you hear about us?</label>
+                <label className={`text-sm text-[#020726] dark:text-gray-300`}>How did you hear about us?</label>
                 <Field
                   as="select"
                   name="heardAbout"
-                  className={`w-full p-3 mt-1 rounded-lg border outline-none ${inputBg} ${borderColor}`}
+                  className={`w-full p-3 mt-1 rounded-lg border outline-none bg-white dark:bg-[#1f233d]
+  text-[#020726] dark:text-white
+  border-gray-300 dark:border-white/10`}
                 >
                   <option value="">Select an option</option>
                   <option value="Instagram">Instagram</option>
@@ -168,14 +180,17 @@ const ApplyForm = () => {
 };
 
 // ⭐ Reusable Form Field Component
-const FormField = ({ label, name, type = "text", labelColor, inputBg, placeholderColor, borderColor }) => (
+const FormField = ({ label, name, type = "text" }) => (
   <div>
-    <label className={`text-sm ${labelColor}`}>{label}</label>
+    <label className={`text-sm text-[#020726] dark:text-gray-300`}>{label}</label>
     <Field
       name={name}
       type={type}
       placeholder={`Enter ${label.toLowerCase()}`}
-      className={`w-full p-3 mt-1 rounded-lg border outline-none ${inputBg} ${placeholderColor} ${borderColor}`}
+      className={`w-full p-3 mt-1 rounded-lg border outline-none bg-white dark:bg-[#1f233d]
+text-[#020726] dark:text-white
+placeholder-gray-500 dark:placeholder-gray-400
+border-gray-300 dark:border-white/10`}
     />
     <ErrorMessage name={name} className="text-red-400 text-sm mt-1" component="div" />
   </div>

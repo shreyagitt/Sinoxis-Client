@@ -3,7 +3,7 @@ import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
-import { useTheme } from "../components/Topbar";
+//import { useTheme } from "../components/Topbar";
 
 const LoginSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email").required("Email is required"),
@@ -13,10 +13,10 @@ const LoginSchema = Yup.object().shape({
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const { theme } = useTheme();
+//  const { theme } = useTheme();
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
-  const pageBg = theme === "dark" ? "bg-[#020726] text-white" : "bg-gray-100 text-[#020726]";
+  /*const pageBg = theme === "dark" ? "bg-[#020726] text-white" : "bg-gray-100 text-[#020726]";
   const cardBg =
     theme === "dark"
       ? "bg-[#0a1039] border-white/10"
@@ -27,7 +27,7 @@ const LoginPage = () => {
     theme === "dark"
       ? "bg-[#1f233d] text-white border-white/20 placeholder-gray-300"
       : "bg-gray-100 text-[#020726] border-gray-300 placeholder-gray-500";
-
+*/
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
       const payload = {
@@ -61,22 +61,32 @@ const LoginPage = () => {
   };
 
   return (
-    <div
-      className={`min-h-screen flex flex-col justify-center items-center px-4 py-8 sm:py-12 transition-all duration-300 ${pageBg}`}
-    >
+    <div className="min-h-screen flex flex-col justify-center items-center px-4 py-8 sm:py-12 transition-all duration-300 bg-gray-100 dark:bg-[#020726] text-[#020726] dark:text-white">
       {/* Logo */}
-      <img
-        src="/image/logo.webp"
-        alt="Sinoxis Logo"
-        className="w-20 h-20 sm:w-24 sm:h-24 md:w-30 md:h-30 mb-6 sm:mb-8"
-      />
+    <div className="flex justify-center mb-6 sm:mb-8">
+
+  {/* Light Mode Logo */}
+  <img
+    src="/logo3.png"
+    alt="Sinoxis Logo"
+    className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 object-contain dark:hidden"
+  />
+
+  {/* Dark Mode Logo */}
+  <img
+    src="/image/logo.webp"
+    alt="Sinoxis Logo"
+    className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 object-contain hidden dark:block"
+  />
+
+</div>
 
       {/* Card */}
       <div
-        className={`w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-md rounded-2xl p-6 sm:p-8 md:p-10 transition-all duration-300 ${cardBg}`}
+        className={`w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-md rounded-2xl p-6 sm:p-8 md:p-10 transition-all duration-300 bg-white dark:bg-[#0a1039] border border-gray-300 dark:border-white/10 shadow-md`}
       >
         <h3 className="text-2xl sm:text-3xl font-semibold text-center mb-2">Login</h3>
-        <p className={`text-center mb-6 sm:mb-8 ${subtleText}`}>
+        <p className={`text-center mb-6 sm:mb-8 text-gray-600 dark:text-gray-300`}>
           Enter your credentials to access your account.
         </p>
 
@@ -86,24 +96,24 @@ const LoginPage = () => {
 
               {/* EMAIL */}
               <div>
-                <label className={`block mb-1 text-sm sm:text-base font-medium ${labelColor}`}>Email</label>
+                <label className={`block mb-1 text-sm sm:text-base font-medium text-[#020726] dark:text-white`}>Email</label>
                 <Field
                   name="email"
                   type="email"
                   placeholder="Enter your email"
-                  className={`w-full p-3 sm:p-3.5 rounded-lg outline-none border text-sm sm:text-base focus:ring-2 focus:ring-[#29B6F6] ${inputBg}`}
+                  className={`w-full p-3 sm:p-3.5 rounded-lg outline-none border text-sm sm:text-base focus:ring-2 focus:ring-[#29B6F6] bg-gray-100 dark:bg-[#1f233d] text-[#020726] dark:text-white border-gray-300 dark:border-white/20 placeholder-gray-500 dark:placeholder-gray-300`}
                 />
                 <ErrorMessage name="email" component="div" className="text-red-500 text-sm mt-1" />
               </div>
 
               {/* PASSWORD */}
               <div>
-                <label className={`block mb-1 text-sm sm:text-base font-medium ${labelColor}`}>Password</label>
+                <label className={`block mb-1 text-sm sm:text-base font-medium text-[#020726] dark:text-white`}>Password</label>
                 <Field
                   name="password"
                   type="password"
                   placeholder="Enter password"
-                  className={`w-full p-3 sm:p-3.5 rounded-lg outline-none border text-sm sm:text-base focus:ring-2 focus:ring-[#29B6F6] ${inputBg}`}
+                  className={`w-full p-3 sm:p-3.5 rounded-lg outline-none border text-sm sm:text-base focus:ring-2 focus:ring-[#29B6F6] bg-gray-100 dark:bg-[#1f233d] text-[#020726] dark:text-white border-gray-300 dark:border-white/20 placeholder-gray-500 dark:placeholder-gray-300`}
                 />
                 <ErrorMessage name="password" component="div" className="text-red-500 text-sm mt-1" />
               </div>
@@ -112,13 +122,13 @@ const LoginPage = () => {
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
                 <div className="flex items-center gap-2">
                   <Field type="checkbox" name="remember" className="w-4 h-4 accent-[#29B6F6]" />
-                  <label className={`text-sm sm:text-base ${labelColor}`}>Remember me</label>
+                  <label className={`text-sm sm:text-base text-[#020726] dark:text-white`}>Remember me</label>
                 </div>
 
                 <button
                   type="button"
                   onClick={() => navigate("/register")}
-                  className={`text-sm sm:text-base hover:underline ${labelColor}`}
+                  className={`text-sm sm:text-base hover:underline text-[#020726] dark:text-white`}
                 >
                   Register
                 </button>

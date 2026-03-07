@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+/* Enable dark mode via class */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Smooth transition */
+* {
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+
 /* DARK SCROLLBAR FOR SIDEBAR */
 .sidebar::-webkit-scrollbar {
   width: 6px;

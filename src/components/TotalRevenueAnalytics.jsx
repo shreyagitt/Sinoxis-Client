@@ -15,7 +15,7 @@ import {
   Youtube,
   Headphones,
 } from "lucide-react";
-import { useTheme } from "../components/Topbar";
+//import { useTheme } from "../components/Topbar";
 
 /* =======================
    ✅ SAFE DEFAULT STATE
@@ -45,7 +45,7 @@ const DEFAULT_OVERVIEW = {
 };
 
 export default function TotalRevenueAnalytics() {
-  const { theme } = useTheme();
+  //const { theme } = useTheme();
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
   const token = localStorage.getItem("token");
 
@@ -55,7 +55,7 @@ export default function TotalRevenueAnalytics() {
   const [showExportModal, setShowExportModal] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const filteredPlatforms = overview.platforms.filter((p) => {
+  const filteredPlatforms = (overview.platforms || []).filter((p) => {
   const q = search.toLowerCase();
   return (
     p.name?.toLowerCase().includes(q) ||
@@ -65,7 +65,7 @@ export default function TotalRevenueAnalytics() {
 
   /* =========================
         THEME CLASSES
-  ========================== */
+  ==========================
   const pageBg =
     theme === "dark"
       ? "bg-[#020726] text-white"
@@ -83,7 +83,7 @@ export default function TotalRevenueAnalytics() {
   const modalBg =
     theme === "dark"
       ? "bg-[#0b1138] border border-white/10"
-      : "bg-white border border-gray-200";
+      : "bg-white border border-gray-200";  */
 
   const fmtCurrency = (v) => `$${Number(v || 0).toLocaleString()}`;
 
@@ -155,6 +155,19 @@ const handleExport = async () => {
     fetchAnalytics();
   }, [filterRange]);
 
+  const pageBg = "bg-white dark:bg-[#020726] text-[#020726] dark:text-white";
+
+const cardBg =
+  "bg-white dark:bg-[#0a1039] border border-gray-200 dark:border-white/10 shadow-sm";
+
+const inputBg =
+  "bg-gray-50 dark:bg-[#1f233d] text-[#020726] dark:text-white placeholder-gray-500 dark:placeholder-gray-400 border border-gray-200 dark:border-white/10";
+
+const subtleText = "text-gray-600 dark:text-gray-300";
+
+const modalBg =
+  "bg-white dark:bg-[#0b1138] border border-gray-200 dark:border-white/10";
+
   if (loading) {
     return (
       <div className={`min-h-screen flex items-center justify-center ${pageBg}`}>
@@ -190,11 +203,7 @@ const handleExport = async () => {
 
           <div className="flex items-center gap-3 flex-wrap">
             <div
-              className={`flex rounded-full overflow-hidden border ${
-                theme === "dark"
-                  ? "border-white/10"
-                  : "border-[#0288D1]"
-              }`}
+              className={`flex rounded-full overflow-hidden border border-[#0288D1] dark:border-white/10`}
             >
               {["Last 30 Days", "Last 90 Days", "This Year", "All Time"].map(
                 (r) => (
@@ -204,9 +213,8 @@ const handleExport = async () => {
                     className={`px-4 py-1.5 text-sm font-medium ${
                       filterRange === r
                         ? "bg-gradient-to-r from-[#29B6F6] to-[#0288D1] text-white"
-                        : theme === "dark"
-                        ? "text-[#29B6F6]"
-                        : "text-[#0288D1] hover:bg-[#0288D1]/10"
+                        :  "text-[#0288D1] dark:text-[#29B6F6]"
+                      
                     }`}
                   >
                     {r}
@@ -273,11 +281,7 @@ const handleExport = async () => {
             </h3>
 
             <select
-              className={`px-3 py-1.5 text-sm rounded-lg ${
-                theme === "dark"
-                  ? "bg-[#0a1039] border border-white/10 text-gray-300"
-                  : "bg-white border border-gray-200 text-[#020726]"
-              }`}
+              className={`px-3 py-1.5 text-sm rounded-lg bg-white dark:bg-[#0a1039] border border-gray-200 dark:border-white/10 text-[#020726] dark:text-gray-300`}
             >
               <option>By Month</option>
               <option>By Quarter</option>
@@ -287,11 +291,7 @@ const handleExport = async () => {
 
           {/* Visual Placeholder */}
           <div
-            className={`rounded-2xl p-6 sm:p-8 ${
-              theme === "dark"
-                ? "bg-[#070d2b] border border-white/10"
-                : "bg-white border border-gray-100"
-            }`}
+            className={`rounded-2xl p-6 sm:p-8 bg-white dark:bg-[#070d2b] border border-gray-100 dark:border-white/10`}
           >
             <div className="flex justify-center mb-6">
               <BarChart2 className="text-[#29B6F6]" size={48} />
@@ -401,29 +401,18 @@ const handleExport = async () => {
 
           <div className="flex items-center gap-2 w-full md:w-auto">
             <div
-              className={`flex w-full md:w-auto border rounded-lg overflow-hidden ${
-                theme === "dark" ? "border-white/10" : "border-gray-200"
-              }`}
+              className="flex w-full md:w-auto border border-gray-200 dark:border-white/10 rounded-lg overflow-hidden"
             >
               <input
                 type="text"
                 placeholder="Search platforms..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className={`px-3 py-1.5 outline-none w-full md:w-56 text-sm ${
-                  theme === "dark"
-                    ? "bg-transparent text-gray-200 placeholder-gray-400"
-                    : "bg-white text-[#020726] placeholder-gray-400"
-                }`}
+                className={`px-3 py-1.5 outline-none w-full md:w-56 text-sm bg-white dark:bg-transparent text-[#020726] dark:text-gray-200 placeholder-gray-400`}
               />
 
               <button className="bg-gradient-to-r from-[#29B6F6] to-[#0288D1] px-3 flex items-center justify-center">
-                <Search
-                  size={16}
-                  className={
-                    theme === "dark" ? "text-[#020726]" : "text-white"
-                  }
-                />
+                <Search size={16} className="text-white dark:text-[#020726]" />
               </button>
             </div>
           </div>
@@ -433,11 +422,7 @@ const handleExport = async () => {
         <div className="overflow-x-auto">
           <table className="w-full text-sm min-w-[800px]">
             <thead
-              className={`${
-                theme === "dark"
-                  ? "text-gray-400 border-b border-white/10"
-                  : "text-gray-600 border-b border-gray-200"
-              }`}
+              className={`text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-white/10`}
             >
               <tr>
                 <th className="text-left py-3">Platform</th>
@@ -449,7 +434,7 @@ const handleExport = async () => {
               </tr>
             </thead>
 
-            <tbody className={`${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}>
+            <tbody className={`text-gray-700 dark:text-gray-300`}>
   {filteredPlatforms.map((p, idx) => {
     const avg = Number(p.avgPerStream || 0);
     const growth = Number(p.growth || 0);
@@ -460,11 +445,7 @@ const handleExport = async () => {
     return (
       <tr
         key={idx}
-        className={`${
-          theme === "dark"
-            ? "border-b border-white/5 hover:bg-white/5"
-            : "border-b border-gray-100 hover:bg-gray-50"
-        } transition`}
+        className={`border-b border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/5 transition`}
       >
         <td className="py-3">
           <div className="flex items-center gap-3">
@@ -571,11 +552,8 @@ const handleExport = async () => {
             <div className="mt-6 flex justify-end gap-3">
               <button
                 onClick={() => setShowExportModal(false)}
-                className={`px-4 py-2 rounded-md ${
-                  theme === "dark"
-                    ? "border border-white/20 text-white hover:bg-white/5"
-                    : "border border-gray-200 text-[#020726] hover:bg-gray-50"
-                }`}
+                className={`px-4 py-2 rounded-md border border-gray-200 dark:border-white/20 text-[#020726] dark:text-white hover:bg-gray-50 dark:hover:bg-white/5
+                  `}
               >
                 Cancel
               </button>

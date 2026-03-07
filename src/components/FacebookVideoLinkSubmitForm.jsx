@@ -7,7 +7,7 @@ import { ChevronUpDownIcon, CheckIcon } from "@heroicons/react/20/solid";
 
 import axios from "axios";
 import toast from "react-hot-toast";
-import { useTheme } from "../components/Topbar";
+//import { useTheme } from "../components/Topbar";
 
 // VALIDATION SCHEMA
 const FacebookVideoSchema = Yup.object({
@@ -24,9 +24,9 @@ const FacebookVideoSchema = Yup.object({
 
 const FacebookVideoLinkSubmitForm = () => {
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
-  const { theme } = useTheme();
+  //const { theme } = useTheme();
 
-  // THEME CLASSES
+  /* THEME CLASSES
   const pageBg = theme === "dark" ? "bg-[#020726] text-white" : "bg-white text-[#020726]";
   const cardBg =
     theme === "dark"
@@ -39,22 +39,22 @@ const FacebookVideoLinkSubmitForm = () => {
   const inputBg =
     theme === "dark"
       ? "bg-[#2c2f4a] text-white placeholder-gray-300 border border-transparent"
-      : "bg-gray-100 text-[#020726] placeholder-gray-500 border border-gray-300";
+      : "bg-gray-100 text-[#020726] placeholder-gray-500 border border-gray-300"; */
 
   return (
-    <div className={`min-h-screen flex flex-col pb-20 transition-all duration-300 ${pageBg}`}>
+    <div className="min-h-screen flex flex-col pb-20 transition-all duration-300 bg-white dark:bg-[#020726] text-[#020726] dark:text-white">
 
       {/* HEADER */}
       <div className="py-4 px-4 sm:px-8 lg:px-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
         <h1 className="text-xl font-semibold">Facebook Video Link Submit Form</h1>
-        <p className={`text-sm ${hintColor}`}>
+        <p className={`text-sm text-gray-600 dark:text-gray-300`}>
           Home <span className="text-[#29B6F6]">/ Facebook Video Link Submit Form</span>
         </p>
       </div>
 
       {/* PAGE WRAPPER */}
       <div className="w-full flex justify-center px-4 sm:px-8 lg:px-10">
-        <div className={`rounded-xl p-6 sm:p-8 md:p-10 w-full max-w-5xl border ${cardBg}`}>
+        <div className="rounded-xl p-6 sm:p-8 md:p-10 w-full max-w-5xl border bg-white dark:bg-[#0a1039] border-gray-200 dark:border-white/10">
 
           <Formik
             initialValues={{
@@ -113,14 +113,14 @@ const FacebookVideoLinkSubmitForm = () => {
                 {/* ROW 1 */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FieldGroup
-                    theme={theme}
+                    
                     label="Artist Name *"
                     name="artistNameFb"
                     placeholder="Enter artist name"
                   />
 
                   <FieldGroup
-                    theme={theme}
+                    
                     label="Label Name"
                     name="labelNameFb"
                     placeholder="Enter label name (optional)"
@@ -129,7 +129,7 @@ const FacebookVideoLinkSubmitForm = () => {
 
                 {/* FACEBOOK URL */}
                 <FieldGroup
-                  theme={theme}
+                  
                   label="Facebook Video URL *"
                   name="facebookVideoUrl"
                   placeholder="https://www.facebook.com/.../videos/..."
@@ -137,7 +137,7 @@ const FacebookVideoLinkSubmitForm = () => {
 
                 {/* ISRC */}
                 <FieldGroup
-                  theme={theme}
+                  
                   label="ISRC Code *"
                   name="isrcCodeFb"
                   placeholder="USABC1234567"
@@ -145,7 +145,7 @@ const FacebookVideoLinkSubmitForm = () => {
 
                 {/* CLAIM TYPE – FIXED, RESPONSIVE, CUSTOM DROPDOWN */}
 <div className="w-full">
-  <label className={`block text-sm font-semibold mb-1 ${labelColor}`}>
+  <label className={`block text-sm font-semibold mb-1 text-[#020726] dark:text-white`}>
     Claim Type *
   </label>
 
@@ -166,21 +166,19 @@ const FacebookVideoLinkSubmitForm = () => {
         <Listbox value={value} onChange={setValue}>
           <div className="relative">
             <Listbox.Button
-              className={`w-full rounded-md px-4 py-2 text-sm text-left border focus:ring-1 focus:ring-[#29B6F6] ${inputBg}`}
+              className="w-full rounded-md px-4 py-2 text-sm text-left border bg-gray-100 dark:bg-[#2c2f4a] text-[#020726] dark:text-white border-gray-300 dark:border-white/10 focus:ring-1 focus:ring-[#29B6F6]"
             >
               <span>{options.find((o) => o.value === value)?.label}</span>
 
               <ChevronUpDownIcon
-                className={`h-5 w-5 absolute right-2 top-1/2 -translate-y-1/2 ${
-                  theme === "dark" ? "text-white" : "text-gray-600"
-                }`}
+                className="h-5 w-5 absolute right-2 top-1/2 -translate-y-1/2 text-gray-600 dark:text-white"
               />
             </Listbox.Button>
 
             <Listbox.Options
               className={`
                 absolute mt-1 w-full max-h-60 overflow-auto rounded-md shadow-lg border z-50
-                ${theme === "dark" ? "bg-[#1e2347] text-white" : "bg-white text-black"}
+                bg-white dark:bg-[#1e2347] text-black dark:text-white
               `}
             >
               {options.map((option) => (
@@ -221,7 +219,7 @@ const FacebookVideoLinkSubmitForm = () => {
 
                 {/* CLAIM DETAILS */}
                 <TextAreaGroup
-                  theme={theme}
+                  
                   label="Claim Details"
                   name="claimDetailsFb"
                   rows={4}
@@ -229,7 +227,7 @@ const FacebookVideoLinkSubmitForm = () => {
 
                 {/* SCREENSHOT */}
                 <div>
-                  <label className={`block text-sm font-semibold mb-2 ${labelColor}`}>
+                  <label className={`block text-sm font-semibold mb-2 text-[#020726] dark:text-white`}>
                     Screenshot of Claim (optional)
                   </label>
 
@@ -240,7 +238,7 @@ const FacebookVideoLinkSubmitForm = () => {
                     className={`w-full rounded-md px-4 py-2 border cursor-pointer 
                       file:px-3 file:py-1 file:rounded-md 
                       file:bg-[#29B6F6] file:text-white 
-                      ${inputBg}
+                      bg-gray-100 dark:bg-[#2c2f4a] text-[#020726] dark:text-white border border-gray-300 dark:border-white/10
                     `}
                   />
                 </div>
@@ -248,7 +246,7 @@ const FacebookVideoLinkSubmitForm = () => {
                 {/* CONFIRM */}
                 <div className="flex items-start gap-2">
                   <Field type="checkbox" name="confirmFb" className="mt-1 accent-[#29B6F6]" />
-                  <span className={`text-sm ${labelColor}`}>
+                  <span className={`text-sm text-[#020726] dark:text-white`}>
                     I confirm all information is accurate
                   </span>
                 </div>
@@ -263,10 +261,7 @@ const FacebookVideoLinkSubmitForm = () => {
                   <button
                     type="reset"
                     className={`px-5 py-2 rounded-md border text-sm 
-                      ${theme === "dark"
-                        ? "border-white/20 text-white hover:bg-white/10"
-                        : "border-gray-300 text-[#020726] hover:bg-gray-100"
-                      }`}
+                      border-gray-300 dark:border-white/20 text-[#020726] dark:text-white hover:bg-gray-100 dark:hover:bg-white/10`}
                   >
                     Reset Form
                   </button>
@@ -292,21 +287,17 @@ export default FacebookVideoLinkSubmitForm;
 
 /* ---------------------- REUSABLE COMPONENTS ---------------------- */
 
-const FieldGroup = ({ theme, label, name, placeholder }) => {
-  const labelColor = theme === "dark" ? "text-white" : "text-[#020726]";
-  const inputStyles =
-    theme === "dark"
-      ? "bg-[#2c2f4a] text-white placeholder-gray-400 border border-transparent"
-      : "bg-gray-100 text-[#020726] placeholder-gray-500 border border-gray-300";
-
+const FieldGroup = ({ label, name, placeholder }) => {
   return (
     <div className="w-full">
-      <label className={`block text-sm font-semibold mb-1 ${labelColor}`}>{label}</label>
+      <label className="block text-sm font-semibold mb-1 text-[#020726] dark:text-white">
+        {label}
+      </label>
 
       <Field
         name={name}
         placeholder={placeholder}
-        className={`w-full rounded-md px-4 py-2 outline-none focus:ring-1 focus:ring-[#29B6F6] ${inputStyles}`}
+        className="w-full rounded-md px-4 py-2 outline-none focus:ring-1 focus:ring-[#29B6F6] bg-gray-100 dark:bg-[#2c2f4a] text-[#020726] dark:text-white border border-gray-300 dark:border-white/10"
       />
 
       <ErrorMessage name={name} component="p" className="text-red-400 text-xs mt-1" />
@@ -314,22 +305,17 @@ const FieldGroup = ({ theme, label, name, placeholder }) => {
   );
 };
 
-const TextAreaGroup = ({ theme, label, name, rows }) => {
-  const labelColor = theme === "dark" ? "text-white" : "text-[#020726]";
-  const inputStyles =
-    theme === "dark"
-      ? "bg-[#2c2f4a] text-white placeholder-gray-400 border border-transparent"
-      : "bg-gray-100 text-[#020726] placeholder-gray-500 border border-gray-300";
+const TextAreaGroup = ({  label, name, rows }) => {
 
   return (
     <div className="w-full">
-      <label className={`block text-sm font-semibold mb-1 ${labelColor}`}>{label}</label>
+      <label className={`block text-sm font-semibold mb-1 text-[#020726] dark:text-white`}>{label}</label>
 
       <Field
         as="textarea"
         name={name}
         rows={rows}
-        className={`w-full rounded-md px-4 py-2 outline-none focus:ring-1 focus:ring-[#29B6F6] ${inputStyles}`}
+        className={`w-full rounded-md px-4 py-2 outline-none focus:ring-1 focus:ring-[#29B6F6] bg-gray-100 dark:bg-[#2c2f4a] text-[#020726] dark:text-white border border-gray-300 dark:border-white/10`}
       />
 
       <ErrorMessage name={name} component="p" className="text-red-400 text-xs mt-1" />

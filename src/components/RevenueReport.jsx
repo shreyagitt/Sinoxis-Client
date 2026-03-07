@@ -3,33 +3,28 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import jsPDF from "jspdf";
 import { useNavigate } from "react-router-dom";
-import { useTheme } from "../components/Topbar";
+//import { useTheme } from "../components/Topbar";
 
 // ================================
 // STATUS PILL (RESPONSIVE)
 // ================================
-const StatusPill = ({ status, theme }) => {
+const StatusPill = ({ status }) => {
   if (!status) return null;
 
-  const base = "inline-block px-2.5 py-0.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap";
+  const base =
+    "inline-block px-2.5 py-0.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap";
 
-  const colorMapDark = {
-    Pending: "bg-yellow-400 text-black",
-    Failed: "bg-red-600 text-white",
-    Paid: "bg-green-400 text-black",
+  const colorMap = {
+    Pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-400 dark:text-black",
+    Failed: "bg-red-100 text-red-800 dark:bg-red-600 dark:text-white",
+    Paid: "bg-green-100 text-green-800 dark:bg-green-400 dark:text-black",
   };
 
-  const colorMapLight = {
-    Pending: "bg-yellow-100 text-yellow-800",
-    Failed: "bg-red-100 text-red-800",
-    Paid: "bg-green-100 text-green-800",
-  };
-
-  const classes = theme === "dark"
-    ? (colorMapDark[status] || "bg-gray-400 text-black")
-    : (colorMapLight[status] || "bg-gray-200 text-gray-800");
-
-  return <span className={`${base} ${classes}`}>{status}</span>;
+  return (
+    <span className={`${base} ${colorMap[status] || "bg-gray-200 dark:bg-gray-400 text-gray-800 dark:text-black"}`}>
+      {status}
+    </span>
+  );
 };
 
 // ================================
@@ -37,7 +32,7 @@ const StatusPill = ({ status, theme }) => {
 // ================================
 export default function RevenueReports() {
   const navigate = useNavigate();
-  const { theme } = useTheme();
+  //const { theme } = useTheme();
 
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
   const token = localStorage.getItem("token");
@@ -156,11 +151,11 @@ const handleDownload = (t) => {
   // ================================
   // THEME DESIGN
   // ================================
-  const pageBg = theme === "dark" ? "bg-[#020726] text-white" : "bg-white text-[#020726]";
-  const cardBg = theme === "dark" ? "bg-[#0a1039] border border-white/10" : "bg-white border border-gray-200 shadow-sm";
-  const inputBg = theme === "dark" ? "bg-[#1f233d] text-white border border-white/10" : "bg-gray-50 border border-gray-200";
-  const subtleText = theme === "dark" ? "text-gray-300" : "text-gray-600";
-  const modalBg = theme === "dark" ? "bg-[#0b1138] border border-white/10" : "bg-white border border-gray-200";
+  const pageBg = "bg-white dark:bg-[#020726] text-[#020726] dark:text-white";
+const cardBg = "bg-white dark:bg-[#0a1039] border border-gray-200 dark:border-white/10 shadow-sm";
+const inputBg = "bg-gray-50 dark:bg-[#1f233d] border border-gray-200 dark:border-white/10 text-[#020726] dark:text-white";
+const subtleText = "text-gray-600 dark:text-gray-300";
+const modalBg = "bg-white dark:bg-[#0b1138] border border-gray-200 dark:border-white/10";
 
   // ================================
   // UI START
@@ -191,11 +186,10 @@ const handleDownload = (t) => {
 
           <button
             onClick={() => setShowWithdrawModal(true)}
-            className={`self-start sm:self-auto rounded-full px-4 py-2 text-sm font-medium ${
-              theme === "dark"
-                ? "border border-[#29B6F6] text-[#29B6F6] hover:bg-[#29B6F6]/10"
-                : "border border-[#0288D1] text-[#0288D1] hover:bg-[#e8f6ff]"
-            }`}
+            className="self-start sm:self-auto rounded-full px-4 py-2 text-sm font-medium
+border border-[#0288D1] dark:border-[#29B6F6]
+text-[#0288D1] dark:text-[#29B6F6]
+hover:bg-[#e8f6ff] dark:hover:bg-[#29B6F6]/10"
           >
             Withdraw
           </button>
@@ -213,14 +207,12 @@ const handleDownload = (t) => {
           {transactions.map((t, idx) => (
             <div
               key={idx}
-              className={`grid grid-cols-1 sm:grid-cols-12 gap-4 sm:gap-6 items-start sm:items-center ${
-                theme === "dark" ? "border-b border-white/5 pb-4" : "border-b border-gray-100 pb-4"
-              }`}
+              className={`grid grid-cols-1 sm:grid-cols-12 gap-4 sm:gap-6 items-start sm:items-center border-b border-gray-100 dark:border-white/5 pb-4`}
             >
               {/* SOURCE */}
               <div className="col-span-5 flex items-center gap-3 sm:gap-4">
                 <span className="text-base">{t.source}</span>
-                {t.status && <StatusPill status={t.status} theme={theme} />}
+                {t.status && <StatusPill status={t.status} />}
               </div>
 
               {/* DATE */}
@@ -244,12 +236,15 @@ const handleDownload = (t) => {
               <div className="col-span-2 flex justify-end">
                 <button
   onClick={() => handleDownload(t)}
-  className={`p-2 rounded-md ${theme === "dark" ? "hover:bg-white/5" : "hover:bg-gray-100"}`}
+  className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-white/5"
 >
   <svg width="22" height="22" viewBox="0 0 24 24">
-    <path d="M12 3v10" stroke={theme === "dark" ? "#ffffff" : "#020726"} strokeWidth="1.5" strokeLinecap="round" />
-    <path d="M8 11l4 4 4-4" stroke={theme === "dark" ? "#ffffff" : "#020726"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M5 17h14" stroke={theme === "dark" ? "#ffffff" : "#020726"} strokeWidth="1.5" strokeLinecap="round" />
+    <path d="M12 3v10" stroke="currentColor"
+className="text-[#020726] dark:text-white" strokeWidth="1.5" strokeLinecap="round" />
+    <path d="M8 11l4 4 4-4" stroke="currentColor"
+className="text-[#020726] dark:text-white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M5 17h14" stroke="currentColor"
+className="text-[#020726] dark:text-white" strokeWidth="1.5" strokeLinecap="round" />
   </svg>
 </button>
 
@@ -264,17 +259,17 @@ const handleDownload = (t) => {
       {showWithdrawModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
           <div className={`w-full max-w-lg md:max-w-2xl rounded-xl p-6 shadow-xl ${modalBg}`}>
-            <h2 className={`text-lg sm:text-xl font-semibold ${theme === "dark" ? "text-white" : "text-[#020726]"}`}>
+            <h2 className="text-lg sm:text-xl font-semibold text-[#020726] dark:text-white">
               Withdraw Money
             </h2>
 
-            <hr className={`my-4 ${theme === "dark" ? "border-white/10" : "border-gray-200"}`} />
+            <hr className="my-4 border-gray-200 dark:border-white/10" />
 
             {/* FORM */}
             <form onSubmit={handleWithdraw}>
               {/* AVAILABLE */}
               <div className="flex items-center justify-between mb-6">
-                <span className={`text-base sm:text-lg ${theme === "dark" ? "text-white" : "text-[#020726]"}`}>
+                <span className="text-base sm:text-lg text-[#020726] dark:text-white">
                   Withdrawable Amount
                 </span>
                 <span className="text-lg sm:text-xl text-[#15d196] font-semibold">
@@ -284,7 +279,7 @@ const handleDownload = (t) => {
 
               {/* ENTER AMOUNT */}
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
-                <label className={`text-base sm:text-lg ${theme === "dark" ? "text-white" : "text-[#020726]"}`}>
+                <label className="text-base sm:text-lg text-[#020726] dark:text-white">
                   Enter Amount
                 </label>
 
@@ -299,9 +294,7 @@ const handleDownload = (t) => {
                     />
 
                     <span
-                      className={`absolute right-2 top-1/2 -translate-y-1/2 text-sm px-2 py-1 rounded ${
-                        theme === "dark" ? "text-[#29B6F6] bg-[#29B6F6]/10" : "text-[#0288D1] bg-[#e8f6ff]"
-                      }`}
+                      className={`absolute right-2 top-1/2 -translate-y-1/2 text-sm px-2 py-1 rounded text-[#0288D1] dark:text-[#29B6F6] bg-[#e8f6ff] dark:bg-[#29B6F6]/10`}
                     >
                       ₹
                     </span>
@@ -314,20 +307,13 @@ const handleDownload = (t) => {
               </div>
 
               {/* ERROR */}
-              {withdrawAmtNum > withdrawable && (
-                <div
-                  className={`px-4 py-3 rounded-md mb-6 ${
-                    theme === "dark"
-                      ? "bg-[#4a2b2b] border border-[#7a4a4a] text-[#f7d384]"
-                      : "bg-red-50 border border-red-200 text-red-700"
-                  }`}
-                >
+             {withdrawAmtNum > withdrawable && (
+  <div className="px-4 py-3 rounded-md mb-6 bg-red-50 dark:bg-[#4a2b2b] border border-red-200 dark:border-[#7a4a4a] text-red-700 dark:text-[#f7d384]">
                   You cannot withdraw more than your withdrawable balance.
                 </div>
               )}
 
-              <hr className={`my-4 ${theme === "dark" ? "border-white/10" : "border-gray-200"}`} />
-
+<hr className="my-4 border-gray-200 dark:border-white/10" />
               {/* SUBMIT */}
               <button
                 type="submit"

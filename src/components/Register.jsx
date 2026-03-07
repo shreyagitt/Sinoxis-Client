@@ -3,7 +3,7 @@ import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
-import { useTheme } from "../components/Topbar";
+//import { useTheme } from "../components/Topbar";
 
 // Validation schema
 const RegisterSchema = Yup.object().shape({
@@ -25,22 +25,19 @@ const RegisterSchema = Yup.object().shape({
 
 const RegisterPage = () => {
   const navigate = useNavigate();
-  const { theme } = useTheme();
+  //const { theme } = useTheme();
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
-  const pageBg = theme === "dark" ? "bg-[#020726] text-white" : "bg-gray-100 text-[#020726]";
+  const pageBg =
+  "bg-gray-100 dark:bg-[#020726] text-[#020726] dark:text-white";
   const cardBg =
-    theme === "dark"
-      ? "bg-[#0a1039] border-white/10"
-      : "bg-white border border-gray-300 shadow-lg";
+  "bg-white dark:bg-[#0a1039] border border-gray-300 dark:border-white/10 shadow-lg";
 
-  const labelColor = theme === "dark" ? "text-white" : "text-[#020726]";
+  const labelColor = "text-[#020726] dark:text-white";
   const inputBg =
-    theme === "dark"
-      ? "bg-[#1f233d] text-white border-white/20 placeholder-gray-300"
-      : "bg-gray-100 text-[#020726] border-gray-300 placeholder-gray-500";
+  "bg-gray-100 dark:bg-[#1f233d] text-[#020726] dark:text-white border border-gray-300 dark:border-white/20 placeholder-gray-500 dark:placeholder-gray-300";
 
-  const subtleText = theme === "dark" ? "text-gray-300" : "text-gray-600";
+ const subtleText = "text-gray-600 dark:text-gray-300";
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
@@ -78,11 +75,19 @@ const RegisterPage = () => {
     <div
       className={`min-h-screen flex flex-col justify-center items-center px-4 py-8 sm:py-10 md:py-12 transition-all duration-300 ${pageBg}`}
     >
-      {/* LOGO */}
-      <img
-        src="/image/logo.webp"
-        className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 mb-6"
-      />
+      {/* LOGO LIGHT */}
+<img
+  src="/logo3.png"
+  alt="Sinoxis Logo"
+  className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 mb-6 object-contain dark:hidden"
+/>
+
+{/* LOGO DARK */}
+<img
+  src="/image/logo.webp"
+  alt="Sinoxis Logo"
+  className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 mb-6 object-contain hidden dark:block"
+/>
 
       {/* CARD */}
       <div

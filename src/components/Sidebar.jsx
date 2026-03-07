@@ -10,11 +10,11 @@ import {
   FaPaperPlane
 } from "react-icons/fa";
 import { Link, useLocation } from "react-router-dom";
-import { useTheme } from "../components/Topbar";
+//import { useTheme } from "../components/Topbar";
 
 const Sidebar = ({ collapsed, isMobile, toggleSidebar }) => {
   const location = useLocation();
-  const { theme } = useTheme();
+  //const { theme } = useTheme();
   const [openMenu, setOpenMenu] = useState(null);
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -112,7 +112,7 @@ const permissions = user?.permissions || {};
   /* -----------------------------
         THEME COLORS
   ------------------------------ */
-  const bgColor =
+  /*const bgColor =
     theme === "dark"
       ? "bg-[#020726]"
       : "bg-white border-gray-200"; // fixed light mode
@@ -122,7 +122,7 @@ const permissions = user?.permissions || {};
 
   const hoverBg = theme === "dark" ? "hover:bg-white/10" : "hover:bg-[#E8F4FF]";
   const subHoverBg =
-    theme === "dark" ? "hover:bg-white/10" : "hover:bg-[#E8F4FF]";
+    theme === "dark" ? "hover:bg-white/10" : "hover:bg-[#E8F4FF]"; */
 
   /* -----------------------------
       SIDEBAR WIDTH (RESPONSIVE)
@@ -150,20 +150,26 @@ const permissions = user?.permissions || {};
         className={`
           fixed top-0 left-0 h-screen pb-10 flex flex-col overflow-y-auto
           shadow-xl transition-all duration-300 z-50
-          ${bgColor}
+          bg-white dark:bg-[#020726] border-r border-gray-200 dark:border-white/10
           ${sidebarWidth}
         `}
       >
         {/* LOGO */}
         <div
           className={`h-[70px] flex items-center justify-center border-b 
-            ${theme === "dark" ? "border-white/10" : "border-gray-300"}
+            border-gray-300 dark:border-white/10
           `}
         >
-         <img
-  src={theme === "dark" ? "/image/logo.webp" : "/logo3.png"}
-  alt="Logo"
-  className={`object-contain transition-all ${
+        <img
+  src="/logo3.png"
+  className={`object-contain dark:hidden ${
+    isCollapsedState ? "h-[50px]" : "h-[65px]"
+  }`}
+/>
+
+<img
+  src="/image/logo.webp"
+  className={`object-contain hidden dark:block ${
     isCollapsedState ? "h-[50px]" : "h-[65px]"
   }`}
 />
@@ -211,7 +217,7 @@ const permissions = user?.permissions || {};
               ${
                 isActive
                   ? "bg-gradient-to-r from-[#29B6F6] to-[#0288D1] text-white"
-                  : `${hoverBg} ${menuText}`
+                  : "text-[#020726] dark:text-[#DDE7FF] hover:bg-[#E8F4FF] dark:hover:bg-white/10"
               }
             `}
           >
@@ -248,7 +254,7 @@ const permissions = user?.permissions || {};
                           ${
                             activeSub
                               ? "bg-[#0288D1] text-white"
-                              : `${subText} ${subHoverBg}`
+                              : "text-[#020726] dark:text-gray-300 hover:bg-[#E8F4FF] dark:hover:bg-white/10"
                           }
                         `}
                       >
@@ -265,13 +271,7 @@ const permissions = user?.permissions || {};
 </ul>
 
         {/* FADE */}
-        <div
-          className={`h-6 ${
-            theme === "dark"
-              ? "bg-gradient-to-t from-[#020726]"
-              : "bg-gradient-to-t from-white"
-          }`}
-        />
+        <div className="h-6 bg-gradient-to-t from-white dark:from-[#020726]" />
       </div>
     </>
   );

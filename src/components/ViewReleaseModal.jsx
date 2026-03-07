@@ -2,24 +2,21 @@
 import React, { useEffect, useState } from "react";
 
 import { X, Edit3 } from "lucide-react";
-import { useTheme } from "../components/Topbar";
+//import { useTheme } from "../components/Topbar";
 
-const FieldBlock = ({ label, value, theme }) => {
-  const labelColor = theme === "dark" ? "text-gray-300" : "text-[#020726]";
-  const boxBg =
-    theme === "dark"
-      ? "bg-[#111a3b] border border-white/10 text-gray-200"
-      : "bg-white border border-gray-200 text-[#020726]";
-
+const FieldBlock = ({ label, value }) => {
   return (
     <div className="mt-4">
-      <p className={`text-sm ${labelColor}`}>{label}</p>
-      <div className={`mt-1 p-3 rounded break-words min-h-[48px] ${boxBg}`}>
+      <p className="text-sm text-[#020726] dark:text-gray-300">{label}</p>
+
+      <div className="mt-1 p-3 rounded break-words min-h-[48px] bg-white dark:bg-[#111a3b] border border-gray-200 dark:border-white/10 text-[#020726] dark:text-gray-200">
         {value || "-"}
       </div>
     </div>
   );
 };
+
+
 
 export default function ViewReleaseModal({
   release,
@@ -30,9 +27,9 @@ export default function ViewReleaseModal({
 }) {
 const fullRelease = release;
 
-  const { theme } = useTheme();
+  //const { theme } = useTheme();
 
-
+/*
   const overlayBg = theme === "dark" ? "bg-black/70" : "bg-black/40";
   const panelBg =
     theme === "dark"
@@ -44,7 +41,7 @@ const fullRelease = release;
       ? "text-gray-300 hover:text-[#29B6F6]"
       : "text-gray-600 hover:text-[#0288D1]";
 
-  const subText = theme === "dark" ? "text-gray-300" : "text-gray-600";
+  const subText = theme === "dark" ? "text-gray-300" : "text-gray-600";*/
 
   // ✅ FINAL IMAGE RESOLUTION LOGIC (UPLOAD SAFE)
   const coverSrc =
@@ -54,19 +51,19 @@ const fullRelease = release;
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex justify-center items-center ${overlayBg} backdrop-blur-sm p-4`}
+      className="fixed inset-0 z-50 flex justify-center items-center bg-black/40 dark:bg-black/70 backdrop-blur-sm p-4"
       role="dialog"
     >
       <div
         className={`
           w-full max-w-[900px] max-h-[90vh]
           overflow-y-auto rounded-xl p-6 
-          shadow-xl relative ${panelBg}
+          shadow-xl relative bg-white dark:bg-[#0a1039] border border-gray-200 dark:border-white/10 text-[#020726] dark:text-white
           scrollbar-thin scrollbar-thumb-gray-400/40 scrollbar-track-transparent
         `}
       >
         {/* CLOSE BUTTON */}
-        <button onClick={onClose} className={`absolute top-3 right-3 ${closeIconColor}`}>
+        <button onClick={onClose} className={`absolute top-3 right-3 text-gray-600 dark:text-gray-300 hover:text-[#0288D1] dark:hover:text-[#29B6F6]`}>
           <X size={22} />
         </button>
 
@@ -76,13 +73,7 @@ const fullRelease = release;
           <>
             {/* HEADER */}
             <div
-              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b pb-3"
-              style={{
-                borderColor:
-                  theme === "dark"
-                    ? "rgba(41,182,246,0.12)"
-                    : "rgba(0,0,0,0.08)",
-              }}
+              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-gray-200 dark:border-[#29B6F6]/20 pb-3"
             >
               <h3 className="text-xl font-semibold">Release Details</h3>
 
@@ -90,11 +81,7 @@ const fullRelease = release;
                 onClick={() => onEdit(fullRelease._id)}
                 className={`
                   px-3 py-1 rounded-full flex items-center gap-2 text-sm font-medium
-                  ${
-                    theme === "dark"
-                      ? "bg-[#29B6F6]/10 border border-[#29B6F6] text-[#29B6F6] hover:bg-[#29B6F6] hover:text-white"
-                      : "bg-white border border-gray-300 hover:bg-gray-50 text-[#0288D1]"
-                  }
+                  bg-white dark:bg-[#29B6F6]/10 border border-gray-300 dark:border-[#29B6F6] text-[#0288D1] dark:text-[#29B6F6] hover:bg-gray-50 dark:hover:bg-[#29B6F6] dark:hover:text-white
                 `}
               >
                 <Edit3 size={14} /> Edit
@@ -106,10 +93,10 @@ const fullRelease = release;
 
               {/* LEFT */}
               <div>
-                <FieldBlock label="Track Title" value={track?.trackTitle} theme={theme} />
-<FieldBlock label="ISRC" value={track?.isrc} theme={theme} />
-<FieldBlock label="Language" value={track?.language} theme={theme} />
-<FieldBlock label="Publisher" value={track?.publisher} theme={theme} />
+                <FieldBlock label="Track Title" value={track?.trackTitle}  />
+<FieldBlock label="ISRC" value={track?.isrc}  />
+<FieldBlock label="Language" value={track?.language}  />
+<FieldBlock label="Publisher" value={track?.publisher}  />
 
               </div>
 
@@ -118,31 +105,31 @@ const fullRelease = release;
                 <FieldBlock
   label="Writers"
   value={track?.writers?.join(", ")}
-  theme={theme}
+  
 />
 
 <FieldBlock
   label="Composers"
   value={track?.composers?.join(", ")}
-  theme={theme}
+  
 />
 
 <FieldBlock
   label="Music Directors"
   value={track?.musicDirectors?.join(", ")}
-  theme={theme}
+  
 />
 
 <FieldBlock
   label="Producers"
   value={track?.producers?.join(", ")}
-  theme={theme}
+  
 />
 
 <FieldBlock
   label="Stores"
   value={stores?.length ? stores.join(", ") : "-"}
-  theme={theme}
+  
 />
 
               </div>
@@ -150,23 +137,13 @@ const fullRelease = release;
 
             {/* FOOTER */}
             <div
-              className="flex flex-col sm:flex-row justify-end gap-3 mt-8 pt-4"
-              style={{
-                borderTop:
-                  theme === "dark"
-                    ? "1px solid rgba(41,182,246,0.12)"
-                    : "1px solid rgba(0,0,0,0.08)",
-              }}
+             className="flex flex-col sm:flex-row justify-end gap-3 mt-8 pt-4 border-t border-gray-200 dark:border-[#29B6F6]/20"
             >
               <button
                 onClick={onClose}
                 className={`
                   px-6 py-2 rounded-full border text-sm
-                  ${
-                    theme === "dark"
-                      ? "border-white/20 text-gray-300 hover:text-white hover:bg-white/10"
-                      : "border-gray-300 text-[#020726] hover:bg-gray-100"
-                  }
+                 border-gray-300 dark:border-white/20 text-[#020726] dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10
                 `}
               >
                 Close

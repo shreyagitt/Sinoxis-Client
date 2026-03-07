@@ -42,7 +42,7 @@ avatarPreview: Yup.string().nullable(),
 });
 
 export default function Artists() {
-  const { theme } = useTheme();
+  //const { theme } = useTheme();
 
   const token = localStorage.getItem("token");
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
@@ -184,7 +184,7 @@ useEffect(() => {
 };
 
 
-  /* THEME STYLES */
+  /* THEME STYLES 
   const pageBg = theme === "dark" ? "bg-[#020726] text-white" : "bg-white text-[#020726]";
   const cardBg = theme === "dark" ? "bg-[#0a1039] border border-white/10" : "bg-white border border-gray-200";
   const headerText = theme === "dark" ? "text-white" : "text-[#020726]";
@@ -194,27 +194,27 @@ useEffect(() => {
     theme === "dark"
       ? { background: "linear-gradient(90deg,#00AEEF,#007BFF)" }
       : { background: "linear-gradient(90deg,#29B6F6,#0288D1)" };
-  const iconTextColor = theme === "dark" ? "text-sky-400 group-hover:text-white" : "text-[#0288D1] hover:text-white";
+  const iconTextColor = theme === "dark" ? "text-sky-400 group-hover:text-white" : "text-[#0288D1] hover:text-white"; */
 
   return (
-    <div className={`min-h-screen p-4 sm:p-6 lg:p-8 transition-colors ${pageBg}`}>
+    <div className={`min-h-screen p-4 sm:p-6 lg:p-8 transition-colors bg-white dark:bg-[#020726] text-[#020726] dark:text-white`}>
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-        <h1 className={`text-2xl md:text-3xl font-semibold ${headerText}`}>Artists</h1>
-        <p className={`text-sm ${subText}`}>
+        <h1 className={`text-2xl md:text-3xl font-semibold text-[#020726] dark:text-white`}>Artists</h1>
+        <p className={`text-sm text-gray-600 dark:text-gray-300`}>
           Home / <span className="text-[#29B6F6]">Artist</span>
         </p>
       </div>
 
       {/* Main Card */}
-      <div className={`${cardBg} rounded-2xl p-4 sm:p-6 shadow-sm mb-6`}>
+      <div className={`rounded-2xl p-4 sm:p-6 shadow-sm mb-6 bg-white dark:bg-[#0a1039] border border-gray-200 dark:border-white/10`}>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-          <h2 className={`text-lg sm:text-xl font-medium ${headerText}`}>Manage Artists</h2>
+          <h2 className={`text-lg sm:text-xl font-medium text-[#020726] dark:text-white`}>Manage Artists</h2>
 
           <button
             onClick={() => setShowAddModal(true)}
-            className="px-4 sm:px-5 py-2 rounded-full text-white font-semibold"
-            style={buttonGradient}
+            className="px-4 sm:px-5 py-2 rounded-full text-white font-semibold bg-gradient-to-r from-[#29B6F6] to-[#0288D1]"
+         
           >
             Add Artist
           </button>
@@ -224,7 +224,7 @@ useEffect(() => {
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full min-w-[900px]">
             <thead>
-              <tr className={`${theme === "dark" ? "text-gray-300" : "text-gray-500"} text-left`}>
+              <tr className="text-left text-gray-500 dark:text-gray-300">
                 <th className="py-3 px-4">Artist Name</th>
                 <th className="py-3 px-4">Mobile</th>
                 <th className="py-3 px-4">Email</th>
@@ -239,13 +239,11 @@ useEffect(() => {
               {artists.map((artist) => (
                 <tr
                   key={artist.id}
-                  className={`${tableRowHover} border-t ${
-                    theme === "dark" ? "border-white/5" : "border-gray-100"
-                  }`}
+                  className="border-t border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/5"
                 >
                   <td className="py-4 px-4 align-top">
                     <div className="text-base font-medium">{artist.name}</div>
-                    <div className={`text-xs mt-1 ${subText}`}>
+                    <div className={`text-xs mt-1 text-gray-600 dark:text-gray-300`}>
                       Created: {formatDate(artist.createdAt)}
                     </div>
                   </td>
@@ -259,7 +257,7 @@ useEffect(() => {
                         href={artist.spotify}
                         target="_blank"
                         rel="noreferrer"
-                        className={`flex items-center gap-2 ${iconTextColor}`}
+                        className={`flex items-center gap-2 text-[#0288D1] dark:text-sky-400`}
                       >
                         <Music size={14} /> Open
                       </a>
@@ -274,7 +272,7 @@ useEffect(() => {
                         href={artist.apple}
                         target="_blank"
                         rel="noreferrer"
-                        className={`flex items-center gap-2 ${iconTextColor}`}
+                        className={`flex items-center gap-2 text-[#0288D1] dark:text-sky-400`}
                       >
                         <Disc size={14} /> Open
                       </a>
@@ -289,7 +287,7 @@ useEffect(() => {
                         href={artist.youtube}
                         target="_blank"
                         rel="noreferrer"
-                        className={`flex items-center gap-2 ${iconTextColor}`}
+                        className={`flex items-center gap-2 text-[#0288D1] dark:text-sky-400`}
                       >
                         <Play size={14} /> Open
                       </a>
@@ -359,16 +357,14 @@ useEffect(() => {
           {artists.map((artist) => (
             <article
               key={artist.id}
-              className={`rounded-lg p-4 border ${
-                theme === "dark" ? "border-white/5 bg-transparent" : "border-gray-200 bg-transparent"
-              } ${tableRowHover}`}
+              className="rounded-lg p-4 border border-gray-200 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/5"
             >
               <div className="flex flex-col gap-3">
                 {/* Header */}
                 <div className="flex justify-between items-start">
                   <div>
                     <div className="text-base font-medium">{artist.name}</div>
-                    <div className={`text-xs mt-1 ${subText}`}>
+                    <div className={`text-xs mt-1 text-gray-600 dark:text-gray-300`}>
                       Created: {formatDate(artist.createdAt)}
                     </div>
                   </div>
@@ -376,17 +372,13 @@ useEffect(() => {
                   <div className="flex gap-2">
                     <button
                       onClick={() => openView(artist)}
-                      className={`w-9 h-9 rounded-full flex items-center justify-center border ${
-                        theme === "dark" ? "border-sky-500" : "border-[#29B6F6]"
-                      } group`}
+                      className={`w-9 h-9 rounded-full flex items-center justify-center border 
+                        border-[#29B6F6] dark:border-sky-500
+                       group`}
                     >
                       <Eye
                         size={14}
-                        className={`${
-                          theme === "dark"
-                            ? "text-sky-400 group-hover:text-white"
-                            : "text-[#0288D1] group-hover:text-white"
-                        }`}
+                        className={`text-[#0288D1] dark:text-sky-400 group-hover:text-white`}
                       />
                     </button>
 

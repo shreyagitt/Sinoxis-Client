@@ -13,7 +13,7 @@ import {
   Mail,
   HelpCircle,
 } from "lucide-react";
-import { useTheme } from "./Topbar";
+//import { useTheme } from "./Topbar";
 
 /* =========================
    RequestPayment page
@@ -22,7 +22,7 @@ import { useTheme } from "./Topbar";
 const QUICK_AMOUNTS = [1000, 2500, 5000, 10000];
 
 function RequestPayment() {
-  const { theme } = useTheme();
+  //const { theme } = useTheme();
 
   /* =========================
      ✅ API + AUTH
@@ -159,18 +159,10 @@ const [paypalData, setPaypalData] = useState({
   /* =========================
      ✅ THEME STYLES
   ========================= */
-  const pageBg =
-    theme === "dark" ? "bg-[#020726] text-white" : "bg-white text-[#020726]";
-  const cardBg =
-    theme === "dark"
-      ? "bg-[#0a1039] border border-white/10"
-      : "bg-white border border-gray-200";
-  const subtleText =
-    theme === "dark" ? "text-gray-300" : "text-gray-600";
-  const inputBg =
-    theme === "dark"
-      ? "bg-[#0a1039] text-white border border-white/10"
-      : "bg-gray-50 text-[#020726] border border-gray-200";
+  const pageBg = "bg-white dark:bg-[#020726] text-[#020726] dark:text-white";
+const cardBg = "bg-white dark:bg-[#0a1039] border border-gray-200 dark:border-white/10";
+const subtleText = "text-gray-600 dark:text-gray-300";
+const inputBg = "bg-gray-50 dark:bg-[#0a1039] text-[#020726] dark:text-white border border-gray-200 dark:border-white/10";
   const accentText = "text-[#29B6F6]";
   const accentGradient = "from-[#29B6F6] to-[#0288D1]";
 
@@ -199,7 +191,7 @@ const [paypalData, setPaypalData] = useState({
       {/* ================= ✅ SUMMARY CARDS (LIVE BALANCE) ================= */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
         <MetricCard
-          theme={theme}
+          
           title="Available Balance"
           value={`$${balance.toLocaleString()}`}
           subtitle="Ready for withdrawal"
@@ -207,7 +199,7 @@ const [paypalData, setPaypalData] = useState({
         />
 
         <MetricCard
-          theme={theme}
+          
           title="Pending Revenue"
           value="$23,768"
           subtitle="Next payout cycle"
@@ -215,7 +207,7 @@ const [paypalData, setPaypalData] = useState({
         />
 
         <MetricCard
-          theme={theme}
+          
           title="Processing"
           value="$12,450"
           subtitle="Current requests"
@@ -223,7 +215,7 @@ const [paypalData, setPaypalData] = useState({
         />
 
         <MetricCard
-          theme={theme}
+          
           title="Total Processed"
           value="$247,890"
           subtitle="All time payments"
@@ -252,11 +244,8 @@ const [paypalData, setPaypalData] = useState({
             </label>
 
             <div
-              className={`flex flex-col sm:flex-row items-center justify-between gap-3 rounded-xl p-4 ${
-                theme === "dark"
-                  ? "bg-[#081435] border border-white/10"
-                  : "bg-gray-50 border border-gray-200"
-              }`}
+              className={`flex flex-col sm:flex-row items-center justify-between gap-3 rounded-xl p-4 
+              bg-gray-50 dark:bg-[#081435] border border-gray-200 dark:border-white/10`}
             >
               <span className={`text-sm ${subtleText}`}>USD</span>
 
@@ -282,11 +271,7 @@ const [paypalData, setPaypalData] = useState({
                     e.preventDefault();
                     setAmount(v);
                   }}
-                  className={`px-3 py-2 rounded-md text-sm border ${
-                    theme === "dark"
-                      ? "border-white/10 text-white hover:bg-white/5"
-                      : "border-gray-200 text-[#020726] hover:bg-[#e8f6ff]"
-                  }`}
+                  className={`px-3 py-2 rounded-md text-sm border border-gray-200 dark:border-white/10 text-[#020726] dark:text-white hover:bg-[#e8f6ff] dark:hover:bg-white/5`}
                 >
                   ${v}
                 </button>
@@ -297,11 +282,9 @@ const [paypalData, setPaypalData] = useState({
                   e.preventDefault();
                   setAmount(balance);
                 }}
-                className={`px-3 py-2 rounded-md text-sm border ${
-                  theme === "dark"
-                    ? "border-white/10 text-white hover:bg-white/5"
-                    : "border-gray-200 text-[#020726] hover:bg-[#e8f6ff]"
-                }`}
+                  className="px-3 py-2 rounded-md text-sm border border-gray-200 dark:border-white/10 
+             text-[#020726] dark:text-white 
+             hover:bg-[#e8f6ff] dark:hover:bg-white/5"
               >
                 Max
               </button>
@@ -320,7 +303,7 @@ const [paypalData, setPaypalData] = useState({
                 onClick={() => setMethod("bank")}
                 title="Bank Transfer"
                 icon={<Briefcase size={20} />}
-                theme={theme}
+                
               />
 
               <OptionCard
@@ -328,7 +311,7 @@ const [paypalData, setPaypalData] = useState({
                 onClick={() => setMethod("paypal")}
                 title="PayPal"
                 icon={<CreditCard size={20} />}
-                theme={theme}
+                
               />
             </div>
           </div>
@@ -336,7 +319,7 @@ const [paypalData, setPaypalData] = useState({
           {/* ================= PAYMENT DETAILS ================= */}
          {method === "bank" && (
   <BankDetails
-    theme={theme}
+    
     bankData={bankData}
     setBankData={setBankData}
   />
@@ -344,7 +327,7 @@ const [paypalData, setPaypalData] = useState({
 
 {method === "paypal" && (
   <PayPalDetails
-    theme={theme}
+    
     paypalData={paypalData}
     setPaypalData={setPaypalData}
   />
@@ -394,7 +377,7 @@ const [paypalData, setPaypalData] = useState({
         </form>
         {/* ================= SIDEBAR ================= */}
         <Sidebar
-          theme={theme}
+          
           amount={amount}
           processingFee={processingFee}
           tax={tax}
@@ -411,11 +394,8 @@ const [paypalData, setPaypalData] = useState({
 /* ================= SUB COMPONENTS ================= */
 
 /* ================= METRIC CARD ================= */
-const MetricCard = ({ theme, title, value, subtitle, icon, badges = [] }) => {
-  const cardBg =
-    theme === "dark"
-      ? "bg-[#0a1039] border border-white/10"
-      : "bg-white border border-gray-200";
+const MetricCard = ({ title, value, subtitle, icon, badges = [] }) => {
+  const cardBg = "bg-white dark:bg-[#0a1039] border border-gray-200 dark:border-white/10";
 
   const toneMap = {
     emerald: "bg-emerald-100 text-emerald-700",
@@ -454,17 +434,15 @@ const MetricCard = ({ theme, title, value, subtitle, icon, badges = [] }) => {
 };
 
 /* ================= OPTION CARD ================= */
-const OptionCard = ({ active, onClick, icon, title, theme }) => {
+const OptionCard = ({ active, onClick, icon, title}) => {
   return (
     <button
       onClick={onClick}
       type="button"
       className={`p-4 rounded-xl flex items-center gap-4 border transition w-full ${
-        active
-          ? "border-[#29B6F6] bg-[#29B6F6]/10"
-          : theme === "dark"
-          ? "border-white/10"
-          : "border-gray-200"
+       active
+  ? "border-[#29B6F6] bg-[#29B6F6]/10"
+  : "border-gray-200 dark:border-white/10"
       }`}
     >
       <div className="w-10 h-10 rounded-full bg-[#29B6F6]/20 flex items-center justify-center">
@@ -477,14 +455,11 @@ const OptionCard = ({ active, onClick, icon, title, theme }) => {
   );
 };
 
-const EditableField = ({ label, value, onChange, theme }) => {
+const EditableField = ({ label, value, onChange }) => {
   const inputStyle =
-    theme === "dark"
-      ? "bg-[#0a1039] text-white border border-white/10 placeholder-gray-400"
-      : "bg-gray-50 text-[#020726] border border-gray-200 placeholder-gray-500";
+  "bg-gray-50 dark:bg-[#0a1039] text-[#020726] dark:text-white border border-gray-200 dark:border-white/10 placeholder-gray-500 dark:placeholder-gray-400";
 
-  const labelStyle =
-    theme === "dark" ? "text-white" : "text-[#020726]";
+  const labelStyle = "text-[#020726] dark:text-white";
 
   return (
     <div>
@@ -505,14 +480,14 @@ const EditableField = ({ label, value, onChange, theme }) => {
 
 
 /* ================= BANK DETAILS ================= */
-const BankDetails = ({ theme, bankData, setBankData }) => (
+const BankDetails = ({  bankData, setBankData }) => (
 
   <div className="mb-6">
     <h4 className="font-semibold mb-3">Bank Account Details</h4>
 
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <EditableField
-      theme={theme}
+      
         label="Account Holder"
         value={bankData.name}
         onChange={(e) =>
@@ -521,7 +496,7 @@ const BankDetails = ({ theme, bankData, setBankData }) => (
       />
 
       <EditableField
-      theme={theme}
+      
         label="Account Number"
         value={bankData.number}
         onChange={(e) =>
@@ -530,7 +505,7 @@ const BankDetails = ({ theme, bankData, setBankData }) => (
       />
 
       <EditableField
-      theme={theme}
+      
         label="Bank Name"
         value={bankData.bank}
         onChange={(e) =>
@@ -539,7 +514,7 @@ const BankDetails = ({ theme, bankData, setBankData }) => (
       />
 
       <EditableField
-      theme={theme}
+      
         label="Routing Number"
         value={bankData.routing}
         onChange={(e) =>
@@ -552,14 +527,14 @@ const BankDetails = ({ theme, bankData, setBankData }) => (
 
 
 /* ================= PAYPAL DETAILS ================= */
-const PayPalDetails = ({ theme, paypalData, setPaypalData }) => (
+const PayPalDetails = ({  paypalData, setPaypalData }) => (
 
   <div className="mb-6">
     <h4 className="font-semibold mb-3">PayPal Account Details</h4>
 
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <EditableField
-      theme={theme}
+      
         label="PayPal Email"
         value={paypalData.email}
         onChange={(e) =>
@@ -568,7 +543,7 @@ const PayPalDetails = ({ theme, paypalData, setPaypalData }) => (
       />
 
       <EditableField
-      theme={theme}
+      
         label="PayPal ID"
         value={paypalData.paypalId}
         onChange={(e) =>
@@ -581,20 +556,8 @@ const PayPalDetails = ({ theme, paypalData, setPaypalData }) => (
 
 
 /* ================= SIDEBAR ================= */
-const Sidebar = ({
-  theme,
-  amount,
-  processingFee,
-  tax,
-  totalReceive,
-  deliveryTime,
-  method,
-  recentRequests,
-}) => {
-  const cardBg =
-    theme === "dark"
-      ? "bg-[#0a1039] border border-white/10"
-      : "bg-white border border-gray-200";
+const Sidebar = ({ amount, processingFee, tax, totalReceive, deliveryTime, method, recentRequests }) => {
+  const cardBg = "bg-white dark:bg-[#0a1039] border border-gray-200 dark:border-white/10";
 
   return (
     <aside className="xl:col-span-4 space-y-6">

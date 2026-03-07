@@ -1,12 +1,12 @@
 import { useState,useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useTheme } from "../components/Topbar";
+//import { useTheme } from "../components/Topbar";
 import axios from "axios";
 
 export default function Stores() {
   const [step] = useState(2);
     const navigate = useNavigate();
-    const { theme } = useTheme();
+   // const { theme } = useTheme();
   const [selected, setSelected] = useState([]);
 
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
@@ -90,14 +90,10 @@ useEffect(() => {
 
   return (
     <div
-      className={`min-h-screen font-[Montserrat]
-        ${
-          theme === "dark"
-            ? "bg-gradient-to-b from-[#020726] to-[#0a1039] text-white"
-            : "bg-gray-100 text-[#020726]"
-        }
-      `}
-    >
+  className="min-h-screen font-[Montserrat]
+  bg-gray-100 dark:bg-gradient-to-b dark:from-[#020726] dark:to-[#0a1039]
+  text-[#020726] dark:text-white"
+>
 
       {/* HEADER */}
        <div className="flex justify-between items-center px-6 sm:px-10 py-6">
@@ -110,15 +106,12 @@ useEffect(() => {
 
       {/* MAIN CARD */}
        <div
-        className={`max-w-6xl mx-auto mt-6 rounded-[28px]
-          px-4 sm:px-8 md:px-12 py-8 md:py-10
-          ${
-            theme === "dark"
-              ? "bg-[#060b2e] shadow-[0_30px_80px_rgba(0,0,0,0.6)]"
-              : "bg-white shadow-lg border border-gray-200"
-          }
-        `}
-      >
+  className="max-w-6xl mx-auto mt-6 rounded-[28px]
+  px-4 sm:px-8 md:px-12 py-8 md:py-10
+  bg-white dark:bg-[#060b2e]
+  shadow-lg dark:shadow-[0_30px_80px_rgba(0,0,0,0.6)]
+  border border-gray-200 dark:border-white/10"
+>
 
         {/* TITLE */}
        <h2 className="text-center text-3xl sm:text-4xl font-medium text-sky-400">
@@ -132,9 +125,7 @@ useEffect(() => {
         {/* PROGRESS */}
         <div className="relative mt-12">
           <div
-            className={`h-[3px] rounded-full ${
-              theme === "dark" ? "bg-white/10" : "bg-gray-300"
-            }`}
+            className="h-[3px] rounded-full bg-gray-300 dark:bg-white/10"
           />
           <div className="absolute top-0 h-[3px] w-[66%] bg-sky-400 rounded-full" />
 
@@ -189,13 +180,12 @@ useEffect(() => {
     flex items-center justify-center gap-3
     px-6 py-4 rounded-xl
     border transition-all
-    ${
-      active
-        ? "border-sky-400 bg-sky-400/10 shadow-[0_0_0_3px_rgba(56,189,248,0.15)]"
-        : theme === "dark"
-        ? "border-white/20 hover:border-sky-400/50"
-        : "border-gray-300 hover:border-sky-400"
-    }
+    
+      ${
+  active
+    ? "border-sky-400 bg-sky-400/10 shadow-[0_0_0_3px_rgba(56,189,248,0.15)]"
+    : "border-gray-300 dark:border-white/20 hover:border-sky-400"
+}
     ${isView ? "cursor-not-allowed opacity-60" : ""}
   `}
 >
@@ -237,26 +227,19 @@ useEffect(() => {
   <div className="flex gap-4 mt-4">
     <button
       onClick={selectAll}
-      className={`px-4 py-2 rounded-lg text-sm transition
-  ${
-    theme === "dark"
-      ? "bg-white/20 hover:bg-white/30 text-white"
-      : "bg-white border border-gray-300 hover:bg-gray-100 text-[#020726]"
-  }
-`}
+      className="px-4 py-2 rounded-lg text-sm transition
+bg-white border border-gray-300 hover:bg-gray-100 text-[#020726]
+dark:bg-white/20 dark:hover:bg-white/30 dark:border-white/10 dark:text-white"
+
 
     >
       Select All
     </button>
     <button
       onClick={deselectAll}
-      className={`px-4 py-2 rounded-lg text-sm transition
-  ${
-    theme === "dark"
-      ? "bg-white/20 hover:bg-white/30 text-white"
-      : "bg-white border border-gray-300 hover:bg-gray-100 text-[#020726]"
-  }
-`}
+      className="px-7 py-2 rounded-lg transition
+bg-gray-200 hover:bg-gray-300
+dark:bg-white/20 dark:hover:bg-white/30"
 
     >
       Deselect All
@@ -276,13 +259,9 @@ useEffect(() => {
   }
 }}
 
-  className={`px-7 py-2 rounded-lg transition
-    ${
-      theme === "dark"
-        ? "bg-white/20 hover:bg-white/30"
-        : "bg-gray-200 hover:bg-gray-300"
-    }
-  `}
+ className="px-7 py-2 rounded-lg transition
+bg-gray-200 hover:bg-gray-300
+dark:bg-white/20 dark:hover:bg-white/30"
 >
 
     Back

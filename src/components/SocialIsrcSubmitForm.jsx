@@ -4,7 +4,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { useTheme } from "../components/Topbar";
+//import { useTheme } from "../components/Topbar";
 
 const SocialISRCschema = Yup.object({
   artistNameSocial: Yup.string().required("Artist name is required"),
@@ -21,8 +21,8 @@ const SocialISRCschema = Yup.object({
 
 const SocialIsrcSubmitForm = () => {
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
-  const { theme } = useTheme();
-
+  //const { theme } = useTheme();
+/*
   const pageBg = theme === "dark" ? "bg-[#020726] text-white" : "bg-white text-[#020726]";
   const cardBg =
     theme === "dark"
@@ -35,7 +35,7 @@ const SocialIsrcSubmitForm = () => {
       ? "bg-[#2c2f4a] text-white placeholder-[#9bb6d8] border-transparent"
       : "bg-gray-50 text-[#020726] placeholder-gray-500 border border-gray-300";
 
-  const smallHint = theme === "dark" ? "text-[#9bb6d8]" : "text-gray-600";
+  const smallHint = theme === "dark" ? "text-[#9bb6d8]" : "text-gray-600";*/
 
   const handleSubmit = async (values, { resetForm }) => {
   try {
@@ -72,21 +72,25 @@ const SocialIsrcSubmitForm = () => {
 
 
   return (
-    <div className={`min-h-screen pb-20 transition-all duration-300 ${pageBg}`}>
+    <div className="min-h-screen pb-20 transition-all duration-300
+bg-white dark:bg-[#020726]
+text-[#020726] dark:text-white">
 
       {/* Header */}
       <div className="py-4 px-4 sm:px-6 md:px-10 flex flex-col md:flex-row justify-between gap-2">
-        <h1 className={`text-lg sm:text-xl font-semibold ${labelColor}`}>
+        <h1 className={`text-lg sm:text-xl font-semibold text-[#020726] dark:text-white`}>
           Social Profile Links & Music ISRC Submit Form
         </h1>
-        <p className={`text-xs sm:text-sm ${smallHint}`}>
+        <p className={`text-xs sm:text-sm text-gray-600 dark:text-[#9bb6d8]`}>
           Home <span className="text-[#29B6F6]">/ Social ISRC Submit Form</span>
         </p>
       </div>
 
       {/* Form Card */}
       <div className="w-full flex justify-center px-4 sm:px-6 md:px-10">
-        <div className={`rounded-xl p-6 sm:p-8 md:p-10 w-full max-w-4xl ${cardBg}`}>
+        <div className={`rounded-xl p-6 sm:p-8 md:p-10 w-full max-w-4xl bg-white dark:bg-[#0a1039]
+border border-gray-200 dark:border-white/10
+shadow-sm dark:shadow-xl`}>
 
           <Formik
             initialValues={{
@@ -109,13 +113,13 @@ const SocialIsrcSubmitForm = () => {
               {/* Artist + Label */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <FieldGroup
-                  theme={theme}
+                  
                   label="Artist Name *"
                   name="artistNameSocial"
                   placeholder="Enter artist name"
                 />
                 <FieldGroup
-                  theme={theme}
+                  
                   label="Label Name"
                   name="labelName"
                   placeholder="Enter label name (optional)"
@@ -125,13 +129,13 @@ const SocialIsrcSubmitForm = () => {
               {/* Facebook + Instagram */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <FieldGroup
-                  theme={theme}
+                  
                   label="Facebook Profile URL"
                   name="facebookLink"
                   placeholder="https://facebook.com/artist..."
                 />
                 <FieldGroup
-                  theme={theme}
+                  
                   label="Instagram Profile URL"
                   name="instagramLink"
                   placeholder="https://instagram.com/artist..."
@@ -141,13 +145,13 @@ const SocialIsrcSubmitForm = () => {
               {/* Spotify + Apple */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <FieldGroup
-                  theme={theme}
+                  
                   label="Spotify Artist URL"
                   name="spotifyLink"
                   placeholder="https://open.spotify.com/artist/..."
                 />
                 <FieldGroup
-                  theme={theme}
+                  
                   label="Apple Music Artist URL"
                   name="appleMusicLink"
                   placeholder="https://music.apple.com/artist/..."
@@ -156,7 +160,7 @@ const SocialIsrcSubmitForm = () => {
 
               {/* ISRC */}
               <FieldGroup
-                theme={theme}
+                
                 label="Music ISRC Code *"
                 name="isrcCode"
                 placeholder="Enter ISRC code"
@@ -164,7 +168,7 @@ const SocialIsrcSubmitForm = () => {
 
               {/* Track Title */}
               <FieldGroup
-                theme={theme}
+                
                 label="Track Title"
                 name="trackTitleSocial"
                 placeholder="Enter track title"
@@ -172,7 +176,7 @@ const SocialIsrcSubmitForm = () => {
 
               {/* Official Video */}
               <FieldGroup
-                theme={theme}
+                
                 label="Official YouTube Video"
                 name="officialVideoUrlSocial"
                 placeholder="https://www.youtube.com/watch?v=..."
@@ -185,7 +189,7 @@ const SocialIsrcSubmitForm = () => {
                   name="confirmSocial"
                   className="mt-1 accent-[#29B6F6]"
                 />
-                <span className={`text-sm ${labelColor}`}>
+                <span className={`text-sm text-[#020726] dark:text-white`}>
                   I confirm that all information provided is accurate
                 </span>
               </div>
@@ -199,11 +203,10 @@ const SocialIsrcSubmitForm = () => {
               <div className="flex flex-col sm:flex-row justify-end gap-3 pt-3">
                 <button
                   type="reset"
-                  className={`px-5 py-2 rounded-md text-sm border ${
-                    theme === "dark"
-                      ? "border-white/20 text-white hover:bg-white/10"
-                      : "border-gray-300 text-[#020726] hover:bg-gray-100"
-                  }`}
+                  className="px-5 py-2 rounded-md text-sm border
+border-gray-300 dark:border-white/20
+text-[#020726] dark:text-white
+hover:bg-gray-100 dark:hover:bg-white/10"
                 >
                   Reset Form
                 </button>
@@ -227,26 +230,29 @@ const SocialIsrcSubmitForm = () => {
 export default SocialIsrcSubmitForm;
 
 /* ---------------------- REUSABLE FIELD COMPONENT ---------------------- */
-const FieldGroup = ({ theme, label, name, placeholder }) => {
-  const labelColor = theme === "dark" ? "text-white" : "text-[#020726]";
-  const inputBg =
-    theme === "dark"
-      ? "bg-[#2c2f4a] text-white placeholder-[#9bb6d8] border border-transparent"
-      : "bg-white text-[#020726] placeholder-gray-500 border border-gray-300";
-
+const FieldGroup = ({ label, name, placeholder }) => {
   return (
     <div className="w-full">
-      <label className={`block text-sm font-semibold mb-1 ${labelColor}`}>
+      <label className="block text-sm font-semibold mb-1 text-[#020726] dark:text-white">
         {label}
       </label>
 
       <Field
         name={name}
         placeholder={placeholder}
-        className={`w-full rounded-md px-4 py-2 text-sm focus:ring-1 focus:ring-[#29B6F6] ${inputBg}`}
+        className="w-full rounded-md px-4 py-2 text-sm
+        bg-white dark:bg-[#2c2f4a]
+        text-[#020726] dark:text-white
+        placeholder-gray-500 dark:placeholder-[#9bb6d8]
+        border border-gray-300 dark:border-transparent
+        focus:ring-1 focus:ring-[#29B6F6]"
       />
 
-      <ErrorMessage name={name} component="p" className="text-red-400 text-xs mt-1" />
+      <ErrorMessage
+        name={name}
+        component="p"
+        className="text-red-400 text-xs mt-1"
+      />
     </div>
   );
 };

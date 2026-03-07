@@ -4,24 +4,22 @@ import { useNavigate } from "react-router-dom";
 import { useLocation} from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { useTheme } from "../components/Topbar";
+//import { useTheme } from "../components/Topbar";
 import ViewReleaseModal from "../components/ViewReleaseModal";
 
 const COVER_PLACEHOLDER =
   "https://www.mixcloud.com/blog/wp-content/uploads/2023/11/Collage-1-2.png";
 
-function statusClasses(status, theme) {
-  const textDark = theme === "dark" ? "text-[#000]" : "text-[#020726]";
-
+  function statusClasses(status) {
   switch (status) {
     case "Rejected":
-      return `bg-[#ff0000] ${textDark} font-semibold`;
+      return "bg-[#ff0000] text-[#020726] dark:text-black font-semibold";
     case "Inactive":
-      return `bg-[#5aa3ff] ${textDark} font-semibold`;
+      return "bg-[#5aa3ff] text-[#020726] dark:text-black font-semibold";
     case "Pending":
-      return `bg-[#ffd300] ${textDark} font-semibold`;
+      return "bg-[#ffd300] text-[#020726] dark:text-black font-semibold";
     case "Approved":
-      return `bg-[#33ff8b] ${textDark} font-semibold`;
+      return "bg-[#33ff8b] text-[#020726] dark:text-black font-semibold";
     default:
       return "bg-gray-500 text-white";
   }
@@ -29,11 +27,11 @@ function statusClasses(status, theme) {
 
 export default function Releases() {
   const navigate = useNavigate();
-  const { theme } = useTheme();
+  //const { theme } = useTheme();
   const location = useLocation();
 
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
-
+/*
   const pageBg =
     theme === "dark" ? "bg-[#020726] text-white" : "bg-white text-[#020726]";
   const cardBg =
@@ -49,20 +47,22 @@ export default function Releases() {
       ? "bg-[#0a1039] border-white/20 text-white placeholder-gray-400"
       : "bg-gray-100 border-gray-300 text-[#020726] placeholder-gray-500";
 
-  const filterActive =
-    theme === "dark"
-      ? "border-[#29B6F6] text-[#29B6F6]"
-      : "border-[#0288D1] text-[#0288D1]";
-
-  const filterDefault =
-    theme === "dark"
-      ? "border-[#0A84FF] text-[#0A84FF] hover:bg-[#00AEEF] hover:text-white"
-      : "border-[#0288D1] text-[#0288D1] hover:bg-[#29B6F6] hover:text-white";
+  
 
   const mobileCardBg =
     theme === "dark"
       ? "bg-[#050a26] border border-white/10"
       : "bg-white border border-gray-200 shadow-sm";
+
+      */
+
+     const filterActive =
+  "border-[#29B6F6] text-[#29B6F6]";
+
+const filterDefault =
+  "border-[#0288D1] text-[#0288D1] hover:bg-[#29B6F6] hover:text-white dark:border-[#0A84FF] dark:text-[#0A84FF] dark:hover:bg-[#00AEEF]";
+
+const tableBorder = "border-gray-300 dark:border-white/10";
 
   // ✅ API STATE
   const [releases, setReleases] = useState([]);
@@ -194,13 +194,13 @@ const openView = async (release) => {
 
 
   return (
-    <div className={`min-h-screen px-6 py-8 ${pageBg}`}>
+    <div className="min-h-screen px-6 py-8 bg-white dark:bg-[#020726] text-[#020726] dark:text-white">
 
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-8">
         <h1 className="text-2xl md:text-3xl font-semibold">My Releases</h1>
         <div className="text-sm">
-          <span className={subtleText}>Home / </span>
+          <span className="text-gray-600 dark:text-gray-300">Home / </span>
           <span className="text-[#29B6F6]">My Releases</span>
         </div>
       </div>
@@ -208,7 +208,7 @@ const openView = async (release) => {
       {/* FILTERS */}
       <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <div className={`text-sm font-medium mb-3 ${subtleText}`}>
+          <div className={`text-sm font-medium mb-3 text-gray-600 dark:text-gray-300`}>
             Release Count
           </div>
           <div className="flex flex-wrap gap-3">
@@ -233,11 +233,11 @@ const openView = async (release) => {
           </div>
         </div>
 
-        <div className={`text-sm ${subtleText}`}>{countText}</div>
+        <div className={`text-sm text-gray-600 dark:text-gray-300`}>{countText}</div>
       </div>
 
       {/* MAIN CARD */}
-      <div className={`rounded-2xl p-4 md:p-6 border ${cardBg}`}>
+      <div className={`rounded-2xl p-4 md:p-6 border bg-white dark:bg-[#0a1039] border-gray-200 dark:border-white/10 shadow-md`}>
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
           <h2 className="text-lg font-semibold">Manage Releases</h2>
 
@@ -246,7 +246,7 @@ const openView = async (release) => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Type & Enter to search"
-              className={`px-4 py-2 rounded-full focus:outline-none text-sm ${inputBg}`}
+              className={`px-4 py-2 rounded-full focus:outline-none text-sm bg-gray-100 dark:bg-[#0a1039] border-gray-300 dark:border-white/20 text-[#020726] dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
             />
             <button
               onClick={openCreate}
@@ -263,11 +263,7 @@ const openView = async (release) => {
   {filtered.map((r) => (
     <div
       key={r._id}
-      className={`p-4 rounded-xl border ${
-        theme === "dark"
-          ? "bg-[#050a26] border-white/10"
-          : "bg-white border-gray-200 shadow-sm"
-      }`}
+      className="p-4 rounded-xl border bg-white dark:bg-[#050a26] border-gray-200 dark:border-white/10 shadow-sm"
     >
       <div className="flex items-center gap-4">
         <img
@@ -280,8 +276,7 @@ const openView = async (release) => {
           <p className="text-sm text-gray-400">{r.artist}</p>
           <span
             className={`inline-block mt-2 px-3 py-1 rounded-full text-xs ${statusClasses(
-              r.status,
-              theme
+              r.status
             )}`}
           >
             {r.status}
@@ -306,7 +301,7 @@ const openView = async (release) => {
         <div className="hidden lg:block overflow-x-auto mt-2">
           <table className="min-w-[1100px] w-full text-left text-sm">
             <thead>
-              <tr className={`${subtleText} ${tableBorder} border-b`}>
+              <tr className={`text-gray-600 dark:text-gray-300 ${tableBorder} border-b`}>
                 <th className="py-3 px-4">Cover Art</th>
                 <th className="py-3 px-4">Title</th>
                 <th className="py-3 px-4">Artist</th>
@@ -338,7 +333,7 @@ const openView = async (release) => {
                   <td className="px-4 py-3">{r.upc || "—"}</td>
 
                   <td className="px-4 py-3">
-                    <span className={`px-4 py-1 rounded-full ${statusClasses(r.status, theme)}`}>
+                    <span className={`px-4 py-1 rounded-full ${statusClasses(r.status)}`}>
                       {r.status}
                     </span>
                   </td>
@@ -350,21 +345,13 @@ const openView = async (release) => {
     <button onClick={() => openEdit(r)}
       className={`
         w-10 h-10 flex items-center justify-center rounded-full border group transition
-        ${
-          theme === "dark"
-            ? "border-amber-400 hover:bg-amber-400"
-            : "border-amber-600 hover:bg-amber-100"
-        }
+        border-amber-600 dark:border-amber-400 hover:bg-amber-100 dark:hover:bg-amber-400
       `}
       title="Edit"
     >
       <Edit3
         size={18}
-        className={`${
-          theme === "dark"
-            ? "text-amber-300 group-hover:text-white"
-            : "text-amber-700 group-hover:text-amber-800"
-        }`}
+        className={`text-amber-700 dark:text-amber-300 group-hover:text-amber-800 dark:group-hover:text-white`}
       />
     </button>
 
@@ -373,21 +360,13 @@ const openView = async (release) => {
       onClick={() => openView(r)}
       className={`
         w-10 h-10 flex items-center justify-center rounded-full border group transition
-        ${
-          theme === "dark"
-            ? "border-sky-500 hover:bg-sky-500"
-            : "border-sky-600 hover:bg-sky-100"
-        }
+        border-sky-600 dark:border-sky-500 hover:bg-sky-100 dark:hover:bg-sky-500
       `}
       title="View"
     >
       <Eye
         size={18}
-        className={`${
-          theme === "dark"
-            ? "text-sky-400 group-hover:text-white"
-            : "text-sky-700 group-hover:text-sky-900"
-        }`}
+        className={`text-sky-700 dark:text-sky-400 group-hover:text-sky-900 dark:group-hover:text-white`}
       />
     </button>
 
