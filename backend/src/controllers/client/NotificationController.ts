@@ -46,9 +46,16 @@ export const markAllAsRead = asyncHandler(
     const userId = req.user?.userId;
 
     await Notification.updateMany(
-      { userId, isRead: false },
-      { isRead: true }
-    );
+  {
+    roleTarget: "client",
+    isRead: false,
+    $or: [
+      { userId: userId },
+      { userId: null },
+    ],
+  },
+  { isRead: true }
+);
 
     res.status(HTTP_STATUS.OK).json({
       success: true,
