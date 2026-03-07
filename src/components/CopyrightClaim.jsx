@@ -163,8 +163,8 @@ const CopyrightClaim = () => {
   {claims.map((row) => (
     <div
       key={row._id}
-      className={`border ${rowBorder} rounded-lg p-4 
-      grid grid-cols-1 sm:grid-cols-4 gap-4 sm:gap-0 items-start`}
+      className="border border-gray-200 dark:border-white/10 rounded-lg p-4 
+grid grid-cols-1 sm:grid-cols-4 gap-4 sm:gap-0 items-start"
     >
 
       {/* ==== LINK ==== */}
