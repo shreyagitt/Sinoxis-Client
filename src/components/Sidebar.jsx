@@ -31,37 +31,37 @@ const permissions = user?.permissions || {};
 
   const menuItems = [
     {
-      path: "/",
+      path: "/dashboard",
       label: "Home",
       icon: <FaHome />,
       permission: "dashboard",
-      subItems: [
+     /* subItems: [
         { label: "Dashboard", path: "/dashboard" },
         
-      ],
+      ],*/
     },
    {
-  path: "/releases",
+  path: "/releases/myRelease",
   label: "Releases",
   icon: <FaMusic />,
   roles: ["client"],              // who can ever see it
   permission: "release", // admin toggle
-  subItems: [{ label: "My Release", path: "/releases/myRelease" }],
+  //subItems: [{ label: "My Release", path: "/releases/myRelease" }],
 },
     {
-      path: "/artists",
+      path: "/artists/list",
       label: "Artists",
       icon: <FaUsers />,
       roles: ["client"],              // who can ever see it
   permission: "artists",
-      subItems: [{ label: "List Of Artists", path: "/artists/list" }],
+      //subItems: [{ label: "List Of Artists", path: "/artists/list" }],
     },
     {
-      path: "/lables",
+      path: "/lables/list",
       label: "Lables",
       icon: <FaUsers />,
       permission:"labels",
-      subItems: [{ label: "List Of Lables", path: "/lables/list" }],
+      //subItems: [{ label: "List Of Lables", path: "/lables/list" }],
     },
     {
       path: "/revenue",
@@ -209,63 +209,83 @@ const permissions = user?.permissions || {};
 
       return (
         <li key={item.path}>
-          {/* MAIN MENU */}
-          <div
-            onClick={() => toggleMenu(item.path)}
-            className={`flex items-center rounded-md cursor-pointer transition 
-              ${isCollapsedState ? "justify-center py-3" : "px-4 py-3 gap-3"}
-              ${
-                isActive
-                  ? "bg-gradient-to-r from-[#29B6F6] to-[#0288D1] text-white"
-                  : "text-[#020726] dark:text-[#DDE7FF] hover:bg-[#E8F4FF] dark:hover:bg-white/10"
-              }
-            `}
-          >
-            <span className="text-[18px]">{item.icon}</span>
+  {item.subItems ? (
+    /* MENU WITH DROPDOWN */
+    <div
+      onClick={() => toggleMenu(item.path)}
+      className={`flex items-center rounded-md cursor-pointer transition 
+        ${isCollapsedState ? "justify-center py-3" : "px-4 py-3 gap-3"}
+        ${
+          isActive
+            ? "bg-gradient-to-r from-[#29B6F6] to-[#0288D1] text-white"
+            : "text-[#020726] dark:text-[#DDE7FF] hover:bg-[#E8F4FF] dark:hover:bg-white/10"
+        }
+      `}
+    >
+      <span className="text-[18px]">{item.icon}</span>
 
-            {!isCollapsedState && (
-              <>
-                <span className="flex-1 text-[15px]">{item.label}</span>
-                <FaChevronDown
-                  className={`transition-transform ${
-                    isOpen ? "rotate-180 text-white" : "text-gray-400"
-                  }`}
-                />
-              </>
-            )}
-          </div>
+      {!isCollapsedState && (
+        <>
+          <span className="flex-1 text-[15px]">{item.label}</span>
+          <FaChevronDown
+            className={`transition-transform ${
+              isOpen ? "rotate-180 text-white" : "text-gray-400"
+            }`}
+          />
+        </>
+      )}
+    </div>
+  ) : (
+    /* MENU WITHOUT DROPDOWN */
+    <Link
+      to={item.path}
+      className={`flex items-center rounded-md transition 
+        ${isCollapsedState ? "justify-center py-3" : "px-4 py-3 gap-3"}
+        ${
+          isActive
+            ? "bg-gradient-to-r from-[#29B6F6] to-[#0288D1] text-white"
+            : "text-[#020726] dark:text-[#DDE7FF] hover:bg-[#E8F4FF] dark:hover:bg-white/10"
+        }
+      `}
+    >
+      <span className="text-[18px]">{item.icon}</span>
+      {!isCollapsedState && (
+        <span className="text-[15px]">{item.label}</span>
+      )}
+    </Link>
+  )}
 
-          {/* SUBMENUS */}
-          {!isCollapsedState && isOpen && (
-            <ul className="ml-8 mt-1 space-y-1">
-              {item.subItems
-                ?.filter(
-                  (sub) =>
-                    !sub.permission || permissions[sub.permission] === true
-                )
-                .map((sub) => {
-                  const activeSub = location.pathname === sub.path;
+  {/* SUBMENUS */}
+  {!isCollapsedState && item.subItems && isOpen && (
+    <ul className="ml-8 mt-1 space-y-1">
+      {item.subItems
+        ?.filter(
+          (sub) =>
+            !sub.permission || permissions[sub.permission] === true
+        )
+        .map((sub) => {
+          const activeSub = location.pathname === sub.path;
 
-                  return (
-                    <li key={sub.path}>
-                      <Link
-                        to={sub.path}
-                        className={`block px-3 py-2 rounded-md text-[14px] transition
-                          ${
-                            activeSub
-                              ? "bg-[#0288D1] text-white"
-                              : "text-[#020726] dark:text-gray-300 hover:bg-[#E8F4FF] dark:hover:bg-white/10"
-                          }
-                        `}
-                      >
-                        • {sub.label}
-                      </Link>
-                    </li>
-                  );
-                })}
-            </ul>
-          )}
-        </li>
+          return (
+            <li key={sub.path}>
+              <Link
+                to={sub.path}
+                className={`block px-3 py-2 rounded-md text-[14px] transition
+                  ${
+                    activeSub
+                      ? "bg-[#0288D1] text-white"
+                      : "text-[#020726] dark:text-gray-300 hover:bg-[#E8F4FF] dark:hover:bg-white/10"
+                  }
+                `}
+              >
+                • {sub.label}
+              </Link>
+            </li>
+          );
+        })}
+    </ul>
+  )}
+</li>
       );
     })}
 </ul>

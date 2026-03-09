@@ -50,6 +50,52 @@ const baseUrl = import.meta.env.VITE_API_BASE_URL;
   //const { theme } = useTheme();
   const [saved, setSaved] = useState(false);
   const [initialFormValues, setInitialFormValues] = useState(initialValues);
+  const [genres, setGenres] = useState([]);
+const [subGenres, setSubGenres] = useState([]);
+
+useEffect(() => {
+  const fetchGenres = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(`${baseUrl}/client/genre`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      if (data?.success) {
+        setGenres(data.data);
+      }
+    } catch (err) {
+      console.error("Failed to load genres", err);
+    }
+  };
+
+  fetchGenres();
+}, []);
+
+const fetchSubGenres = async (genreId) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await fetch(`${baseUrl}/client/subgenre/${genreId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await res.json();
+
+    if (data?.success) {
+      setSubGenres(data.data);
+    }
+  } catch (err) {
+    console.error("Failed to load subgenres", err);
+  }
+};
 
   const mode = localStorage.getItem("releaseMode") || "create";
   const isView = mode === "view";
@@ -136,7 +182,7 @@ digitalReleaseDate: toDateInputValue(parsed.digitalReleaseDate),
       {/* TOP HEADER */}
       <div className="flex justify-between items-center px-10 py-6">
         <h1 className="text-xl font-medium">
-          Release Application Form
+          Create Release
         </h1>
         <p className="text-sm ">
           Home <span className="text-gray-400">/</span> <span className="text-sky-400">Dashboard </span>
@@ -265,7 +311,7 @@ localStorage.setItem(
 
 
 
-{({ errors, touched, values }) => (
+{({ errors, touched, values,setFieldValue }) => (
 <Form className="grid md:grid-cols-2 gap-x-10 gap-y-6 mt-12">
 
 
@@ -285,50 +331,47 @@ localStorage.setItem(
     placeholder="Subtitle"
   />
 
-  <SelectField
-    
-    name="genre"
-    placeholder="Genre *"
-    options={[
-      "Ambient / Instrumental",
-      "Carnatic Classical",
-      "Children's Music",
-      "Dance",
-      "Devotional",
-      "Electronic",
-      "Film",
-      "Folk",
-      "Hip-Hop / Rap",
-      "Indie",
-      "Jazz",
-      "Pop",
-      "Rock",
-      "Worldwide",
-    ]}
-      disabled={isView}   // ✅ FIX
-    error={touched.genre && errors.genre}
-  />
+<SelectField
+  name="genre"
+  placeholder="Genre *"
+  disabled={isView}
+  options={genres.map((g) => ({
+    label: g.name,
+    value: g._id,
+  }))}
+  error={touched.genre && errors.genre}
+  onChange={(e) => {
+    const genreId = e.target.value;
 
-  <SelectField
-    
-    name="subgenre"
-    placeholder="Subgenre *"
-    options={[
-      "Ambient",
-      "Classical",
-      "Electronic",
-      "Indie",
-      "Pop",
-      "Rock",
-    ]}
-      disabled={isView}   // ✅ FIX
-    error={touched.subgenre && errors.subgenre}
-  />
+    setFieldValue("genre", genreId);
+    setFieldValue("subgenre", "");
+
+    const selectedGenre = genres.find((g) => g._id === genreId);
+
+    if (selectedGenre) {
+      setSubGenres(selectedGenre.subGenres || []);
+    }
+  }}
+/>
+
+<SelectField
+  name="subgenre"
+  placeholder="Subgenre *"
+  disabled={isView || !values.genre}
+  options={subGenres.map((sg) => ({
+    label: sg.name,
+    value: sg._id,
+  }))}
+  error={touched.subgenre && errors.subgenre}
+  onChange={(e) => {
+    setFieldValue("subgenre", e.target.value);
+  }}
+/>
 
   <SelectField
   
   name="label"
-  placeholder="Select Active Label *"
+  placeholder="Select Label *"
   disabled={isView || activeLabels.length === 0}
   options={activeLabels.map((l) => ({
     label: l.labelName,
@@ -579,12 +622,12 @@ export const FormField = ({  error, disabled, ...props }) => {
 
 
 export const SelectField = ({
-
   name,
   placeholder,
   options,
   error,
-  disabled
+  disabled,
+  onChange
 }) => {
   const inputBg =
   "bg-white dark:bg-[#2a2f4d] text-[#020726] dark:text-white border border-gray-300 dark:border-white/10";
@@ -596,6 +639,7 @@ export const SelectField = ({
         name={name}
         disabled={disabled}
         aria-invalid={!!error}
+        onChange={onChange}
         className={`w-full h-[46px] px-5 pr-12 rounded-xl outline-none
         focus:ring-1 focus:ring-sky-400 transition ${inputBg}`}
       >
