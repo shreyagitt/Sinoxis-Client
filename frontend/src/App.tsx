@@ -35,6 +35,7 @@ import CopyClaimManagement from "./pages/CopyClaimManagement";
 import AdminOACPage from "./pages/OACpage";
 import UserManagement from "./pages/UserManagement";
 import Store from "./pages/Store";
+import GenresPage from "./pages/genrePage";
 
 const AppRoutes: React.FC = () => {
   const dispatch = useDispatch();
@@ -132,6 +133,15 @@ const AppRoutes: React.FC = () => {
               element={
                 <ProtectedRoute>
                   <Layout><Store /></Layout>
+                </ProtectedRoute>
+              }
+            />
+
+             <Route
+              path="/genre"
+              element={
+                <ProtectedRoute>
+                  <Layout><GenresPage /></Layout>
                 </ProtectedRoute>
               }
             />

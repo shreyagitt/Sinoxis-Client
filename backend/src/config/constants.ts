@@ -47,6 +47,8 @@ export const API_ENDPOINTS = {
   OFFICIALARTIST:'/api/v1/official-artist',
   NOTIFICATION:'/api/v1/notifications',
   STORE:'/api/v1/store',
+  GENRE:'/api/v1/genre',
+  SUBGENRE:'/api/v1/subgenre'
   
 
 } as const;
@@ -69,6 +71,8 @@ export const CLIENT_API_ENDPOINTS = {
   OFFICIALARTIST:'/official-artist',
   NOTIFICATION:'/notifications',
   STORE:'/store',
+  GENRE:'/genre',
+  SUBGENRE:'/subgenre'
 } as const;
 
 export const HTTP_STATUS = {

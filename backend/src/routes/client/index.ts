@@ -18,6 +18,8 @@ import CopyClaimRoutes from './CopyClaimRoutes';
 import OACRequest from './oac.routes';
 import NotificationRoutes from './NotificationRoutes';
 import StoreRoutes from './StoreRoutes';
+import GenreRoutes from "./GenreRoutes";
+import SubGenreRoutes from "./subGenreRoutes"
 
 
 
@@ -43,6 +45,8 @@ clientRouter.use(CLIENT_API_ENDPOINTS.COPYRIGHTCLAIM, CopyClaimRoutes);
 clientRouter.use(CLIENT_API_ENDPOINTS.OFFICIALARTIST, OACRequest);
 clientRouter.use(CLIENT_API_ENDPOINTS.NOTIFICATION, NotificationRoutes);
 clientRouter.use(CLIENT_API_ENDPOINTS.STORE, StoreRoutes);
+clientRouter.use(CLIENT_API_ENDPOINTS.GENRE, GenreRoutes);
+clientRouter.use(CLIENT_API_ENDPOINTS.SUBGENRE, SubGenreRoutes);
 
 
 export default clientRouter;

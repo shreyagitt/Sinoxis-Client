@@ -69,6 +69,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
     { to: "/banksettings", label: "Bank Settings", icon: <FolderCog className="w-5 h-5" /> },
     { to: "/form", label: "Apply Form Management", icon: <FileText className="w-5 h-5" /> },
     { to: "/store", label: "Store Management", icon: <Store className="w-5 h-5" /> },
+    { to: "/genre", label: "Genre Management", icon: <Music className="w-5 h-5" /> },
   ];
 
   return (
