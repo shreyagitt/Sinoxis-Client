@@ -19,7 +19,7 @@ import OACRequest from './oac.routes';
 import NotificationRoutes from './NotificationRoutes';
 import StoreRoutes from './StoreRoutes';
 import GenreRoutes from "./GenreRoutes";
-import SubGenreRoutes from "./subGenreRoutes"
+import SubGenreRoutes from "./SubGenreRoutes"
 
 
 

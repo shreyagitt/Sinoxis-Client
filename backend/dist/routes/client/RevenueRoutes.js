@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const RevenueController_1 = require("../../controllers/client/RevenueController");
+const auth_1 = require("../../middlewares/auth");
+const checkPermission_1 = require("../../middlewares/checkPermission");
+const router = (0, express_1.Router)();
+router.get("/", auth_1.authenticate, (0, auth_1.authorize)("client"), RevenueController_1.ClientRevenueController.getMyAnalytics);
+router.get("/export/csv", auth_1.authenticate, (0, auth_1.authorize)("client"), (0, checkPermission_1.checkPermission)("totalRevenue"), RevenueController_1.ClientRevenueController.exportMyAnalyticsCSV);
+exports.default = router;
