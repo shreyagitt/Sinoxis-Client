@@ -5,14 +5,25 @@ import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 
 
+const today = new Date();
+
+const tomorrow = new Date();
+tomorrow.setDate(tomorrow.getDate() + 1);
+
+
 const releaseSchema = Yup.object({
   title: Yup.string().required("Title is required"),
   subtitle: Yup.string(),
   genre: Yup.string().required("Genre is required"),
   subgenre: Yup.string().required("Subgenre is required"),
   label: Yup.string().required("Label is required"),
-  originalReleaseDate: Yup.date().required("Original release date required"),
-  digitalReleaseDate: Yup.date().required("Digital release date required"),
+  originalReleaseDate: Yup.date()
+    .max(today, "Original release date cannot be in the future")
+    .required("Original release date required"),
+
+  digitalReleaseDate: Yup.date()
+    .min(tomorrow, "Digital release date must be after today")
+    .required("Digital release date required"),
   copyrightText: Yup.string().required("Copyright is required"),
   upc: Yup.string(), // ✅ ADD THIS
   productionYear: Yup.number()
@@ -174,6 +185,12 @@ digitalReleaseDate: toDateInputValue(parsed.digitalReleaseDate),
     if (img) setCoverPreview(img);
   }
 }, []);
+const today = new Date().toISOString().split("T")[0];
+
+const tomorrow = new Date();
+tomorrow.setDate(tomorrow.getDate() + 1);
+const tomorrowDate = tomorrow.toISOString().split("T")[0];
+
 
 
   return (
@@ -311,7 +328,25 @@ localStorage.setItem(
 
 
 
-{({ errors, touched, values,setFieldValue }) => (
+{({ errors, touched, values,setFieldValue }) => {
+
+  useEffect(() => {
+  if (values.productionYear && values.label) {
+
+    const selectedLabel = activeLabels.find(
+      (l) => l._id === values.label
+    );
+
+    if (selectedLabel) {
+      const copyright = `℗ ${values.productionYear} ${selectedLabel.labelName}`;
+
+      setFieldValue("copyrightText", copyright);
+    }
+  }
+}, [values.productionYear, values.label, activeLabels]);
+
+return(
+
 <Form className="grid md:grid-cols-2 gap-x-10 gap-y-6 mt-12">
 
 
@@ -380,9 +415,18 @@ localStorage.setItem(
   error={touched.label && errors.label}
 />
 
+<FormField
+    
+    name="productionYear"
+    placeholder="Production Year"
+    disabled={isView}
+    error={touched.productionYear && errors.productionYear}
+  />
+
   <DateField
     
     name="originalReleaseDate"
+     max={today}
       disabled={isView}   // ✅ FIX
     error={touched.originalReleaseDate && errors.originalReleaseDate}
   />
@@ -390,6 +434,7 @@ localStorage.setItem(
   <DateField
     
     name="digitalReleaseDate"
+     min={tomorrowDate}
       disabled={isView}   // ✅ FIX
     error={touched.digitalReleaseDate && errors.digitalReleaseDate}
   />
@@ -411,13 +456,13 @@ localStorage.setItem(
   error={touched.upc && errors.upc}
 />
 
-  <FormField
+  {/*<FormField
     
     name="productionYear"
     placeholder="Production Year"
     disabled={isView}
     error={touched.productionYear && errors.productionYear}
-  />
+  />*/}
 
   {/* ✅ COVER ART — FULL WIDTH (INSIDE FORM) */}
   <div className="md:col-span-2 mt-6">
@@ -432,17 +477,21 @@ localStorage.setItem(
         border border-dashed border-white/30
         flex items-center justify-center
         transition
-    border-gray-400 dark:border-white/30 bg-gray-100 dark:bg-[#05092a]
+    ${coverPreview ? "bg-transparent" :"border-gray-400 dark:border-white/30 bg-gray-100 dark:bg-[#05092a]"}
     `}
       
     >
       {coverPreview ? (
-        <img
-          src={coverPreview}
-          alt="Cover Preview"
-          className="w-full h-full object-cover rounded-2xl"
-        />
-      ) : (
+  <div className="flex w-full h-full items-center">
+    <div className="w-[180px] h-[180px] ml-2 overflow-hidden rounded-xl shadow-md">
+      <img
+        src={coverPreview}
+        alt="Cover Preview"
+        className="w-full h-full object-cover"
+      />
+    </div>
+  </div>
+) : (
         <div className="text-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -563,7 +612,8 @@ localStorage.setItem(
   </div>
 
 </Form>
-)}
+  );
+}}
 </Formik>
 
 
@@ -629,38 +679,47 @@ export const SelectField = ({
   disabled,
   onChange
 }) => {
+
   const inputBg =
-  "bg-white dark:bg-[#2a2f4d] text-[#020726] dark:text-white border border-gray-300 dark:border-white/10";
+    "bg-white dark:bg-[#2a2f4d] text-[#020726] dark:text-white border border-gray-300 dark:border-white/10";
 
   return (
     <div className="relative flex flex-col w-full">
-      <Field
-        as="select"
-        name={name}
-        disabled={disabled}
-        aria-invalid={!!error}
-        onChange={onChange}
-        className={`w-full h-[46px] px-5 pr-12 rounded-xl outline-none
-        focus:ring-1 focus:ring-sky-400 transition ${inputBg}`}
-      >
-        <option value="">{placeholder}</option>
 
-        {options.map((opt) => {
-          // support both string + object options
-          if (typeof opt === "string") {
-            return (
-              <option key={opt} value={opt}>
-                {opt}
-              </option>
-            );
-          }
+      <Field name={name}>
+        {({ field, form }) => (
+          <select
+            {...field}
+            disabled={disabled}
+            aria-invalid={!!error}
+            onChange={(e) => {
+              form.handleChange(e);     // ✅ update Formik state
+              if (onChange) onChange(e); // ✅ run custom logic
+            }}
+            className={`w-full h-[46px] px-5 pr-12 rounded-xl outline-none
+            focus:ring-1 focus:ring-sky-400 transition ${inputBg}`}
+          >
 
-          return (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          );
-        })}
+            <option value="">{placeholder}</option>
+
+            {options.map((opt) => {
+              if (typeof opt === "string") {
+                return (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                );
+              }
+
+              return (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              );
+            })}
+
+          </select>
+        )}
       </Field>
 
       {error && (
@@ -673,21 +732,24 @@ export const SelectField = ({
           </span>
         </>
       )}
+
     </div>
   );
 };
 
 
 
-export const DateField = ({  name, error , disabled }) => {
+export const DateField = ({ name, error, disabled, min, max }) => {
   const inputBg =
-  "bg-white dark:bg-[#2a2f4d] text-[#020726] dark:text-white border border-gray-300 dark:border-white/10";
+    "bg-white dark:bg-[#2a2f4d] text-[#020726] dark:text-white border border-gray-300 dark:border-white/10";
 
   return (
     <div className="relative flex flex-col w-full">
       <Field
         type="date"
         name={name}
+        min={min}
+        max={max}
         disabled={disabled}
         aria-invalid={!!error}
         className={`w-full h-[46px] px-5 pr-12 rounded-xl outline-none
@@ -695,17 +757,15 @@ export const DateField = ({  name, error , disabled }) => {
       />
 
       {error && (
-        <div className="absolute right-4 top-[14px]">
-          <ErrorIcon />
-        </div>
-      )}
-
-      {error && (
-        <span className="text-red-400 text-xs mt-1 leading-tight">
-          {error}
-        </span>
+        <>
+          <div className="absolute right-4 top-[14px]">
+            <ErrorIcon />
+          </div>
+          <span className="text-red-400 text-xs mt-1 leading-tight">
+            {error}
+          </span>
+        </>
       )}
     </div>
   );
 };
-

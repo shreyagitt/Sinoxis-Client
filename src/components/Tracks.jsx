@@ -785,22 +785,38 @@ function MusicIcon() {
   );
 }
 
+function getSavedSuggestions(key) {
+  const data = localStorage.getItem(key);
+  return data ? JSON.parse(data) : [];
+}
+
+function saveSuggestion(key, value) {
+  const existing = getSavedSuggestions(key);
+
+  if (!existing.includes(value)) {
+    const updated = [...existing, value];
+    localStorage.setItem(key, JSON.stringify(updated));
+  }
+}
 
 function MultiInput({
   name,
   placeholder,
-  options = [],
   values,
   setFieldValue,
   error,
   disabled,
 }) {
- // const { theme } = useTheme();
+
   const [value, setValue] = useState("");
   const [open, setOpen] = useState(false);
   const containerRef = useRef(null);
 
-  // ✅ CLOSE ON CLICK OUTSIDE
+  const storageKey = `suggestions_${name}`;
+
+  const suggestions = getSavedSuggestions(storageKey);
+
+  // close dropdown
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
@@ -818,22 +834,30 @@ function MultiInput({
 
   const addItem = (item) => {
     if (disabled) return;
-    if (!item || values.includes(item)) return;
-    
-    setFieldValue(name, [...values, item]);
+
+    const clean = item.trim();
+    if (!clean || values.includes(clean)) return;
+
+    const updated = [...values, clean];
+    setFieldValue(name, updated, true);
+
+    saveSuggestion(storageKey, clean); // 🔥 save suggestion
+
     setValue("");
     setOpen(false);
   };
 
   const removeItem = (item) => {
     if (disabled) return;
-    setFieldValue(
-      name,
-      values.filter((i) => i !== item)
-    );
+
+   setFieldValue(
+  name,
+  values.filter((i) => i !== item),
+  true
+);
   };
 
-  const filteredOptions = options.filter(
+  const filteredOptions = suggestions.filter(
     (opt) =>
       !values.includes(opt) &&
       opt.toLowerCase().includes(value.toLowerCase())
@@ -841,31 +865,34 @@ function MultiInput({
 
   return (
     <div ref={containerRef} className="relative w-full">
+
       {/* INPUT BOX */}
       <div
-        className={`min-h-[46px] px-4 py-2 rounded-xl
-          flex flex-wrap items-center gap-2 cursor-text
-          bg-white dark:bg-[#2a2f4d] text-[#020726] dark:text-white placeholder-gray-500 dark:placeholder-gray-300 border border-gray-300 dark:border-white/10
-        `}
+        className="min-h-[46px] px-4 py-2 rounded-xl
+        flex flex-wrap items-center gap-2 cursor-text
+        bg-white dark:bg-[#2a2f4d] text-[#020726] dark:text-white
+        border border-gray-300 dark:border-white/10"
         onClick={() => !disabled && setOpen(true)}
       >
-        {/* CHIPS */}
+
+        {/* TAGS */}
         {values.map((item) => (
           <span
             key={item}
             className="flex items-center gap-1
-              bg-sky-400/20 text-sky-300
-              px-3 py-1 rounded-lg text-sm"
+            bg-sky-400/20 text-sky-300
+            px-3 py-1 rounded-lg text-sm"
           >
             {item}
-            <button
-              type="button"
-              disabled={disabled}
-              onClick={() => removeItem(item)}
-              className="hover:text-red-400"
-            >
-              ×
-            </button>
+            {!disabled && (
+              <button
+                type="button"
+                onClick={() => removeItem(item)}
+                className="hover:text-red-400"
+              >
+                ×
+              </button>
+            )}
           </span>
         ))}
 
@@ -880,42 +907,30 @@ function MultiInput({
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               e.preventDefault();
-              addItem(value.trim());
+              addItem(value);
             }
           }}
           placeholder={values.length === 0 ? placeholder : ""}
-          className={`flex-1 bg-transparent outline-none text-sm min-w-[120px]
-            bg-white dark:bg-[#2a2f4d] text-[#020726] dark:text-white placeholder-gray-500 dark:placeholder-gray-300 border border-gray-300 dark:border-white/10
-          `}
+          className="flex-1 bg-transparent outline-none text-sm min-w-[120px]"
         />
 
-        {/* DROPDOWN ICON */}
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={() => setOpen((o) => !o)}
-          className="ml-auto text-gray-400 hover:text-sky-400"
-        >
-          ▼
-        </button>
       </div>
 
-      {/* DROPDOWN */}
+      {/* SUGGESTIONS */}
       {open && filteredOptions.length > 0 && (
         <div
-          className={`absolute z-20 mt-2 w-full rounded-xl overflow-hidden shadow-lg
-           bg-white dark:bg-[#1f2440] border border-gray-200 dark:border-white/10
-          `}
+          className="absolute z-20 mt-2 w-full rounded-xl overflow-hidden shadow-lg
+          bg-white dark:bg-[#1f2440]
+          border border-gray-200 dark:border-white/10"
         >
           {filteredOptions.map((opt) => (
             <button
               key={opt}
               type="button"
-              disabled={disabled}
               onClick={() => addItem(opt)}
-              className={`w-full text-left px-4 py-2 text-sm transition
-               text-gray-800 dark:text-gray-200 hover:bg-sky-100 dark:hover:bg-sky-400/20
-              `}
+              className="w-full text-left px-4 py-2 text-sm transition
+              text-gray-800 dark:text-gray-200
+              hover:bg-sky-100 dark:hover:bg-sky-400/20"
             >
               {opt}
             </button>
@@ -923,10 +938,9 @@ function MultiInput({
         </div>
       )}
 
-      {/* ERROR */}
       {error && <p className="text-red-400 text-xs mt-1">{error}</p>}
+
     </div>
   );
 }
-
 
