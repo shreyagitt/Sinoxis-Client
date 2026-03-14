@@ -48,7 +48,9 @@ export const API_ENDPOINTS = {
   NOTIFICATION:'/api/v1/notifications',
   STORE:'/api/v1/store',
   GENRE:'/api/v1/genre',
-  SUBGENRE:'/api/v1/subgenre'
+  SUBGENRE:'/api/v1/subgenre',
+  LANGUAGE:'/api/v1/language',
+  
   
 
 } as const;
@@ -72,7 +74,8 @@ export const CLIENT_API_ENDPOINTS = {
   NOTIFICATION:'/notifications',
   STORE:'/store',
   GENRE:'/genre',
-  SUBGENRE:'/subgenre'
+  SUBGENRE:'/subgenre',
+  LANGUAGE:'/language'
 } as const;
 
 export const HTTP_STATUS = {

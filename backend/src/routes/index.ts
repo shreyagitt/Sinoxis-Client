@@ -21,7 +21,8 @@ import notificationRoutes from './notificationRoutes';
 import userRoutes from './userRoutes';
 import storeRoutes from './storeRoutes';
 import genreRoutes from "./genreRoutes";
-import subGenreRoutes from "./subGenreRoutes"
+import subGenreRoutes from "./subGenreRoutes";
+import LanguageRoutes from "./languageRoutes"
 
 const router = Router();
 
@@ -56,6 +57,7 @@ router.use(API_ENDPOINTS.USERS, userRoutes);
 router.use(API_ENDPOINTS.STORE, storeRoutes);
 router.use(API_ENDPOINTS.GENRE, genreRoutes);
 router.use(API_ENDPOINTS.SUBGENRE, subGenreRoutes);
+router.use(API_ENDPOINTS.LANGUAGE, LanguageRoutes);
 
 
 

@@ -19,7 +19,7 @@ router.post(
   "/",
   authenticate,
   authorize("client"),
-  checkPermission("createRelease"),
+  checkPermission("release"),
   upload.fields([
   { name: "cover", maxCount: 1 },
   { name: "audio", maxCount: 1 },
@@ -57,7 +57,7 @@ router.delete(
   "/:id",
   authenticate,
   authorize("client"),
-  checkPermission("createRelease"),
+  checkPermission("release"),
   deleteMyRelease
 );
 

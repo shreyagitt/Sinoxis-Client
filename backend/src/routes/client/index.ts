@@ -19,7 +19,8 @@ import OACRequest from './oac.routes';
 import NotificationRoutes from './NotificationRoutes';
 import StoreRoutes from './StoreRoutes';
 import GenreRoutes from "./GenreRoutes";
-import SubGenreRoutes from "./SubGenreRoutes"
+import SubGenreRoutes from "./SubGenreRoutes";
+import languageRoutes from "./languageRoutes";
 
 
 
@@ -47,6 +48,8 @@ clientRouter.use(CLIENT_API_ENDPOINTS.NOTIFICATION, NotificationRoutes);
 clientRouter.use(CLIENT_API_ENDPOINTS.STORE, StoreRoutes);
 clientRouter.use(CLIENT_API_ENDPOINTS.GENRE, GenreRoutes);
 clientRouter.use(CLIENT_API_ENDPOINTS.SUBGENRE, SubGenreRoutes);
+clientRouter.use(CLIENT_API_ENDPOINTS.LANGUAGE, languageRoutes);
+
 
 
 export default clientRouter;

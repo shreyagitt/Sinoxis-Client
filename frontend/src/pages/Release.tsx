@@ -31,6 +31,7 @@ interface Track {
   musicDirectors?: string[];
   producers?: string[];
   audioUrl?: string;
+  audioName?: string;   
   lyrics?: string;
 }
 
@@ -400,7 +401,46 @@ const tracks: Track[] = selectedRelease
           <p><b>Language:</b> {t.language || "-"}</p>
 
           <p><b>ISRC:</b> {t.isrc || "-"}</p>
-          <p><b>Audio URL:</b> {t.audioUrl || "-"}</p>
+
+<div className="col-span-2">
+  <b>Track Audio:</b>
+
+  {t.audioUrl ? (
+  <div className="mt-2 space-y-2">
+
+    <audio
+      controls
+      src={t.audioUrl}
+      preload="metadata"
+      className="w-full max-w-md"
+    />
+
+    <div className="flex gap-3">
+
+      <a
+        href={t.audioUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="px-3 py-1 bg-blue-600 text-white text-xs rounded"
+      >
+        Open
+      </a>
+
+      <a
+        href={t.audioUrl}
+        download
+        className="px-3 py-1 bg-green-600 text-white text-xs rounded"
+      >
+        Download
+      </a>
+
+    </div>
+
+  </div>
+) : (
+  <p>No audio uploaded</p>
+)}
+</div>
 
           <p className="col-span-2">
             <b>Writers:</b> {t.writers?.length ? t.writers.join(", ") : "-"}

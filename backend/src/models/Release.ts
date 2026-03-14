@@ -24,6 +24,11 @@ const TrackSchema = new Schema(
       type: String,
       trim: true,
     },
+     previouslyReleased: {
+      type: String,
+      enum: ["yes", "no"],
+      default: "no",
+    },
 
     isrc: {
       type: String,

@@ -36,6 +36,7 @@ import AdminOACPage from "./pages/OACpage";
 import UserManagement from "./pages/UserManagement";
 import Store from "./pages/Store";
 import GenresPage from "./pages/genrePage";
+import LanguagesPage from "./pages/Language";
 
 const AppRoutes: React.FC = () => {
   const dispatch = useDispatch();
@@ -269,6 +270,15 @@ const AppRoutes: React.FC = () => {
               element={
                 <ProtectedRoute>
                   <Layout><ApplyFormManagement /></Layout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/language"
+              element={
+                <ProtectedRoute>
+                  <Layout><LanguagesPage /></Layout>
                 </ProtectedRoute>
               }
             />

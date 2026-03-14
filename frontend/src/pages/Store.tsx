@@ -283,8 +283,8 @@ export default function StoresPage() {
                   className="border rounded px-3 py-2 w-full"
                   value={form.platform}
                   onChange={(e) =>
-                    setForm({ ...form, platform: e.target.value.toLowerCase() })
-                  }
+  setForm({ ...form, platform: e.target.value })
+}
                 />
 
                 <label className="flex items-center gap-2 cursor-pointer">
