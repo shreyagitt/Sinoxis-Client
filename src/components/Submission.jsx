@@ -85,6 +85,13 @@ if (t?.tracks?.length) {
 
 
 const baseUrl = import.meta.env.VITE_API_BASE_URL;
+const token = localStorage.getItem("token");
+
+if (!token) {
+  toast.error("Session expired. Please login again.");
+  navigate("/login");
+  return;
+}
 
 const handlePublish = async () => {
   if (isView) return;
@@ -94,7 +101,7 @@ const handlePublish = async () => {
     return;
   }
 
-  const token = localStorage.getItem("token");
+  
 
   try {
     const formData = new FormData();
@@ -126,7 +133,8 @@ const handlePublish = async () => {
       primaryArtist: t.primaryArtist,
       publisher: t.publisher,
       language: t.language,
-      isrc: t.isrc,
+      previouslyReleased: t.previouslyReleased || "no",
+      isrc: t.isrc || "",
       writers: t.writers || [],
       composers: t.composers || [],
       musicDirectors: t.musicDirectors || [],
@@ -195,7 +203,7 @@ if (!track.some((t) => t.audioKey || t.audioUrl)) {
     await axios.post(`${baseUrl}/client/release`, formData, {
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
+        
       },
     });
 
@@ -209,9 +217,13 @@ if (!track.some((t) => t.audioKey || t.audioUrl)) {
 
     navigate("/releases/myRelease");
   } catch (err) {
-    console.error(err);
-    toast.error("Failed to submit release");
-  }
+  console.error("SERVER ERROR:", err.response?.data);
+  console.error("STATUS:", err.response?.status);
+
+  toast.error(
+    err.response?.data?.message || "Failed to submit release"
+  );
+}
 };
 
 
@@ -346,7 +358,17 @@ border border-gray-200 dark:border-white/10">
         <li><b>Primary Artist:</b> {t.primaryArtist || "—"}</li>
         <li><b>Publisher:</b> {t.publisher || "—"}</li>
         <li><b>Language:</b> {t.language || "—"}</li>
-        <li><b>ISRC:</b> {t.isrc || "—"}</li>
+        <li>
+  <b>Previously Released:</b>{" "}
+  {t.previouslyReleased === "yes" ? "Yes" : "No"}
+</li>
+
+<li>
+  <b>ISRC:</b>{" "}
+  {t.previouslyReleased === "yes"
+    ? t.isrc || "Missing"
+    : "Not required"}
+</li>
 
         <li>
           <b>Writers:</b> {t.writers?.length ? t.writers.join(", ") : "—"}

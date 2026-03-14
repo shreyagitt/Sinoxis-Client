@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 //import { useTheme } from "../components/Topbar";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
+import axios from "axios";
 
 
   
@@ -11,71 +12,63 @@ export default function TrackDetails() {
   const [step] = useState(1);
   //const { theme } = useTheme();
   const navigate = useNavigate();
+  const baseUrl = import.meta.env.VITE_API_BASE_URL;
+const token = localStorage.getItem("token");
 
   const mode = localStorage.getItem("releaseMode") || "create";
 const isView = mode === "view";
 const isEdit = mode === "edit";
 
-const [trackIndex, setTrackIndex] = useState(0);
+const [trackIndex, setTrackIndex] = useState(
+  Number(localStorage.getItem("currentTrackIndex")) || 0
+);
 
+useEffect(() => {
+  localStorage.setItem("currentTrackIndex", trackIndex);
+}, [trackIndex]);
 
   // ✅ DECLARE STATE FIRST
   const [savedDraft, setSavedDraft] = useState(null);
   const [showLyrics, setShowLyrics] = useState(false);
   const [audioFile, setAudioFile] = useState(null);
 const [lyrics, setLyrics] = useState("");
-
+const [languages, setLanguages] = useState([]);
 
   // ✅ LOAD FROM localStorage
 useEffect(() => {
-  let objectUrl;
+  let objectUrl = null;
 
   const hydrate = async () => {
     const stored = localStorage.getItem("trackDraft");
-    if (!stored) {
-      setSavedDraft(null);
-      setLyrics("");
-      setAudioFile(null);
-      return;
-    }
+    if (!stored) return;
 
     const parsed = JSON.parse(stored);
     const current = parsed.tracks?.[trackIndex] || {};
 
-    setSavedDraft(parsed);
+    setSavedDraft(prev => {
+  if (JSON.stringify(prev) === JSON.stringify(parsed)) return prev;
+  return parsed;
+});
     setLyrics(current.lyrics || "");
 
-    // Cloudinary audio (edit/view)
-   if (current.audioUrl) {
-  const displayName =
-    current.audioName ||
-    current.audioUrl.split("/").pop()?.split("?")[0] ||
-    "Uploaded Audio";
+    /* CLOUDINARY AUDIO */
+    if (current.audioUrl) {
+      setAudioFile({
+        name: current.audioName || "Uploaded Audio",
+        dataUrl: current.audioUrl,
+      });
+      return;
+    }
 
-  setAudioFile({
-    name: displayName,
-    dataUrl: current.audioUrl,
-  });
-  return;
-}
-
-    // IndexedDB audio (create)
+    /* INDEXEDDB AUDIO */
     if (current.audioKey) {
       const blob = await loadAudio(current.audioKey);
+
       if (blob) {
         objectUrl = URL.createObjectURL(blob);
 
-        const displayName =
-          current.audioName ||
-          current.audioFileId
-            ?.split("/")
-            .pop()
-            ?.replace(/^\d+-/, "")
-            ?.replace(/%20/g, " ")
-          || "Uploaded Audio";
-
         setAudioFile({
-          name: displayName,
+          name: current.audioName || "Uploaded Audio",
           dataUrl: objectUrl,
         });
         return;
@@ -90,9 +83,26 @@ useEffect(() => {
   return () => {
     if (objectUrl) URL.revokeObjectURL(objectUrl);
   };
-}, [trackIndex]);   // 🔥 REQUIRED
+}, [trackIndex]);
 
 
+useEffect(() => {
+  const fetchLanguages = async () => {
+    try {
+      const res = await axios.get(`${baseUrl}/client/language`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setLanguages(res.data?.data || []);
+    } catch (err) {
+      console.error("Language fetch failed:", err);
+    }
+  };
+
+  if (token) fetchLanguages();
+}, [token]);
 
 
 
@@ -120,6 +130,7 @@ const initialValues = {
   primaryArtist: currentTrack.primaryArtist || "",
   publisher: currentTrack.publisher || "",
   language: currentTrack.language || "",
+  previouslyReleased: currentTrack.previouslyReleased || "",
   isrc: currentTrack.isrc || "",
   writers: currentTrack.writers || [],
   composers: currentTrack.composers || [],
@@ -135,7 +146,15 @@ const trackSchema = Yup.object({
   primaryArtist: Yup.string().required("Primary artist is required"),
   publisher: Yup.string().required("Publisher is required"),
   language: Yup.string().required("Language is required"),
-  isrc: Yup.string().required("ISRC is required"),
+  previouslyReleased: Yup.string()
+    .oneOf(["yes", "no"])
+    .required("Please select an option"),
+
+  isrc: Yup.string().when("previouslyReleased", {
+    is: "yes",
+    then: (schema) => schema.required("ISRC is required for previously released tracks"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
 
   writers: Yup.array().min(1, "At least one writer is required"),
   composers: Yup.array().min(1, "At least one composer is required"),
@@ -212,11 +231,12 @@ const trackSchema = Yup.object({
         </div>
 
         {/* AUDIO DROPBOX */}
-        <div
-  className={`mt-10 border border-dashed rounded-2xl
+      <div
+  className={`relative mt-10 border border-dashed rounded-2xl
     h-[150px] sm:h-[170px]
     flex flex-col items-center justify-center
     border-sky-500 dark:border-sky-400/60 bg-gray-50 dark:bg-[#05092a]
+    overflow-hidden
   `}
 >
 
@@ -300,6 +320,7 @@ const trackSchema = Yup.object({
   validationSchema={trackSchema}
   onSubmit={(values) => {
     if (isView) {
+      
       navigate("/stores");        // ✅ allow forward navigation
       return;
     }
@@ -325,6 +346,7 @@ const trackSchema = Yup.object({
     const trackPayload = {
       ...tracks[trackIndex],
       ...values,
+      previouslyReleased: values.previouslyReleased,
       lyrics,
       audioKey: tracks[trackIndex]?.audioKey || null,
       audioName: tracks[trackIndex]?.audioName || null,
@@ -345,7 +367,15 @@ const trackSchema = Yup.object({
       })
     );
 
-    navigate("/stores");
+    if (trackIndex < tracks.length - 1) {
+  setTrackIndex(trackIndex + 1);
+  return;
+}
+
+else {
+  localStorage.removeItem("currentTrackIndex");
+navigate("/stores");
+}
   }}
 >
 
@@ -413,20 +443,34 @@ const trackSchema = Yup.object({
         disabled={isView}
         error={touched.publisher && errors.publisher}
       />
+<SelectInput
+  name="language"
+  placeholder="Select Language *"
+  disabled={isView}
+  error={touched.language && errors.language}
+ options={languages.map((l) => l.name)}
+/>
 
-      <Input
-        name="language"
-        placeholder="Language *"
-        disabled={isView}
-        error={touched.language && errors.language}
-      />
+     {/* PREVIOUSLY RELEASED */}
+<SelectInput
+  name="previouslyReleased"
+  placeholder="Previously Released?"
+  disabled={isView}
+  error={touched.previouslyReleased && errors.previouslyReleased}
+  options={["yes", "no"]}
+/>
 
-      <Input
-        name="isrc"
-        placeholder="ISRC *"
-        disabled={isView}
-        error={touched.isrc && errors.isrc}
-      />
+{/* ISRC */}
+<Input
+  name="isrc"
+  placeholder={
+    values.previouslyReleased === "yes"
+      ? "ISRC *"
+      : "ISRC (optional)"
+  }
+  disabled={isView || values.previouslyReleased === "no"}
+  error={touched.isrc && errors.isrc}
+/>
 
       {/* ADD LYRICS */}
       {/* ADD LYRICS + ADD TRACK (SAME ROW) */}
@@ -506,10 +550,8 @@ const trackSchema = Yup.object({
 
      const nextIndex = tracks.length;
 
+setSavedDraft({ ...stored, tracks });
 setTrackIndex(nextIndex);
-  setLyrics("");
-  setAudioFile(null);
-  setSavedDraft({ ...stored, tracks });
 
 
     }}
@@ -530,8 +572,14 @@ setTrackIndex(nextIndex);
 
         {/* BACK */}
         <button
-          type="button"
-          onClick={() => navigate("/releases/create")}
+           type="button"
+  onClick={() => {
+    if (trackIndex > 0) {
+      setTrackIndex(trackIndex - 1);
+    } else {
+      navigate("/releases/create");
+    }
+  }}
           className={`h-[46px] px-8 rounded-xl transition
             bg-gray-200 dark:bg-white/20 hover:bg-gray-300 dark:hover:bg-white/30
           `}
@@ -863,6 +911,14 @@ function MultiInput({
       opt.toLowerCase().includes(value.toLowerCase())
   );
 
+  useEffect(() => {
+  return () => {
+    if (value.trim()) {
+      addItem(value);
+    }
+  };
+}, []);
+
   return (
     <div ref={containerRef} className="relative w-full">
 
@@ -898,12 +954,17 @@ function MultiInput({
 
         {/* INPUT */}
         <input
-          value={value}
-          disabled={disabled}
-          onChange={(e) => {
-            setValue(e.target.value);
-            setOpen(true);
-          }}
+  value={value}
+  disabled={disabled}
+  onChange={(e) => {
+    setValue(e.target.value);
+    setOpen(true);
+  }}
+  onBlur={() => {
+    if (value.trim()) {
+      addItem(value);
+    }
+  }}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               e.preventDefault();
@@ -944,3 +1005,38 @@ function MultiInput({
   );
 }
 
+
+function SelectInput({ name, placeholder, error, disabled, options }) {
+  return (
+    <div className="w-full">
+      <div className="relative">
+        <Field
+          as="select"
+          name={name}
+          disabled={disabled}
+          className={`w-full h-[46px] px-5 rounded-xl outline-none
+          bg-white dark:bg-[#2a2f4d] text-[#020726] dark:text-white
+          border border-gray-300 dark:border-white/10`}
+        >
+          <option value="">{placeholder}</option>
+
+          {options.map((opt) => (
+            <option key={opt} value={opt}>
+              {opt}
+            </option>
+          ))}
+        </Field>
+
+        {error && (
+          <span className="absolute right-4 top-1/2 -translate-y-1/2
+          w-5 h-5 rounded-full border border-red-400
+          text-red-400 flex items-center justify-center text-xs font-bold">
+            !
+          </span>
+        )}
+      </div>
+
+      {error && <p className="text-red-400 text-xs mt-1">{error}</p>}
+    </div>
+  );
+}
