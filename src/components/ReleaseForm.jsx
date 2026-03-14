@@ -5,11 +5,16 @@ import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 
 
-const today = new Date();
 
-const tomorrow = new Date();
-tomorrow.setDate(tomorrow.getDate() + 1);
 
+const todayDate = new Date();
+todayDate.setHours(0,0,0,0);
+
+const tomorrowDateObj = new Date(todayDate);
+tomorrowDateObj.setDate(tomorrowDateObj.getDate() + 1);
+
+const today = todayDate.toISOString().split("T")[0];
+const tomorrowDate = tomorrowDateObj.toISOString().split("T")[0];
 
 const releaseSchema = Yup.object({
   title: Yup.string().required("Title is required"),
@@ -17,15 +22,19 @@ const releaseSchema = Yup.object({
   genre: Yup.string().required("Genre is required"),
   subgenre: Yup.string().required("Subgenre is required"),
   label: Yup.string().required("Label is required"),
+
   originalReleaseDate: Yup.date()
-    .max(today, "Original release date cannot be in the future")
+    .max(todayDate, "Original release date cannot be in the future")
     .required("Original release date required"),
 
   digitalReleaseDate: Yup.date()
-    .min(tomorrow, "Digital release date must be after today")
+    .min(tomorrowDateObj, "Digital release date must be after today")
     .required("Digital release date required"),
+
   copyrightText: Yup.string().required("Copyright is required"),
-  upc: Yup.string(), // ✅ ADD THIS
+
+  upc: Yup.string(),
+
   productionYear: Yup.number()
     .typeError("Enter valid year")
     .min(1900)
@@ -185,11 +194,7 @@ digitalReleaseDate: toDateInputValue(parsed.digitalReleaseDate),
     if (img) setCoverPreview(img);
   }
 }, []);
-const today = new Date().toISOString().split("T")[0];
 
-const tomorrow = new Date();
-tomorrow.setDate(tomorrow.getDate() + 1);
-const tomorrowDate = tomorrow.toISOString().split("T")[0];
 
 
 

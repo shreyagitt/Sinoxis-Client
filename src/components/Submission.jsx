@@ -87,12 +87,6 @@ if (t?.tracks?.length) {
 const baseUrl = import.meta.env.VITE_API_BASE_URL;
 const token = localStorage.getItem("token");
 
-if (!token) {
-  toast.error("Session expired. Please login again.");
-  navigate("/login");
-  return;
-}
-
 const handlePublish = async () => {
   if (isView) return;
 
