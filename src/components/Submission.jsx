@@ -4,6 +4,20 @@ import axios from "axios";
 import toast from "react-hot-toast";
 //import { useTheme } from "../components/Topbar";
 
+
+const formatStoreName = (name) => {
+  if (!name) return "";
+
+  return name
+    .split(" ")
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
+
+
+
+
+
 export default function SubmissionStep() {
  // const { theme } = useTheme();
     const navigate = useNavigate();
@@ -17,7 +31,8 @@ const isEdit = mode === "edit";
 const [release, setRelease] = useState(null);
 const [track, setTrack] = useState([]);
 const [stores, setStores] = useState([]);
-
+const [genres, setGenres] = useState([]);
+const [subGenres, setSubGenres] = useState([]);
 
 const [coverImage, setCoverImage] = useState(null);
  
@@ -127,7 +142,8 @@ const handlePublish = async () => {
       primaryArtist: t.primaryArtist,
       publisher: t.publisher,
       language: t.language,
-      previouslyReleased: t.previouslyReleased || "no",
+      previouslyReleased:
+  t.previouslyReleased === "Yes" ? "yes" : "no",
       isrc: t.isrc || "",
       writers: t.writers || [],
       composers: t.composers || [],
@@ -219,8 +235,38 @@ if (!track.some((t) => t.audioKey || t.audioUrl)) {
   );
 }
 };
+useEffect(() => {
+  const fetchGenres = async () => {
+    try {
+      const token = localStorage.getItem("token");
 
+      const res = await fetch(`${baseUrl}/client/genre`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
+      const data = await res.json();
+
+      if (data?.success) {
+        setGenres(data.data);
+      }
+    } catch (err) {
+      console.error("Failed to load genres", err);
+    }
+  };
+
+  fetchGenres();
+}, []);
+
+const getGenreName = (id) => {
+  return genres.find((g) => g._id === id)?.name || id;
+};
+
+const getSubGenreName = (id) => {
+  const genre = genres.find((g) => g._id === release?.genre);
+  return genre?.subGenres?.find((sg) => sg._id === id)?.name || id;
+};
 
 
   return (
@@ -306,7 +352,9 @@ border border-gray-200 dark:border-white/10">
     <li><b>Title:</b> {release.title}</li>
     <li><b>Subtitle:</b> {release.subtitle}</li>
     <li><b>Label:</b> {release.label}</li>
-    <li><b>Genre:</b> {release.genre} / {release.subgenre}</li>
+    <li>
+  <b>Genre:</b> {getGenreName(release.genre)} / {getSubGenreName(release.subgenre)}
+</li>
     <li><b>Original Release Date:</b> {release.originalReleaseDate}</li>
     <li><b>Digital Release Date:</b> {release.digitalReleaseDate}</li>
     <li><b>Production Year:</b> {release.productionYear}</li>
@@ -408,8 +456,8 @@ border border-gray-200 dark:border-white/10">
       <ul className="list-disc pl-4 text-sm">
        {stores.map((s, i) => (
   <li key={i}>
-    {typeof s === "string" ? s : s.platform}
-  </li>
+  {formatStoreName(typeof s === "string" ? s : s.platform)}
+</li>
 ))}
 
 

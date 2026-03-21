@@ -8,13 +8,16 @@ import * as Yup from "yup";
 
 
 const todayDate = new Date();
-todayDate.setHours(0,0,0,0);
+todayDate.setHours(0, 0, 0, 0);
 
+// ✅ LOCAL DATE (not UTC)
+const today = new Date().toLocaleDateString("en-CA");
+
+// ✅ tomorrow (local)
 const tomorrowDateObj = new Date(todayDate);
-tomorrowDateObj.setDate(tomorrowDateObj.getDate() + 1);
+tomorrowDateObj.setDate(todayDate.getDate() + 1);
 
-const today = todayDate.toISOString().split("T")[0];
-const tomorrowDate = tomorrowDateObj.toISOString().split("T")[0];
+const tomorrowDate = tomorrowDateObj.toLocaleDateString("en-CA");
 
 const releaseSchema = Yup.object({
   title: Yup.string().required("Title is required"),
@@ -24,12 +27,12 @@ const releaseSchema = Yup.object({
   label: Yup.string().required("Label is required"),
 
   originalReleaseDate: Yup.date()
-    .max(todayDate, "Original release date cannot be in the future")
-    .required("Original release date required"),
+  .max(todayDate, "Original release date cannot be in the future")
+  .required("Original release date required"),
 
-  digitalReleaseDate: Yup.date()
-    .min(tomorrowDateObj, "Digital release date must be after today")
-    .required("Digital release date required"),
+digitalReleaseDate: Yup.date()
+  .min(todayDate, "Digital release date cannot be in the past")
+  .required("Digital release date required"),
 
   copyrightText: Yup.string().required("Copyright is required"),
 
@@ -415,7 +418,7 @@ return(
   disabled={isView || activeLabels.length === 0}
   options={activeLabels.map((l) => ({
     label: l.labelName,
-    value: l._id,
+    value: l.labelName,
   }))}
   error={touched.label && errors.label}
 />
@@ -439,7 +442,7 @@ return(
   <DateField
     
     name="digitalReleaseDate"
-     min={tomorrowDate}
+     min={today}
       disabled={isView}   // ✅ FIX
     error={touched.digitalReleaseDate && errors.digitalReleaseDate}
   />

@@ -3,6 +3,16 @@ import { useNavigate } from "react-router-dom";
 //import { useTheme } from "../components/Topbar";
 import axios from "axios";
 
+
+const formatStoreName = (name) => {
+  if (!name) return "";
+
+  return name
+    .split(" ")
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
+
 export default function Stores() {
   const [step] = useState(2);
     const navigate = useNavigate();
@@ -196,7 +206,9 @@ useEffect(() => {
                   alt={store.name}
                   className="w-6 h-6 object-contain"
                 />
-          <span className="text-base">{store.name}</span>
+          <span className="text-base">
+  {formatStoreName(store.name)}
+</span>
 
           {/* CHECK MARK */}
           {active && (

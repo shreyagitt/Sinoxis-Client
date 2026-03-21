@@ -147,11 +147,11 @@ const trackSchema = Yup.object({
   publisher: Yup.string().required("Publisher is required"),
   language: Yup.string().required("Language is required"),
   previouslyReleased: Yup.string()
-    .oneOf(["yes", "no"])
+    .oneOf(["Yes", "No"])
     .required("Please select an option"),
 
   isrc: Yup.string().when("previouslyReleased", {
-    is: "yes",
+    is: "Yes",
     then: (schema) => schema.required("ISRC is required for previously released tracks"),
     otherwise: (schema) => schema.notRequired(),
   }),
@@ -457,18 +457,18 @@ navigate("/stores");
   placeholder="Previously Released?"
   disabled={isView}
   error={touched.previouslyReleased && errors.previouslyReleased}
-  options={["yes", "no"]}
+  options={["Yes", "No"]}
 />
 
 {/* ISRC */}
 <Input
   name="isrc"
   placeholder={
-    values.previouslyReleased === "yes"
+    values.previouslyReleased === "Yes"
       ? "ISRC *"
       : "ISRC (optional)"
   }
-  disabled={isView || values.previouslyReleased === "no"}
+  disabled={isView || values.previouslyReleased === "No"}
   error={touched.isrc && errors.isrc}
 />
 
