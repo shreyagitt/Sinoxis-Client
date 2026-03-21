@@ -33,6 +33,7 @@ interface Track {
   audioUrl?: string;
   audioName?: string;   
   lyrics?: string;
+  previouslyReleased?: string;
 }
 
 interface Release {
@@ -63,6 +64,15 @@ interface Release {
   };
 }
 
+const formatStoreName = (name: string) => {
+  if (!name) return "";
+
+  return name
+    .split(" ")
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
+
 /* ================= COMPONENT ================= */
 
 const AdminReleases: React.FC = () => {
@@ -75,6 +85,8 @@ const AdminReleases: React.FC = () => {
   const [viewOpen, setViewOpen] = useState(false);
   const [selectedRelease, setSelectedRelease] =
     useState<Release | null>(null);
+
+  const [genres, setGenres] = useState([]);
 
   /* ================= FETCH ALL ================= */
   const fetchReleases = async () => {
@@ -168,6 +180,34 @@ const tracks: Track[] = selectedRelease
   "Unfinished",
   "Action Required",
 ];
+
+const getGenreName = (id) => {
+  return genres.find((g) => g._id === id)?.name || id;
+};
+
+const getSubGenreName = (genreId, subId) => {
+  const genre = genres.find((g) => g._id === genreId);
+  return genre?.subGenres?.find((sg) => sg._id === subId)?.name || subId;
+};
+
+
+useEffect(() => {
+  const fetchGenres = async () => {
+    try {
+      const res = await axios.get(`${baseUrl}/genre`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res.data?.success) {
+        setGenres(res.data.data);
+      }
+    } catch (err) {
+      console.error("Failed to load genres", err);
+    }
+  };
+
+  if (token) fetchGenres();
+}, [token]);
 
 
   return (
@@ -348,10 +388,12 @@ const tracks: Track[] = selectedRelease
     <div>{selectedRelease.artist || "-"}</div>
 
     <div><span className="font-medium">Genre</span></div>
-    <div>{selectedRelease.genre || "-"}</div>
+    <div>{getGenreName(selectedRelease.genre)}</div>
 
     <div><span className="font-medium">Subgenre</span></div>
-    <div>{selectedRelease.subgenre || "-"}</div>
+    <div>
+  {getSubGenreName(selectedRelease.genre, selectedRelease.subgenre)}
+</div>
 
     <div><span className="font-medium">Label</span></div>
     <div>{selectedRelease.label || "-"}</div>
@@ -399,7 +441,14 @@ const tracks: Track[] = selectedRelease
 
           <p><b>Publisher:</b> {t.publisher || "-"}</p>
           <p><b>Language:</b> {t.language || "-"}</p>
-
+<p>
+  <b>Previously Released:</b>{" "}
+  {t.previouslyReleased === "yes"
+    ? "Yes"
+    : t.previouslyReleased === "no"
+    ? "No"
+    : "-"}
+</p>
           <p><b>ISRC:</b> {t.isrc || "-"}</p>
 
 <div className="col-span-2">
@@ -491,7 +540,7 @@ const tracks: Track[] = selectedRelease
                       key={s}
                       className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded text-xs"
                     >
-                      {s}
+                      {formatStoreName(s)}
                     </span>
                   ))}
                 </div>
