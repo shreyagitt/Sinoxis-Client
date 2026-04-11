@@ -339,19 +339,18 @@ localStorage.setItem(
 {({ errors, touched, values,setFieldValue }) => {
 
   useEffect(() => {
-  if (values.productionYear && values.label) {
+    if (values.productionYear && values.label && !isView) {
+      // label select stores labelName as value, but draft/edit might store _id
+      const selectedLabel = activeLabels.find(
+        (l) => l.labelName === values.label || l._id === values.label
+      );
 
-    const selectedLabel = activeLabels.find(
-      (l) => l._id === values.label
-    );
-
-    if (selectedLabel) {
-      const copyright = `℗ ${values.productionYear} ${selectedLabel.labelName}`;
-
-      setFieldValue("copyrightText", copyright);
+      if (selectedLabel) {
+        const copyright = `℗ ${values.productionYear} ${selectedLabel.labelName}`;
+        setFieldValue("copyrightText", copyright);
+      }
     }
-  }
-}, [values.productionYear, values.label, activeLabels]);
+  }, [values.productionYear, values.label, activeLabels, isView, setFieldValue]);
 
 return(
 
