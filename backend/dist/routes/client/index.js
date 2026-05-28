@@ -1,0 +1,52 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const constants_1 = require("../../config/constants");
+const ArtistRoutes_1 = __importDefault(require("./ArtistRoutes"));
+const ReleaseRoute_1 = __importDefault(require("./ReleaseRoute"));
+const BankRoutes_1 = __importDefault(require("./BankRoutes"));
+const ApplyFormRoutes_1 = __importDefault(require("./ApplyFormRoutes"));
+const FacebookVideoRoutes_1 = __importDefault(require("./FacebookVideoRoutes"));
+const MetadataRoutes_1 = __importDefault(require("./MetadataRoutes"));
+const SocialISRCRoutes_1 = __importDefault(require("./SocialISRCRoutes"));
+const YouTubeClaimRoutes_1 = __importDefault(require("./YouTubeClaimRoutes"));
+const YouTubeOACRoutes_1 = __importDefault(require("./YouTubeOACRoutes"));
+const RevenueRoutes_1 = __importDefault(require("./RevenueRoutes"));
+const RevenueReportRoutes_1 = __importDefault(require("./RevenueReportRoutes"));
+const PaymentRoutes_1 = __importDefault(require("./PaymentRoutes"));
+const LabelRoutes_1 = __importDefault(require("./LabelRoutes"));
+const CopyClaimRoutes_1 = __importDefault(require("./CopyClaimRoutes"));
+const oac_routes_1 = __importDefault(require("./oac.routes"));
+const NotificationRoutes_1 = __importDefault(require("./NotificationRoutes"));
+const StoreRoutes_1 = __importDefault(require("./StoreRoutes"));
+const GenreRoutes_1 = __importDefault(require("./GenreRoutes"));
+const SubGenreRoutes_1 = __importDefault(require("./SubGenreRoutes"));
+const languageRoutes_1 = __importDefault(require("./languageRoutes"));
+const clientRouter = (0, express_1.Router)();
+// ------------------------------
+// Mount routes (No Tenant Middleware)
+// ------------------------------
+clientRouter.use(constants_1.CLIENT_API_ENDPOINTS.ARTIST, ArtistRoutes_1.default);
+clientRouter.use(constants_1.CLIENT_API_ENDPOINTS.RELEASE, ReleaseRoute_1.default);
+clientRouter.use(constants_1.CLIENT_API_ENDPOINTS.BANK, BankRoutes_1.default);
+clientRouter.use(constants_1.CLIENT_API_ENDPOINTS.APPLY, ApplyFormRoutes_1.default);
+clientRouter.use(constants_1.CLIENT_API_ENDPOINTS.FACEBOOKVIDEO, FacebookVideoRoutes_1.default);
+clientRouter.use(constants_1.CLIENT_API_ENDPOINTS.METADATA, MetadataRoutes_1.default);
+clientRouter.use(constants_1.CLIENT_API_ENDPOINTS.SOCIALISRC, SocialISRCRoutes_1.default);
+clientRouter.use(constants_1.CLIENT_API_ENDPOINTS.YOUTUBECLAIM, YouTubeClaimRoutes_1.default);
+clientRouter.use(constants_1.CLIENT_API_ENDPOINTS.YOUTUBEOAC, YouTubeOACRoutes_1.default);
+clientRouter.use(constants_1.CLIENT_API_ENDPOINTS.REVENUE, RevenueRoutes_1.default);
+clientRouter.use(constants_1.CLIENT_API_ENDPOINTS.REVENUEREPORTS, RevenueReportRoutes_1.default);
+clientRouter.use(constants_1.CLIENT_API_ENDPOINTS.PAYMENT, PaymentRoutes_1.default);
+clientRouter.use(constants_1.CLIENT_API_ENDPOINTS.LABEL, LabelRoutes_1.default);
+clientRouter.use(constants_1.CLIENT_API_ENDPOINTS.COPYRIGHTCLAIM, CopyClaimRoutes_1.default);
+clientRouter.use(constants_1.CLIENT_API_ENDPOINTS.OFFICIALARTIST, oac_routes_1.default);
+clientRouter.use(constants_1.CLIENT_API_ENDPOINTS.NOTIFICATION, NotificationRoutes_1.default);
+clientRouter.use(constants_1.CLIENT_API_ENDPOINTS.STORE, StoreRoutes_1.default);
+clientRouter.use(constants_1.CLIENT_API_ENDPOINTS.GENRE, GenreRoutes_1.default);
+clientRouter.use(constants_1.CLIENT_API_ENDPOINTS.SUBGENRE, SubGenreRoutes_1.default);
+clientRouter.use(constants_1.CLIENT_API_ENDPOINTS.LANGUAGE, languageRoutes_1.default);
+exports.default = clientRouter;

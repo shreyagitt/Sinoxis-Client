@@ -1,0 +1,211 @@
+// src/pages/RegisterPage.jsx
+import React from "react";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
+import { useNavigate } from "react-router-dom";
+//import { useTheme } from "../components/Topbar";
+
+// Validation schema
+const RegisterSchema = Yup.object().shape({
+  firstName: Yup.string().min(2, "Too short").required("First name is required"),
+  lastName: Yup.string().min(2, "Too short").required("Last name is required"),
+  email: Yup.string().email("Invalid email").required("Email is required"),
+
+  password: Yup.string()
+    .min(8, "Minimum 8 characters")
+    .matches(/[A-Z]/, "Must contain uppercase letter")
+    .matches(/[a-z]/, "Must contain lowercase letter")
+    .matches(/\d/, "Must contain a number")
+    .required("Password is required"),
+
+  confirmPassword: Yup.string()
+    .oneOf([Yup.ref("password"), null], "Passwords do not match")
+    .required("Confirm password is required"),
+});
+
+const RegisterPage = () => {
+  const navigate = useNavigate();
+  //const { theme } = useTheme();
+  const baseUrl = import.meta.env.VITE_API_BASE_URL;
+
+  const pageBg =
+  "bg-gray-100 dark:bg-[#020726] text-[#020726] dark:text-white";
+  const cardBg =
+  "bg-white dark:bg-[#0a1039] border border-gray-300 dark:border-white/10 shadow-lg";
+
+  const labelColor = "text-[#020726] dark:text-white";
+  const inputBg =
+  "bg-gray-100 dark:bg-[#1f233d] text-[#020726] dark:text-white border border-gray-300 dark:border-white/20 placeholder-gray-500 dark:placeholder-gray-300";
+
+ const subtleText = "text-gray-600 dark:text-gray-300";
+
+  const handleSubmit = async (values, { setSubmitting }) => {
+    try {
+      const bodyData = {
+        firstName: values.firstName,
+        lastName: values.lastName,
+        email: values.email,
+        password: values.password,
+      };
+
+      const res = await fetch(`${baseUrl}/auth/client/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(bodyData),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        alert("Registration successful! Please login.");
+        navigate("/login");
+      } else {
+        alert(data.error || "Registration failed");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong!");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div
+      className={`min-h-screen flex flex-col justify-center items-center px-4 py-8 sm:py-10 md:py-12 transition-all duration-300 ${pageBg}`}
+    >
+      {/* LOGO LIGHT */}
+<img
+  src="/logo3.png"
+  alt="Sinoxis Logo"
+  className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 mb-6 object-contain dark:hidden"
+/>
+
+{/* LOGO DARK */}
+<img
+  src="/image/logo.webp"
+  alt="Sinoxis Logo"
+  className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 mb-6 object-contain hidden dark:block"
+/>
+
+      {/* CARD */}
+      <div
+        className={`rounded-xl w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-md p-6 sm:p-8 md:p-10 transition-all duration-300 ${cardBg}`}
+      >
+        <h3 className="text-2xl sm:text-3xl font-semibold text-center mb-2">Register</h3>
+        <p className={`text-center mb-6 sm:mb-8 text-sm sm:text-base ${subtleText}`}>
+          Create your account
+        </p>
+
+        <Formik
+          initialValues={{
+            firstName: "",
+            lastName: "",
+            email: "",
+            password: "",
+            confirmPassword: "",
+          }}
+          validationSchema={RegisterSchema}
+          onSubmit={handleSubmit}
+        >
+          {({ isSubmitting }) => (
+            <Form className="space-y-4 sm:space-y-5">
+
+              {/* FIRST NAME */}
+              <div>
+                <label className={`block mb-1 text-sm sm:text-base font-medium ${labelColor}`}>
+                  First Name
+                </label>
+                <Field
+                  name="firstName"
+                  className={`w-full p-3 sm:p-3.5 rounded-lg outline-none border text-sm sm:text-base ${inputBg}`}
+                />
+                <ErrorMessage name="firstName" className="text-red-500 text-xs sm:text-sm" component="div" />
+              </div>
+
+              {/* LAST NAME */}
+              <div>
+                <label className={`block mb-1 text-sm sm:text-base font-medium ${labelColor}`}>
+                  Last Name
+                </label>
+                <Field
+                  name="lastName"
+                  className={`w-full p-3 sm:p-3.5 rounded-lg outline-none border text-sm sm:text-base ${inputBg}`}
+                />
+                <ErrorMessage name="lastName" className="text-red-500 text-xs sm:text-sm" component="div" />
+              </div>
+
+              {/* EMAIL */}
+              <div>
+                <label className={`block mb-1 text-sm sm:text-base font-medium ${labelColor}`}>
+                  Email
+                </label>
+                <Field
+                  name="email"
+                  type="email"
+                  className={`w-full p-3 sm:p-3.5 rounded-lg outline-none border text-sm sm:text-base ${inputBg}`}
+                />
+                <ErrorMessage name="email" className="text-red-500 text-xs sm:text-sm" component="div" />
+              </div>
+
+              {/* PASSWORD */}
+              <div>
+                <label className={`block mb-1 text-sm sm:text-base font-medium ${labelColor}`}>
+                  Password
+                </label>
+                <Field
+                  name="password"
+                  type="password"
+                  className={`w-full p-3 sm:p-3.5 rounded-lg outline-none border text-sm sm:text-base ${inputBg}`}
+                />
+                <ErrorMessage name="password" className="text-red-500 text-xs sm:text-sm" component="div" />
+              </div>
+
+              {/* CONFIRM PASSWORD */}
+              <div>
+                <label className={`block mb-1 text-sm sm:text-base font-medium ${labelColor}`}>
+                  Confirm Password
+                </label>
+                <Field
+                  name="confirmPassword"
+                  type="password"
+                  className={`w-full p-3 sm:p-3.5 rounded-lg outline-none border text-sm sm:text-base ${inputBg}`}
+                />
+                <ErrorMessage name="confirmPassword" className="text-red-500 text-xs sm:text-sm" component="div" />
+              </div>
+
+              {/* BUTTON */}
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full py-3 sm:py-3.5 rounded-lg text-white font-semibold text-sm sm:text-lg transition-all disabled:opacity-50"
+                style={{
+                  background: "linear-gradient(90deg, #29B6F6, #0288D1)",
+                }}
+              >
+                {isSubmitting ? "Registering..." : "Register"}
+              </button>
+
+              {/* LOGIN LINK */}
+              <p className={`text-center mt-3 text-xs sm:text-sm ${subtleText}`}>
+                Already have an account?{" "}
+                <span
+                  className="text-[#29B6F6] cursor-pointer hover:underline"
+                  onClick={() => navigate("/login")}
+                >
+                  Login
+                </span>
+              </p>
+
+            </Form>
+          )}
+        </Formik>
+      </div>
+    </div>
+  );
+};
+
+export default RegisterPage;
+
+

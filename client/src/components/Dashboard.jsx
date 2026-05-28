@@ -1,0 +1,244 @@
+// src/pages/Dashboard.jsx
+import React , {useState,useEffect} from "react";
+import { useNavigate } from "react-router-dom";
+import { FaMusic, FaRupeeSign, FaUser, FaEdit, FaTrash } from "react-icons/fa";
+//import { useTheme } from "../components/Topbar";
+import axios from "axios";
+import toast from "react-hot-toast";
+
+
+// Dummy songs data
+const songs = [
+  { title: "Midnight Dreams", artist: "Luna Gray", streams: "1.2M", status: "Trending", badge: "green", release: "Oct 2025" },
+  { title: "Echoes of You", artist: "Arion Keys", streams: "980K", status: "Rising", badge: "blue", release: "Sep 2025" },
+  { title: "Lost Frequency", artist: "DJ Nova", streams: "750K", status: "New", badge: "yellow", release: "Aug 2025" },
+  { title: "Golden Waves", artist: "Violet Sky", streams: "612K", status: "Completed", badge: "green", release: "Jul 2025" },
+];
+
+export default function Dashboard() {
+  const navigate = useNavigate();
+  //const { theme } = useTheme();
+
+  const baseUrl = import.meta.env.VITE_API_BASE_URL;
+const token = localStorage.getItem("token");
+
+const [totalReleases, setTotalReleases] = useState(0);
+const [walletBalance, setWalletBalance] = useState(0);
+const [recentReleases, setRecentReleases] = useState([]);
+
+
+useEffect(() => {
+  const fetchDashboardData = async () => {
+    try {
+      // ✅ FETCH MY RELEASES
+      const releasesRes = await axios.get(`${baseUrl}/client/release`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const releases = releasesRes.data.data || [];
+      setTotalReleases(releases.length);
+      setRecentReleases(releases.slice(0, 4)); // ✅ Last 4
+
+      // ✅ FETCH WALLET BALANCE (CHANGE URL IF NEEDED)
+      try {
+        const walletRes = await axios.get(`${baseUrl}/client/revenue-report`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        setWalletBalance(walletRes.data.balance || 0);
+      } catch {
+        setWalletBalance(0); // ✅ fallback if API not ready
+      }
+
+    } catch (err) {
+      console.error(err);
+      toast.error("Dashboard data load failed");
+    }
+  };
+
+  fetchDashboardData();
+}, []);
+
+
+  // THEME COLORS
+  /*const pageBg = theme === "dark" ? "bg-[#020726] text-white" : "bg-white text-[#020726]";
+  const cardBg = theme === "dark" ? "bg-[#0a1039] border-white/10" : "bg-white border-gray-200";
+  const textSecondary = theme === "dark" ? "text-gray-300" : "text-gray-600";
+  const searchBg =
+    theme === "dark"
+      ? "bg-[#0a1039] border-white/10 text-gray-300"
+      : "bg-gray-100 border-gray-300 text-[#020726]";
+  const boxDark =
+    theme === "dark" ? "bg-[#0d123f] border-white/10" : "bg-gray-100 border-gray-200";
+
+  const statusBg = {
+    green: theme === "dark" ? "bg-green-900/40 text-green-300" : "bg-green-100 text-green-700",
+    blue: theme === "dark" ? "bg-blue-900/40 text-blue-300" : "bg-blue-100 text-blue-700",
+    yellow:
+      theme === "dark"
+        ? "bg-yellow-900/40 text-yellow-300"
+        : "bg-yellow-100 text-yellow-700",
+  }; */
+
+  return (
+<div className="min-h-screen px-4 md:px-8 py-6 md:py-8 transition-all duration-300 bg-white dark:bg-[#020726] text-[#020726] dark:text-white">
+
+      {/* HEADER */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
+        <h1 className="text-2xl md:text-3xl font-semibold">Dashboard</h1>
+
+        <div className={`text-sm text-gray-600 dark:text-gray-300`}>
+          Home / <span className="text-[#29B6F6]">Dashboard</span>
+        </div>
+      </div>
+
+      {/* SEARCH + BUTTONS (FIXED RESPONSIVE LAYOUT) */}
+      <div className="flex flex-col lg:flex-row justify-between gap-4 mb-8">
+
+        {/* Search takes full width always on mobile */}
+        <input
+          type="text"
+          placeholder="Type & Enter to search"
+          className={`w-full px-5 py-3 rounded-full border bg-gray-100 dark:bg-[#0a1039] border-gray-300 dark:border-white/10 text-[#020726] dark:text-gray-300`}
+        />
+
+        {/* Buttons Group - Responsive but aligned correctly */}
+        <div className="flex gap-3 flex-wrap lg:flex-nowrap justify-start lg:justify-end w-full lg:w-auto">
+          <button
+            onClick={() => navigate("/releases/create")}
+            className="bg-[#29B6F6] hover:bg-[#0288D1] px-6 py-2 rounded-full text-white w-full sm:w-auto"
+          >
+            Create Release
+          </button>
+
+          <button
+            onClick={() => navigate("/releases/myRelease")}
+            className="bg-[#29B6F6] hover:bg-[#0288D1] px-6 py-2 rounded-full text-white w-full sm:w-auto"
+          >
+            My Release
+          </button>
+        </div>
+      </div>
+
+      {/* TOTAL CARDS */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mb-12">
+        <div className={`p-5 rounded-xl flex gap-3 w-full border bg-white dark:bg-[#0a1039] border-gray-200 dark:border-white/10`}>
+          <div className="bg-[#29B6F6] p-3 rounded-lg">
+            <FaMusic className="text-white text-xl" />
+          </div>
+          <div>
+            <p className="text-gray-600 dark:text-gray-300">Total Releases</p>
+            <p className="text-xl font-bold">{totalReleases}</p>
+          </div>
+        </div>
+
+        <div className={`p-5 rounded-xl flex gap-4 w-full border bg-white dark:bg-[#0a1039] border-gray-200 dark:border-white/10`}>
+          <div className="bg-[#29B6F6] p-3 rounded-lg">
+            <FaRupeeSign className="text-white text-xl" />
+          </div>
+          <div>
+            <p className="text-gray-600 dark:text-gray-300">Account Balance</p>
+            <p className="text-xl font-bold">₹ {walletBalance}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* RECENT RELEASES */}
+      <div className={`p-6 rounded-xl border mb-12 bg-white dark:bg-[#0a1039] border-gray-200 dark:border-white/10`}>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
+          <h2 className="text-lg font-semibold">Recent Releases</h2>
+          <button
+            onClick={() => navigate("/releases/create")}
+            className="bg-[#29B6F6] hover:bg-[#0288D1] px-5 py-2 rounded-full text-white w-full sm:w-auto"
+          >
+            Create Release
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+          {recentReleases.map((r, i) => (
+  <div key={r._id || i} className={`rounded-xl overflow-hidden border bg-gray-100 dark:bg-[#0d123f] border-gray-200 dark:border-white/10`}>
+
+            
+             <img
+  src={
+    r.cover ||
+    "https://www.mixcloud.com/blog/wp-content/uploads/2023/11/Collage-1-2.png"
+  }
+  className="w-full h-40 sm:h-48 object-cover"
+  alt="Release cover"
+/>
+
+              <div className="p-4">
+                <p className="text-gray-600 dark:text-gray-300">{r.artist}</p>
+<p className="text-lg font-semibold">{r.title}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+     
+
+      
+          
+          
+        
+
+    </div>
+  );
+}
+
+/* ---------------- STAT CARD COMPONENT ---------------- */
+function StatCard({ title, value, percent, color, theme }) {
+  const cardBg = theme === "dark" ? "bg-[#0a1039] border-white/10" : "bg-white border-gray-200";
+  const textSecondary = theme === "dark" ? "text-gray-300" : "text-gray-600";
+
+  const percentColor = {
+    cyan: "text-[#29B6F6]",
+    pink: "text-pink-400",
+    green: "text-green-400",
+    yellow: "text-yellow-500",
+  };
+
+  return (
+    <div className={`p-6 rounded-xl border flex justify-between items-center bg-white dark:bg-[#0a1039] border-gray-200 dark:border-white/10`}>
+      <div>
+        <p className="text-gray-600 dark:text-gray-300">{title}</p>
+        <p className="text-2xl md:text-3xl font-bold">{value}</p>
+        <p className={`mt-1 text-sm ${percentColor[color]}`}>{percent}</p>
+      </div>
+
+      <div className="p-3 rounded-lg bg-white/10">
+        {/* ICON DRAWINGS */}
+        {color === "cyan" && (
+          <svg width="40" height="40">
+            <rect width="8" height="20" x="4" y="14" fill="#29B6F6" />
+            <rect width="8" height="30" x="16" y="4" fill="#29B6F6" />
+            <rect width="8" height="22" x="28" y="12" fill="#29B6F6" />
+          </svg>
+        )}
+
+        {color === "pink" && (
+          <svg width="40" height="40">
+            <path d="M5 25 Q15 5 25 25 T45 25" stroke="#ff4ecd" strokeWidth="3" fill="none" />
+          </svg>
+        )}
+
+        {color === "green" && (
+          <svg width="40" height="40">
+            <rect width="8" height="30" x="4" y="6" fill="#4ade80" />
+            <rect width="8" height="20" x="16" y="16" fill="#4ade80" />
+            <rect width="8" height="28" x="28" y="8" fill="#4ade80" />
+          </svg>
+        )}
+
+        {color === "yellow" && (
+          <svg width="40" height="40">
+            <path d="M5 25 Q10 10 20 15 T35 35" stroke="#facc15" strokeWidth="3" fill="none" />
+          </svg>
+        )}
+      </div>
+    </div>
+  );
+}

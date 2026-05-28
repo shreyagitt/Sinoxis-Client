@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "6000:5173"
+    restart: unless-stopped
+    networks:
+      - sinoxis-admin-network
+
+
+networks:
+  sinoxis-admin-network:
+    external: true
