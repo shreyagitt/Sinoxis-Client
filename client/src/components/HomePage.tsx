@@ -1,6 +1,6 @@
 // src/pages/HomePage.jsx
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React ,{useEffect} from "react";
+import { useNavigate  } from "react-router-dom";
 //import { useTheme } from "../components/Topbar"; // ⭐ THEME ENABLED
 
 const HomePage = () => {
