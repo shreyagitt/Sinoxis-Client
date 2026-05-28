@@ -22,7 +22,7 @@ const handleLiveDemo = () => {
   navigate("/login", {
     state: {
       demoEmail: "tim@gmail.com",
-      demoPassword: "Tim1234",
+      demoPassword: "Tim12345",
     },
   });
 };
