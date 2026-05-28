@@ -1,5 +1,5 @@
 // src/pages/LoginPage.jsx
-import React ,{useEffect} from "react";
+import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
@@ -31,12 +31,7 @@ const LoginPage = () => {
       : "bg-gray-100 text-[#020726] border-gray-300 placeholder-gray-500";
 */
 
-useEffect(() => {
-  if (location.state?.demoEmail) {
-    setEmail(location.state.demoEmail);
-    setPassword(location.state.demoPassword);
-  }
-}, [location]);
+
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
@@ -100,7 +95,15 @@ useEffect(() => {
           Enter your credentials to access your account.
         </p>
 
-        <Formik initialValues={{ email: "", password: "", remember: false }} validationSchema={LoginSchema} onSubmit={handleSubmit}>
+        <Formik
+  initialValues={{
+    email: location.state?.demoEmail || "",
+    password: location.state?.demoPassword || "",
+    remember: false,
+  }}
+  validationSchema={LoginSchema}
+  onSubmit={handleSubmit}
+>
           {({ isSubmitting }) => (
             <Form className="space-y-5 sm:space-y-6">
 
