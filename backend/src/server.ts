@@ -32,7 +32,7 @@ app.use(
 );
 
 // ---------------- CORS ----------------
-const allowedOrigins = (process.env.CORS_ORIGIN || "").split(",")
+/*const allowedOrigins = (process.env.CORS_ORIGIN || "").split(",")
 .map(o=>o.trim().replace(/\/+$/,''));
 
 app.use(
@@ -47,6 +47,15 @@ app.use(
       }
     },
     credentials: process.env.CORS_CREDENTIALS === "true",
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  })
+);
+*/
+
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   })
 );
