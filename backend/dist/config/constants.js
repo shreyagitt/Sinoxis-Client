@@ -47,7 +47,8 @@ exports.API_ENDPOINTS = {
     NOTIFICATION: '/api/v1/notifications',
     STORE: '/api/v1/store',
     GENRE: '/api/v1/genre',
-    SUBGENRE: '/api/v1/subgenre'
+    SUBGENRE: '/api/v1/subgenre',
+    LANGUAGE: '/api/v1/language',
 };
 exports.CLIENT_API_ENDPOINTS = {
     ARTIST: '/artist',
@@ -68,7 +69,8 @@ exports.CLIENT_API_ENDPOINTS = {
     NOTIFICATION: '/notifications',
     STORE: '/store',
     GENRE: '/genre',
-    SUBGENRE: '/subgenre'
+    SUBGENRE: '/subgenre',
+    LANGUAGE: '/language'
 };
 exports.HTTP_STATUS = {
     OK: 200,

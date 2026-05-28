@@ -24,6 +24,7 @@ const NotificationRoutes_1 = __importDefault(require("./NotificationRoutes"));
 const StoreRoutes_1 = __importDefault(require("./StoreRoutes"));
 const GenreRoutes_1 = __importDefault(require("./GenreRoutes"));
 const SubGenreRoutes_1 = __importDefault(require("./SubGenreRoutes"));
+const languageRoutes_1 = __importDefault(require("./languageRoutes"));
 const clientRouter = (0, express_1.Router)();
 // ------------------------------
 // Mount routes (No Tenant Middleware)
@@ -47,4 +48,5 @@ clientRouter.use(constants_1.CLIENT_API_ENDPOINTS.NOTIFICATION, NotificationRout
 clientRouter.use(constants_1.CLIENT_API_ENDPOINTS.STORE, StoreRoutes_1.default);
 clientRouter.use(constants_1.CLIENT_API_ENDPOINTS.GENRE, GenreRoutes_1.default);
 clientRouter.use(constants_1.CLIENT_API_ENDPOINTS.SUBGENRE, SubGenreRoutes_1.default);
+clientRouter.use(constants_1.CLIENT_API_ENDPOINTS.LANGUAGE, languageRoutes_1.default);
 exports.default = clientRouter;

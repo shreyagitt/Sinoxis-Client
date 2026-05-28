@@ -27,6 +27,7 @@ const userRoutes_1 = __importDefault(require("./userRoutes"));
 const storeRoutes_1 = __importDefault(require("./storeRoutes"));
 const genreRoutes_1 = __importDefault(require("./genreRoutes"));
 const subGenreRoutes_1 = __importDefault(require("./subGenreRoutes"));
+const languageRoutes_1 = __importDefault(require("./languageRoutes"));
 const router = (0, express_1.Router)();
 // Health check
 router.get('/health', (req, res) => {
@@ -58,6 +59,7 @@ router.use(constants_1.API_ENDPOINTS.USERS, userRoutes_1.default);
 router.use(constants_1.API_ENDPOINTS.STORE, storeRoutes_1.default);
 router.use(constants_1.API_ENDPOINTS.GENRE, genreRoutes_1.default);
 router.use(constants_1.API_ENDPOINTS.SUBGENRE, subGenreRoutes_1.default);
+router.use(constants_1.API_ENDPOINTS.LANGUAGE, languageRoutes_1.default);
 // ✅ Client-side routes
 router.use('/api/v1/client', client_1.default);
 exports.default = router;

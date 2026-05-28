@@ -13,7 +13,7 @@ const router = (0, express_1.Router)();
    CREATE OR UPDATE RELEASE (ONE API)
    Used by: Release / Tracks / Stores / Submission pages
    ===================================================== */
-router.post("/", auth_1.authenticate, (0, auth_1.authorize)("client"), (0, checkPermission_1.checkPermission)("createRelease"), upload_1.default.fields([
+router.post("/", auth_1.authenticate, (0, auth_1.authorize)("client"), (0, checkPermission_1.checkPermission)("release"), upload_1.default.fields([
     { name: "cover", maxCount: 1 },
     { name: "audio", maxCount: 1 },
 ]), ReleaseController_1.upsertRelease);
@@ -28,5 +28,5 @@ router.get("/", auth_1.authenticate, (0, auth_1.authorize)("client"), ReleaseCon
 /* =====================================================
    DELETE RELEASE
    ===================================================== */
-router.delete("/:id", auth_1.authenticate, (0, auth_1.authorize)("client"), (0, checkPermission_1.checkPermission)("createRelease"), ReleaseController_1.deleteMyRelease);
+router.delete("/:id", auth_1.authenticate, (0, auth_1.authorize)("client"), (0, checkPermission_1.checkPermission)("release"), ReleaseController_1.deleteMyRelease);
 exports.default = router;

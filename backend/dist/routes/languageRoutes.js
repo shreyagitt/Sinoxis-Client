@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const languageController_1 = require("../controllers/languageController");
+const auth_1 = require("../middlewares/auth");
+const router = (0, express_1.Router)();
+router.get("/", auth_1.authenticate, (0, auth_1.authorize)("admin"), languageController_1.AdminLanguageController.list);
+router.post("/", auth_1.authenticate, (0, auth_1.authorize)("admin"), languageController_1.AdminLanguageController.create);
+router.patch("/:id", auth_1.authenticate, (0, auth_1.authorize)("admin"), languageController_1.AdminLanguageController.update);
+router.patch("/:id/toggle", auth_1.authenticate, (0, auth_1.authorize)("admin"), languageController_1.AdminLanguageController.toggleActive);
+router.delete("/:id", auth_1.authenticate, (0, auth_1.authorize)("admin"), languageController_1.AdminLanguageController.delete);
+exports.default = router;

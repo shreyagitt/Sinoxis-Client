@@ -21,6 +21,11 @@ const TrackSchema = new mongoose_1.Schema({
         type: String,
         trim: true,
     },
+    previouslyReleased: {
+        type: String,
+        enum: ["yes", "no"],
+        default: "no",
+    },
     isrc: {
         type: String,
         uppercase: true,
