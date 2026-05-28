@@ -3,6 +3,7 @@ import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 //import { useTheme } from "../components/Topbar";
 
 const LoginSchema = Yup.object().shape({
@@ -13,6 +14,7 @@ const LoginSchema = Yup.object().shape({
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 //  const { theme } = useTheme();
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
@@ -28,6 +30,14 @@ const LoginPage = () => {
       ? "bg-[#1f233d] text-white border-white/20 placeholder-gray-300"
       : "bg-gray-100 text-[#020726] border-gray-300 placeholder-gray-500";
 */
+
+useEffect(() => {
+  if (location.state?.demoEmail) {
+    setEmail(location.state.demoEmail);
+    setPassword(location.state.demoPassword);
+  }
+}, [location]);
+
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
       const payload = {

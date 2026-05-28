@@ -18,6 +18,15 @@ const HomePage = () => {
 
   const subText = theme === "dark" ? "text-gray-400" : "text-gray-600";*/
 
+const handleLiveDemo = () => {
+  navigate("/login", {
+    state: {
+      demoEmail: "tim@gmail.com",
+      demoPassword: "Tim1234",
+    },
+  });
+};
+
   return (
     <div className="min-h-screen flex justify-center items-center p-8 transition-all duration-300 bg-white dark:bg-[#020726] text-[#020726] dark:text-white">
       <div className="rounded-2xl max-w-md w-full text-center p-10 border transition-all duration-300 bg-white dark:bg-[#0a1039] border-gray-300 dark:border-white/10 shadow-xl">
@@ -60,16 +69,16 @@ const HomePage = () => {
             Login
           </button>
 
-          {/* APPLY */}
-          <button
-            onClick={() => navigate("/apply")}
-            className="px-6 py-2 rounded-xl text-white font-semibold shadow-lg transition hover:opacity-90"
-            style={{
-              background: "linear-gradient(90deg,#00AEEF,#007BFF)",
-            }}
-          >
-            Apply
-          </button>
+          {/* LIVE DEMO */}
+<button
+  onClick={handleLiveDemo}
+  className="px-6 py-2 rounded-xl text-white font-semibold shadow-lg transition hover:opacity-90"
+  style={{
+    background: "linear-gradient(90deg,#00AEEF,#007BFF)",
+  }}
+>
+  Live Demo
+</button>
         </div>
       </div>
     </div>
